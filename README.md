@@ -1,5 +1,5 @@
 # CUDA-Q Academic 
-This repository contains Jupyter notebooks and supporting files for quantum computing training.  These training materials have been developed by NVIDIA Corporation and are provided free of charge. Please see [LICENSE] for license details.
+This repository contains Jupyter notebooks and supporting files for quantum computing training.  These training materials have been developed by NVIDIA Corporation and are provided free of charge. Please see [LICENSE](LICENSE) for license details.
 
 ## Modules
 Currently this repository contains one module: QAOA for Max Cut. More folders will be added as material becomes available.
@@ -27,4 +27,5 @@ Pre-requisites:
 * Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
 * Familiarity with variational quantum algorithms (e.g. VQE or QAOA)
 
-
+# More Information
+To learn more about CUDA-Q, including additional examples and tutorials, visit the [NVIDIA CUDA-Q documentation page](https://nvidia.github.io/cuda-quantum/latest/index.html).
