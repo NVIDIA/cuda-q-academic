@@ -1,10 +1,10 @@
 # CUDA-Q Academic 
-This repository contains Jupyter notebooks and supporting files for quantum computing training.  These training materials have been developed by NVIDIA Corporation and are provided free of charge. Please see [LICENSE](LICENSE) for license details.
+This repository contains Jupyter notebooks and supporting files for quantum computing training using CUDA-Q.  These training materials have been developed by NVIDIA Corporation and are provided free of charge. Please see [LICENSE](LICENSE) for license details.
+
+Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in qbraid or in Google Colab. Simply select the notebook and click on the qbraid icon or the Go to Colab icon at the top of the page. Note that using Google Colab will require additional steps outlined in the notebooks to install CUDA-Q and to view images. 
 
 ## Modules
 Currently this repository contains one module: QAOA for Max Cut. More folders will be added as material becomes available.
-
-Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in qbraid or in Google Colab. Simply select the notebook and click on the qbraid icon or the Go to Colab icon at the top of the page. Note that using Google Colab will require additional steps outlined in the notebooks to install CUDA-Q and to view images. 
 
 ## QAOA for Max Cut Module
 The folder titled `qaoa-for-max-cut` contain the Divide-and-Conquer QAOA for Max Cut module.
