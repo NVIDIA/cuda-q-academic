@@ -1,9 +1,12 @@
 # CUDA-Q Academic 
-[<img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" width="150">](https://account.qbraid.com?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git)
+
 
 This repository contains Jupyter notebooks and supporting files for quantum computing training using CUDA-Q.  These training materials have been developed by NVIDIA Corporation and are provided free of charge. Please see [LICENSE](LICENSE) for license details.
 
-Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in qBraid Lab or in Google Colab. Simply select the notebook and click on the Launch on qBraid icon or the Go to Colab icon at the top of the page. If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager). Note that using Google Colab will require additional steps outlined in the notebooks to install CUDA-Q. 
+Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in qBraid Lab or in Google Colab. Simply  click on the Launch on qBraid icon below or navigate to the notebook in github and select the Go to Colab icon at the top of the page.  Note that using Google Colab will require additional steps outlined in the notebooks to install CUDA-Q. 
+
+[<img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" width="150">](https://account.qbraid.com?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git)
+If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
 
 ## Modules
 Currently this repository contains one module: QAOA for Max Cut. More folders will be added as material becomes available.
