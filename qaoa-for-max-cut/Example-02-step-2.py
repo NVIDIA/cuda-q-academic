@@ -26,7 +26,7 @@ from mpi4py import MPI
 
 
 # Getting information about platform
-cudaq.set_target("nvidia-mqpu")
+cudaq.set_target("nvidia")
 target = cudaq.get_target()
 
 # Setting up MPI
