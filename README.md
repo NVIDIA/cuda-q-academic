@@ -9,10 +9,10 @@ Instructions to install CUDA-Q can be found in the [instructions.md](instruction
 If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
 
 ## Modules
-Currently this repository contains one module: QAOA for Max Cut. More folders will be added as material becomes available.
+Currently this repository contains one module: Divide-and-Conquer QAOA for Max Cut. More folders will be added as material becomes available.
 
-## QAOA for Max Cut Module
-The folder titled `qaoa-for-max-cut` contain the Divide-and-Conquer QAOA for Max Cut module.
+## Divide-and-Conquer QAOA for Max Cut Module
+The folder titled `qaoa-for-max-cut` contains a self-contained version of the Divide-and-Conquer QAOA for Max Cut module suitable for self-guided learning. The folder titled IEEE-Quantum-Week-2024, contains the version of Divide-and-Conquer QAOA for Max Cut module suitable for live classroom instruction.
 
 This material, which includes Jupyter notebooks and Python scripts, is organized into labs that build upon one another. The goal of the labs is to apply a divide-and-conquer QAOA algorithm to a large max cut problem using parallel computation. [Lab 0](qaoa-for-max-cut/00_StartHere.ipynb) gives an overview of the learning material and an introduction to working with the Jupyter notebooks in Google CoLaboratory. [Labs 1](qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb), [2](qaoa-for-max-cut/02_One_level_divide_and_conquer_QAOA.ipynb), and [3](qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb) provide instructional material including solutions to exercises, while [Lab 4](qaoa-for-max-cut/04_Assessment.ipynb) can serve as an open-ended assessment.
 
