@@ -76,10 +76,7 @@ def qaoaProblem(qubit_0 : cudaq.qubit, qubit_1 : cudaq.qubit, alpha : float):
     alpha: float
         Free variable   
         
-    Returns
-    -------
-    cudaq.Kernel
-        Subcircuit of the problem kernel for Max-Cut of the graph with a given edge
+
     """
     x.ctrl(qubit_0, qubit_1)
     rz(2.0*alpha, qubit_1)
@@ -96,10 +93,7 @@ def qaoaMixer(qubit_0 : cudaq.qubit, beta : float):
     beta: float
         Free variable   
         
-    Returns
-    -------
-    cudaq.Kernel
-        Subcircuit of the mixer kernel for Max-Cut of the graph with a given edge
+
     """
     rx(2.0*beta, qubit_0)
 
@@ -124,11 +118,7 @@ def kernel_qaoa(qubit_count :int, layer_count: int, edges_src: List[int], edges_
         List of the second (target) node listed in each edge of the graph, when the edges of the graph are listed as pairs of nodes
     thetas: List[float]
         Free variables to be optimized   
-        
-    Returns
-    -------
-    cudaq.Kernel
-        QAOA circuit for Max-Cut for max cut of the graph with given edges and nodes
+
     """
     # Let's allocate the qubits
     qreg = cudaq.qvector(qubit_count)
