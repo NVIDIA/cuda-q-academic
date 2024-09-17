@@ -166,10 +166,10 @@ def find_optimal_parameters(G, layer_count, seed):
     # The number of qubits we'll need is the same as the number of vertices in our graph
     qubit_count : int = len(nodes)
     # Each layer of the QAOA kernel contains 2 parameters
-    parameter_count : int = 2*layer_count
+    parameter_count : int = 2*layer_count # edit this line if more parameters are added to each layer of the qaoa kernel
     
     # Specify the optimizer and its initial parameters. 
-    optimizer = cudaq.optimizers.COBYLA()
+    optimizer = cudaq.optimizers.COBYLA() # Edit this line to change the optimizer
     np.random.seed(seed)
     cudaq.set_random_seed(seed)
     optimizer.initial_parameters = np.random.uniform(-np.pi, np.pi,
@@ -181,7 +181,7 @@ def find_optimal_parameters(G, layer_count, seed):
         spin_operator=hamiltonian_max_cut(qubit_src, qubit_tgt, weights),
         argument_mapper=lambda parameter_vector: (qubit_count, layer_count, qubit_src, qubit_tgt, parameter_vector),
         optimizer=optimizer,
-        parameter_count=parameter_count)
+        parameter_count=parameter_count) # the lines above will need editing if the optimizer is changed to a gradient-based optimizer
 
     return optimal_parameters
 
@@ -325,7 +325,7 @@ def qaoa_for_graph(G, layer_count, shots, seed):
             results+=random_assignment
         
     else:
-        parameter_count: int = 2 * layer_count
+        parameter_count: int = 2 * layer_count # edit this line if more parameters are added to each layer of the qaoa kernel
 
         # Problem parameters
         nodes = sorted(list(nx.nodes(G)))
@@ -505,7 +505,7 @@ def merging(G, graph_dictionary, merger_graph):
 
         # Specify the optimizer and its initial parameters. Make it repeatable.
         cudaq.set_random_seed(merger_seed)
-        optimizer_merger = cudaq.optimizers.COBYLA()
+        optimizer_merger = cudaq.optimizers.COBYLA() # Edit this line to change the optimizer
         np.random.seed(merger_seed)
         optimizer_merger.initial_parameters = np.random.uniform(-np.pi, np.pi,
                                                      parameter_count_merger)  
@@ -517,7 +517,7 @@ def merging(G, graph_dictionary, merger_graph):
             argument_mapper=lambda parameter_vector: (qubit_count_merger, layer_count_merger, merger_edge_src, merger_edge_tgt, parameter_vector),
             optimizer=optimizer_merger,
             parameter_count=parameter_count_merger, 
-            shots = 20000)
+            shots = 20000) # the lines above will need editing if the optimizer is changed to a gradient-based optimizer
 
         # Sample the circuit using the optimized parameters
         # Sample enough times to distinguish the most_probable outcome for
@@ -807,8 +807,8 @@ else:
 #########################################################################
 num_subgraphs=11 # limits the size of the merger graphs
 num_qubits = 14 # max number of qubits allowed in a quantum circuit
-layer_count =1 # Layer count for the QAOA max cut
-seed = 13 # Seed for QAOA for max cut
+layer_count =1 # Layer count for the QAOA max cut # Edit this line to change the layer count
+seed = 13 # Seed for QAOA for max cut  # Edit this line to change the seed for the random initial parameters
 results = {}
 for key in assigned_subgraph_dictionary:
     G = assigned_subgraph_dictionary[key]
