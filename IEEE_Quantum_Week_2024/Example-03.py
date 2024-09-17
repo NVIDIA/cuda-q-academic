@@ -488,7 +488,7 @@ def merging(G, graph_dictionary, merger_graph):
         
         # Run QAOA on the merger subgraph to identify which subgraphs
         # if any should change colors
-        layer_count_merger = 3 # set arbitrarily
+        layer_count_merger = 3 # layer count for the merger qaoa
         parameter_count_merger: int = 2 * layer_count_merger
         nodes_merger = sorted(list(nx.nodes(merger_graph)))
         merger_edge_src = []
@@ -787,7 +787,7 @@ else:
 #########################################################################
 num_subgraphs=11 # limits the size of the merger graphs
 num_qubits = 14 # max number of qubits allowed in a quantum circuit
-layer_count =1 # Layer count for the QAOA max cut
+layer_count =1 # Layer count for the QAOA max cut # Edit this line to change the layer_count
 results = {}
 for key in assigned_subgraph_dictionary:
     G = assigned_subgraph_dictionary[key]
