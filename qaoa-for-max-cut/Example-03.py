@@ -409,7 +409,7 @@ def merger_graph_penalties(mergerGraph, subgraph_dictionary, G):
         for u in nx.nodes(subgraph_dictionary[i]):
             for neighbor_u in nx.all_neighbors(G, u):
                 if neighbor_u in nx.nodes(subgraph_dictionary[j]):
-                    if G.nodes[u]['color'] != G.nodes[neighbor_u]['color']:
+                    if str(G.nodes[u]['color']) != str(G.nodes[neighbor_u]['color']):
                         penalty_ij += 1
                     else:
                         penalty_ij += -1
