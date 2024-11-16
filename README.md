@@ -9,7 +9,7 @@ Instructions to install CUDA-Q can be found in the [instructions.md](instruction
 If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
 
 # CUDA-Q Educational Resources 
-[This document]() is intended to assist faculty or students in identifying CUDA-Q resources that align with their quantum information science or quantum computing syllabi or learning path.
+[This document](SampleQuantumInformationScienceSyllabus.pdf) is intended to assist faculty or students in identifying CUDA-Q resources that align with their quantum information science or quantum computing syllabi or learning path.
 
 # Modules
 Currently this repository contains two modules: Quick Start to Quantum Computing with CUDA-Q and QAOA for Max Cut. More folders will be added as material becomes available.
