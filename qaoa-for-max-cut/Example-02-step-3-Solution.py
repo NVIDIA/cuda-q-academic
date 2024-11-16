@@ -512,7 +512,7 @@ else:
         for u in subgraph_dictionary[i]:
             for neighbor_u in nx.all_neighbors(sampleGraph2, u):
                 if neighbor_u in subgraph_dictionary[j]:
-                    if sampleGraph2.nodes[u]['color'] != sampleGraph2.nodes[neighbor_u]['color']:
+                    if str(sampleGraph2.nodes[u]['color']) != str(sampleGraph2.nodes[neighbor_u]['color']):
                         penalty_ij += 1
                     else:
                         penalty_ij += -1
@@ -588,7 +588,7 @@ else:
     max_cut = 0
     max_cut_edges = []
     for u, v in sampleGraph2.edges():
-        if sampleGraph2.nodes[u]['new_color'] != sampleGraph2.nodes[v]['new_color']: 
+        if str(sampleGraph2.nodes[u]['new_color']) != str(sampleGraph2.nodes[v]['new_color']): 
                 max_cut+=1
                 max_cut_edges.append((u,v))
     print('The max cut value approximated from the Divide and Conquer QAOA is',max_cut)
