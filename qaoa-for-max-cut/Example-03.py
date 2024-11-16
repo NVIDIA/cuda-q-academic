@@ -256,7 +256,7 @@ def cutvalue(G):
     """  
     cut = 0
     for u, v in G.edges():
-        if G.nodes[u]['color'] != G.nodes[v]['color']: 
+        if str(G.nodes[u]['color']) != str(G.nodes[v]['color']): 
             cut+=1
     return cut
 
