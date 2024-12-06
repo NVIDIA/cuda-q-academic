@@ -1,4 +1,4 @@
-# CUDA-Q Resource List for Quantum Information Science and Quantum Computing Courses
+# CUDA-Q Sample Syllabus
 
 This document is intended to assist faculty in selecting CUDA-Q resources that align with their syllabus 
 and topic list for undergraduate or graduate courses in Quantum Information Science or Quantum Computing. 
