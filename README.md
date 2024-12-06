@@ -42,3 +42,6 @@ Pre-requisites:
 * Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
 * Familiarity with variational quantum algorithms (e.g. VQE or QAOA) such as the material covered in the Introduction to Quantum Computing module.
 
+## Conference Presentations
+The conference presentations folder contains tutorial notebooks presented at conferences and workshops.
+
