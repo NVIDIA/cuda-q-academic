@@ -26,8 +26,8 @@ This document will be updated with additional resources as they become available
   b. Overview of fault tolerant computation and NISQ<br>
   c. Computational Complexity<br>
   d. Quick Start to Quantum Computing (A [full mini-course under development 
-  that covers](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) all of 
-these topics is here and short code samples that individually address the topics are linked in the items below)<br>
+  that covers all of 
+these topics is in the linked directory](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)  and short code samples that individually address the topics are linked in the bulleted items below)<br>
 
     * [Quantum states and gates](https://nvidia.github.io/cuda-quantum/latest/using/examples/quantum_operations.html)
     * [Quantum Measurement](https://nvidia.github.io/cuda-quantum/latest/examples/python/measuring_kernels.html)
