@@ -13,7 +13,7 @@ using CUDA-Q’s kernel-based programming model, supporting both Python and C++ 
 
 The CUDA-Q resources are categorized by topic. The list of topics below combines key concepts identified by 
 the [Quantum Information Science Learning: Future Pathways](https://qis-learners.research.illinois.edu) workshop, 
-competencies from the Quantum Computing and Simulation section of the [European Competence Framework for Quantum Technologies](https://qt.eu/media/pdf/CompetenceFrameworkQuantumTechnologiesV1.pdf) 
+competencies from the Quantum Computing and Simulation section of the [European Competence Framework for Quantum Technologies]([https://qt.eu/media/pdf/CompetenceFrameworkQuantumTechnologiesV1.pdf](https://qtedu.eu/european-competence-framework-quantum-technologies)) 
 report, 
 relevant [high performance computing competencies](https://figshare.com/s/4d7e3f73d91ba97c03ed), and topics common in the table of contents of several textbooks on quantum computing. 
 This document will be updated with additional resources as they become available.
