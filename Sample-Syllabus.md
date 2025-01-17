@@ -62,5 +62,5 @@ and application [blog on solar energy application](https://developer.nvidia.com/
     
 7. Further topics in Applications and Algorithm Design<br>
   a. Circuit cutting ([introduction to circuit cutting through QAOA max cut example](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut))<br>
-  b. GPT-QE [blog](https://developer.nvidia.com/blog/advancing-quantum-algorithm-design-with-gpt/?ncid=so-link-401079&linkId=100000294214594)
+  b. GPT-QE [blog](https://developer.nvidia.com/blog/advancing-quantum-algorithm-design-with-gpt/?ncid=so-link-401079&linkId=100000294214594)<br>
   c. Divisive clustering [code](https://nvidia.github.io/cuda-quantum/latest/applications/python/divisive_clustering_coresets.html) and [blog](https://developer.nvidia.com/blog/cuda-q-enabled-resource-reduction-for-quantum-clustering-algorithms/)<br>
