@@ -16,6 +16,6 @@
 
 **Outline:**
 * Lab 1 - Start Small: Learn quantum information and quantum programming with one qubit
-* Lab 2 - Move onto Bigger and More Entangled Things: Program with multiple qubits (Under construction)
-* Lab 3 - Add a Bit of Variation: Write your first hybrid variational program (Coming soon!)
+* Lab 2 - Move onto Bigger and More Entangled Things: Program with multiple qubits 
+* Lab 3 - Add a Bit of Variation: Write your first hybrid variational program 
 * Lab 4 - Speed Things Up: Accelerate hybrid programs on a GPU (Coming soon!)
