@@ -23,7 +23,7 @@ graphlib_backport==1.1.0
 idna==3.7
 ipython==8.12.3
 jedi==0.19.1
-Jinja2==3.1.4
+Jinja2==3.1.6
 jsonschema==4.23.0
 jsonschema-specifications==2023.12.1
 jupyter_client==8.6.2
