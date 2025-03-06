@@ -5,7 +5,7 @@ Click on the links below to run the notebooks on the listed platforms.
 You can also download the notebooks to run with a local installation of cudaq.
 
 
-| Notebook    |qBraid | cocalc  | Google Colab^ |
+| Notebook    |qBraid | CoCalc  | Google Colab^ |
 | ----------- | ----------- |  ----------- | ----------- |
 | Lab 0: Start Here  | <a href="https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git&redirectUrl=qaoa-for-max-cut/00_StartHere.ipynb" target="_parent"><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="Launch On qBraid" width="150"/></a> || [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/00_StartHere.ipynb)|
 | Lab 1: Max Cut with QAOA  |<a href="https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git&redirectUrl=qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" target="_parent"><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="Launch On qBraid" width="150"/></a> | | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb)|
