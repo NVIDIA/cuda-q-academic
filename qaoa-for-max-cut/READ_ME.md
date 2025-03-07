@@ -19,4 +19,6 @@ simply click on the icons below to run the notebooks on the listed platform.
 [^1]:If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
 [^2]:After following the link, select the "Edit your own copy" button, and either select or create a project. Use the run icon in the upper toolbar to execute Python cells.
 [^3]:You will need to uncomment out the `pip install cudaq` code in each notebook to run on Google CoLab.
-[^4]: [^5]: [^6]: The majority of the code in these labs can be executed on CPU. However, the final example employing parallelization does require a GPU.  If you don't have GPU access, you can still appreciate and learn from the code without executing it.  
+[^4]: The majority of the code in this lab can be executed on CPU. However, the final example employing parallelization does require a GPU.  If you don't have GPU access, you can still appreciate and learn from the code without executing it.  
+[^5]: See the footnote above.
+[^6]: The assessment does require a GPU to execute.  If you don't have GPU access, you can still appreciate and learn from the code without executing it.  
