@@ -7,7 +7,7 @@ simply click on the icons below to run the notebooks on the listed platform.
 
 
 
-| Notebook    |qBraid [^1] | CoCalc  | Google Colab^ |
+| Notebook    |qBraid[^1] | CoCalc[^2]  | Google Colab[^3] |
 | ----------- | ----------- |  ----------- | ----------- |
 | Lab 0: Start Here  | <a href="https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git&redirectUrl=qaoa-for-max-cut/00_StartHere.ipynb" target="_parent"><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="Launch On qBraid" width="150"/></a> | [<img src="https://cocalc.com/_next/static/media/icon.9f1b8851.svg" width=20/> Open in CoCalc](https://cocalc.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/00_StartHere.ipynb) | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/00_StartHere.ipynb)| 
 |Lab 1: Max Cut with QAOA  |<a href="https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git&redirectUrl=qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" target="_parent"><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="Launch On qBraid" width="150"/></a> | [<img src="https://cocalc.com/_next/static/media/icon.9f1b8851.svg" width=20/> Open in CoCalc](https://cocalc.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb)| [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb)|
@@ -16,5 +16,5 @@ simply click on the icons below to run the notebooks on the listed platform.
 | Lab 4: Assessment |<a href="https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git&redirectUrl=qaoa-for-max-cut/04_Assessment.ipynb" target="_parent"><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="Launch On qBraid" width="150"/></a> | [<img src="https://cocalc.com/_next/static/media/icon.9f1b8851.svg" width=20/> Open in CoCalc](https://cocalc.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb)|  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb)|
 
 [^1]:If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
-
-^You will need to uncomment out the `pip install cudaq` code in each notebook to run on Google colab.
+[^2]
+[^3]:You will need to uncomment out the `pip install cudaq` code in each notebook to run on Google colab.
