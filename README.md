@@ -6,15 +6,13 @@ This repository contains Jupyter notebooks and supporting files for [quantum com
 Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in qBraid Lab, CoCalc, or in Google Colab.  Directions for this are found in the README.md files in the main folder for each set of notebooks. 
 
 
-# CUDA-Q Educational Resources 
+# CUDA-Q Educational Resources and Modules
 * The [sample syllabus](Sample-Syllabus.md) is intended to assist faculty or students in identifying CUDA-Q resources that align with their quantum information science or quantum computing syllabi or learning path.
 
 * The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
 
-# Modules
+* 
 Currently this repository contains two modules: [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) and [QAOA for Max Cut](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut). More folders will be added as material becomes available.
-
-Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file, and the notebooks can be run in several platforms including qBriad, CoCalc, and Google CoLab after creating personal accounts.  Instructions for this can be found in the README files in each of the module folders. 
 
 ---
 ## Quick Start to Quantum Computing with CUDA-Q
@@ -29,7 +27,7 @@ to an application of a divide-and-conquer QAOA algorithm to a large max cut prob
 
 **Prerequisites:**
 * Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
-* Familiarity with variational quantum algorithms (e.g. VQE or QAOA)
+* Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) course or equivalent familiarity with variational quantum algorithms (e.g. VQE or QAOA). 
 
 ---
 ## Conference Presentations
