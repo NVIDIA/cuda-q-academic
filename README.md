@@ -11,8 +11,7 @@ Instructions to install CUDA-Q can be found in the [instructions.md](instruction
 
 * The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
 
-* 
-Currently this repository contains two modules: [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) and [QAOA for Max Cut](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut). More folders will be added as material becomes available.
+* Currently this repository contains two modules: [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) and [QAOA for Max Cut](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut). More folders will be added as material becomes available.
 
 ---
 ## Quick Start to Quantum Computing with CUDA-Q
