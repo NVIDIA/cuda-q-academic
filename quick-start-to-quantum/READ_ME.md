@@ -14,13 +14,6 @@
 * Program variational quantum algorithms to explore the solution space of an optimization problem
 * Discover opportunities for accelerating hybrid programs on a GPU
 
-**Outline:**
-* Lab 1 - Start Small: Learn quantum information and quantum programming with one qubit
-* Lab 2 - Move onto Bigger and More Entangled Things: Program with multiple qubits 
-* Lab 3 - Add a Bit of Variation Part 1: Write your first variational program 
-* Lab 4 - Add a Bit of Variation Part 2: Write your first hybrid variational program 
-
-# Divide-and-Conquer QAOA for Max Cut
 
 ## Notebooks
 The Jupyter notebooks in this folder are designed to run in an environment with CUDA-Q with Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also including in this folder to help get you set up.
