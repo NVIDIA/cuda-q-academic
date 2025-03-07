@@ -6,7 +6,7 @@ This repository contains Jupyter notebooks and supporting files for [quantum com
 Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in qBraid Lab, CoCalc, or in Google Colab.  Directions for this are found in the README.md files in the main folder for each set of notebooks. 
 
 
-# CUDA-Q Educational Resources and Modules
+# Educational Resources and Modules
 * The [sample syllabus](Sample-Syllabus.md) is intended to assist faculty or students in identifying CUDA-Q resources that align with their quantum information science or quantum computing syllabi or learning path.
 
 * The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
