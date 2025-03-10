@@ -16,7 +16,7 @@
 
 
 ## Notebooks
-The Jupyter notebooks in this folder are designed to run in an environment with CUDA-Q with Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also including in this folder to help get you set up.
+The Jupyter notebooks in this folder are designed to run in an environment with CUDA-Q with Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also included in the main directory of the repository to help get you set up.
 
 Otherwise, if you have set up an account in any of the platforms listed below, 
 simply click on the icons below to run the notebooks on the listed platform.   
