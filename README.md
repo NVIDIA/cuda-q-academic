@@ -28,7 +28,4 @@ to an application of a divide-and-conquer QAOA algorithm to a large max cut prob
 * Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
 * Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) course or equivalent familiarity with variational quantum algorithms (e.g. VQE or QAOA). 
 
----
-## Conference Presentations
-The conference presentations folder contains tutorial notebooks presented at conferences and workshops.
 
