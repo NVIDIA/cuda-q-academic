@@ -35,8 +35,8 @@ to an application of a divide-and-conquer QAOA algorithm to a large max cut prob
 **Pre-requisites:** Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q. It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The CUDA-Q Academic course entitled "[Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)" provide a walkthrough of this prerequisite knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
 
 ---
-## Quantum Error Correction 101 (Coming Soon!)
-Whether you're a beginner or looking to deepen your understanding, this series will provide you with the skills and motivation to explore the cutting-edge field of quantum error correction.
+## Quantum Error Correction 101 
+Whether you're a beginner or looking to deepen your understanding, [this series](https://github.com/NVIDIA/cuda-q-academic/tree/main/qec101) will provide you with the skills and motivation to explore the cutting-edge field of quantum error correction.
 
 **Pre-requisites:** 
 Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q.  It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The  CUDA-Q Academic course entitled "[Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)" provide a walkthrough of this prerequisite knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
