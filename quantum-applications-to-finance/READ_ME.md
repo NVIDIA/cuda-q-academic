@@ -20,4 +20,5 @@ simply click on the icons below to run the notebooks on the listed platform.
 | Portfolio Optimization (Coming Soon!)  | | | |
 [^1]:If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
 [^2]:After following the link, select the "Edit your own copy" button, and either select or create a project. Use the run icon in the upper toolbar to execute Python cells.
-[^3]:You will need to uncomment out the `pip install cudaq` code in each notebook to run on Google CoLab.readme
+[^3]: You will need to run the command `!pip install cudaq` in a python code block in each notebook to run on Google CoLab.
+
