@@ -36,7 +36,7 @@ def steane_code():
     #x(data_qubits[3])
     
 
-    # Detect X errors
+    # Detect Z errors
     h(ancilla_qubits)
 
     x.ctrl(ancilla_qubits[0],data_qubits[0])
@@ -56,9 +56,9 @@ def steane_code():
 
     h(ancilla_qubits)
 
-    sx1 = mz(ancilla_qubits[0])
-    sx2 = mz(ancilla_qubits[1])
-    sx3 = mz(ancilla_qubits[2])
+    sz1 = mz(ancilla_qubits[0])
+    sz2 = mz(ancilla_qubits[1])
+    sz3 = mz(ancilla_qubits[2])
 
     #Reset ancillas
     reset(ancilla_qubits)
@@ -83,9 +83,9 @@ def steane_code():
 
     h(ancilla_qubits)
 
-    sz1 = mz(ancilla_qubits[0])
-    sz2 = mz(ancilla_qubits[1])
-    sz3 = mz(ancilla_qubits[2])
+    sx1 = mz(ancilla_qubits[0])
+    sx2 = mz(ancilla_qubits[1])
+    sx3 = mz(ancilla_qubits[2])
 
 
     # Correct X errors
