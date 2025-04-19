@@ -41,7 +41,7 @@ these topics is in the linked directory](https://github.com/NVIDIA/cuda-q-academ
   a. [Quantum teleportation](https://nvidia.github.io/cuda-quantum/latest/applications/python/quantum_teleportation.html)<br>
   b. [Deutsch's Algorithm](https://nvidia.github.io/cuda-quantum/latest/applications/python/deutschs_algorithm.html)<br>
   c. [Bernstein-Vazirani](https://nvidia.github.io/cuda-quantum/latest/applications/python/bernstein_vazirani.html)<br>
-  d. Grover’s<br>
+  d. [Grover’s](https://nvidia.github.io/cuda-quantum/latest/applications/python/grovers.html)<br>
   e. QPE<br>
   f. [QFT](https://nvidia.github.io/cuda-quantum/latest/applications/python/quantum_fourier_transform.html)<br>
   g. [Shor’s Factoring Algorithm](https://nvidia.github.io/cuda-quantum/latest/applications/python/shors.html)<br>
