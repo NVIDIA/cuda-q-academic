@@ -24,7 +24,7 @@ The Quick Start to Quantum Computing with CUDA-Q module aims to take a learner f
 [This folder](qis-examples) contains example code and explanations of foundational quantum algorithms often appearing in Quantum Information Science courses.  It is intended to complement quantum information science textbooks and courses, rather than being self-contained.
 
 **Pre-requisites:** 
-Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
+* Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
 * Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)
 
 ---
