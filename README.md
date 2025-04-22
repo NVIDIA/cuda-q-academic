@@ -11,13 +11,21 @@ Instructions to install CUDA-Q can be found in the [instructions.md](instruction
 
 * The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
 
-* This repository contains four modules, detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining three modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
+* This repository contents are detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining three modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
 
 ---
 ## Quick Start to Quantum Computing with CUDA-Q
 The Quick Start to Quantum Computing with CUDA-Q module aims to take a learner from no knowledge of quantum computation to programming a variational algorithm in CUDA-Q. This material, which includes Jupyter notebooks, is organized into labs that build upon one another. 
 
 **Pre-requisites:** Learners should have familiarity with Jupyter notebooks and programming in Python.  Additionally, pre-requisite knowledge includes complex numbers, linear algebra, and statistics. In particular, we assume experience computing and understanding of arithmetic of complex numbers, probabilities, expectation values, vectors, dot products, and matrix multiplication. Knowledge of eigenvalues and eigenvectors will be helpful, but not necessarily a requirement.   
+
+---
+## Quantum Information Science Examples
+[This folder](qis-examples) contains example code and explanations of foundational quantum algorithms often appearing in Quantum Information Science courses.  It is intended to complement quantum information science textbooks and courses, rather than being self-contained.
+
+**Pre-requisites:** 
+* Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
+* Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)
 
 ---
 ## QAOA for Max Cut Module
