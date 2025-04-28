@@ -34,6 +34,7 @@ kiwisolver==1.4.5
 MarkupSafe==2.1.5
 matplotlib==3.9.1
 matplotlib-inline==0.1.7
+matplotlib_venn==1.1.2
 mistune==3.0.2
 nbclient==0.10.0
 nbconvert==7.16.4
