@@ -30,7 +30,7 @@ The Quick Start to Quantum Computing with CUDA-Q module aims to take a learner f
 ---
 ## QAOA for Max Cut Module
 The Divide-and-Conquer QAOA for Max Cut module takes a learner from the implementation of QAOA to solve a small max problem
-to an application of a divide-and-conquer QAOA algorithm to a large max cut problem using parallel computation. [Lab 0](qaoa-for-max-cut/00_StartHere.ipynb) gives an overview of the learning material and an introduction to working with the Jupyter notebooks. [Labs 1](qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb), [2](qaoa-for-max-cut/02_One_level_divide_and_conquer_QAOA.ipynb), and [3](qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb) provide instructional material including solutions to exercises, while [Lab 4](qaoa-for-max-cut/04_Assessment.ipynb) can serve as an open-ended assessment.
+to an application of a divide-and-conquer QAOA algorithm to a large max cut problem using parallel computation. This visual introduction to QAOA and circuit cutting provides the learner the background to understand more advanced topics such as [ADAPT-QAOA](https://nvidia.github.io/cuda-quantum/latest/applications/python/adapt_qaoa.html) and [Adaptive Circuit Knitting](https://arxiv.org/pdf/2411.10406).
 
 **Prerequisites:**
 * Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
