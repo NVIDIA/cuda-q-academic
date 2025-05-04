@@ -28,6 +28,45 @@ The Quick Start to Quantum Computing with CUDA-Q module aims to take a learner f
 * Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)
 
 ---
+## Setup and Installation
+
+Using the examples in this repository requires **NVIDIA CUDA Quantum** to be installed first.
+
+1.  **Install CUDA Quantum SDK:** Follow the official installation guide for your operating system, preferably using the **SDK installer or Conda**:
+    [https://nvidia.github.io/cuda-quantum/latest/install.html](https://nvidia.github.io/cuda-quantum/latest/install.html)
+    *   Ensure your NVIDIA drivers and CUDA Toolkit (if needed by the chosen install method) are compatible.
+    *   Verify the installation by checking if you can import `cudaq` in Python and run `nvq++ --version` (for C++ examples) in your terminal.
+
+2.  **Clone this Repository:**
+    ```bash
+    git clone https://github.com/KaranSinghDev/cuda-q-academic.git
+    cd cuda-q-academic
+    ```
+
+3.  **(Recommended)** Create and activate a Python virtual environment within the cloned directory, using the Python environment where your CUDA Quantum SDK was installed or is accessible.
+    ```bash
+    python -m venv venv
+    source venv/bin/activate # Linux/macOS
+    # venv\Scripts\activate # Windows
+    ```
+
+4.  **Install Python Dependencies for Examples:** Install helper libraries used in the notebooks and scripts:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+**Running Examples:**
+You can now run the Python scripts (`.py`) or open the Jupyter Notebooks (`.ipynb`) within your configured environment. C++ examples will require using the `nvq++` compiler provided by the SDK.
+
+## Dependencies
+
+*   **NVIDIA CUDA Quantum SDK:** The core requirement. Must be installed separately via the official SDK installer or Conda (see Setup). Provides `cudaq` (Python) and `nvq++` (C++).
+*   **Python:** Version compatible with your CUDA Quantum installation (check official docs).
+*   **Python Libraries:** Various helper libraries used in the examples (e.g., `numpy`, `matplotlib`, `jupyter`, `qutip`, etc.). These can be installed via `pip install -r requirements.txt` *after* setting up CUDA Quantum.
+*   **C++ Compiler:** A compatible C++ compiler (like g++) is needed if you intend to build or run custom C++ code alongside `nvq++`.
+
+---
+                                                  
 ## QAOA for Max Cut Module
 The Divide-and-Conquer QAOA for Max Cut module takes a learner from the implementation of QAOA to solve a small max problem
 to an application of a divide-and-conquer QAOA algorithm to a large max cut problem using parallel computation. This visual introduction to QAOA and circuit cutting provides the learner the background to understand more advanced topics such as [ADAPT-QAOA](https://nvidia.github.io/cuda-quantum/latest/applications/python/adapt_qaoa.html), [Adaptive Circuit Knitting](https://arxiv.org/pdf/2411.10406), and [QAOA-GPT](https://arxiv.org/pdf/2504.16350).
