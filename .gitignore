@@ -1,0 +1,16 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+.cache
+.vscode/
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
