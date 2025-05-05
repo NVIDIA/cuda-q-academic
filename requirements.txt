@@ -1,3 +1,15 @@
+# ----------------------------------------------------------------------
+# Python dependencies for running the CUDA-Q Academic examples/notebooks.
+#
+# IMPORTANT: The core NVIDIA CUDA Quantum SDK (providing the `cudaq`
+# Python module and potentially the nvq++ compiler) MUST be installed
+# separately BEFORE installing these requirements. Follow the official
+# guide: https://nvidia.github.io/cuda-quantum/latest/install.html
+#
+# This file primarily lists libraries used by the Jupyter notebooks
+# and Python example scripts.
+# ----------------------------------------------------------------------
+
 astpretty==3.0.0
 asttokens==2.4.1
 attrs==23.2.0
@@ -7,11 +19,11 @@ bleach==6.1.0
 certifi==2024.7.4
 charset-normalizer==3.3.2
 contourpy==1.2.1
-cuda-quantum==0.7.1
-cuquantum-cu11==23.10.0
-custatevec-cu11==1.5.0
-cutensor-cu11==1.7.0
-cutensornet-cu11==2.3.0
+# cuda-quantum==0.7.1 # REMOVED - Must be installed via SDK/Conda
+cuquantum-cu11==23.10.0 # Note: These cuQuantum packages are specific to CUDA 11.x
+custatevec-cu11==1.5.0 # Might cause issues if system CUDA is different.
+cutensor-cu11==1.7.0 # Consider removing these unless CUDA 11 is a hard req.
+cutensornet-cu11==2.3.0 # Consider removing these unless CUDA 11 is a hard req.
 cycler==0.12.1
 decorator==5.1.1
 defusedxml==0.7.1
