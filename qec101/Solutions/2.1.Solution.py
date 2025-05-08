@@ -181,7 +181,3 @@ for bitstring in results:
 
 print("0:", zeros)
 print("1:", ones)
-
-
-
-
