@@ -16,12 +16,12 @@
 
 
 ## Notebooks
-The Jupyter notebooks in this folder are designed to run in an environment with CUDA-Q with Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also included in the main directory of the repository to help get you set up.
+The Jupyter notebooks in this folder are designed to run in an environment with CUDA-Q with Python.  ***Please note that to run the interactive widgets in the notebooks, you'll need to copy not only the notebooks, but also the interactive widget folder into your environment.*** 
+
+For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also included in the main directory of the repository to help get you set up.
 
 Otherwise, if you have set up an account in any of the platforms listed below, 
-simply click on the icons below to run the notebooks on the listed platform.   
-
-
+simply click on the icons below to run the notebooks on the listed platform. 
 
 | Notebook    |qBraid[^1] | CoCalc[^2]  | Google Colab[^3] |
 | ----------- | ----------- |  ----------- | ----------- |
@@ -32,4 +32,4 @@ simply click on the icons below to run the notebooks on the listed platform.
 
 [^1]:If using qBraid Lab, use the [Environment Manager](https://docs.qbraid.com/lab/user-guide/environments) to install the CUDA-Q environment and then activate it in your notebook. In qBraid Lab you can switch to a GPU instance using the [Compute Manager](https://docs.qbraid.com/lab/user-guide/compute-manager).
 [^2]:After following the link, select the "Edit your own copy" button, and either select or create a project. Use the run icon in the upper toolbar to execute Python cells.
-[^3]:You will need to add a code block with the command `!pip install cudaq` and execute it in each notebook to run on Google CoLab.
+[^3]:You will need to add a code block with the command `!pip install cudaq` and execute it in each notebook to run on Google CoLab.  
