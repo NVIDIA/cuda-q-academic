@@ -11,6 +11,7 @@ Learners should have familiarity with Jupyter notebooks and programming in Pytho
 
 * ***Understand Fundamental Concepts:*** Grasp the basic principles of classical and quantum error correction, including the differences between them and the importance of stabilizers in quantum error correction.
 * ***Implement and Analyze Error Correction Codes:*** Explore, implement, and analyze simple classical error correction codes (e.g., repetition code) and advanced quantum error correction codes (e.g., Shor code, Steane code), understanding their performance and limitations.
+* ***Simulate Noise:*** Apply noise models to quantum circuit simulation and explore how noisy data can be used to test the effectiveness of QEC protocols.
 
 ---
 ## Notebooks
