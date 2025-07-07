@@ -1,258 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Quantum Rotation Widget</title>
-</head>
-<body>
 
-
-<!-- Load require.js. Delete this if your page already loads require.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js" crossorigin="anonymous"></script>
-
-<script type="application/vnd.jupyter.widget-state+json">
-{
-  "version_major": 2,
-  "version_minor": 0,
-  "state": {
-    "7a84bd897e09485c98b1fb1a8d797e53": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "2706203bf7a74601af4130d253445f9b": {
-      "model_name": "SliderStyleModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "1a1e06c1ad7f44579962711f6162583e": {
-      "model_name": "FloatSliderModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "continuous_update": false,
-        "description": "\u03b8x:",
-        "layout": "IPY_MODEL_7a84bd897e09485c98b1fb1a8d797e53",
-        "max": 6.283185307179586,
-        "step": 0.01,
-        "style": "IPY_MODEL_2706203bf7a74601af4130d253445f9b"
-      }
-    },
-    "370b212742c24c90b2d6f6725eeaa7c1": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "4e29d47688ec4645b13c30896516783d": {
-      "model_name": "SliderStyleModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "4a1151c0111240f1924e69fd48f1d871": {
-      "model_name": "FloatSliderModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "continuous_update": false,
-        "description": "\u03b8y:",
-        "layout": "IPY_MODEL_370b212742c24c90b2d6f6725eeaa7c1",
-        "max": 6.283185307179586,
-        "step": 0.01,
-        "style": "IPY_MODEL_4e29d47688ec4645b13c30896516783d"
-      }
-    },
-    "61d4ed87194a48b0b18dbeee79513042": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "1f2d8a4264bc4cefbaa0759adb85bf55": {
-      "model_name": "SliderStyleModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "c343d27aa2ac489fbc59358aa65b9ef2": {
-      "model_name": "FloatSliderModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "continuous_update": false,
-        "description": "\u03b8z:",
-        "layout": "IPY_MODEL_61d4ed87194a48b0b18dbeee79513042",
-        "max": 6.283185307179586,
-        "step": 0.01,
-        "style": "IPY_MODEL_1f2d8a4264bc4cefbaa0759adb85bf55"
-      }
-    },
-    "3751f9ebc172407da394291aaecac704": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "fea6d28a445d4c21968279602bfc7b95": {
-      "model_name": "HTMLStyleModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "5745fc2693044156b5a9edb14f3fba49": {
-      "model_name": "HTMLModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "layout": "IPY_MODEL_3751f9ebc172407da394291aaecac704",
-        "style": "IPY_MODEL_fea6d28a445d4c21968279602bfc7b95",
-        "value": "<h3>Visualize the Final Qubit State on the Bloch Sphere after Rotating about the X, Y and Z Axis with Varying Angles (\u03b8x, \u03b8y, \u03b8z in radians)</h3>"
-      }
-    },
-    "f39bea0f2220494c800cad30c0ad8f89": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "a07e3be76ced4249bf37d6bd0bffa004": {
-      "model_name": "OutputModel",
-      "model_module": "@jupyter-widgets/output",
-      "model_module_version": "1.0.0",
-      "state": {
-        "_dom_classes": [],
-        "layout": "IPY_MODEL_f39bea0f2220494c800cad30c0ad8f89",
-        "outputs": []
-      }
-    },
-    "635e7e7ef58f4b18b4a1cdf2222bd333": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "81b6447dcb114b38aa11ddac32aa659d": {
-      "model_name": "OutputModel",
-      "model_module": "@jupyter-widgets/output",
-      "model_module_version": "1.0.0",
-      "state": {
-        "_dom_classes": [],
-        "layout": "IPY_MODEL_635e7e7ef58f4b18b4a1cdf2222bd333",
-        "outputs": []
-      }
-    },
-    "4c4a0e0f583949059e91d31017cb70e3": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "3f71fe156f164f2791f317b0b0805aa4": {
-      "model_name": "VBoxModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [
-          "widget-interact"
-        ],
-        "children": [
-          "IPY_MODEL_1a1e06c1ad7f44579962711f6162583e",
-          "IPY_MODEL_4a1151c0111240f1924e69fd48f1d871",
-          "IPY_MODEL_c343d27aa2ac489fbc59358aa65b9ef2",
-          "IPY_MODEL_b4e2d670d8374bddb00a27bff9348748"
-        ],
-        "layout": "IPY_MODEL_4c4a0e0f583949059e91d31017cb70e3"
-      }
-    },
-    "2498a603c68f4ae5978032b4844dffff": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "b4e2d670d8374bddb00a27bff9348748": {
-      "model_name": "OutputModel",
-      "model_module": "@jupyter-widgets/output",
-      "model_module_version": "1.0.0",
-      "state": {
-        "_dom_classes": [],
-        "layout": "IPY_MODEL_2498a603c68f4ae5978032b4844dffff",
-        "outputs": []
-      }
-    },
-    "f41bdf7a430449ba89a3480cebcdc1be": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "b1fedb44ec94427f8709a36bfe721e49": {
-      "model_name": "HBoxModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "children": [
-          "IPY_MODEL_1a1e06c1ad7f44579962711f6162583e",
-          "IPY_MODEL_4a1151c0111240f1924e69fd48f1d871",
-          "IPY_MODEL_c343d27aa2ac489fbc59358aa65b9ef2"
-        ],
-        "layout": "IPY_MODEL_f41bdf7a430449ba89a3480cebcdc1be"
-      }
-    },
-    "e0e289d2f8a34420aa4400d841749318": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "72a5426029964415a294fa891f19a21f": {
-      "model_name": "HBoxModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "children": [
-          "IPY_MODEL_a07e3be76ced4249bf37d6bd0bffa004",
-          "IPY_MODEL_81b6447dcb114b38aa11ddac32aa659d"
-        ],
-        "layout": "IPY_MODEL_e0e289d2f8a34420aa4400d841749318"
-      }
-    },
-    "5e486da789f94a61af7993fab098f1d3": {
-      "model_name": "LayoutModel",
-      "model_module": "@jupyter-widgets/base",
-      "model_module_version": "2.0.0",
-      "state": {}
-    },
-    "977d7a51aeae4d4ea95443d849376b86": {
-      "model_name": "VBoxModel",
-      "model_module": "@jupyter-widgets/controls",
-      "model_module_version": "2.0.0",
-      "state": {
-        "_dom_classes": [],
-        "children": [
-          "IPY_MODEL_5745fc2693044156b5a9edb14f3fba49",
-          "IPY_MODEL_b1fedb44ec94427f8709a36bfe721e49",
-          "IPY_MODEL_72a5426029964415a294fa891f19a21f"
-        ],
-        "layout": "IPY_MODEL_5e486da789f94a61af7993fab098f1d3"
-      }
-    }
-  }
-}
-</script>
-<script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "977d7a51aeae4d4ea95443d849376b86"}
-</script>
-
-</body>
-</html>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Quantum Rotation Widget</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <!-- Load RequireJS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"
+                integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA="
+                crossorigin="anonymous"></script>
+        
+        <!-- Load IPywidgets bundle -->
+        <script data-jupyter-widgets-cdn="https://unpkg.com/"
+                data-jupyter-widgets-cdn-only
+                src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@*/dist/embed-amd.js"
+                crossorigin="anonymous"></script>
+        
+        <!-- Widget state -->
+        <script type="application/vnd.jupyter.widget-state+json">
+            {"version_major": 2, "version_minor": 0, "state": {"a9ff4d23b01a447d9d63f93894bda054": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "779a8f4cec57463a98caae3d97d089d9": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {}}, "007edf77b2a74935804dc88e2f61d1ba": {"model_name": "FloatSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "continuous_update": false, "description": "\u03b8x:", "layout": "IPY_MODEL_a9ff4d23b01a447d9d63f93894bda054", "max": 6.283185307179586, "step": 0.01, "style": "IPY_MODEL_779a8f4cec57463a98caae3d97d089d9"}}, "0cdc0d453f7e4128b4d37edbffe4880b": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "984de602539145ea9e63b55e97b3987a": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {}}, "c6b3b958a3e84808b35c4a5f5107f995": {"model_name": "FloatSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "continuous_update": false, "description": "\u03b8y:", "layout": "IPY_MODEL_0cdc0d453f7e4128b4d37edbffe4880b", "max": 6.283185307179586, "step": 0.01, "style": "IPY_MODEL_984de602539145ea9e63b55e97b3987a"}}, "c567824b78a94b4b9b265c8b8c7170a7": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "142bc128f0a644b2afa959e0c91d54ff": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {}}, "ab1f4d83e27143f6acf712f6c825e174": {"model_name": "FloatSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "continuous_update": false, "description": "\u03b8z:", "layout": "IPY_MODEL_c567824b78a94b4b9b265c8b8c7170a7", "max": 6.283185307179586, "step": 0.01, "style": "IPY_MODEL_142bc128f0a644b2afa959e0c91d54ff"}}, "2b0058ee70ba4fab80c886c8bc9576ae": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "dd322a86fc4d46e088bf10f5784bc254": {"model_name": "HTMLStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {}}, "79ee5bd9409c4d69a8e1ed8f35d35991": {"model_name": "HTMLModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "layout": "IPY_MODEL_2b0058ee70ba4fab80c886c8bc9576ae", "style": "IPY_MODEL_dd322a86fc4d46e088bf10f5784bc254", "value": "<h3>Visualize the Final Qubit State on the Bloch Sphere after Rotating about the X, Y and Z Axis with Varying Angles (\u03b8x, \u03b8y, \u03b8z in radians)</h3>"}}, "9f98247b316941228a969bd2754eb6d0": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "234e00cf251b4716ae7a4985feb0d80e": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "layout": "IPY_MODEL_9f98247b316941228a969bd2754eb6d0", "outputs": []}}, "79335151645943bf87b4e2587c9a0385": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "76d4210ff67f402795e5d45fc13c9f1e": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "layout": "IPY_MODEL_79335151645943bf87b4e2587c9a0385", "outputs": []}}, "2d190dd2aaaa408daf2ea37ea0a2451c": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "f30bbe26e6294d66ba0c729b0f138aca": {"model_name": "VBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": ["widget-interact"], "children": ["IPY_MODEL_007edf77b2a74935804dc88e2f61d1ba", "IPY_MODEL_c6b3b958a3e84808b35c4a5f5107f995", "IPY_MODEL_ab1f4d83e27143f6acf712f6c825e174", "IPY_MODEL_0c62deebd380411593eec86417f199f8"], "layout": "IPY_MODEL_2d190dd2aaaa408daf2ea37ea0a2451c"}}, "6540b3fcd3874408b7f66cd3d1ed825c": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "0c62deebd380411593eec86417f199f8": {"model_name": "OutputModel", "model_module": "@jupyter-widgets/output", "model_module_version": "1.0.0", "state": {"_dom_classes": [], "layout": "IPY_MODEL_6540b3fcd3874408b7f66cd3d1ed825c", "outputs": []}}, "f09fe4cb2bf04d5a94e1d046448b2e35": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "9c8840232f40470f9c44feab82bcf2b0": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "children": ["IPY_MODEL_007edf77b2a74935804dc88e2f61d1ba", "IPY_MODEL_c6b3b958a3e84808b35c4a5f5107f995", "IPY_MODEL_ab1f4d83e27143f6acf712f6c825e174"], "layout": "IPY_MODEL_f09fe4cb2bf04d5a94e1d046448b2e35"}}, "20d377db983246459c0cbfc150c14782": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "60b43d15800c46b68736ae8aa87248e9": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "children": ["IPY_MODEL_234e00cf251b4716ae7a4985feb0d80e", "IPY_MODEL_76d4210ff67f402795e5d45fc13c9f1e"], "layout": "IPY_MODEL_20d377db983246459c0cbfc150c14782"}}, "c2608d7ae5ce4ce98d0df318353f7310": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {}}, "22329778b38745ddaefc9a2c6f606108": {"model_name": "VBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "state": {"_dom_classes": [], "children": ["IPY_MODEL_79ee5bd9409c4d69a8e1ed8f35d35991", "IPY_MODEL_9c8840232f40470f9c44feab82bcf2b0", "IPY_MODEL_60b43d15800c46b68736ae8aa87248e9"], "layout": "IPY_MODEL_c2608d7ae5ce4ce98d0df318353f7310"}}}}
+        </script>
+        
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .widget-container {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                background-color: #f9f9f9;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div class="widget-container">
+            <h1>Quantum Rotation Visualization</h1>
+            <p>This interactive widget allows you to visualize quantum rotations on the Bloch sphere.</p>
+            
+            <!-- Widget will be rendered here -->
+            <script type="application/vnd.jupyter.widget-view+json">
+                {"version_major": 2, "version_minor": 0, "model_id": "22329778b38745ddaefc9a2c6f606108"}
+            </script>
+        </div>
+    </body>
+    </html>
+    
