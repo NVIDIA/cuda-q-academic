@@ -30,7 +30,7 @@ This document will be updated with additional resources as they become available
 these topics is in the linked directory](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)  and short code samples that individually address the topics are linked in the bulleted items below)<br>
 
     * [Quantum states and gates](https://nvidia.github.io/cuda-quantum/latest/using/examples/quantum_operations.html)
-    * [Quantum Measurement](https://nvidia.github.io/cuda-quantum/latest/examples/python/measuring_kernels.html)(https://nvidia.github.io/cuda-quantum/latest/using/examples/measuring_kernels.html))
+    * [Quantum Measurement](https://nvidia.github.io/cuda-quantum/latest/examples/python/measuring_kernels.html)
     * Qubits: [Qubit visualization](https://nvidia.github.io/cuda-quantum/latest/examples/python/visualization.html) on the Bloch sphere<br>
     * Entanglement
     * [Quantum circuits and kernels structure, sampling, and expectation value computation](https://nvidia.github.io/cuda-quantum/latest/using/basics/basics.html)
