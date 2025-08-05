@@ -24,5 +24,5 @@ simply log in to the account, then click on the icons below to run the notebooks
 | Notebook      | Google Colab |
 | -----------  | ----------- |
 |Lab 1 - Jaynes-Cummings Hamiltonian  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb)|
-| Lab 2 - Time Dependent Hamiltonians   |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamims101/02_Time_Dependent_Hamiltonians.ipynb)| |||
+| Lab 2 - Time Dependent Hamiltonians - Coming Soon!  |  | |||
 
