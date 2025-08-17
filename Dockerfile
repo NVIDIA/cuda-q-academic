@@ -1,7 +1,7 @@
 FROM nvcr.io/nvidia/quantum/cuda-quantum:cu12-0.11.0
 WORKDIR /app
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install cudaq
+RUN pip install cudaq==0.12.0
 COPY dynamics101/ /app/dynamics101/ 
 COPY images/ /app/images/ 
 COPY qaoa-for-max-cut/ /app/qaoa-for-max-cut/ 

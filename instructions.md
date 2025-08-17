@@ -23,7 +23,7 @@ docker build -t cuda-quantum-academic:latest .
 To run the container, use the following command. 
 
 ```sh
-docker run -p 8888:8888 -e JUPYTER_ENABLE_LAB=yes cuda-quantum-academic:latest
+docker run -p 8888:8888 cuda-quantum-academic:latest
 ```
 
 You can now open a web browser to http://localhost:8888/lab to access the labs.
@@ -44,7 +44,7 @@ if you wish to direct your browser to port 8888 but run the Jupyter lab within t
 on port 8000, then you'd run the following: 
 
 ```sh
-docker run -e JUPYTER_LAB_PORT=8000 -p 8888:8000  -e JUPYTER_ENABLE_LAB=yes cuda-quantum-academic:latest
+docker run -e JUPYTER_LAB_PORT=8000 -p 8888:8000  cuda-quantum-academic:latest
 ```
 
 
