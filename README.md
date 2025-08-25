@@ -11,7 +11,7 @@ Instructions to install CUDA-Q can be found in the [instructions.md](instruction
 
 * The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
 
-* This repository contents are detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining three modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
+* This repository contents are detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
 
 ---
 ## Quick Start to Quantum Computing with CUDA-Q
@@ -21,7 +21,7 @@ The Quick Start to Quantum Computing with CUDA-Q module aims to take a learner f
 
 ---
 ## Quantum Information Science Examples
-[This folder](qis-examples) contains example code and explanations of foundational quantum algorithms often appearing in Quantum Information Science courses.  It is intended to complement quantum information science textbooks and courses, rather than being self-contained.
+[The qis-examples folder](qis-examples) contains example code and explanations of foundational quantum algorithms often appearing in Quantum Information Science courses.  It is intended to complement quantum information science textbooks and courses, rather than being self-contained.
 
 **Pre-requisites:** 
 * Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
@@ -43,8 +43,12 @@ to an application of a divide-and-conquer QAOA algorithm to a large max cut prob
 **Pre-requisites:** Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q. It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The CUDA-Q Academic course entitled "[Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)" provide a walkthrough of this prerequisite knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
 
 ---
-## Quantum Error Correction 101 
+## Quantum Error Correction (QEC) 101 
 Whether you're a beginner or looking to deepen your understanding, [this series](https://github.com/NVIDIA/cuda-q-academic/tree/main/qec101) will provide you with the skills and motivation to explore the cutting-edge field of quantum error correction.
 
 **Pre-requisites:** 
 Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q.  It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The  CUDA-Q Academic course entitled "[Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)" provide a walkthrough of this prerequisite knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
+
+---
+## Dynamics 101
+[This advanced series of tutorials](https://github.com/NVIDIA/cuda-q-academic/tree/main/dynamics101) demonstrates GPU-accelerated time evolution of Schrodinger and Lindblad master equations for quantum systems. Prerequisite knowledge of open and closed quantum systems is assumed.

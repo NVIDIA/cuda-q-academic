@@ -58,7 +58,7 @@ and application [blog on solar energy application](https://developer.nvidia.com/
 
     * Quantum Communication
     * Coherence and Types of Noise
-    * [Error mitigation](https://nvidia.github.io/cuda-quantum/latest/applications/python/readout_error_mitigation.html) and error correction
+    * [Error mitigation](https://nvidia.github.io/cuda-quantum/latest/applications/python/readout_error_mitigation.html) and [error correction](https://github.com/NVIDIA/cuda-q-academic/tree/main/qec101)
     
 7. Further topics in Applications and Algorithm Design<br>
   a. Circuit cutting ([introduction to circuit cutting through QAOA max cut example](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut))<br>
