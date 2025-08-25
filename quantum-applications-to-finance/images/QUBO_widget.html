@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUBO Portfolio Optimization Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Styles for NVIDIA Theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111111; /* Near black */
+        }
+        .nvidia-green {
+            color: #76b900;
+        }
+        .nvidia-bg-dark {
+            background-color: #222222;
+        }
+        .nvidia-border {
+            border-color: #333333;
+        }
+        /* Custom slider track */
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #444444;
+        }
+        input[type="range"]::-moz-range-track {
+            background: #444444;
+        }
+        /* Custom slider thumb */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #76b900;
+            cursor: pointer;
+            border-radius: 50%;
+            margin-top: -6px; /* Center thumb on track */
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #76b900;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .accent-nvidia {
+             accent-color: #76b900;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="text-white">
+
+    <div class="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold nvidia-green mb-2">QUBO Portfolio Optimization Visualizer</h1>
+            <p class="text-lg text-gray-400">
+                Interactively explore how risk (β) and return (α) weights affect the QUBO matrix and optimal portfolio selection.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Panel: Controls and Results -->
+            <div class="lg:col-span-1 nvidia-bg-dark p-6 rounded-2xl shadow-lg border nvidia-border">
+                <!-- Controls -->
+                <div class="mb-6">
+                    <h2 class="text-2xl font-semibold text-white mb-4">Parameters</h2>
+                    <div class="mb-4">
+                        <label for="alpha" class="block nvidia-green font-medium mb-2">α (Return Factor): <span id="alpha-value">1.00</span></label>
+                        <input type="range" id="alpha" min="0" max="3" step="0.05" value="1.0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-nvidia">
+                    </div>
+                    <div>
+                        <label for="beta" class="block nvidia-green font-medium mb-2">β (Risk Factor): <span id="beta-value">1.00</span></label>
+                        <input type="range" id="beta" min="0" max="3" step="0.05" value="1.0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-nvidia">
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div>
+                    <h2 class="text-2xl font-semibold text-white mb-4 border-t nvidia-border pt-6">Optimal Portfolio</h2>
+                    <div class="space-y-3">
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Selected Assets</p>
+                            <p id="result-selection" class="text-xl font-mono font-bold text-white">N/A</p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Portfolio Risk</p>
+                            <p id="result-risk" class="text-xl font-bold nvidia-green">0.0000</p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Portfolio Return</p>
+                            <p id="result-return" class="text-xl font-bold nvidia-green">0.0000</p>
+                        </div>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">Total QUBO Quality (minimized)</p>
+                            <p id="result-quality" class="text-xl font-bold nvidia-green">0.0000</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Heatmap -->
+            <div class="lg:col-span-2 nvidia-bg-dark p-6 rounded-2xl shadow-lg border nvidia-border">
+                <h2 class="text-2xl font-semibold text-white mb-2 text-center">QUBO Matrix Heatmap (Q)</h2>
+                <p class="text-center text-sm text-gray-400 mb-4">
+                    Lower values (<span class="text-blue-400">blue</span>) contribute to higher-quality portfolios.
+                </p>
+                <div class="flex flex-col items-center justify-center">
+                    <div id="heatmap-container" class="grid grid-cols-4 gap-1 p-2 bg-gray-900 rounded-lg">
+                        <!-- Heatmap cells will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with formula -->
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>QUBO Matrix Definition:</p>
+            <p><span class="font-mono nvidia-green">Q[i,i] = -αμ_i + βΣ_ii</span></p>
+            <p><span class="font-mono nvidia-green">Q[i,j] = 2βΣ_ij</span> for i &lt; j</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Static Data ---
+        const mu = [0.80, 0.70, 0.25, 0.20];
+        const Sigma = [
+            [0.90, 0.45, 0.55, 0.10],
+            [0.45, 0.40, 0.30, 0.08],
+            [0.55, 0.30, 0.25, 0.05],
+            [0.10, 0.08, 0.05, 0.05]
+        ];
+        const nAssets = mu.length;
+
+        // --- DOM Element References ---
+        const alphaSlider = document.getElementById('alpha');
+        const betaSlider = document.getElementById('beta');
+        const alphaValueSpan = document.getElementById('alpha-value');
+        const betaValueSpan = document.getElementById('beta-value');
+        const heatmapContainer = document.getElementById('heatmap-container');
+        const resultSelection = document.getElementById('result-selection');
+        const resultRisk = document.getElementById('result-risk');
+        const resultReturn = document.getElementById('result-return');
+        const resultQuality = document.getElementById('result-quality');
+
+        // --- Core Functions ---
+
+        /**
+         * Calculates the upper-triangular QUBO matrix.
+         */
+        function calculateQubo(alpha, beta) {
+            const n = mu.length;
+            const Q = Array(n).fill(0).map(() => Array(n).fill(0));
+            for (let i = 0; i < n; i++) {
+                Q[i][i] = -alpha * mu[i] + beta * Sigma[i][i];
+                for (let j = i + 1; j < n; j++) {
+                    Q[i][j] = 2.0 * beta * Sigma[i][j];
+                }
+            }
+            return Q;
+        }
+
+        /**
+         * Finds the best portfolio by iterating through all 2^n combinations.
+         */
+        function findBestPortfolio(Q) {
+            let bestSelection = [];
+            let minQuality = Infinity;
+
+            for (let i = 0; i < (1 << nAssets); i++) {
+                const selection = [];
+                let quality = 0;
+                for (let j = 0; j < nAssets; j++) {
+                    selection.push((i >> j) & 1);
+                }
+                for (let row = 0; row < nAssets; row++) {
+                    for (let col = 0; col < nAssets; col++) {
+                        quality += selection[row] * Q[row][col] * selection[col];
+                    }
+                }
+                if (quality < minQuality) {
+                    minQuality = quality;
+                    bestSelection = selection;
+                }
+            }
+
+            let risk = 0;
+            let returnValue = 0;
+            for (let i = 0; i < nAssets; i++) {
+                returnValue += bestSelection[i] * mu[i];
+                for (let j = 0; j < nAssets; j++) {
+                    risk += bestSelection[i] * Sigma[i][j] * bestSelection[j];
+                }
+            }
+
+            return { selection: bestSelection, risk, return: returnValue, quality: minQuality };
+        }
+
+        /**
+         * Generates a color for the heatmap cell.
+         */
+        function getColor(value, min, max) {
+            if (value === 0 && min < 0 && max > 0) return 'rgba(200, 200, 200, 0.1)';
+            if (max === min) return 'rgba(128, 128, 255, 0.8)';
+
+            const opacity = Math.abs(value) / Math.max(Math.abs(min), Math.abs(max));
+            if (value > 0) { // Shades of red for positive
+                return `rgba(255, ${150 - opacity * 100}, ${150 - opacity * 100}, ${0.2 + opacity * 0.8})`;
+            }
+            if (value < 0) { // Shades of blue for negative
+                return `rgba(${150 - opacity * 100}, ${150 - opacity * 100}, 255, ${0.2 + opacity * 0.8})`;
+            }
+            return 'rgba(255, 255, 255, 0.1)';
+        }
+
+        /**
+         * Main update function to refresh the UI.
+         */
+        function update() {
+            const alpha = parseFloat(alphaSlider.value);
+            const beta = parseFloat(betaSlider.value);
+
+            // Update slider value displays
+            alphaValueSpan.textContent = alpha.toFixed(2);
+            betaValueSpan.textContent = beta.toFixed(2);
+
+            // Calculate QUBO and find best portfolio
+            const quboMatrix = calculateQubo(alpha, beta);
+            const portfolio = findBestPortfolio(quboMatrix);
+
+            // Update results display
+            resultSelection.textContent = `[${portfolio.selection.join(', ')}]`;
+            resultRisk.textContent = portfolio.risk.toFixed(4);
+            resultReturn.textContent = portfolio.return.toFixed(4);
+            resultQuality.textContent = portfolio.quality.toFixed(4);
+
+            // Update heatmap
+            heatmapContainer.innerHTML = ''; // Clear previous heatmap
+            const values = quboMatrix.flat().filter(v => v !== 0);
+            const stats = { min: Math.min(...values, 0), max: Math.max(...values, 0) };
+
+            for (let i = 0; i < nAssets; i++) {
+                for (let j = 0; j < nAssets; j++) {
+                    const value = quboMatrix[i][j];
+                    const cell = document.createElement('div');
+                    cell.className = 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-md transition-colors duration-200';
+                    
+                    if (i > j) {
+                        cell.classList.add('bg-gray-800');
+                    } else {
+                        cell.style.backgroundColor = getColor(value, stats.min, stats.max);
+                        cell.innerHTML = `<span class="text-xs sm:text-sm md:text-base font-semibold text-white drop-shadow-md">${value.toFixed(2)}</span>`;
+                    }
+                    heatmapContainer.appendChild(cell);
+                }
+            }
+        }
+
+        // --- Event Listeners ---
+        alphaSlider.addEventListener('input', update);
+        betaSlider.addEventListener('input', update);
+
+        // --- Initial Load ---
+        window.onload = update;
+
+    </script>
+</body>
+</html>
