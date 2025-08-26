@@ -54,5 +54,5 @@ Learners should have familiarity with Jupyter notebooks and programming in Pytho
 [This advanced series of tutorials](https://github.com/NVIDIA/cuda-q-academic/tree/main/dynamics101) demonstrates GPU-accelerated time evolution of Schrodinger and Lindblad master equations for quantum systems. Prerequisite knowledge of open and closed quantum systems is assumed.
 
 ---
-## Chemistry Simulations (Coming Soon!)
-This collection of notebooks explores techniques for calculating molecular ground state energies, a fundamental problem in chemistry. The notebooks offer a deep dive into implementing and applying the ADAPT-VQE algorithm and various Krylov subspace methods.
+## Chemistry Simulations 
+This collection of notebooks explores techniques for calculating molecular ground state energies, a fundamental problem in chemistry. The notebooks offer a deep dive into implementing and applying the ADAPT-VQE algorithm and various Krylov subspace methods (Coming soon!).
