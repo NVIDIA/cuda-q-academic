@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Adapt-VQE vs. VQE Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Theme Colors */
+        :root {
+            --nvidia-green: #76B900;
+            --nvidia-purple: #7A00FF;
+            --nvidia-dark-gray: #333333;
+            --nvidia-light-gray: #F5F5F5;
+            --nvidia-bg: #2A2A2A;
+            --nvidia-text: #FFFFFF;
+            --nvidia-error: #FF4136;
+            --nvidia-highlight: #90EE90;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--nvidia-bg);
+            color: var(--nvidia-text);
+        }
+        .info-card {
+            background-color: var(--nvidia-dark-gray);
+            border-left: 4px solid var(--nvidia-green);
+        }
+        .circuit-card {
+            background-color: var(--nvidia-dark-gray);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .adapt-border { border-left: 4px solid var(--nvidia-green); }
+        .vqe-border { border-left: 4px solid var(--nvidia-purple); }
+
+        .nvidia-button {
+            background-color: var(--nvidia-dark-gray);
+            color: var(--nvidia-text);
+            border: 1px solid var(--nvidia-green);
+            transition: all 0.3s ease;
+        }
+        .nvidia-button:hover:not(:disabled) {
+            background-color: var(--nvidia-green);
+            color: var(--nvidia-dark-gray);
+            font-weight: 600;
+        }
+        .nvidia-button:disabled {
+            background-color: #444;
+            border-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .vqe-button {
+             background-color: var(--nvidia-purple);
+             border-color: var(--nvidia-purple);
+             color: var(--nvidia-text);
+             font-weight: 700;
+        }
+        .vqe-button:hover:not(:disabled) {
+            background-color: var(--nvidia-text);
+            color: var(--nvidia-purple);
+        }
+        .minimize-button {
+            background-color: var(--nvidia-green);
+            color: var(--nvidia-dark-gray);
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(118, 185, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        .gradient-bar {
+            background: linear-gradient(to right, var(--nvidia-green) var(--p), #555 var(--p));
+        }
+        .qubit-lane {
+            position: relative;
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        .qubit-label {
+            font-family: 'monospace';
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            color: var(--nvidia-light-gray);
+        }
+        .qubit-wire {
+            width: 100%;
+            height: 2px;
+            background-color: #777;
+        }
+        .gate-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .gate-box {
+            background-color: var(--nvidia-green);
+            color: var(--nvidia-dark-gray);
+            border: 2px solid var(--nvidia-green);
+            padding: 0.25rem 0.75rem;
+            font-family: 'monospace';
+            font-weight: 600;
+            z-index: 10;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            /* Added for vertical centering */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+        }
+        .gate-box.vqe-gate {
+            background-color: var(--nvidia-purple);
+            border-color: var(--nvidia-purple);
+            color: white;
+        }
+        .gate-box.unoptimized {
+            background-color: var(--nvidia-dark-gray);
+            color: var(--nvidia-highlight);
+            border-color: var(--nvidia-highlight);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-white">Adapt-VQE vs. Standard VQE</h1>
+            <p class="text-lg text-gray-300 mt-2">An interactive comparison of quantum optimization algorithms.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Circuits -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="circuit-card adapt-border">
+                    <h2 class="text-2xl font-bold text-white mb-4">Adapt-VQE Circuit (Grows Dynamically)</h2>
+                    <div id="adapt-circuit-container" class="bg-gray-800 p-4 rounded-md overflow-x-auto min-h-[200px]"></div>
+                </div>
+                <div class="circuit-card vqe-border">
+                    <h2 class="text-2xl font-bold text-white mb-4">Standard VQE Circuit (Fixed Ansatz)</h2>
+                    <div id="vqe-circuit-container" class="bg-gray-800 p-4 rounded-md overflow-x-auto min-h-[200px]"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Controls -->
+            <div class="info-card p-6 rounded-lg shadow-lg flex flex-col">
+                <h2 class="text-2xl font-bold text-white mb-4">Controls</h2>
+                <div id="feedback-text" class="text-center font-semibold min-h-[4em] mb-4"></div>
+                
+                <!-- Adapt-VQE Controls -->
+                <div id="adapt-controls">
+                    <div id="minimize-button-container" class="mb-4"></div>
+                    <h3 class="text-xl font-bold text-white mb-2 border-t border-gray-500 pt-4">Operator Pool</h3>
+                    <p class="text-xs text-gray-400 mb-3">These values are gradient magnitudes. Choose the largest one.</p>
+                    <div id="operator-pool" class="space-y-3 flex-grow"></div>
+                </div>
+
+                <!-- VQE Controls -->
+                <div id="vqe-controls" class="mt-auto">
+                     <h3 class="text-xl font-bold text-white mb-4 border-t border-gray-500 pt-4">Run Simulation</h3>
+                    <button id="vqe-run-button" class="nvidia-button vqe-button w-full p-3 rounded-md text-lg">Run VQE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Chart -->
+        <div class="mt-6 info-card p-6 rounded-lg shadow-lg">
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">Energy Profile Comparison</h2>
+                <button id="reset-all-button" class="nvidia-button px-6 py-2 rounded-md font-semibold">Reset All</button>
+            </div>
+            <div class="h-64 md:h-80"><canvas id="energyChart"></canvas></div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- SHARED ELEMENTS & CONFIG ---
+    const chartCanvas = document.getElementById('energyChart');
+    const resetAllButton = document.getElementById('reset-all-button');
+    const feedbackText = document.getElementById('feedback-text');
+    let energyChart;
+    const NUM_QUBITS = 3;
+    const STARTING_ENERGY = 2.0;
+    const FINAL_ENERGY = -1.137;
+
+    // Get computed styles for chart colors
+    const rootStyles = getComputedStyle(document.documentElement);
+    const nvidiaGreen = rootStyles.getPropertyValue('--nvidia-green').trim();
+    const nvidiaPurple = rootStyles.getPropertyValue('--nvidia-purple').trim();
+
+    // --- ADAPT-VQE ELEMENTS & STATE ---
+    const adaptState = {};
+    const operatorPoolDiv = document.getElementById('operator-pool');
+    const adaptCircuitContainer = document.getElementById('adapt-circuit-container');
+    const minimizeButtonContainer = document.getElementById('minimize-button-container');
+    const ADAPT_OPERATORS = [
+        { name: 'A₁', qubits: [0, 1] }, { name: 'A₂', qubits: [1, 2] },
+        { name: 'A₃', qubits: [0] },   { name: 'A₄', qubits: [2] },
+        { name: 'A₅', qubits: [0, 2] }, { name: 'A₆', qubits: [1] },
+    ];
+
+    // --- VQE ELEMENTS & STATE ---
+    const vqeState = {};
+    const vqeCircuitContainer = document.getElementById('vqe-circuit-container');
+    const vqeRunButton = document.getElementById('vqe-run-button');
+    const VQE_OPERATORS = [
+        { name: 'A₁', qubits: [0] },    { name: 'A₂', qubits: [1] },
+        { name: 'A₃', qubits: [2] },    { name: 'A₄', qubits: [0, 1] },
+        { name: 'A₅', qubits: [1, 2] }, { name: 'A₆', qubits: [0, 2] },
+        { name: 'A₇', qubits: [0] },    { name: 'A₈', qubits: [1] },
+        { name: 'A₉', qubits: [2] },    { name: 'A₁₀', qubits: [1, 2] },
+    ];
+
+    // --- INITIALIZATION ---
+    function initialize() {
+        initializeAdaptState();
+        initializeVqeState();
+        renderChart();
+        renderAdaptVQE();
+        renderVQE();
+    }
+
+    function initializeAdaptState() {
+        Object.assign(adaptState, {
+            iteration: 0, energy: STARTING_ENERGY, gradients: {},
+            availableOperators: [...ADAPT_OPERATORS], circuit: [],
+            energyHistory: [STARTING_ENERGY], labels: ['Start'],
+            isConverged: false, awaitingOptimization: false,
+        });
+        calculateAdaptGradients();
+        setFeedback('Select an operator to begin the Adapt-VQE process.');
+    }
+    
+    function initializeVqeState() {
+        Object.assign(vqeState, {
+            isRunning: false, energyHistory: [], labels: [],
+        });
+        vqeRunButton.disabled = false;
+    }
+
+    // --- ADAPT-VQE LOGIC ---
+    function calculateAdaptGradients() {
+        if (adaptState.isConverged) {
+            adaptState.availableOperators.forEach(op => { adaptState.gradients[op.name] = 0.0; });
+            return;
+        }
+        const remainingSteps = ADAPT_OPERATORS.length - adaptState.iteration;
+        const energyGap = adaptState.energy - FINAL_ENERGY;
+        const baseGradient = (energyGap / (remainingSteps > 0 ? remainingSteps : 1)) * 0.8;
+
+        adaptState.availableOperators.forEach((op, index) => {
+            let grad = (index === 0)
+                ? baseGradient * (Math.random() * 0.2 + 0.9)
+                : baseGradient * (Math.random() * 0.5 + 0.1);
+            adaptState.gradients[op.name] = grad;
+        });
+
+        if (Math.abs(energyGap) < 0.05 || adaptState.availableOperators.length === 0) {
+            adaptState.isConverged = true;
+            setFeedback('✅ Adapt-VQE has converged!', 'var(--nvidia-green)');
+            adaptState.availableOperators.forEach(op => { adaptState.gradients[op.name] = 0.0; });
+        }
+    }
+
+    function handleOperatorSelection(selectedOpName) {
+        if (adaptState.isConverged || adaptState.awaitingOptimization) return;
+        const bestOpName = adaptState.availableOperators.reduce((a, b) =>
+            Math.abs(adaptState.gradients[a.name]) > Math.abs(adaptState.gradients[b.name]) ? a : b
+        ).name;
+
+        if (selectedOpName === bestOpName) {
+            const selectedOp = adaptState.availableOperators.find(op => op.name === selectedOpName);
+            adaptState.circuit.push({ ...selectedOp, optimized: false, theta: `θ_${adaptState.circuit.length + 1}` });
+            adaptState.availableOperators = adaptState.availableOperators.filter(op => op.name !== selectedOpName);
+            adaptState.awaitingOptimization = true;
+            setFeedback('Gate added. Now minimize its θ parameter.', 'var(--nvidia-light-gray)');
+        } else {
+            setFeedback('Suboptimal choice. Pick the operator with the largest gradient.', 'var(--nvidia-error)');
+        }
+        renderAdaptVQE();
+    }
+
+    function handleMinimize() {
+        if (!adaptState.awaitingOptimization) return;
+        const lastGate = adaptState.circuit[adaptState.circuit.length - 1];
+        if (lastGate) {
+            lastGate.optimized = true;
+            adaptState.iteration++;
+            
+            let energyDropMultiplier = adaptState.iteration < 4 ? 1.3 : 0.5;
+            const energyDrop = Math.abs(adaptState.gradients[lastGate.name]) * (Math.random() * 0.3 + energyDropMultiplier);
+            adaptState.energy -= energyDrop;
+
+            if (adaptState.availableOperators.length === 0 || Math.abs(adaptState.energy - FINAL_ENERGY) < 0.05) {
+                adaptState.energy = FINAL_ENERGY;
+            }
+            
+            adaptState.energyHistory.push(adaptState.energy);
+            adaptState.labels.push(`A-Step ${adaptState.iteration}`);
+        }
+        adaptState.awaitingOptimization = false;
+        calculateAdaptGradients();
+        if (!adaptState.isConverged) {
+            setFeedback('Parameter minimized! Select the next operator.', 'var(--nvidia-green)');
+        }
+        renderAdaptVQE();
+        renderChart();
+    }
+
+    // --- VQE LOGIC ---
+    function runVQE() {
+        if (vqeState.isRunning) return;
+        vqeState.isRunning = true;
+        vqeRunButton.disabled = true;
+        setFeedback('VQE optimizing all 10 parameters...', 'var(--nvidia-purple)');
+
+        vqeState.energyHistory = [STARTING_ENERGY];
+        vqeState.labels = ['Start'];
+        
+        const totalSteps = 50;
+        const energyLevels = [];
+        for (let i = 0; i <= totalSteps; i++) {
+            const progress = i / totalSteps;
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            energyLevels.push(STARTING_ENERGY - (STARTING_ENERGY - FINAL_ENERGY) * easedProgress);
+        }
+
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step >= energyLevels.length) {
+                clearInterval(interval);
+                vqeState.isRunning = false;
+                setFeedback('✅ VQE optimization complete!', 'var(--nvidia-green)');
+                return;
+            }
+            vqeState.energyHistory.push(energyLevels[step]);
+            vqeState.labels.push(`V-Step ${step}`);
+            step++;
+            renderChart();
+        }, 60);
+    }
+
+    // --- RENDERING ---
+    function renderAdaptVQE() {
+        renderOperatorPool();
+        renderCircuit(adaptCircuitContainer, adaptState.circuit, false);
+        renderAdaptControls();
+    }
+
+    function renderVQE() {
+        const vqeCircuit = VQE_OPERATORS.map((op, i) => ({...op, theta: `θ_${i+1}`}));
+        renderCircuit(vqeCircuitContainer, vqeCircuit, true);
+    }
+
+    function renderAdaptControls() {
+        minimizeButtonContainer.innerHTML = '';
+        if (adaptState.awaitingOptimization) {
+            const btn = document.createElement('button');
+            btn.className = 'nvidia-button minimize-button w-full p-3 rounded-md text-lg';
+            btn.textContent = 'Minimize θ';
+            btn.onclick = handleMinimize;
+            minimizeButtonContainer.appendChild(btn);
+        }
+    }
+    
+    function renderOperatorPool() {
+        operatorPoolDiv.innerHTML = '';
+        const maxGradient = Math.max(...Object.values(adaptState.gradients).map(g => Math.abs(g)), 0.0001);
+        adaptState.availableOperators.forEach(op => {
+            const gradValue = adaptState.gradients[op.name] || 0.0;
+            const percentage = (Math.abs(gradValue) / maxGradient) * 100;
+            const button = document.createElement('button');
+            button.className = 'nvidia-button w-full p-3 rounded-md text-left';
+            button.disabled = adaptState.isConverged || adaptState.awaitingOptimization;
+            button.onclick = () => handleOperatorSelection(op.name);
+            button.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold">${op.name.replace('₁', '<sub>1</sub>').replace('₂', '<sub>2</sub>').replace('₃', '<sub>3</sub>').replace('₄', '<sub>4</sub>').replace('₅', '<sub>5</sub>').replace('₆', '<sub>6</sub>')}</span>
+                    <span class="text-sm font-mono">${Math.abs(gradValue).toFixed(4)}</span>
+                </div>
+                <div class="w-full h-2 rounded-full mt-2 bg-gray-700">
+                    <div class="h-full rounded-full gradient-bar" style="--p: ${percentage}%"></div>
+                </div>`;
+            operatorPoolDiv.appendChild(button);
+        });
+    }
+
+    function renderCircuit(container, circuit, isVqe) {
+        container.innerHTML = '';
+        const lanes = Array.from({ length: NUM_QUBITS }, (_, i) => {
+            const lane = document.createElement('div');
+            lane.className = 'qubit-lane';
+            lane.innerHTML = `<div class="qubit-label">q<sub>${i}</sub>⟩</div><div class="qubit-wire"></div>`;
+            container.appendChild(lane);
+            return lane;
+        });
+
+        const spacing = isVqe ? 75 : 110;
+        circuit.forEach((gate, index) => {
+            const gateOffset = 60 + index * spacing;
+            const gateSymbol = `A<sub>${gate.name.substring(1)}</sub>`;
+            const thetaSymbol = `θ<sub>${gate.theta.substring(2)}</sub>`;
+            
+            const gateContainer = document.createElement('div');
+            gateContainer.className = 'gate-container';
+            gateContainer.style.left = `${gateOffset}px`;
+            const gateBox = document.createElement('div');
+            gateBox.className = `gate-box ${isVqe ? 'vqe-gate' : ''} ${!isVqe && !gate.optimized ? 'unoptimized' : ''}`;
+            gateBox.innerHTML = `e<sup>-i${gateSymbol}${thetaSymbol}</sup>`;
+            gateContainer.appendChild(gateBox);
+
+            if (gate.qubits.length > 0) {
+                const minQubit = Math.min(...gate.qubits);
+                lanes[minQubit].appendChild(gateContainer);
+                
+                // If it's a multi-qubit gate, resize the box to span the lanes
+                if (gate.qubits.length > 1) {
+                    const maxQubit = Math.max(...gate.qubits);
+                    const singleBoxHeight = 36; // Approximate height of a single gate box
+                    const height = (maxQubit - minQubit) * 50 + singleBoxHeight;
+                    gateBox.style.height = `${height}px`;
+                }
+            }
+        });
+    }
+
+    function renderChart() {
+        const chartConfig = {
+            type: 'line',
+            data: { 
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Adapt-VQE Energy', data: adaptState.energyHistory,
+                        borderColor: nvidiaGreen, backgroundColor: nvidiaGreen,
+                        fill: false, tension: 0.2, pointRadius: 5, borderWidth: 3
+                    },
+                    {
+                        label: 'Standard VQE Energy', data: vqeState.energyHistory,
+                        borderColor: nvidiaPurple, backgroundColor: nvidiaPurple,
+                        fill: false, tension: 0.2, pointRadius: 2, borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: false, ticks: { color: 'var(--nvidia-light-gray)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                    x: { ticks: { display: false }, grid: { display: false } }
+                },
+                plugins: { legend: { labels: { color: 'var(--nvidia-light-gray)', font: { size: 14 } } } }
+            }
+        };
+        if (energyChart) {
+            energyChart.data.datasets[0].data = adaptState.energyHistory;
+            energyChart.data.datasets[1].data = vqeState.energyHistory;
+            energyChart.data.labels = adaptState.labels.concat(vqeState.labels);
+            energyChart.update();
+        } else {
+            energyChart = new Chart(chartCanvas.getContext('2d'), chartConfig);
+        }
+    }
+    
+    function setFeedback(message, color) { feedbackText.innerHTML = message; if(color) feedbackText.style.color = color; }
+    
+    resetAllButton.addEventListener('click', initialize);
+    vqeRunButton.addEventListener('click', runVQE);
+
+    initialize();
+});
+</script>
+
+</body>
+</html>
