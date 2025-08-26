@@ -50,7 +50,8 @@ these topics is in the linked directory](https://github.com/NVIDIA/cuda-q-academ
   b. [Variational quantum eigensolver](https://nvidia.github.io/cuda-quantum/latest/applications/python/vqe.html)<br>
   c. QAOA for max cut - [code only](https://nvidia.github.io/cuda-quantum/latest/applications/python/qaoa.html) and [course materials with exercises, video
 explanations, etc.](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut)<br>
-  d. Hybrid neural networks [basic code](https://nvidia.github.io/cuda-quantum/latest/applications/python/hybrid_qnns.html)
+  d. [QAOA for portfolio optimization](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb)
+  e. Hybrid neural networks [basic code](https://nvidia.github.io/cuda-quantum/latest/applications/python/hybrid_qnns.html)
 and application [blog on solar energy application](https://developer.nvidia.com/blog/accelerating-quantum-algorithms-for-solar-energy-prediction-with-nvidia-cuda-q-and-nvidia-cudnn/?ncid=so-link-818523&linkId=100000301600419)<br>
 6. Quantum Computation<br>
   a. Classical Simulation of Quantum Algorithms<br>
@@ -64,3 +65,5 @@ and application [blog on solar energy application](https://developer.nvidia.com/
   a. Circuit cutting ([introduction to circuit cutting through QAOA max cut example](https://github.com/NVIDIA/cuda-q-academic/tree/main/qaoa-for-max-cut))<br>
   b. GPT-QE [blog](https://developer.nvidia.com/blog/advancing-quantum-algorithm-design-with-gpt/?ncid=so-link-401079&linkId=100000294214594)<br>
   c. Divisive clustering [code](https://nvidia.github.io/cuda-quantum/latest/applications/python/divisive_clustering_coresets.html) and [blog](https://developer.nvidia.com/blog/cuda-q-enabled-resource-reduction-for-quantum-clustering-algorithms/)<br>
+  d. Quantum annealing ([applied to portofolio optimization](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb))
+  e. [Infleqtion's QChop alogrithm](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb)
