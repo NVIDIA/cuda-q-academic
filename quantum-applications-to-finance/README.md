@@ -4,7 +4,7 @@ This series of tutorials explores the intersection of quantum computing and fina
 
 This series is designed to be modular. Notebooks 1 and 2 are a two-part series that should be completed in sequence. All other notebooks are fully independent and can be explored in any order. Feel free to dive into whichever topic interests you most!
 
-📚 What You'll Learn
+📚 **What You'll Learn**
 In Notebooks 1 & 2, you'll dive into the fundamentals of quantum walks, see how they differ from classical random walks, and apply them to model financial data.
 
 Notebook 3 demonstrates how quantum computing can optimize investment portfolios. You'll explore three different approaches: the Quantum Approximate Optimization Algorithm (QAOA), quantum annealing, and a novel algorithm by Infleqtion called QChop.
