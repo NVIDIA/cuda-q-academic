@@ -17,33 +17,36 @@ customize this container, make edits to the included `Dockerfile`.
 docker login nvcr.io
 # Follow the login instructions at ngc.nvidia.com
 # Next, build the container locally
-docker build -t cuda-quantum-academic:latest
+docker build -t cuda-quantum-academic:latest .
 ```
 
-To run the container, use the following command. By default Jupyter-lab will
-use port 8888 and docker will expose this port. If you wish to use a different
-port, see the directions below.
+To run the container, use the following command. 
 
 ```sh
-docker run cuda-quantum-academic:latest
+docker run -p 8888:8888 cuda-quantum-academic:latest
 ```
 
 You can now open a web browser to http://localhost:8888/lab to access the labs.
 
 ### Changing the port
-You can either change the port that will be used by jupyter-lab at build time
-(more permanent) or at runtime (more dynamic).
+If you cannot use port 8888 on your local machine then you can specify a differnt
+port when running the the container.  For example, if you want to connect to your 
+Jupyter Lab on port 8000 using http://localhost:8000/lab, then you'd do the following:
 
-Build time:
-```sh
-docker build --build-arg JUPYTER_LAB_PORT=8000 -t cuda-quantum-academic:latest
-docker run cuda-quantum-academic:latest
-```
-
-Run time:
 ```sh
 docker run -p 8000:8888 cuda-quantum-academic:latest
 ```
+
+Here `8888` is the port used within the container. Docker is routing your local 
+traffic on `8000` to the container port `8888`.  If you need to change the port used within
+the container, then you can also specify that port when running your container. For example,
+if you wish to direct your browser to port 8888 but run the Jupyter lab within the container 
+on port 8000, then you'd run the following: 
+
+```sh
+docker run -e JUPYTER_LAB_PORT=8000 -p 8888:8000  cuda-quantum-academic:latest
+```
+
 
 ## Running the notebooks in Google Colab
 Simply click on the icon at the top of each notebook in github to open it up in Google Colab.  In each notebook there instructions for running CoLab.
