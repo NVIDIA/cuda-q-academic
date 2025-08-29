@@ -1,5 +1,5 @@
 # Chemistry Simulations
-This collection of notebooks explores techniques for calculating molecular ground state energies, a fundamental problem in the field. The notebooks offer a deep dive into implementing and applying two the adaptive ADAPT-VQE algorithm and various Krylov subspace methods.  More techniques will be added.
+This collection of notebooks explores techniques for calculating molecular ground state energies, a fundamental problem in the field. The notebooks offer a deep dive into implementing and applying two approaches: the ADAPT-VQE algorithm and various Krylov subspace methods.  Additionally techniques will be added in the future.
 
 *Pre-requisites:* Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q. Since these notebooks cover chemistry and materials science simulations, domain knowledge is helpful. It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The CUDA-Q Academic course entitled "Quick Start to Quantum Computing with CUDA-Q" provide a walkthrough of this prerequisite CUDA-Q knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
 
