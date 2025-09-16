@@ -9,7 +9,8 @@ Quantum dynamics simulations differ from the more common circuit simulations, wh
 To draw a classical analogy: the logic of a classical computer can be modeled using binary logic gates (AND, OR, XOR) applied to transistors, abstractly represented as 0s and 1s. However, to design faster and higher-performing transistors, electrical engineers run complex models that fully simulate the device physics, including fluctuations in voltage, capacitance, and current. Similarly, designing better qubits and QPUs requires analog dynamics simulations that fully capture the physics of physical qubits, akin to modeling the physics of transistors in classical computing.
 
 Designed for advanced users with a solid background in quantum mechanics and familiarity with Python programming, this series of notebooks guides you through GPU-accelerated quantum dynamics simulations. We start with the Jaynes-Cummings Hamiltonian to introduce the fundamental concepts and then progress to the Landau-Zener model to explore time-dependent Hamiltonian terms and custom operators.
-These notebooks were presented at the Quantum Device Workshop at UCLA in May 2025.  You can watch a recording of the presentation of these notebooks [here](https://youtu.be/Hjp5hUt8OY8?feature=shared&t=4046).
+
+🎥 You can [watch a recording of the presentation](https://youtu.be/Hjp5hUt8OY8?feature=shared&t=4046) of these notebooks from the Quantum Device Workshop at UCLA in May 2025. 
 
 ## Learning Objectives
 
