@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Walk & Galton Board</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .controls, .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resetBtn {
+            background-color: #dc3545;
+        }
+        #resetBtn:hover {
+            background-color: #c82333;
+        }
+        svg {
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Classical Random Walk Simulator 🎲</h1>
+
+    <div class="controls">
+        <label for="probSlider">P(Right): <span id="probValue">0.50</span></label>
+        <input type="range" id="probSlider" min="0" max="1" step="0.01" value="0.5">
+        <button id="runStepBtn">Run Single Walk</button>
+        <button id="run100Btn">Run 100 Walks</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="container">
+        <h2>Galton Board (4-Step Walk)</h2>
+        <svg id="galtonBoard" width="400" height="250"></svg>
+    </div>
+
+    <div class="container">
+        <h2>Binomial Distribution</h2>
+        <svg id="histogram" width="500" height="300"></svg>
+    </div>
+
+    <script>
+        // DOM Elements
+        const probSlider = document.getElementById('probSlider');
+        const probValueSpan = document.getElementById('probValue');
+        const runStepBtn = document.getElementById('runStepBtn');
+        const run100Btn = document.getElementById('run100Btn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // SVG Canvases
+        const galtonSvg = document.getElementById('galtonBoard');
+        const histoSvg = document.getElementById('histogram');
+        const galtonWidth = galtonSvg.getAttribute('width');
+        const galtonHeight = galtonSvg.getAttribute('height');
+        const histoWidth = histoSvg.getAttribute('width');
+        const histoHeight = histoSvg.getAttribute('height');
+
+        // Simulation Parameters
+        const steps = 4;
+        const pegSpacingY = galtonHeight / (steps + 2);
+        const pegSpacingX = galtonWidth / (steps + 1);
+        let frequencies = { '-4': 0, '-2': 0, '0': 0, '2': 0, '4': 0 };
+        let totalRuns = 0;
+
+        // --- Event Listeners ---
+        probSlider.addEventListener('input', () => {
+            probValueSpan.textContent = parseFloat(probSlider.value).toFixed(2);
+        });
+
+        runStepBtn.addEventListener('click', () => runSingleWalk(true));
+        run100Btn.addEventListener('click', () => {
+            for (let i = 0; i < 100; i++) {
+                runSingleWalk(false); // Run without animation
+            }
+        });
+        resetBtn.addEventListener('click', resetSimulation);
+
+        // --- Core Functions ---
+        function drawGaltonBoard() {
+            galtonSvg.innerHTML = ''; // Clear previous board
+            for (let row = 0; row < steps; row++) {
+                for (let col = 0; col <= row; col++) {
+                    const cx = (galtonWidth / 2) - (pegSpacingX * row / 2) + (col * pegSpacingX);
+                    const cy = pegSpacingY * (row + 1.5);
+                    createCircle(galtonSvg, cx, cy, 4, '#555');
+                }
+            }
+        }
+
+        function runSingleWalk(animate = false) {
+            let currentX = galtonWidth / 2;
+            let finalPosition = 0;
+            const pathData = [`M ${currentX},${pegSpacingY * 0.5}`];
+
+            for (let i = 0; i < steps; i++) {
+                const probability = parseFloat(probSlider.value);
+                const goRight = Math.random() < probability;
+                
+                // Update position: right is +1, left is -1
+                finalPosition += goRight ? 1 : -1;
+                currentX += goRight ? pegSpacingX / 2 : -pegSpacingX / 2;
+                
+                pathData.push(`L ${currentX},${pegSpacingY * (i + 1.5)}`);
+            }
+            // The binomial outcome is determined by the number of steps right vs left.
+            // After 4 steps, possible outcomes are:
+            // 4R, 0L -> final pos = +4
+            // 3R, 1L -> final pos = +2
+            // 2R, 2L -> final pos = 0
+            // 1R, 3L -> final pos = -2
+            // 0R, 4L -> final pos = -4
+            // Let k = number of steps right. Final Position = k - (steps - k) = 2k - steps
+            // Here, steps = 4, so Final Position = 2k - 4.
+            const binomPosition = 2 * (finalPosition + steps) / 2 - steps; // Convert from walk to binom key
+            frequencies[binomPosition]++;
+            totalRuns++;
+
+            if (animate) {
+                drawPath(pathData);
+            }
+            updateHistogram();
+        }
+
+        function updateHistogram() {
+            histoSvg.innerHTML = '';
+            const outcomes = Object.keys(frequencies).map(Number);
+            const maxFreq = Math.max(...Object.values(frequencies));
+            const barWidth = histoWidth / (outcomes.length * 1.5);
+            const padding = 20;
+            const chartHeight = histoHeight - padding * 2;
+
+            outcomes.forEach((outcome, i) => {
+                const freq = frequencies[outcome];
+                const barHeight = (maxFreq > 0) ? (freq / maxFreq) * chartHeight : 0;
+                const x = (i * (barWidth * 1.5)) + (barWidth / 2) + padding;
+                const y = histoHeight - barHeight - padding;
+                
+                // Draw bar
+                createRect(histoSvg, x, y, barWidth, barHeight, '#007bff');
+                // Draw label
+                createText(histoSvg, x + barWidth / 2, histoHeight - 5, outcome, 'middle');
+                // Draw frequency count
+                const countTextY = y > 20 ? y - 5 : 15;
+                createText(histoSvg, x + barWidth / 2, countTextY, freq, 'middle', '#333');
+            });
+        }
+        
+        function resetSimulation() {
+            totalRuns = 0;
+            frequencies = { '-4': 0, '-2': 0, '0': 0, '2': 0, '4': 0 };
+            drawGaltonBoard();
+            updateHistogram();
+        }
+
+        // --- SVG Helper Functions ---
+        function createCircle(svg, cx, cy, r, fill) {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", cx);
+            circle.setAttribute("cy", cy);
+            circle.setAttribute("r", r);
+            circle.setAttribute("fill", fill);
+            svg.appendChild(circle);
+        }
+
+        function createRect(svg, x, y, width, height, fill) {
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", x);
+            rect.setAttribute("y", y);
+            rect.setAttribute("width", width);
+            rect.setAttribute("height", height);
+            rect.setAttribute("fill", fill);
+            svg.appendChild(rect);
+        }
+
+        function createText(svg, x, y, content, anchor = 'start', fill = '#000') {
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", y);
+            text.setAttribute("text-anchor", anchor);
+            text.setAttribute("fill", fill);
+            text.textContent = content;
+            svg.appendChild(text);
+        }
+        
+        function drawPath(pathData) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData.join(' '));
+            path.setAttribute("stroke", "#dc3545");
+            path.setAttribute("stroke-width", 2);
+            path.setAttribute("fill", "none");
+            galtonSvg.appendChild(path);
+
+            // Ball that "falls"
+            const ball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            ball.setAttribute("r", 6);
+            ball.setAttribute("fill", "crimson");
+            galtonSvg.appendChild(ball);
+
+            // Animate the ball along the path
+            const animateMotion = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
+            animateMotion.setAttribute("path", pathData.join(' '));
+            animateMotion.setAttribute("dur", "1.5s");
+            animateMotion.setAttribute("fill", "freeze");
+            ball.appendChild(animateMotion);
+            
+            // Remove the path and ball after animation to keep the board clean
+            setTimeout(() => {
+                if (galtonSvg.contains(path)) galtonSvg.removeChild(path);
+                if (galtonSvg.contains(ball)) galtonSvg.removeChild(ball);
+            }, 1500);
+        }
+
+        // Initial setup
+        drawGaltonBoard();
+        updateHistogram();
+
+    </script>
+
+</body>
+</html>
