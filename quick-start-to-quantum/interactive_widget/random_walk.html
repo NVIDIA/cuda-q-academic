@@ -3,267 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Walk & Galton Board</title>
+    <title>Interactive Random Walk</title>
     <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark-gray: #333333;
+            --nvidia-mid-gray: #888888;
+            --nvidia-light-gray: #f5f5f5;
+            --background-color: #2a2a2a;
+            --text-color: #ffffff;
+            --container-bg: #3c3c3c;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: #f0f2f5;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
-        h1, h2 {
-            color: #333;
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
-        .controls, .container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+
+        h1, h3 {
+            color: var(--text-color);
             text-align: center;
         }
-        .controls {
+
+        .control-panel {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 5px;
             display: flex;
+            flex-direction: column;
             gap: 20px;
+        }
+
+        .slider-wrapper {
+            display: flex;
             align-items: center;
+            gap: 10px;
         }
-        label {
+
+        .slider-wrapper span {
             font-weight: bold;
+            color: var(--nvidia-mid-gray);
         }
+
+        select {
+            padding: 8px;
+            background-color: var(--nvidia-dark-gray);
+            color: var(--text-color);
+            border: 1px solid var(--nvidia-mid-gray);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
         input[type="range"] {
-            width: 200px;
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: var(--nvidia-dark-gray);
+            outline: none;
+            border-radius: 5px;
         }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--nvidia-green);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .probability-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--nvidia-green);
+        }
+
         button {
-            padding: 10px 15px;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
             border: none;
             border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.3s, transform 0.1s;
+            font-weight: bold;
         }
-        button:hover {
-            background-color: #0056b3;
+        button:active {
+            transform: scale(0.98);
         }
-        #resetBtn {
-            background-color: #dc3545;
+
+        .primary-btn {
+            background-color: var(--nvidia-green);
+            color: white;
         }
-        #resetBtn:hover {
-            background-color: #c82333;
+        .primary-btn:hover {
+            background-color: var(--nvidia-green-dark);
         }
-        svg {
-            background-color: #f9f9f9;
-            border-radius: 4px;
+        .primary-btn:disabled {
+            background-color: var(--nvidia-mid-gray);
+            cursor: not-allowed;
         }
-        .container {
+
+        .secondary-btn {
+            background-color: var(--nvidia-mid-gray);
+            color: white;
+        }
+        .secondary-btn:hover {
+            background-color: #999999;
+        }
+
+        .visualization {
+            margin: 20px 0;
+        }
+        .number-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+            height: 60px;
+            border-bottom: 2px solid var(--nvidia-mid-gray);
+        }
+        .position {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--nvidia-mid-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: var(--container-bg);
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+        .position.current {
+            border-color: var(--nvidia-green);
+            color: var(--nvidia-green);
+            transform: scale(1.2);
+        }
+        .position.visited {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .walker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: var(--nvidia-green);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.8s ease-in-out;
+            z-index: 2;
+        }
+
+        .step-indicator {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--nvidia-green);
+            margin: 20px 0;
+            height: 40px;
+        }
+
+        .distribution {
+            margin-top: 20px;
+        }
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 200px;
+            border-bottom: 2px solid var(--nvidia-mid-gray);
+            margin-bottom: 10px;
+            padding: 0 5px;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, var(--nvidia-green-dark), var(--nvidia-green));
+            margin: 0 2px;
+            position: relative;
+            transition: height 0.5s ease-out;
+            border-radius: 3px 3px 0 0;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
             width: 100%;
-            max-width: 600px;
+            text-align: center;
+            font-weight: bold;
         }
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: var(--nvidia-green);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .bar:hover .bar-value {
+            opacity: 1;
+        }
+
+        .walker-clone {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            background-color: var(--nvidia-green);
+            border-radius: 50%;
+            z-index: 1000;
+            transition: top 0.8s cubic-bezier(0.5, 0, 1, 1), left 0.8s ease-out, opacity 0.8s 0.5s;
+        }
+
     </style>
 </head>
 <body>
-
-    <h1>Classical Random Walk Simulator 🎲</h1>
-
-    <div class="controls">
-        <label for="probSlider">P(Right): <span id="probValue">0.50</span></label>
-        <input type="range" id="probSlider" min="0" max="1" step="0.01" value="0.5">
-        <button id="runStepBtn">Run Single Walk</button>
-        <button id="run100Btn">Run 100 Walks</button>
-        <button id="resetBtn">Reset</button>
-    </div>
-
     <div class="container">
-        <h2>Galton Board (4-Step Walk)</h2>
-        <svg id="galtonBoard" width="400" height="250"></svg>
-    </div>
-
-    <div class="container">
-        <h2>Binomial Distribution</h2>
-        <svg id="histogram" width="500" height="300"></svg>
+        <h1>Interactive Random Walk</h1>
+        
+        <div class="control-panel">
+            <div class="settings-group" style="display: flex; justify-content: space-around; align-items: center;">
+                 <div>
+                    <label for="numStepsSelect">Number of Steps: </label>
+                    <select id="numStepsSelect">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <div class="slider-container" style="width: 60%;">
+                    <label for="probability">Probability of moving right:</label>
+                    <div class="slider-wrapper">
+                        <span>0%</span>
+                        <input type="range" id="probability" min="0" max="100" value="50">
+                        <span>100%</span>
+                    </div>
+                    <div class="probability-display">
+                        <span id="probValue">50</span>% Right / <span id="probValueLeft">50</span>% Left
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="primary-btn" id="singleWalkBtn" onclick="runSingleWalk()">Run Single Walk</button>
+                <button class="secondary-btn" id="multiWalkBtn" onclick="run100Walks()">+ Run 100 Walks</button>
+                <button class="secondary-btn" onclick="resetAll()">Reset All</button>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <h3>Single Walk Visualization</h3>
+            <div class="step-indicator" id="stepIndicator">Click "Run Single Walk" to start</div>
+            <div class="number-line" id="numberLine">
+                <div class="walker" id="walker"></div>
+            </div>
+        </div>
+        
+        <div class="distribution">
+            <h3>Frequency Distribution</h3>
+            <p style="text-align: center;">Total Walks: <span id="totalWalksCount">0</span></p>
+            <div class="bar-chart" id="barChart"></div>
+            <p style="text-align: center; margin-top: 30px;">Final Position</p>
+        </div>
     </div>
 
     <script>
-        // DOM Elements
-        const probSlider = document.getElementById('probSlider');
-        const probValueSpan = document.getElementById('probValue');
-        const runStepBtn = document.getElementById('runStepBtn');
-        const run100Btn = document.getElementById('run100Btn');
-        const resetBtn = document.getElementById('resetBtn');
+        const singleWalkBtn = document.getElementById('singleWalkBtn');
+        const multiWalkBtn = document.getElementById('multiWalkBtn');
+        const probSlider = document.getElementById('probability');
+        const numStepsSelect = document.getElementById('numStepsSelect');
+        const numberLine = document.getElementById('numberLine');
+        const barChart = document.getElementById('barChart');
 
-        // SVG Canvases
-        const galtonSvg = document.getElementById('galtonBoard');
-        const histoSvg = document.getElementById('histogram');
-        const galtonWidth = galtonSvg.getAttribute('width');
-        const galtonHeight = galtonSvg.getAttribute('height');
-        const histoWidth = histoSvg.getAttribute('width');
-        const histoHeight = histoSvg.getAttribute('height');
+        const MAX_STEPS = 4;
+        const NUM_POSITIONS = 2 * MAX_STEPS + 1; // e.g., for 4 steps, we need 9 positions (0-8)
+        const START_POS = MAX_STEPS; // Start in the middle
 
-        // Simulation Parameters
-        const steps = 4;
-        const pegSpacingY = galtonHeight / (steps + 2);
-        const pegSpacingX = galtonWidth / (steps + 1);
-        let frequencies = { '-4': 0, '-2': 0, '0': 0, '2': 0, '4': 0 };
-        let totalRuns = 0;
-
-        // --- Event Listeners ---
-        probSlider.addEventListener('input', () => {
-            probValueSpan.textContent = parseFloat(probSlider.value).toFixed(2);
-        });
-
-        runStepBtn.addEventListener('click', () => runSingleWalk(true));
-        run100Btn.addEventListener('click', () => {
-            for (let i = 0; i < 100; i++) {
-                runSingleWalk(false); // Run without animation
-            }
-        });
-        resetBtn.addEventListener('click', resetSimulation);
-
-        // --- Core Functions ---
-        function drawGaltonBoard() {
-            galtonSvg.innerHTML = ''; // Clear previous board
-            for (let row = 0; row < steps; row++) {
-                for (let col = 0; col <= row; col++) {
-                    const cx = (galtonWidth / 2) - (pegSpacingX * row / 2) + (col * pegSpacingX);
-                    const cy = pegSpacingY * (row + 1.5);
-                    createCircle(galtonSvg, cx, cy, 4, '#555');
-                }
-            }
-        }
-
-        function runSingleWalk(animate = false) {
-            let currentX = galtonWidth / 2;
-            let finalPosition = 0;
-            const pathData = [`M ${currentX},${pegSpacingY * 0.5}`];
-
-            for (let i = 0; i < steps; i++) {
-                const probability = parseFloat(probSlider.value);
-                const goRight = Math.random() < probability;
-                
-                // Update position: right is +1, left is -1
-                finalPosition += goRight ? 1 : -1;
-                currentX += goRight ? pegSpacingX / 2 : -pegSpacingX / 2;
-                
-                pathData.push(`L ${currentX},${pegSpacingY * (i + 1.5)}`);
-            }
-            // The binomial outcome is determined by the number of steps right vs left.
-            // After 4 steps, possible outcomes are:
-            // 4R, 0L -> final pos = +4
-            // 3R, 1L -> final pos = +2
-            // 2R, 2L -> final pos = 0
-            // 1R, 3L -> final pos = -2
-            // 0R, 4L -> final pos = -4
-            // Let k = number of steps right. Final Position = k - (steps - k) = 2k - steps
-            // Here, steps = 4, so Final Position = 2k - 4.
-            const binomPosition = 2 * (finalPosition + steps) / 2 - steps; // Convert from walk to binom key
-            frequencies[binomPosition]++;
-            totalRuns++;
-
-            if (animate) {
-                drawPath(pathData);
-            }
-            updateHistogram();
-        }
-
-        function updateHistogram() {
-            histoSvg.innerHTML = '';
-            const outcomes = Object.keys(frequencies).map(Number);
-            const maxFreq = Math.max(...Object.values(frequencies));
-            const barWidth = histoWidth / (outcomes.length * 1.5);
-            const padding = 20;
-            const chartHeight = histoHeight - padding * 2;
-
-            outcomes.forEach((outcome, i) => {
-                const freq = frequencies[outcome];
-                const barHeight = (maxFreq > 0) ? (freq / maxFreq) * chartHeight : 0;
-                const x = (i * (barWidth * 1.5)) + (barWidth / 2) + padding;
-                const y = histoHeight - barHeight - padding;
-                
-                // Draw bar
-                createRect(histoSvg, x, y, barWidth, barHeight, '#007bff');
-                // Draw label
-                createText(histoSvg, x + barWidth / 2, histoHeight - 5, outcome, 'middle');
-                // Draw frequency count
-                const countTextY = y > 20 ? y - 5 : 15;
-                createText(histoSvg, x + barWidth / 2, countTextY, freq, 'middle', '#333');
-            });
-        }
+        let isAnimating = false;
+        let distributionResults = Array(NUM_POSITIONS).fill(0);
+        let totalWalks = 0;
         
-        function resetSimulation() {
-            totalRuns = 0;
-            frequencies = { '-4': 0, '-2': 0, '0': 0, '2': 0, '4': 0 };
-            drawGaltonBoard();
-            updateHistogram();
-        }
-
-        // --- SVG Helper Functions ---
-        function createCircle(svg, cx, cy, r, fill) {
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", cx);
-            circle.setAttribute("cy", cy);
-            circle.setAttribute("r", r);
-            circle.setAttribute("fill", fill);
-            svg.appendChild(circle);
-        }
-
-        function createRect(svg, x, y, width, height, fill) {
-            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", x);
-            rect.setAttribute("y", y);
-            rect.setAttribute("width", width);
-            rect.setAttribute("height", height);
-            rect.setAttribute("fill", fill);
-            svg.appendChild(rect);
-        }
-
-        function createText(svg, x, y, content, anchor = 'start', fill = '#000') {
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("x", x);
-            text.setAttribute("y", y);
-            text.setAttribute("text-anchor", anchor);
-            text.setAttribute("fill", fill);
-            text.textContent = content;
-            svg.appendChild(text);
-        }
-        
-        function drawPath(pathData) {
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", pathData.join(' '));
-            path.setAttribute("stroke", "#dc3545");
-            path.setAttribute("stroke-width", 2);
-            path.setAttribute("fill", "none");
-            galtonSvg.appendChild(path);
-
-            // Ball that "falls"
-            const ball = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            ball.setAttribute("r", 6);
-            ball.setAttribute("fill", "crimson");
-            galtonSvg.appendChild(ball);
-
-            // Animate the ball along the path
-            const animateMotion = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
-            animateMotion.setAttribute("path", pathData.join(' '));
-            animateMotion.setAttribute("dur", "1.5s");
-            animateMotion.setAttribute("fill", "freeze");
-            ball.appendChild(animateMotion);
+        // --- INITIALIZATION ---
+        function initialize() {
+            numberLine.innerHTML = '<div class="walker" id="walker"></div>'; 
+            for (let i = 0; i < NUM_POSITIONS; i++) {
+                const posElement = document.createElement('div');
+                posElement.className = 'position';
+                posElement.dataset.pos = i;
+                posElement.textContent = i;
+                numberLine.appendChild(posElement);
+            }
             
-            // Remove the path and ball after animation to keep the board clean
-            setTimeout(() => {
-                if (galtonSvg.contains(path)) galtonSvg.removeChild(path);
-                if (galtonSvg.contains(ball)) galtonSvg.removeChild(ball);
-            }, 1500);
+            barChart.innerHTML = '';
+            for (let i = 0; i < NUM_POSITIONS; i++) {
+                const barContainer = document.createElement('div');
+                barContainer.style.cssText = 'flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end;';
+                barContainer.innerHTML = `
+                    <div class="bar" style="height: 0px; width: 100%;">
+                        <div class="bar-value">0</div>
+                    </div>
+                    <div class="bar-label">${i}</div>
+                `;
+                barChart.appendChild(barContainer);
+            }
+            prepareForNewWalk();
         }
 
-        // Initial setup
-        drawGaltonBoard();
-        updateHistogram();
+        // --- EVENT LISTENERS ---
+        probSlider.addEventListener('input', function() {
+            document.getElementById('probValue').textContent = this.value;
+            document.getElementById('probValueLeft').textContent = 100 - this.value;
+            resetAll(); 
+        });
 
+        numStepsSelect.addEventListener('change', resetAll);
+
+        // --- CORE LOGIC ---
+        async function runSingleWalk() {
+            if (isAnimating) return;
+            isAnimating = true;
+            toggleControls(false);
+
+            prepareForNewWalk();
+            
+            const probability = probSlider.value / 100;
+            const numSteps = parseInt(numStepsSelect.value);
+            let position = START_POS;
+            
+            document.getElementById('stepIndicator').textContent = 'Starting walk...';
+            await sleep(1000);
+
+            for (let i = 0; i < numSteps; i++) {
+                const goRight = Math.random() < probability;
+                const oldPosition = position;
+                
+                if (goRight && position < NUM_POSITIONS - 1) {
+                    position++;
+                } else if (!goRight && position > 0) {
+                    position--;
+                }
+                
+                document.getElementById('stepIndicator').textContent = `Step ${i + 1}: Moved ${position > oldPosition ? 'Right' : 'Left'}`;
+                updateWalkerPosition(position);
+                await sleep(1200);
+            }
+            
+            document.getElementById('stepIndicator').textContent = 'Walk complete!';
+            await animateDropToDistribution(position);
+
+            totalWalks++;
+            distributionResults[position]++;
+            updateDistributionDisplay();
+            
+            isAnimating = false;
+            toggleControls(true);
+        }
+
+        function run100Walks() {
+            if (isAnimating) return;
+            const probability = probSlider.value / 100;
+            const numSteps = parseInt(numStepsSelect.value);
+            
+            for (let walk = 0; walk < 100; walk++) {
+                let position = START_POS;
+                for (let step = 0; step < numSteps; step++) {
+                    const goRight = Math.random() < probability;
+                    if (goRight && position < NUM_POSITIONS - 1) position++;
+                    else if (!goRight && position > 0) position--;
+                }
+                distributionResults[position]++;
+            }
+            totalWalks += 100;
+            updateDistributionDisplay();
+        }
+        
+        function resetAll() {
+            if (isAnimating) return;
+            distributionResults = Array(NUM_POSITIONS).fill(0);
+            totalWalks = 0;
+            updateDistributionDisplay();
+            prepareForNewWalk();
+            document.getElementById('stepIndicator').textContent = 'Click "Run Single Walk" to start';
+        }
+
+        // --- UI & ANIMATION ---
+        function prepareForNewWalk() {
+            updateWalkerPosition(START_POS);
+            document.querySelectorAll('.position').forEach(p => p.classList.remove('visited'));
+            document.querySelector(`.position[data-pos='${START_POS}']`).classList.add('visited');
+        }
+
+        function updateWalkerPosition(position) {
+            const positions = document.querySelectorAll('.position');
+            const walkerEl = document.getElementById('walker');
+            
+            positions.forEach(p => p.classList.remove('current'));
+            positions[position].classList.add('current', 'visited');
+            
+            const percentage = (position / (NUM_POSITIONS - 1)) * 100;
+            walkerEl.style.left = `calc(${percentage}% - 15px)`;
+        }
+
+        function updateDistributionDisplay() {
+            const maxCount = Math.max(...distributionResults, 1);
+            const bars = document.querySelectorAll('.bar');
+            
+            distributionResults.forEach((count, index) => {
+                const height = (count / maxCount) * 180;
+                bars[index].style.height = `${height}px`;
+                bars[index].querySelector('.bar-value').textContent = count;
+            });
+            document.getElementById('totalWalksCount').textContent = totalWalks;
+        }
+        
+        async function animateDropToDistribution(finalPosition) {
+            const walkerEl = document.getElementById('walker');
+            const targetBarContainer = barChart.children[finalPosition];
+
+            const walkerRect = walkerEl.getBoundingClientRect();
+            const barRect = targetBarContainer.getBoundingClientRect();
+            
+            const clone = walkerEl.cloneNode(true);
+            clone.className = 'walker-clone';
+            document.body.appendChild(clone);
+            
+            clone.style.left = `${walkerRect.left}px`;
+            clone.style.top = `${walkerRect.top}px`;
+
+            await sleep(50);
+            clone.style.left = `${barRect.left + (barRect.width / 2) - 15}px`;
+            clone.style.top = `${barRect.bottom - 15}px`;
+            clone.style.opacity = '0';
+
+            await sleep(1000);
+            clone.remove();
+        }
+        
+        function toggleControls(enable) {
+            singleWalkBtn.disabled = !enable;
+            multiWalkBtn.disabled = !enable;
+            probSlider.disabled = !enable;
+            numStepsSelect.disabled = !enable;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // --- Run on page load ---
+        initialize();
     </script>
-
 </body>
 </html>
