@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Unitary Matching Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A1A1A;
+            color: #E0E0E0;
+        }
+        .nvidia-green { color: #76B900; }
+        .gate-btn {
+            background-color: #2A2A2A;
+            border: 1px solid #444;
+            color: #E0E0E0;
+            transition: all 0.2s ease-in-out;
+        }
+        .gate-btn:hover {
+            background-color: #76B900;
+            color: #1A1A1A;
+            border-color: #76B900;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(118, 185, 0, 0.3);
+        }
+        .info-box {
+            background-color: #2A2A2A;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #444;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .matrix-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            justify-items: center;
+            align-items: center;
+            border-left: 2px solid #666;
+            border-right: 2px solid #666;
+            border-radius: 10px;
+            padding: 1rem 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Quantum Unitary Matching</h1>
+            <p class="text-lg text-gray-400 mt-2">Construct a circuit to match the target unitary transformation.</p>
+        </header>
+
+        <div class="space-y-10">
+            <div>
+                <h2 class="text-2xl font-semibold text-center mb-4">Action on |0⟩ State</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col items-center space-y-2">
+                        <h3 class="text-xl font-medium text-nvidia-green">Target U|0⟩</h3>
+                        <div id="sphere-target-0" class="w-full h-80 rounded-lg overflow-hidden info-box p-0"></div>
+                    </div>
+                    <div class="flex flex-col items-center space-y-2">
+                        <h3 class="text-xl font-medium">Your U|0⟩</h3>
+                        <div id="sphere-user-0" class="w-full h-80 rounded-lg overflow-hidden info-box p-0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-semibold text-center mb-4">Action on |1⟩ State</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex flex-col items-center space-y-2">
+                        <h3 class="text-xl font-medium text-nvidia-green">Target U|1⟩</h3>
+                        <div id="sphere-target-1" class="w-full h-80 rounded-lg overflow-hidden info-box p-0"></div>
+                    </div>
+                    <div class="flex flex-col items-center space-y-2">
+                        <h3 class="text-xl font-medium">Your U|1⟩</h3>
+                        <div id="sphere-user-1" class="w-full h-80 rounded-lg overflow-hidden info-box p-0"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="mt-12">
+            <div class="info-box max-w-2xl mx-auto text-center mb-8">
+                <h3 class="text-xl font-semibold mb-2">Unitary Infidelity</h3>
+                <p class="text-3xl font-bold font-mono nvidia-green" id="deviation-display">0.00000</p>
+                <div class="text-gray-400 mt-2 text-sm font-mono">
+                     1 - |Tr(U<sub>target</sub>&dagger; &middot; U<sub>circuit</sub>) / 2<sup>N</sup>|&sup2;
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-center mb-2 text-nvidia-green">Target Unitary (U<sub>target</sub>)</h3>
+                    <div id="target-matrix-display" class="info-box font-mono text-lg p-4"></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-center mb-2">Your Unitary (U<sub>circuit</sub>)</h3>
+                    <div id="user-matrix-display" class="info-box font-mono text-lg p-4"></div>
+                </div>
+            </div>
+
+            <div class="info-box max-w-4xl mx-auto">
+                <h3 class="text-xl font-semibold text-center mb-4">Apply Quantum Gates</h3>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                    <button class="gate-btn p-4 rounded-lg font-bold text-xl" data-gate="X">X</button>
+                    <button class="gate-btn p-4 rounded-lg font-bold text-xl" data-gate="Y">Y</button>
+                    <button class="gate-btn p-4 rounded-lg font-bold text-xl" data-gate="Z">Z</button>
+                    <button class="gate-btn p-4 rounded-lg font-bold text-xl" data-gate="H">H</button>
+                    <button class="gate-btn p-4 rounded-lg font-bold text-xl" data-gate="S">S</button>
+                    <button class="gate-btn p-4 rounded-lg font-bold text-xl" data-gate="T">T</button>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                    <button id="reset-circuit-btn" class="gate-btn w-full p-3 rounded-lg font-semibold">Reset Circuit</button>
+                </div>
+            </div>
+
+            <div class="info-box max-w-4xl mx-auto mt-6">
+                <h3 class="text-xl font-semibold text-center mb-2">Applied Gate Sequence</h3>
+                <div id="gate-sequence-display" class="font-mono text-center text-lg p-3 bg-gray-900 rounded-md break-words min-h-[3.5rem] flex items-center justify-center"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Complex Number & Matrix Helpers ---
+        const complex = (re = 0, im = 0) => ({ re, im });
+        const cadd = (a, b) => complex(a.re + b.re, a.im + b.im);
+        const cmul = (a, b) => complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+        const cconj = (a) => complex(a.re, -a.im);
+        const cabs_sq = (a) => a.re * a.re + a.im * a.im;
+        const cabs = (a) => Math.sqrt(cabs_sq(a));
+
+        const matrixMultiply = (A, B) => {
+            const C = [[complex(), complex()], [complex(), complex()]];
+            C[0][0] = cadd(cmul(A[0][0], B[0][0]), cmul(A[0][1], B[1][0]));
+            C[0][1] = cadd(cmul(A[0][0], B[0][1]), cmul(A[0][1], B[1][1]));
+            C[1][0] = cadd(cmul(A[1][0], B[0][0]), cmul(A[1][1], B[1][0]));
+            C[1][1] = cadd(cmul(A[1][0], B[0][1]), cmul(A[1][1], B[1][1]));
+            return C;
+        };
+        const matrixAdjoint = (A) => [[cconj(A[0][0]), cconj(A[1][0])], [cconj(A[0][1]), cconj(A[1][1])]];
+        const matrixTrace = (A) => cadd(A[0][0], A[1][1]);
+
+        // --- Quantum State & Gates ---
+        let targetUnitary, userUnitary, gateSequence;
+        const state0 = { alpha: complex(1), beta: complex(0) };
+        const state1 = { alpha: complex(0), beta: complex(1) };
+        
+        const GATES = {
+            X: [[complex(0), complex(1)], [complex(1), complex(0)]],
+            Y: [[complex(0), complex(0, -1)], [complex(0, 1), complex(0)]],
+            Z: [[complex(1), complex(0)], [complex(0), complex(-1)]],
+            H: [[complex(1/Math.sqrt(2)), complex(1/Math.sqrt(2))], [complex(1/Math.sqrt(2)), complex(-1/Math.sqrt(2))]],
+            S: [[complex(1), complex(0)], [complex(0), complex(0, 1)]],
+            T: [[complex(1), complex(0)], [complex(0), complex(Math.cos(Math.PI/4), Math.sin(Math.PI/4))]],
+        };
+
+        function applyUnitaryToState(unitaryMatrix, state) {
+            const { alpha: alpha_in, beta: beta_in } = state;
+            const alpha_out = cadd(cmul(unitaryMatrix[0][0], alpha_in), cmul(unitaryMatrix[0][1], beta_in));
+            const beta_out = cadd(cmul(unitaryMatrix[1][0], alpha_in), cmul(unitaryMatrix[1][1], beta_in));
+            return { alpha: alpha_out, beta: beta_out };
+        }
+        
+        function stateToBloch(state) {
+            const alpha_mag_sq = cabs_sq(state.alpha);
+            const clamped_alpha_mag = Math.max(0, Math.min(1, Math.sqrt(alpha_mag_sq)));
+            const theta = 2 * Math.acos(clamped_alpha_mag);
+            let phi_beta = Math.atan2(state.beta.im, state.beta.re);
+            let phi_alpha = Math.atan2(state.alpha.im, state.alpha.re);
+            const phi = phi_beta - phi_alpha;
+            return { theta, phi };
+        }
+
+        // --- Core Logic & Display ---
+        function getFixedTargetUnitary() {
+            return [
+                [complex(0.567, -0.234), complex(-0.345, 0.678)],
+                [complex(0.789, 0.123),  complex(0.456, -0.567)]
+            ];
+        }
+
+        function calculateUnitaryDeviation() {
+            const want_unitary = targetUnitary;
+            const got_unitary = userUnitary;
+            const num_of_qubits = 1; // For this 2x2 matrix simulation
+
+            const product = matrixMultiply(matrixAdjoint(want_unitary), got_unitary);
+            const trace = matrixTrace(product);
+            
+            // Per the request: 1 - |Tr(U_target† * U_circuit) / 2**N|**2
+            const denominator = 2**num_of_qubits;
+            const trace_div = complex(trace.re / denominator, trace.im / denominator);
+            const fidelity = cabs_sq(trace_div);
+            const infidelity = 1.0 - fidelity;
+
+            const displayEl = document.getElementById('deviation-display');
+            displayEl.textContent = infidelity.toFixed(5);
+            displayEl.classList.toggle('text-green-300', infidelity < 0.0001);
+            displayEl.classList.toggle('nvidia-green', infidelity >= 0.0001);
+        }
+
+        function formatComplexForMatrix(c) {
+            const re = c.re.toFixed(3);
+            const im = c.im.toFixed(3);
+            if (Math.abs(c.im) < 1e-4) return `${re}`;
+            if (Math.abs(c.re) < 1e-4) return `${im}j`;
+            return `${re}${c.im >= 0 ? '+' : ''}${im}j`;
+        }
+
+        function displayMatrix(elementId, matrix) {
+            const container = document.getElementById(elementId);
+            container.classList.add('matrix-container');
+            const [ [c00, c01], [c10, c11] ] = matrix;
+            container.innerHTML = `
+                <span>${formatComplexForMatrix(c00)}</span><span>${formatComplexForMatrix(c01)}</span>
+                <span>${formatComplexForMatrix(c10)}</span><span>${formatComplexForMatrix(c11)}</span>`;
+        }
+        
+        function updateGateSequenceDisplay() {
+            const displayEl = document.getElementById('gate-sequence-display');
+            displayEl.innerHTML = gateSequence.length === 0 
+                ? '<span class="text-gray-500">Circuit is empty.</span>' 
+                : gateSequence.join(' ');
+        }
+        
+        // --- Three.js Visualization ---
+        function createBlochSphere(container) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 1.5, 3.5);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.minDistance = 2;
+            controls.maxDistance = 10;
+
+            const group = new THREE.Group();
+            scene.add(group);
+            group.rotation.x = -Math.PI / 2;
+
+            const sphereGeom = new THREE.SphereGeometry(1, 32, 32);
+            const sphereMat = new THREE.MeshBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.15, wireframe: true });
+            group.add(new THREE.Mesh(sphereGeom, sphereMat));
+
+            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0x76B900, 0.15, 0.08);
+            group.add(vectorGeom);
+            
+            const previewVector = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0xFFFFFF, 0.15, 0.08);
+            previewVector.visible = false;
+            group.add(previewVector);
+
+            const createLabel = (text, position, fontSize = 40) => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                context.font = `Bold ${fontSize}px Inter`;
+                canvas.width = context.measureText(text).width + 20;
+                canvas.height = fontSize * 1.5;
+                context.font = `Bold ${fontSize}px Inter`;
+                context.fillStyle = "rgba(224, 224, 224, 0.95)";
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.scale.set(canvas.width / 120, canvas.height / 120, 1.0);
+                sprite.position.copy(position);
+                return sprite;
+            };
+
+            // Z-axis poles
+            group.add(createLabel('|0⟩', new THREE.Vector3(0, 0, 1.2)));
+            group.add(createLabel('|1⟩', new THREE.Vector3(0, 0, -1.3)));
+            
+            // X and Y axis poles
+            const axisFontSize = 35;
+            group.add(createLabel('|+⟩', new THREE.Vector3(1.2, 0, 0), axisFontSize));
+            group.add(createLabel('|-⟩', new THREE.Vector3(-1.2, 0, 0), axisFontSize));
+            group.add(createLabel('|+i⟩', new THREE.Vector3(0, 1.25, 0), axisFontSize));
+            group.add(createLabel('|-i⟩', new THREE.Vector3(0, -1.25, 0), axisFontSize));
+
+
+            const onWindowResize = () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            };
+            window.addEventListener('resize', onWindowResize);
+
+            return { scene, camera, renderer, controls, vectorGeom, previewVector, onWindowResize };
+        }
+
+        function updateVectorPosition(vector, state) {
+            const { theta, phi } = stateToBloch(state);
+            const x = Math.sin(theta) * Math.cos(phi);
+            const y = Math.sin(theta) * Math.sin(phi);
+            const z = Math.cos(theta);
+            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+        }
+
+        // --- Main Setup & Update Functions ---
+        const viz = {
+            target0: createBlochSphere(document.getElementById('sphere-target-0')),
+            target1: createBlochSphere(document.getElementById('sphere-target-1')),
+            user0: createBlochSphere(document.getElementById('sphere-user-0')),
+            user1: createBlochSphere(document.getElementById('sphere-user-1')),
+        };
+
+        function updateAllVisuals() {
+            updateVectorPosition(viz.target0.vectorGeom, applyUnitaryToState(targetUnitary, state0));
+            updateVectorPosition(viz.target1.vectorGeom, applyUnitaryToState(targetUnitary, state1));
+            updateVectorPosition(viz.user0.vectorGeom, applyUnitaryToState(userUnitary, state0));
+            updateVectorPosition(viz.user1.vectorGeom, applyUnitaryToState(userUnitary, state1));
+            
+            displayMatrix('target-matrix-display', targetUnitary);
+            displayMatrix('user-matrix-display', userUnitary);
+            calculateUnitaryDeviation();
+            updateGateSequenceDisplay();
+        }
+        
+        function resetCircuit() {
+            userUnitary = [[complex(1), complex(0)], [complex(0), complex(1)]];
+            gateSequence = [];
+            updateAllVisuals();
+        }
+
+        function initializeChallenge() {
+            targetUnitary = getFixedTargetUnitary();
+            resetCircuit();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            Object.values(viz).forEach(v => {
+                v.controls.update();
+                v.renderer.render(v.scene, v.camera);
+            });
+        }
+
+        // --- Event Listeners ---
+        document.querySelectorAll('.gate-btn[data-gate]').forEach(button => {
+            const gateName = button.dataset.gate;
+            const gateMatrix = GATES[gateName];
+
+            button.addEventListener('click', () => {
+                userUnitary = matrixMultiply(gateMatrix, userUnitary);
+                gateSequence.push(gateName);
+                updateAllVisuals();
+            });
+            
+            button.addEventListener('mouseenter', () => {
+                const previewUnitary = matrixMultiply(gateMatrix, userUnitary);
+                const previewState0 = applyUnitaryToState(previewUnitary, state0);
+                const previewState1 = applyUnitaryToState(previewUnitary, state1);
+
+                updateVectorPosition(viz.user0.previewVector, previewState0);
+                updateVectorPosition(viz.user1.previewVector, previewState1);
+
+                viz.user0.previewVector.visible = true;
+                viz.user1.previewVector.visible = true;
+            });
+
+            button.addEventListener('mouseleave', () => {
+                viz.user0.previewVector.visible = false;
+                viz.user1.previewVector.visible = false;
+            });
+        });
+        
+        document.getElementById('reset-circuit-btn').addEventListener('click', resetCircuit);
+        
+        // --- Initial Setup ---
+        initializeChallenge();
+        animate();
+        
+        // Defer the first render call to ensure all DOM elements are ready
+        setTimeout(() => {
+            Object.values(viz).forEach(v => v.onWindowResize());
+        }, 100);
+
+    </script>
+</body>
+</html>
