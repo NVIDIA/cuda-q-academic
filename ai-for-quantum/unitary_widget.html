@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unitary Widget</title>
+    <title>Interactive Unitary Widget</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -48,78 +48,112 @@
             border-radius: 10px;
             padding: 0.5rem;
         }
+        .legend-dot {
+            height: 0.8rem;
+            width: 0.8rem;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body class="antialiased">
 
     <div class="container mx-auto p-4 max-w-7xl">
-        <header class="text-center mb-3">
+        <header class="text-center mb-4">
             <h1 class="text-2xl font-bold nvidia-green">Quantum Unitary Matching</h1>
-            <p class="text-gray-400 mt-1 text-sm">Construct a circuit to match the target unitary.</p>
+            <p class="text-gray-400 mt-1 text-sm max-w-2xl mx-auto">
+                Your goal is to match the target unitary transformation shown on the Bloch spheres.
+            </p>
         </header>
 
-        <div class="space-y-3 mb-4">
-            <div>
-                <h2 class="text-md font-semibold text-center mb-1">Action on |0⟩ State</h2>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="flex flex-col items-center">
-                        <h3 class="text-sm font-medium text-nvidia-green">Target U|0⟩</h3>
-                        <div id="sphere-target-0" class="w-full h-52 rounded-lg overflow-hidden info-box p-0"></div>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <h3 class="text-sm font-medium">Your U|0⟩</h3>
-                        <div id="sphere-user-0" class="w-full h-52 rounded-lg overflow-hidden info-box p-0"></div>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h2 class="text-md font-semibold text-center mb-1">Action on |1⟩ State</h2>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="flex flex-col items-center">
-                        <h3 class="text-sm font-medium text-nvidia-green">Target U|1⟩</h3>
-                        <div id="sphere-target-1" class="w-full h-52 rounded-lg overflow-hidden info-box p-0"></div>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <h3 class="text-sm font-medium">Your U|1⟩</h3>
-                        <div id="sphere-user-1" class="w-full h-52 rounded-lg overflow-hidden info-box p-0"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-            <div class="space-y-3">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="space-y-4">
                 <div class="info-box p-2 text-center">
                     <h3 class="text-md font-semibold mb-1">Unitary Infidelity</h3>
                     <p class="text-2xl font-bold font-mono nvidia-green" id="deviation-display">0.00000</p>
                 </div>
                 <div class="info-box p-2">
-                     <h3 class="text-md font-semibold text-center mb-1 text-nvidia-green">Target Unitary</h3>
+                     <h3 class="text-md font-semibold text-center mb-1 nvidia-green">Target Unitary</h3>
                     <div id="target-matrix-display" class="font-mono text-sm"></div>
                 </div>
                  <div class="info-box p-2">
-                    <h3 class="text-md font-semibold text-center mb-1">Your Unitary</h3>
+                    <h3 class="text-md font-semibold text-center mb-1 text-white">Your Unitary</h3>
                     <div id="user-matrix-display" class="font-mono text-sm"></div>
                 </div>
             </div>
 
-            <div class="space-y-3">
+            <div class="space-y-4">
                  <div class="info-box p-3">
                     <h3 class="text-md font-semibold text-center mb-2">Apply Quantum Gates</h3>
                     <div class="grid grid-cols-3 gap-2">
-                        <button class="gate-btn p-2 rounded-md font-bold text-lg" data-gate="X">X</button>
-                        <button class="gate-btn p-2 rounded-md font-bold text-lg" data-gate="Y">Y</button>
-                        <button class="gate-btn p-2 rounded-md font-bold text-lg" data-gate="Z">Z</button>
-                        <button class="gate-btn p-2 rounded-md font-bold text-lg" data-gate="H">H</button>
-                        <button class="gate-btn p-2 rounded-md font-bold text-lg" data-gate="S">S</button>
-                        <button class="gate-btn p-2 rounded-md font-bold text-lg" data-gate="T">T</button>
+                        <div class="relative group">
+                            <button class="gate-btn w-full p-2 rounded-md font-bold text-lg" data-gate="X">X</button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 px-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">Rotates 180° about the X-axis</span>
+                        </div>
+                        <div class="relative group">
+                            <button class="gate-btn w-full p-2 rounded-md font-bold text-lg" data-gate="Y">Y</button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 px-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">Rotates 180° about the Y-axis</span>
+                        </div>
+                        <div class="relative group">
+                            <button class="gate-btn w-full p-2 rounded-md font-bold text-lg" data-gate="Z">Z</button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 px-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">Rotates 180° about the Z-axis</span>
+                        </div>
+                        <div class="relative group">
+                            <button class="gate-btn w-full p-2 rounded-md font-bold text-lg" data-gate="H">H</button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 px-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">Hadamard: Rotates around a tilted axis</span>
+                        </div>
+                        <div class="relative group">
+                            <button class="gate-btn w-full p-2 rounded-md font-bold text-lg" data-gate="S">S</button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 px-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">Phase Gate: Rotates 90° about Z-axis</span>
+                        </div>
+                        <div class="relative group">
+                            <button class="gate-btn w-full p-2 rounded-md font-bold text-lg" data-gate="T">T</button>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 px-2 bg-gray-800 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">T Gate: Rotates 45° about Z-axis</span>
+                        </div>
                     </div>
                     <button id="reset-circuit-btn" class="gate-btn w-full p-2 mt-2 rounded-md font-semibold">Reset Circuit</button>
+                    <button id="undo-gate-btn" class="gate-btn w-full p-2 mt-2 rounded-md font-semibold">Undo Last Gate</button>
                 </div>
                 <div class="info-box p-2">
-                    <h3 class="text-md font-semibold text-center mb-1">Applied Gate Sequence</h3>
+                    <h3 class="text-md font-semibold text-center mb-1 text-white">Your Circuit's Gate Sequence</h3>
                     <div id="gate-sequence-display" class="font-mono text-center text-sm bg-gray-900 rounded break-words min-h-[2.5rem] flex items-center justify-center p-1"></div>
                 </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-center mb-1">Action on |0⟩ State</h2>
+                    <div id="sphere-0" class="w-full h-72 rounded-lg overflow-hidden info-box p-0"></div>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-center mb-1">Action on |1⟩ State</h2>
+                    <div id="sphere-1" class="w-full h-72 rounded-lg overflow-hidden info-box p-0"></div>
+                </div>
+                <div class="flex justify-center items-center space-x-4 text-sm pt-2">
+                    <div class="flex items-center"><span class="legend-dot" style="background-color: #76B900;"></span>Target</div>
+                    <div class="flex items-center"><span class="legend-dot" style="background-color: #FFFFFF;"></span>Your Circuit</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box p-4 mt-6">
+            <h3 class="text-lg font-bold text-center mb-3">Instructions & Details</h3>
+            <div class="text-sm text-gray-300 space-y-2">
+                <p>
+                    Your goal is to match the target unitary transformation. Apply quantum gates to create a circuit that gets as close as possible to the target's action on the |0⟩ and |1⟩ states.
+                </p>
+                <p>
+                    The <b>Bloch spheres</b> show the result: the <b>green vector</b> is the target and the <b>white vector</b> is your circuit's state. Drag the spheres to view them from different angles.
+                </p>
+                <p>
+                    The <b>Unitary Infidelity</b> score (lower is better, 0.0 is a perfect match) is calculated using the formula:
+                </p>
+                <code class="bg-gray-900 p-2 rounded-md block mt-2 text-center nvidia-green font-mono">
+                    1 - |Tr(U<sub>target</sub>&dagger; &middot; U<sub>circuit</sub>) / 2|<sup>2</sup>
+                </code>
             </div>
         </div>
     </div>
@@ -220,8 +254,14 @@
                 : gateSequence.join(' ');
         }
         
-        // --- Three.js Visualization ---
-        // MODIFIED: Restored to creating a single vector per sphere
+        function recalculateUserUnitary() {
+            userUnitary = [[complex(1), complex(0)], [complex(0), complex(1)]];
+            for (const gateName of gateSequence) {
+                const gateMatrix = GATES[gateName];
+                userUnitary = matrixMultiply(gateMatrix, userUnitary);
+            }
+        }
+        
         function createBlochSphere(container) {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -245,8 +285,11 @@
             const sphereMat = new THREE.MeshBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.15, wireframe: true });
             group.add(new THREE.Mesh(sphereGeom, sphereMat));
 
-            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0x76B900, 0.15, 0.08);
-            group.add(vectorGeom);
+            const targetVector = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0x76B900, 0.15, 0.08);
+            group.add(targetVector);
+
+            const userVector = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0xFFFFFF, 0.15, 0.08);
+            group.add(userVector);
 
             const createLabel = (text, position, fontSize = 32) => {
                 const canvas = document.createElement('canvas');
@@ -282,7 +325,7 @@
             };
             window.addEventListener('resize', onWindowResize);
 
-            return { scene, camera, renderer, controls, vectorGeom, onWindowResize };
+            return { scene, camera, renderer, controls, targetVector, userVector, onWindowResize };
         }
 
         function updateVectorPosition(vector, state) {
@@ -293,26 +336,22 @@
             vector.setDirection(new THREE.Vector3(x, y, z).normalize());
         }
 
-        // --- Main Setup & Update Functions ---
-        // MODIFIED: Initialize four spheres
         const viz = {
-            target0: createBlochSphere(document.getElementById('sphere-target-0')),
-            user0: createBlochSphere(document.getElementById('sphere-user-0')),
-            target1: createBlochSphere(document.getElementById('sphere-target-1')),
-            user1: createBlochSphere(document.getElementById('sphere-user-1')),
+            sphere0: createBlochSphere(document.getElementById('sphere-0')),
+            sphere1: createBlochSphere(document.getElementById('sphere-1')),
         };
 
-        // MODIFIED: Update logic for four separate spheres
         function updateAllVisuals() {
             const targetState0 = applyUnitaryToState(targetUnitary, state0);
             const targetState1 = applyUnitaryToState(targetUnitary, state1);
             const userState0 = applyUnitaryToState(userUnitary, state0);
             const userState1 = applyUnitaryToState(userUnitary, state1);
 
-            updateVectorPosition(viz.target0.vectorGeom, targetState0);
-            updateVectorPosition(viz.target1.vectorGeom, targetState1);
-            updateVectorPosition(viz.user0.vectorGeom, userState0);
-            updateVectorPosition(viz.user1.vectorGeom, userState1);
+            updateVectorPosition(viz.sphere0.targetVector, targetState0);
+            updateVectorPosition(viz.sphere0.userVector, userState0);
+            
+            updateVectorPosition(viz.sphere1.targetVector, targetState1);
+            updateVectorPosition(viz.sphere1.userVector, userState1);
             
             displayMatrix('target-matrix-display', targetUnitary);
             displayMatrix('user-matrix-display', userUnitary);
@@ -321,8 +360,8 @@
         }
         
         function resetCircuit() {
-            userUnitary = [[complex(1), complex(0)], [complex(0), complex(1)]];
             gateSequence = [];
+            recalculateUserUnitary();
             updateAllVisuals();
         }
 
@@ -339,21 +378,24 @@
             });
         }
 
-        // --- Event Listeners ---
         document.querySelectorAll('.gate-btn[data-gate]').forEach(button => {
-            const gateName = button.dataset.gate;
-            const gateMatrix = GATES[gateName];
-
             button.addEventListener('click', () => {
-                userUnitary = matrixMultiply(gateMatrix, userUnitary);
-                gateSequence.push(gateName);
+                gateSequence.push(button.dataset.gate);
+                recalculateUserUnitary();
                 updateAllVisuals();
             });
         });
         
         document.getElementById('reset-circuit-btn').addEventListener('click', resetCircuit);
+
+        document.getElementById('undo-gate-btn').addEventListener('click', () => {
+            if (gateSequence.length > 0) {
+                gateSequence.pop();
+                recalculateUserUnitary();
+                updateAllVisuals();
+            }
+        });
         
-        // --- Initial Setup ---
         initializeChallenge();
         animate();
         
