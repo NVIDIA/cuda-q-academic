@@ -70,7 +70,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <div class="space-y-4">
+            <div class="flex flex-col space-y-4">
                 <div class="info-box p-2 text-center">
                     <h3 class="text-md font-semibold mb-1">Unitary Infidelity</h3>
                     <p class="text-2xl font-bold font-mono nvidia-green" id="deviation-display">0.00000</p>
@@ -82,6 +82,13 @@
                  <div class="info-box p-2">
                     <h3 class="text-md font-semibold text-center mb-1 text-white">Your Unitary</h3>
                     <div id="user-matrix-display" class="font-mono text-sm"></div>
+                </div>
+                <div class="info-box p-3">
+                    <h3 class="text-md font-semibold text-center mb-2 text-yellow-400">Best Match So Far</h3>
+                    <div class="text-sm font-mono">
+                        <p>Infidelity: <span id="best-infidelity-display" class="font-bold text-yellow-400">N/A</span></p>
+                        <p class="mt-1 break-all">Sequence: <span id="best-sequence-display"></span></p>
+                    </div>
                 </div>
             </div>
 
@@ -179,6 +186,8 @@
 
         // --- Quantum State & Gates ---
         let targetUnitary, userUnitary, gateSequence;
+        let bestInfidelity, bestGateSequence; // NEW: Variables for best score tracking
+
         const state0 = { alpha: complex(1), beta: complex(0) };
         const state1 = { alpha: complex(0), beta: complex(1) };
         
@@ -216,6 +225,19 @@
             return [[complex(u[0][0].re/norm, u[0][0].im/norm), complex(u[0][1].re/norm, u[0][1].im/norm)], [complex(u[1][0].re/norm, u[1][0].im/norm), complex(u[1][1].re/norm, u[1][1].im/norm)]];
         }
 
+        // NEW: Function to update the Best Match display
+        function updateBestScoreDisplay() {
+            const infidelityEl = document.getElementById('best-infidelity-display');
+            const sequenceEl = document.getElementById('best-sequence-display');
+            if (bestInfidelity === Infinity) {
+                infidelityEl.textContent = 'N/A';
+                sequenceEl.innerHTML = '<span class="text-gray-500">None</span>';
+            } else {
+                infidelityEl.textContent = bestInfidelity.toFixed(5);
+                sequenceEl.innerHTML = bestGateSequence.length > 0 ? bestGateSequence.join(' ') : '<span class="text-gray-500">Identity</span>';
+            }
+        }
+
         function calculateUnitaryDeviation() {
             const product = matrixMultiply(matrixAdjoint(targetUnitary), userUnitary);
             const trace = matrixTrace(product);
@@ -226,6 +248,13 @@
             displayEl.textContent = infidelity.toFixed(5);
             displayEl.classList.toggle('text-green-300', infidelity < 0.0001);
             displayEl.classList.toggle('nvidia-green', infidelity >= 0.0001);
+
+            // NEW: Check if this is a new best score
+            if (infidelity < bestInfidelity) {
+                bestInfidelity = infidelity;
+                bestGateSequence = [...gateSequence]; // Make a copy!
+                updateBestScoreDisplay();
+            }
         }
 
         function formatComplexForMatrix(c) {
@@ -362,6 +391,9 @@
         function resetCircuit() {
             gateSequence = [];
             recalculateUserUnitary();
+            bestInfidelity = Infinity; // Reset best score
+            bestGateSequence = [];
+            updateBestScoreDisplay(); // Update display to show reset state
             updateAllVisuals();
         }
 
