@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Bloch Sphere Coin Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A1A1A;
+            color: #E0E0E0;
+        }
+        .nvidia-green { color: #76B900; }
+        .info-box {
+            background-color: #2A2A2A;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid #444;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        /* Custom slider styles */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            margin-top: -7px;
+            border: 2px solid #1A1A1A;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            border: 2px solid #1A1A1A;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Visualizing a Quantum Coin</h1>
+            <p class="text-lg text-gray-400 mt-2">
+                Use the sliders to define the state of a quantum coin, \(\ket{\psi_C} = \alpha\ket{0} + \beta\ket{1}\).
+                Adjusting <b>Theta (\(\theta\))</b> and <b>Phi (\(\phi\))</b>b> changes the state's position on the Bloch sphere and updates the
+                complex amplitudes (\(\alpha\) and \(\beta\)) and measurement probabilities in real-time.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            
+            <div class="lg:col-span-2 space-y-8">
+                <div class="info-box">
+                    <h2 class="text-2xl font-semibold text-center mb-6">State Parameters</h2>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="theta-slider" class="font-bold text-xl">Theta (\(\theta\))</label>
+                            <span id="theta-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
+                        </div>
+                        <input id="theta-slider" type="range" min="0" max="3.14159" step="0.01" value="0">
+                        <p class="text-sm text-gray-400 mt-2">Controls the angle from the North Pole (\(\ket{0}\)).</p>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="phi-slider" class="font-bold text-xl">Phi (\(\phi\))</label>
+                            <span id="phi-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
+                        </div>
+                        <input id="phi-slider" type="range" min="0" max="6.28318" step="0.01" value="0">
+                        <p class="text-sm text-gray-400 mt-2">Controls the angle around the equator (relative phase).</p>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                     <h2 class="text-2xl font-semibold text-center mb-4">State Information</h2>
+                     <div class="space-y-4 text-lg">
+                        <div class="flex justify-between items-center bg-gray-900 p-3 rounded">
+                            <span class="font-bold">\(\alpha\) (Alpha)</span>
+                            <span id="alpha-value" class="font-mono nvidia-green">1.000 + 0.000i</span>
+                        </div>
+                         <div class="flex justify-between items-center bg-gray-900 p-3 rounded">
+                            <span class="font-bold">\(\beta\) (Beta)</span>
+                            <span id="beta-value" class="font-mono nvidia-green">0.000 + 0.000i</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-900 p-3 rounded">
+                            <span class="font-bold">P(\(\ket{0}\)) = \(|\alpha|^2\)</span>
+                            <span id="prob0-value" class="font-mono nvidia-green">1.000 (100%)</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-900 p-3 rounded">
+                            <span class="font-bold">P(\(\ket{1}\)) = \(|\beta|^2\)</span>
+                            <span id="prob1-value" class="font-mono nvidia-green">0.000 (0%)</span>
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                 <div class="flex flex-col items-center space-y-2">
+                    <h2 class="text-2xl font-semibold">Bloch Sphere</h2>
+                    <div id="bloch-sphere-container" class="w-full h-[36rem] rounded-lg overflow-hidden info-box p-0"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Three.js Visualization Setup ---
+        function createBlochSphere(container) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3.5, 1.5, 0); // Default camera position
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.minDistance = 2.5;
+            controls.maxDistance = 8;
+
+            const group = new THREE.Group();
+            scene.add(group);
+            
+            group.rotation.x = -Math.PI / 2; // Align Bloch Z-axis with scene Y-axis
+
+            // Sphere
+            const sphereGeom = new THREE.SphereGeometry(1, 32, 32);
+            const sphereMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, transparent: true, opacity: 0.15, wireframe: true });
+            group.add(new THREE.Mesh(sphereGeom, sphereMat));
+
+            // State Vector
+            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
+            group.add(vectorGeom);
+            
+            // Axes
+            const createAxis = (dir, color) => new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.2, color, 0.05, 0.03);
+            group.add(createAxis(new THREE.Vector3(1,0,0), 0xCCCCCC)); // X
+            group.add(createAxis(new THREE.Vector3(0,1,0), 0xCCCCCC)); // Y
+            group.add(createAxis(new THREE.Vector3(0,0,1), 0xCCCCCC)); // Z
+
+            // Labels
+            const createLabel = (text, position) => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                context.font = `Bold 20px Inter`;
+                const textWidth = context.measureText(text).width;
+                canvas.width = textWidth + 20;
+                canvas.height = 20 * 1.5;
+                context.font = `Bold 20px Inter`;
+                context.fillStyle = "rgba(224, 224, 224, 0.95)";
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+                sprite.position.copy(position);
+                return sprite;
+            };
+
+            group.add(createLabel('|0⟩', new THREE.Vector3(0, 0, 1.35)));
+            group.add(createLabel('|1⟩', new THREE.Vector3(0, 0, -1.35)));
+            group.add(createLabel('|+⟩', new THREE.Vector3(1.3, 0, 0)));
+            group.add(createLabel('|-⟩', new THREE.Vector3(-1.3, 0, 0)));
+            group.add(createLabel('|i⟩', new THREE.Vector3(0, 1.3, 0)));
+            group.add(createLabel('|-i⟩', new THREE.Vector3(0, -1.3, 0)));
+
+            const onWindowResize = () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            };
+            window.addEventListener('resize', onWindowResize);
+
+            return { scene, camera, renderer, controls, vectorGeom, onWindowResize };
+        }
+
+        function updateVectorPosition(vector, theta, phi) {
+            const x = Math.sin(theta) * Math.cos(phi);
+            const y = Math.sin(theta) * Math.sin(phi);
+            const z = Math.cos(theta);
+            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+        }
+        
+        // --- Main Application Logic ---
+        const blochSphereViz = createBlochSphere(document.getElementById('bloch-sphere-container'));
+        
+        const sliderTheta = document.getElementById('theta-slider');
+        const sliderPhi = document.getElementById('phi-slider');
+        
+        const valueTheta = document.getElementById('theta-value');
+        const valuePhi = document.getElementById('phi-value');
+        
+        const valueAlpha = document.getElementById('alpha-value');
+        const valueBeta = document.getElementById('beta-value');
+        const valueProb0 = document.getElementById('prob0-value');
+        const valueProb1 = document.getElementById('prob1-value');
+
+        function formatComplex(c) {
+            const sign = c.im < 0 ? "-" : "+";
+            return `${c.re.toFixed(3)} ${sign} ${Math.abs(c.im).toFixed(3)}i`;
+        }
+        
+        function updateAll() {
+            const theta = parseFloat(sliderTheta.value);
+            const phi = parseFloat(sliderPhi.value);
+
+            // Update value displays for sliders
+            valueTheta.textContent = theta.toFixed(2);
+            valuePhi.textContent = phi.toFixed(2);
+            
+            // --- Calculate quantum state from theta and phi ---
+            const alpha = {
+                re: Math.cos(theta / 2),
+                im: 0
+            };
+            const beta = {
+                re: Math.cos(phi) * Math.sin(theta / 2),
+                im: Math.sin(phi) * Math.sin(theta / 2)
+            };
+
+            // Calculate probabilities
+            const prob0 = alpha.re * alpha.re + alpha.im * alpha.im;
+            const prob1 = beta.re * beta.re + beta.im * beta.im;
+
+            // Update UI text
+            valueAlpha.textContent = formatComplex(alpha);
+            valueBeta.textContent = formatComplex(beta);
+            valueProb0.textContent = `${prob0.toFixed(3)} (${(prob0 * 100).toFixed(1)}%)`;
+            valueProb1.textContent = `${prob1.toFixed(3)} (${(prob1 * 100).toFixed(1)}%)`;
+            
+            // Update Bloch sphere visualization
+            updateVectorPosition(blochSphereViz.vectorGeom, theta, phi);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            blochSphereViz.controls.update();
+            blochSphereViz.renderer.render(blochSphereViz.scene, blochSphereViz.camera);
+        }
+
+        // --- Event Listeners ---
+        [sliderTheta, sliderPhi].forEach(slider => {
+            slider.addEventListener('input', updateAll);
+        });
+        
+        // --- Initial Call ---
+        updateAll();
+        animate();
+        
+        // Defer resize to ensure DOM is fully ready
+        setTimeout(() => {
+            blochSphereViz.onWindowResize();
+        }, 100);
+
+    </script>
+</body>
+</html>

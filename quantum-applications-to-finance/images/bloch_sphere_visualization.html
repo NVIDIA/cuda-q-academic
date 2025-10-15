@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Bloch Sphere Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A1A1A;
+            color: #E0E0E0;
+        }
+        .nvidia-green { color: #76B900; }
+        .info-box {
+            background-color: #2A2A2A;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid #444;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        /* Custom slider styles */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            margin-top: -7px;
+            border: 2px solid #1A1A1A;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            border: 2px solid #1A1A1A;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Bloch Sphere Visualization</h1>
+            <p class="text-lg text-gray-400 mt-2">Visualize the circuit's output on the Bloch Sphere by using the sliders to adjust the angle of each rotation gate.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            
+            <div class="lg:col-span-2">
+                <div class="info-box space-y-6">
+                    <h2 class="text-2xl font-semibold text-center">Rotation Angles (Radians)</h2>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="theta-x-slider" class="font-bold text-xl">R<sub>x</sub>(&theta;<sub>x</sub>)</label>
+                            <span id="theta-x-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
+                        </div>
+                        <input id="theta-x-slider" type="range" min="0" max="6.283" step="0.01" value="0">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="theta-y-slider" class="font-bold text-xl">R<sub>y</sub>(&theta;<sub>y</sub>)</label>
+                            <span id="theta-y-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
+                        </div>
+                        <input id="theta-y-slider" type="range" min="0" max="6.283" step="0.01" value="0">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="theta-z-slider" class="font-bold text-xl">R<sub>z</sub>(&theta;<sub>z</sub>)</label>
+                            <span id="theta-z-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
+                        </div>
+                        <input id="theta-z-slider" type="range" min="0" max="6.283" step="0.01" value="0">
+                    </div>
+                </div>
+
+                <div class="info-box mt-8">
+                     <h2 class="text-2xl font-semibold text-center mb-4">Quantum Circuit</h2>
+                     <div id="circuit-container" class="bg-gray-900 p-4 rounded-md">
+                        <svg id="circuit-svg" width="100%" height="60" viewBox="0 0 400 60"></svg>
+                     </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                 <div class="flex flex-col items-center space-y-2">
+                    <h2 class="text-2xl font-semibold">Bloch Sphere</h2>
+                    <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden info-box p-0"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Complex Number Helpers ---
+        const complex = (re = 0, im = 0) => ({ re, im });
+        const cadd = (a, b) => complex(a.re + b.re, a.im + b.im);
+        const cmul = (a, b) => complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+        const cabs_sq = (a) => a.re * a.re + a.im * a.im;
+
+        // --- Quantum State Logic ---
+        function applyRx(theta, state) {
+            const cos_t2 = Math.cos(theta / 2);
+            const sin_t2 = Math.sin(theta / 2);
+            const a = state.alpha;
+            const b = state.beta;
+            const alpha_out = cadd(cmul(complex(cos_t2, 0), a), cmul(complex(0, -sin_t2), b));
+            const beta_out = cadd(cmul(complex(0, -sin_t2), a), cmul(complex(cos_t2, 0), b));
+            return { alpha: alpha_out, beta: beta_out };
+        }
+
+        function applyRy(theta, state) {
+            const cos_t2 = Math.cos(theta / 2);
+            const sin_t2 = Math.sin(theta / 2);
+            const a = state.alpha;
+            const b = state.beta;
+            const alpha_out = cadd(cmul(complex(cos_t2, 0), a), cmul(complex(-sin_t2, 0), b));
+            const beta_out = cadd(cmul(complex(sin_t2, 0), a), cmul(complex(cos_t2, 0), b));
+            return { alpha: alpha_out, beta: beta_out };
+        }
+
+        function applyRz(theta, state) {
+            const a = state.alpha;
+            const b = state.beta;
+            // e^(-i*t/2) * alpha
+            const alpha_out = cmul(complex(Math.cos(-theta/2), Math.sin(-theta/2)), a);
+            // e^(i*t/2) * beta
+            const beta_out = cmul(complex(Math.cos(theta/2), Math.sin(theta/2)), b);
+            return { alpha: alpha_out, beta: beta_out };
+        }
+        
+        function stateToBloch(state) {
+            const alpha_mag_sq = cabs_sq(state.alpha);
+            // Clamp to handle potential floating point inaccuracies
+            const clamped_alpha_mag = Math.max(0, Math.min(1, Math.sqrt(alpha_mag_sq)));
+            const theta = 2 * Math.acos(clamped_alpha_mag);
+            
+            const phi_beta = Math.atan2(state.beta.im, state.beta.re);
+            const phi_alpha = Math.atan2(state.alpha.im, state.alpha.re);
+            const phi = phi_beta - phi_alpha;
+            
+            return { theta, phi };
+        }
+
+        // --- Three.js Visualization ---
+        function createBlochSphere(container) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            
+            // ### Camera position for the default view ###
+            camera.position.set(3.5, 1.5, 0); 
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.minDistance = 2.5;
+            controls.maxDistance = 8;
+
+            const group = new THREE.Group();
+            scene.add(group);
+            
+            // This rotation makes the Bloch Z-axis (|0⟩) point up in the scene's Y-axis.
+            group.rotation.x = -Math.PI / 2;
+
+            // Sphere
+            const sphereGeom = new THREE.SphereGeometry(1, 32, 32);
+            const sphereMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, transparent: true, opacity: 0.15, wireframe: true });
+            group.add(new THREE.Mesh(sphereGeom, sphereMat));
+
+            // State Vector
+            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
+            group.add(vectorGeom);
+            
+            // Axes
+            const createAxis = (dir, color) => new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.2, color, 0.05, 0.03);
+            group.add(createAxis(new THREE.Vector3(1,0,0), 0xCCCCCC)); // X: |+⟩
+            group.add(createAxis(new THREE.Vector3(0,1,0), 0xCCCCCC)); // Y: |i⟩
+            group.add(createAxis(new THREE.Vector3(0,0,1), 0xCCCCCC)); // Z: |0⟩
+
+            // Labels
+            const createLabel = (text, position, color = "rgba(224, 224, 224, 0.95)", fontSize =20) => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                context.font = `Bold ${fontSize}px Inter`;
+                const textWidth = context.measureText(text).width;
+                canvas.width = textWidth + 20;
+                canvas.height = fontSize * 1.5;
+                context.font = `Bold ${fontSize}px Inter`; // Re-set font after canvas resize
+                context.fillStyle = color;
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+                sprite.position.copy(position);
+                return sprite;
+            };
+
+            group.add(createLabel('|0⟩', new THREE.Vector3(0, 0, 1.35)));
+            group.add(createLabel('|1⟩', new THREE.Vector3(0, 0, -1.35)));
+            group.add(createLabel('|+⟩', new THREE.Vector3(1.3, 0, 0)));
+            group.add(createLabel('|-⟩', new THREE.Vector3(-1.3, 0, 0)));
+            group.add(createLabel('|i⟩', new THREE.Vector3(0, 1.3, 0)));
+            group.add(createLabel('|-i⟩', new THREE.Vector3(0, -1.3, 0)));
+
+            const onWindowResize = () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            };
+            window.addEventListener('resize', onWindowResize);
+
+            return { scene, camera, renderer, controls, vectorGeom, onWindowResize };
+        }
+
+        function updateVectorPosition(vector, coords) {
+            const { theta, phi } = coords;
+            // The vector is part of the rotated group, so we calculate its position
+            // in the group's local coordinate system (standard spherical coordinates).
+            const x = Math.sin(theta) * Math.cos(phi);
+            const y = Math.sin(theta) * Math.sin(phi);
+            const z = Math.cos(theta);
+            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+        }
+        
+        // --- Circuit Diagram SVG ---
+        function updateCircuitDiagram(thetaX, thetaY, thetaZ) {
+            const svg = document.getElementById('circuit-svg');
+            svg.innerHTML = ''; // Clear previous circuit
+            
+            const svgNS = "http://www.w3.org/2000/svg";
+            const createText = (x, y, content, size = 10) => {
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('x', x);
+                text.setAttribute('y', y);
+                text.setAttribute('fill', '#E0E0E0');
+                text.setAttribute('font-family', 'Inter, sans-serif');
+                text.setAttribute('font-size', size);
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = content;
+                return text;
+            };
+
+            const createGate = (x, name, value) => {
+                const g = document.createElementNS(svgNS, 'g');
+                
+                const rect = document.createElementNS(svgNS, 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', 15);
+                rect.setAttribute('width', 50);
+                rect.setAttribute('height', 30);
+                rect.setAttribute('fill', '#2A2A2A');
+                rect.setAttribute('stroke', '#76B900');
+                rect.setAttribute('stroke-width', 1.5);
+                g.appendChild(rect);
+                
+                const nameText = createText(x + 25, 34, name, 14);
+                g.appendChild(nameText);
+                
+                const valText = createText(x + 25, 55, `(${value.toFixed(2)})`, 10);
+                g.appendChild(valText);
+                
+                return g;
+            };
+
+            // Qubit wire
+            const line = document.createElementNS(svgNS, 'line');
+            line.setAttribute('x1', 20);
+            line.setAttribute('y1', 30);
+            line.setAttribute('x2', 380);
+            line.setAttribute('y2', 30);
+            line.setAttribute('stroke', '#E0E0E0');
+            line.setAttribute('stroke-width', 1);
+            svg.appendChild(line);
+            
+            // Qubit label
+            svg.appendChild(createText(10, 34, "q₀",14 ));
+
+            // Gates
+            svg.appendChild(createGate(60, 'Rx', thetaX));
+            svg.appendChild(createGate(170, 'Ry', thetaY));
+            svg.appendChild(createGate(280, 'Rz', thetaZ));
+        }
+
+        // --- Main Setup & Update Functions ---
+        const blochSphereViz = createBlochSphere(document.getElementById('bloch-sphere-container'));
+        
+        const sliderX = document.getElementById('theta-x-slider');
+        const sliderY = document.getElementById('theta-y-slider');
+        const sliderZ = document.getElementById('theta-z-slider');
+        
+        const valueX = document.getElementById('theta-x-value');
+        const valueY = document.getElementById('theta-y-value');
+        const valueZ = document.getElementById('theta-z-value');
+        
+        function updateAll() {
+            const theta_x = parseFloat(sliderX.value);
+            const theta_y = parseFloat(sliderY.value);
+            const theta_z = parseFloat(sliderZ.value);
+
+            // Update value displays
+            valueX.textContent = theta_x.toFixed(2);
+            valueY.textContent = theta_y.toFixed(2);
+            valueZ.textContent = theta_z.toFixed(2);
+            
+            // Calculate final state
+            const initialState = { alpha: complex(1, 0), beta: complex(0, 0) };
+            const stateAfterRx = applyRx(theta_x, initialState);
+            const stateAfterRy = applyRy(theta_y, stateAfterRx);
+            const finalState = applyRz(theta_z, stateAfterRy);
+
+            // Update visuals
+            const blochCoords = stateToBloch(finalState);
+            updateVectorPosition(blochSphereViz.vectorGeom, blochCoords);
+            updateCircuitDiagram(theta_x, theta_y, theta_z);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            blochSphereViz.controls.update();
+            blochSphereViz.renderer.render(blochSphereViz.scene, blochSphereViz.camera);
+        }
+
+        // --- Event Listeners ---
+        [sliderX, sliderY, sliderZ].forEach(slider => {
+            slider.addEventListener('input', updateAll);
+        });
+        
+        // --- Initial Call ---
+        updateAll();
+        animate();
+        
+        // Defer resize to ensure DOM is fully ready
+        setTimeout(() => {
+            blochSphereViz.onWindowResize();
+        }, 100);
+
+    </script>
+</body>
+</html>
