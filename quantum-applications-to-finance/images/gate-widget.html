@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Gate Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A1A1A;
+            color: #E0E0E0;
+        }
+        .nvidia-green { color: #76B900; }
+        .info-box {
+            background-color: #2A2A2A;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid #444;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Quantum Gate Visualization</h1>
+            <p class="text-lg text-gray-400 mt-2">Click the gates to build a circuit and see the state evolve on the Bloch Sphere.</p>
+        </header>
+
+        <div class="mb-8">
+            <div class="info-box">
+                 <h2 class="text-2xl font-semibold text-center mb-4">Circuit Diagram</h2>
+                 <div id="circuit-container" class="bg-gray-900 p-4 rounded-md overflow-x-auto">
+                    <svg id="circuit-svg" width="100%" height="60"></svg>
+                 </div>
+                 <div class="flex justify-center space-x-4 mt-6">
+                    <button id="backstep-btn" class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-md font-semibold hover:bg-gray-600 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">Backstep</button>
+                    <button id="reset-btn" class="px-4 py-2 bg-gray-700 border border-gray-600 rounded-md font-semibold hover:bg-gray-600 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            
+            <div class="lg:col-span-2">
+                 <div class="info-box">
+                    <h2 class="text-2xl font-semibold text-center mb-6">Quantum Gates</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <button id="gate-x" class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-md flex items-center justify-center font-bold text-xl hover:bg-gray-700 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">X</button>
+                        <button id="gate-y" class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-md flex items-center justify-center font-bold text-xl hover:bg-gray-700 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">Y</button>
+                        <button id="gate-z" class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-md flex items-center justify-center font-bold text-xl hover:bg-gray-700 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">Z</button>
+                        <button id="gate-h" class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-md flex items-center justify-center font-bold text-xl hover:bg-gray-700 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">H</button>
+                        <button id="gate-s" class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-md flex items-center justify-center font-bold text-xl hover:bg-gray-700 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">S</button>
+                        <button id="gate-t" class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-md flex items-center justify-center font-bold text-xl hover:bg-gray-700 hover:border-nvidia-green focus:outline-none focus:ring-2 focus:ring-nvidia-green transition-all duration-200">T</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                 <div class="flex flex-col items-center space-y-2">
+                    <h2 class="text-2xl font-semibold">Bloch Sphere</h2>
+                    <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden info-box p-0"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+      }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Complex Number Helpers ---
+        const complex = (re = 0, im = 0) => ({ re, im });
+        const cadd = (a, b) => complex(a.re + b.re, a.im + b.im);
+        const cmul = (a, b) => complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+        const cabs_sq = (a) => a.re * a.re + a.im * a.im;
+        
+        // --- Quantum Gate Logic ---
+        const ONE_OVER_SQRT2 = 1 / Math.sqrt(2);
+        
+        const GATE_OPERATIONS = {
+            'X': state => ({ alpha: state.beta, beta: state.alpha }),
+            'Y': state => ({ alpha: cmul(complex(0, -1), state.beta), beta: cmul(complex(0, 1), state.alpha) }),
+            'Z': state => ({ alpha: state.alpha, beta: cmul(complex(-1, 0), state.beta) }),
+            'H': state => ({
+                alpha: cmul(complex(ONE_OVER_SQRT2, 0), cadd(state.alpha, state.beta)),
+                beta: cmul(complex(ONE_OVER_SQRT2, 0), cadd(state.alpha, cmul(complex(-1, 0), state.beta)))
+            }),
+            'S': state => ({ alpha: state.alpha, beta: cmul(complex(0, 1), state.beta) }),
+            'T': state => ({ alpha: state.alpha, beta: cmul(complex(Math.cos(Math.PI/4), Math.sin(Math.PI/4)), state.beta) }),
+        };
+
+        function stateToBloch(state) {
+            const alpha_mag_sq = cabs_sq(state.alpha);
+            const clamped_alpha_mag = Math.max(0, Math.min(1, Math.sqrt(alpha_mag_sq)));
+            const theta = 2 * Math.acos(clamped_alpha_mag);
+            
+            if (Math.abs(state.alpha.re) < 1e-9 && Math.abs(state.alpha.im) < 1e-9) {
+                 const phi_beta = Math.atan2(state.beta.im, state.beta.re);
+                 return { theta, phi: phi_beta };
+            }
+            
+            const phi_beta = Math.atan2(state.beta.im, state.beta.re);
+            const phi_alpha = Math.atan2(state.alpha.im, state.alpha.re);
+            const phi = phi_beta - phi_alpha;
+            
+            return { theta, phi };
+        }
+
+        // --- Three.js Visualization ---
+        function createBlochSphere(container) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3.5, 1.5, 0); 
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.minDistance = 2.5;
+            controls.maxDistance = 8;
+
+            const group = new THREE.Group();
+            scene.add(group);
+            group.rotation.x = -Math.PI / 2;
+
+            const sphereGeom = new THREE.SphereGeometry(1, 32, 32);
+            const sphereMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, transparent: true, opacity: 0.15, wireframe: true });
+            group.add(new THREE.Mesh(sphereGeom, sphereMat));
+
+            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
+            group.add(vectorGeom);
+            
+            const createAxis = (dir, color) => new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.2, color, 0.05, 0.03);
+            group.add(createAxis(new THREE.Vector3(1,0,0), 0xCCCCCC)); // X
+            group.add(createAxis(new THREE.Vector3(0,1,0), 0xCCCCCC)); // Y
+            group.add(createAxis(new THREE.Vector3(0,0,1), 0xCCCCCC)); // Z
+
+            const createLabel = (text, position) => {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                context.font = `Bold 20px Inter`;
+                const textWidth = context.measureText(text).width;
+                canvas.width = textWidth + 20;
+                canvas.height = 20 * 1.5;
+                context.font = `Bold 20px Inter`;
+                context.fillStyle = "rgba(224, 224, 224, 0.95)";
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+                sprite.position.copy(position);
+                return sprite;
+            };
+
+            group.add(createLabel('|0⟩', new THREE.Vector3(0, 0, 1.35)));
+            group.add(createLabel('|1⟩', new THREE.Vector3(0, 0, -1.35)));
+            group.add(createLabel('|+⟩', new THREE.Vector3(1.3, 0, 0)));
+            group.add(createLabel('|i⟩', new THREE.Vector3(0, 1.3, 0)));
+
+            const onWindowResize = () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            };
+            window.addEventListener('resize', onWindowResize);
+
+            return { scene, camera, renderer, controls, vectorGeom, onWindowResize };
+        }
+
+        function updateVectorPosition(vector, coords) {
+            const { theta, phi } = coords;
+            const x = Math.sin(theta) * Math.cos(phi);
+            const y = Math.sin(theta) * Math.sin(phi);
+            const z = Math.cos(theta);
+            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+        }
+        
+        // --- Circuit Diagram SVG ---
+        function drawCircuit(sequence) {
+            const svg = document.getElementById('circuit-svg');
+            const svgContainer = document.getElementById('circuit-container');
+            svg.innerHTML = ''; 
+            
+            const svgNS = "http://www.w3.org/2000/svg";
+            const GATE_WIDTH = 40;
+            const GATE_SPACING = 15;
+            // Updated start position for gates
+            const START_X = 60;
+
+            const totalWidth = START_X + sequence.length * (GATE_WIDTH + GATE_SPACING) + 40;
+            svg.setAttribute('width', String(Math.max(svgContainer.clientWidth, totalWidth)));
+
+            const line = document.createElementNS(svgNS, 'line');
+            // Updated line start position to create space for the |0> label
+            line.setAttribute('x1', '40');
+            line.setAttribute('y1', '30');
+            line.setAttribute('x2', String(totalWidth - 10));
+            line.setAttribute('y2', '30');
+            line.setAttribute('stroke', '#E0E0E0');
+            line.setAttribute('stroke-width', '1.5');
+            svg.appendChild(line);
+            
+            const initialText = document.createElementNS(svgNS, 'text');
+            // Updated text position to be before the line starts
+            initialText.setAttribute('x', '20');
+            initialText.setAttribute('y', '35');
+            initialText.setAttribute('fill', '#E0E0E0');
+            initialText.setAttribute('font-family', 'Inter, sans-serif');
+            initialText.setAttribute('font-size', '16');
+            initialText.setAttribute('font-weight', 'bold');
+            initialText.setAttribute('text-anchor', 'middle');
+            initialText.textContent = '|0⟩';
+            svg.appendChild(initialText);
+
+            sequence.forEach((gateName, index) => {
+                const x = START_X + index * (GATE_WIDTH + GATE_SPACING);
+                const g = document.createElementNS(svgNS, 'g');
+                
+                const rect = document.createElementNS(svgNS, 'rect');
+                rect.setAttribute('x', String(x));
+                rect.setAttribute('y', '15');
+                rect.setAttribute('width', String(GATE_WIDTH));
+                rect.setAttribute('height', '30');
+                rect.setAttribute('fill', '#2A2A2A');
+                rect.setAttribute('stroke', '#76B900');
+                rect.setAttribute('stroke-width', '2');
+                rect.setAttribute('rx', '4');
+                g.appendChild(rect);
+                
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('x', String(x + GATE_WIDTH / 2));
+                text.setAttribute('y', '35');
+                text.setAttribute('fill', '#E0E0E0');
+                text.setAttribute('font-family', 'Inter, sans-serif');
+                text.setAttribute('font-size', '16');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = gateName;
+                g.appendChild(text);
+
+                svg.appendChild(g);
+            });
+            
+            svgContainer.scrollLeft = svgContainer.scrollWidth;
+        }
+
+        // --- Main App Logic ---
+        let circuitSequence = [];
+        const blochSphereViz = createBlochSphere(document.getElementById('bloch-sphere-container'));
+        
+        function updateAllVisuals() {
+            const initialState = { alpha: complex(1, 0), beta: complex(0, 0) }; // Start at |0>
+            
+            let currentState = initialState;
+            for (const gateName of circuitSequence) {
+                const gateFunction = GATE_OPERATIONS[gateName];
+                if (gateFunction) {
+                    currentState = gateFunction(currentState);
+                }
+            }
+
+            const blochCoords = stateToBloch(currentState);
+            updateVectorPosition(blochSphereViz.vectorGeom, blochCoords);
+            drawCircuit(circuitSequence);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            blochSphereViz.controls.update();
+            blochSphereViz.renderer.render(blochSphereViz.scene, blochSphereViz.camera);
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('gate-x').addEventListener('click', () => { circuitSequence.push('X'); updateAllVisuals(); });
+        document.getElementById('gate-y').addEventListener('click', () => { circuitSequence.push('Y'); updateAllVisuals(); });
+        document.getElementById('gate-z').addEventListener('click', () => { circuitSequence.push('Z'); updateAllVisuals(); });
+        document.getElementById('gate-h').addEventListener('click', () => { circuitSequence.push('H'); updateAllVisuals(); });
+        document.getElementById('gate-s').addEventListener('click', () => { circuitSequence.push('S'); updateAllVisuals(); });
+        document.getElementById('gate-t').addEventListener('click', () => { circuitSequence.push('T'); updateAllVisuals(); });
+        
+        document.getElementById('backstep-btn').addEventListener('click', () => {
+            if (circuitSequence.length > 0) {
+                circuitSequence.pop();
+                updateAllVisuals();
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            circuitSequence = [];
+            updateAllVisuals();
+        });
+        
+        // --- Initial Call ---
+        updateAllVisuals();
+        animate();
+        setTimeout(() => { 
+            blochSphereViz.onWindowResize();
+            drawCircuit(circuitSequence); // Initial draw with correct container width
+        }, 100);
+    </script>
+</body>
+</html>
