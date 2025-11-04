@@ -6,7 +6,7 @@ Running quantum applications on a physical QPU is incredibly complex. The device
 
 This series will cover use cases where AI can be used within quantum workflows and provide a greater appreciation for yet another reason why AI supercomputing needs to be tightly coupled to QPUs.
 
-Users are not expected to have significant AI experience and will primarily treat the AI models as black box, or the required knowledge will be presented in the notebooks. Instead, the lessons will focus on where AI fits in the workflow, how the data is prepared as model input, and how the output can be used within the context of the CUDA-Q platform. 
+Users are not expected to have significant AI experience and will primarily treat the AI models as black boxes, or the required knowledge will be presented in the notebooks. Instead, the lessons will focus on where AI fits in the workflow, how the data is prepared as model input, and how the output can be used within the context of the CUDA-Q platform. 
 
 For example, the first notebook guides learners through using a pretrained diffusion model to compile unitary matrices as quantum circuits. This allows for the flexibility to compile the same algorithm on QPUs with different qubit modalities and associated constraints.
 
