@@ -53,6 +53,14 @@ Learners should have familiarity with Jupyter notebooks and programming in Pytho
 ## Dynamics 101
 [This advanced series of tutorials](https://github.com/NVIDIA/cuda-q-academic/tree/main/dynamics101) demonstrates GPU-accelerated time evolution of Schrodinger and Lindblad master equations for quantum systems. Prerequisite knowledge of open and closed quantum systems is assumed.
 
+--- 
+## AI for Quantum
+AI is a powerful tool for enabling quantum computing and can help [tackle challenges related to calibration, compilation, error correction, and more](https://arxiv.org/abs/2411.09131). [These notebooks]((https://github.com/NVIDIA/cuda-q-academic/tree/main/ai-for-quantum) explore AI for quantum use cases with hands-on coding exercises that teach users how to prepare data for and use output from AI models. The first notebook demonstrates how diffusion models can help compile unitaries to gate sets most suited for particular hardware modalities.
+
+**Pre-requisites:**
+This series requires minimal knowledge of AI, treating the AI models as black boxe for the most part. Learners are expected to have a basic knowledge of quantum circuits, unitary matrices, and how noise impacts the results of quantum algorithms.
+
+
 ---
 ## Chemistry Simulations 
 This collection of notebooks explores techniques for calculating molecular ground state energies, a fundamental problem in chemistry. The notebooks offer a deep dive into implementing and applying the ADAPT-VQE algorithm and various Krylov subspace methods (Coming soon!).
