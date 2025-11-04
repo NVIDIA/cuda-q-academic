@@ -2,7 +2,7 @@
 
 Welcome to the AI for Quantum series!
 
-Running quantum applications on a physical QPU is incredibly complex. The device needs to be calibrated, quantum circuits need to be efficiently compiled to run on each device, and errors need to be identified and corrected so the results of the algorithms are reliable. As devices scale, each of these tasks (and many more detailed in the review entitled ["Artificial Intelligence for Quantum Computing"](https://arxiv.org/abs/2411.09131).) become extremely complicated and potential bottlenecks for useful quantum computing. The fact that AI is scalable, fast, and capable of handling the multi-dimensional data associated with quantum computing makes it a powerful tool for overcoming these challenges. 
+Running quantum applications on a physical QPU is incredibly complex. The device needs to be calibrated, quantum circuits need to be efficiently compiled to run on each device, and errors need to be identified and corrected so the results of the algorithms are reliable. As devices scale, each of these tasks (and many more detailed in the review entitled ["Artificial Intelligence for Quantum Computing"](https://arxiv.org/abs/2411.09131)) become extremely complicated and potential bottlenecks for useful quantum computing. The fact that AI is scalable, fast, and capable of handling the multi-dimensional data associated with quantum computing makes it a powerful tool for overcoming these challenges. 
 
 This series will cover use cases where AI can be used within quantum workflows and provide a greater appreciation for yet another reason why AI supercomputing needs to be tightly coupled to QPUs.
 
