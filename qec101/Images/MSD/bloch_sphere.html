@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloch Sphere Simulator</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. Define NVIDIA-inspired color scheme -->
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-dark: #1e1e1e;
+            --nvidia-light-dark: #2b2b2b;
+            --nvidia-text: #f0f0f0;
+            --nvidia-grey: #555555;
+        }
+
+        body {
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-text);
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        /* Custom button styling */
+        .gate-btn {
+            background-color: var(--nvidia-light-dark);
+            color: var(--nvidia-text);
+            border: 2px solid var(--nvidia-grey);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .gate-btn:hover {
+            background-color: var(--nvidia-green);
+            border-color: var(--nvidia-green);
+            color: var(--nvidia-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(118, 185, 0, 0.3);
+        }
+
+        /* Style for the 3D canvas */
+        #bloch-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+        
+        <!-- Widget Container -->
+        <div class="w-full max-w-2xl bg-gradient-to-b from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
+            
+            <!-- Header -->
+            <header class="p-4 border-b border-gray-700">
+                <h1 class="text-2xl font-bold text-center text-white">
+                    Bloch Sphere Simulator
+                </h1>
+                <p class="text-center text-sm" style="color: var(--nvidia-green);">Interactive Quantum State</p>
+            </header>
+
+            <!-- 3D Viewer -->
+            <div class="relative w-full h-96 md:h-[500px] bg-black">
+                <div id="canvas-container" class="absolute inset-0">
+                    <!-- The 3D canvas will be inserted here by three.js -->
+                </div>
+            </div>
+
+            <!-- State Display -->
+            <div class="p-4 bg-gray-900 border-t border-gray-700">
+                <h2 class="text-sm font-semibold text-center text-gray-400 uppercase tracking-wider">CURRENT STATE</h2>
+                <div id="state-display" class="text-center text-xl font-mono p-2 rounded-lg mt-2" style="color: var(--nvidia-green); background-color: var(--nvidia-light-dark);">
+                    |ψ⟩ ≈ (θ: 0.0°, φ: 0.0°)
+                </div>
+            </div>
+
+            <!-- Gate Controls -->
+            <div class="p-4 bg-gray-900 border-t border-gray-700">
+                <h2 class="text-sm font-semibold text-center text-gray-400 uppercase tracking-wider mb-3">APPLY QUANTUM GATE</h2>
+                <div class="grid grid-cols-3 gap-3">
+                    <button id="gate-x" class="gate-btn font-bold py-3 px-4 rounded-lg">X Gate</button>
+                    <button id="gate-y" class="gate-btn font-bold py-3 px-4 rounded-lg">Y Gate</button>
+                    <button id="gate-z" class="gate-btn font-bold py-3 px-4 rounded-lg">Z Gate</button>
+                    <button id="gate-h" class="gate-btn font-bold py-3 px-4 rounded-lg">H Gate</button>
+                    <button id="gate-s" class="gate-btn font-bold py-3 px-4 rounded-lg">S Gate</button>
+                    <button id="gate-t" class="gate-btn font-bold py-3 px-4 rounded-lg">T Gate</button>
+                </div>
+                <button id="gate-reset" class="gate-btn w-full mt-3 py-3 px-4 rounded-lg bg-gray-700 border-gray-600 hover:bg-red-600 hover:border-red-500 hover:text-white">
+                    Reset to |0⟩
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 3. Load three.js and OrbitControls -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <!-- 4. Main Application Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, controls;
+        let sphere, stateVectorArrow;
+        let stateVector; // A THREE.Vector3 representing the state
+        const stateDisplay = document.getElementById('state-display');
+        const container = document.getElementById('canvas-container');
+
+        // --- Helper Function to create text labels ---
+        function makeTextSprite(message, opts = {}) {
+            const fontface = opts.fontface || 'Arial';
+            const fontsize = opts.fontsize || 24;
+            const [R, G, B] = opts.color || [255, 255, 255]; // Default white
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            // Set font size dynamically
+            context.font = `Bold ${fontsize}px ${fontface}`;
+            
+            // Measure text
+            const metrics = context.measureText(message);
+            const textWidth = metrics.width;
+            
+            // Set canvas size
+            canvas.width = textWidth + 10; // Add some padding
+            canvas.height = fontsize + 10;
+
+            // Re-apply font (canvas size reset context)
+            context.font = `Bold ${fontsize}px ${fontface}`;
+            context.fillStyle = `rgba(${R}, ${G}, ${B}, 1.0)`;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            
+            context.fillText(message, canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            
+            // Scale sprite
+            sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+            return sprite;
+        }
+
+        // --- Initialize the 3D Scene ---
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 2.5;
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setClearColor(0x000000, 0); // Transparent background
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 1.5;
+            controls.maxDistance = 10;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            const nVidiaGreenLight = new THREE.PointLight(0x76b900, 0.5, 10);
+            nVidiaGreenLight.position.set(-2, -1, 1.5);
+            scene.add(nVidiaGreenLight);
+
+            // Bloch Sphere
+            const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
+            const sphereMat = new THREE.MeshPhongMaterial({
+                color: 0x555555,
+                transparent: true,
+                opacity: 0.2,
+                shininess: 50
+            });
+            sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            scene.add(sphere);
+
+            // Wireframe for the sphere
+            const wireframeGeo = new THREE.EdgesGeometry(sphereGeo);
+            const wireframeMat = new THREE.LineBasicMaterial({
+                color: 0xaaaaaa,
+                linewidth: 1,
+                transparent: true,
+                opacity: 0.3
+            });
+            const wireframe = new THREE.LineSegments(wireframeGeo, wireframeMat);
+            sphere.add(wireframe);
+
+            // Axes (X, Y, Z)
+            const axisMaterial = new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.7 });
+            const axisLength = 1.3;
+            // X-Axis
+            let points = [new THREE.Vector3(-axisLength, 0, 0), new THREE.Vector3(axisLength, 0, 0)];
+            scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), axisMaterial));
+            // Y-Axis
+            points = [new THREE.Vector3(0, -axisLength, 0), new THREE.Vector3(0, axisLength, 0)];
+            scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), axisMaterial));
+            // Z-Axis
+            points = [new THREE.Vector3(0, 0, -axisLength), new THREE.Vector3(0, 0, axisLength)];
+            scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), axisMaterial));
+            
+            // Equator (Ring)
+            const ringGeo = new THREE.RingGeometry(1, 1, 64);
+            const ringMat = new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.5 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            scene.add(ring);
+
+            // Labels
+            const labelColor = [240, 240, 240];
+            const poleLabelColor = [118, 185, 0]; // NVIDIA Green
+            
+            const label0 = makeTextSprite("|0⟩", { fontsize: 32, color: poleLabelColor });
+            label0.position.set(0, 0, 1.2);
+            scene.add(label0);
+
+            const label1 = makeTextSprite("|1⟩", { fontsize: 32, color: poleLabelColor });
+            label1.position.set(0, 0, -1.2);
+            scene.add(label1);
+
+            const labelPlus = makeTextSprite("|+⟩", { fontsize: 28, color: labelColor });
+            labelPlus.position.set(1.2, 0, 0);
+            scene.add(labelPlus);
+
+            const labelMinus = makeTextSprite("|-⟩", { fontsize: 28, color: labelColor });
+            labelMinus.position.set(-1.2, 0, 0);
+            scene.add(labelMinus);
+            
+            const labelPlusI = makeTextSprite("|+i⟩", { fontsize: 28, color: labelColor });
+            labelPlusI.position.set(0, 1.2, 0);
+            scene.add(labelPlusI);
+
+            const labelMinusI = makeTextSprite("|-i⟩", { fontsize: 28, color: labelColor });
+            labelMinusI.position.set(0, -1.2, 0);
+            scene.add(labelMinusI);
+
+            // State Vector Arrow
+            stateVector = new THREE.Vector3(0, 0, 1); // Start at |0⟩
+            stateVectorArrow = new THREE.ArrowHelper(
+                stateVector.clone().normalize(), // direction
+                new THREE.Vector3(0, 0, 0),    // origin
+                1,                              // length
+                0x76b900,                       // color (NVIDIA Green)
+                0.1,                            // headLength
+                0.07                            // headWidth
+            );
+            scene.add(stateVectorArrow);
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // Initial state display update
+            updateStateDisplay();
+        }
+
+        // --- Handle Window Resize ---
+        function onWindowResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Only required if controls.enableDamping or autoRotate is set
+            renderer.render(scene, camera);
+        }
+
+        // --- Update State Display ---
+        function updateStateDisplay() {
+            // Convert Cartesian (x, y, z) to Spherical (theta, phi)
+            // Ensure z is clamped to [-1, 1] to avoid Math.acos errors
+            const z = Math.max(-1, Math.min(1, stateVector.z));
+            
+            const theta = Math.acos(z);
+            const phi = Math.atan2(stateVector.y, stateVector.x);
+
+            // Convert radians to degrees for display
+            const thetaDeg = THREE.MathUtils.radToDeg(theta);
+            const phiDeg = THREE.MathUtils.radToDeg(phi);
+
+            stateDisplay.textContent = `|ψ⟩ ≈ (θ: ${thetaDeg.toFixed(1)}°, φ: ${phiDeg.toFixed(1)}°)`;
+        }
+
+        // --- Apply Gate Logic ---
+        function applyGate(gateType) {
+            controls.autoRotate = false; // Stop autorotate on interaction
+            const matrix = new THREE.Matrix4();
+            const axis = new THREE.Vector3();
+
+            switch (gateType) {
+                case 'X': // 180° rotation around X-axis
+                    matrix.makeRotationX(Math.PI);
+                    break;
+                case 'Y': // 180° rotation around Y-axis
+                    matrix.makeRotationY(Math.PI);
+                    break;
+                case 'Z': // 180° rotation around Z-axis
+                    matrix.makeRotationZ(Math.PI);
+                    break;
+                case 'H': // 180° rotation around (X+Z)/sqrt(2) axis
+                    axis.set(1, 0, 1).normalize();
+                    matrix.makeRotationAxis(axis, Math.PI);
+                    break;
+                case 'S': // 90° rotation around Z-axis
+                    matrix.makeRotationZ(Math.PI / 2);
+                    break;
+                case 'T': // 45° rotation around Z-axis
+                    matrix.makeRotationZ(Math.PI / 4);
+                    break;
+                case 'RESET':
+                    stateVector.set(0, 0, 1); // Reset to |0⟩
+                    break;
+            }
+
+            if (gateType !== 'RESET') {
+                // Apply the rotation matrix to the state vector
+                stateVector.applyMatrix4(matrix);
+            }
+
+            // Normalize to prevent floating point drift
+            stateVector.normalize();
+
+            // Update the arrow helper
+            stateVectorArrow.setDirection(stateVector);
+
+            // Update the text display
+            updateStateDisplay();
+        }
+
+        // --- Event Listeners for Buttons ---
+        document.getElementById('gate-x').addEventListener('click', () => applyGate('X'));
+        document.getElementById('gate-y').addEventListener('click', () => applyGate('Y'));
+        document.getElementById('gate-z').addEventListener('click', () => applyGate('Z'));
+        document.getElementById('gate-h').addEventListener('click', () => applyGate('H'));
+        document.getElementById('gate-s').addEventListener('click', () => applyGate('S'));
+        document.getElementById('gate-t').addEventListener('click', () => applyGate('T'));
+        document.getElementById('gate-reset').addEventListener('click', () => applyGate('RESET'));
+
+        // --- Start the application ---
+        init();
+        animate();
+
+    </script>
+</body>
+</html>
