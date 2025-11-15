@@ -1,0 +1,428 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVIDIA VQE Stepped Demo</title>
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Load Chart.js for plotting --><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'nvidia-green': '#76b900',
+                        'nvidia-dark': '#222222',
+                        'nvidia-mid': '#333333',
+                        'nvidia-light': '#f0f0f0',
+                        'nvidia-accent': '#4a4a4a', // A slightly lighter dark for contrast
+                    }
+                },
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loop-box {
+            transition: all 0.3s ease-in-out;
+            min-height: 250px; /* Ensure boxes have height */
+        }
+        .highlighted {
+            border-color: #76b900; /* nvidia-green */
+            box-shadow: 0 0 15px rgba(118, 185, 0, 0.7);
+            transform: scale(1.01);
+        }
+        .dimmed {
+            border-color: #4a4a4a; /* nvidia-accent */
+        }
+        .circuit-line {
+            height: 2px;
+            background-color: #f0f0f0;
+            width: 30px;
+        }
+        .gate-box {
+            border: 2px solid #76b900;
+            padding: 4px 8px;
+            font-weight: bold;
+            display: inline-block;
+            white-space: nowrap;
+            border-radius: 4px;
+        }
+        .measurement-box {
+            border: 2px solid #f0f0f0;
+            padding: 4px 8px;
+            font-weight: bold;
+            display: inline-block;
+            white-space: nowrap;
+            border-radius: 4px;
+        }
+        
+        /* Arrow styles */
+        .arrow-box {
+            transition: all 0.3s ease-in-out;
+        }
+        .arrow-box svg {
+            stroke: #f0f0f0; /* nvidia-light */
+            transition: all 0.3s ease-in-out;
+        }
+        .arrow-box.highlighted {
+            border-color: #76b900;
+            box-shadow: 0 0 10px rgba(118, 185, 0, 0.5);
+        }
+        .arrow-box.highlighted svg {
+            stroke: #76b900;
+        }
+        .arrow-box .arrow-text {
+            color: #76b900; /* nvidia-green */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-nvidia-dark text-nvidia-light min-h-screen p-6 flex flex-col items-center justify-center">
+
+    <div class="max-w-6xl w-full mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-nvidia-green hidden">VQE Explorer</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-center">
+            <!-- QPU Box --><div id="qpu-box" class="loop-box lg:col-span-2 bg-nvidia-mid p-6 rounded-lg shadow-xl border-2 dimmed flex flex-col justify-between">
+                <div>
+                    <h3 class="text-2xl font-semibold text-center text-nvidia-light">QPU</h3>
+                    <p class="text-center text-nvidia-green font-mono text-lg mb-4">H = Z</p>
+                    <div class="flex items-center justify-center font-mono text-xl mb-6">
+                        <span>|0⟩</span>
+                        <div class="circuit-line"></div>
+                        <div class="gate-box">R<sub class="text-sm">y</sub>(θ)</div>
+                        <div class="circuit-line"></div>
+                        <div class="measurement-box">M(Z)</div>
+                        <div class="circuit-line"></div>
+                        <span>⟨H⟩</span>
+                    </div>
+                    <p id="qpu-status" class="text-lg text-center text-nvidia-light h-16">Waiting for input...</p>
+                    <p id="qpu-result" class="text-3xl font-bold text-center text-nvidia-green mt-4 hidden"></p>
+                </div>
+                <!-- Run QPU Button removed -->
+            </div>
+
+            <!-- Arrow Container --><div id="arrow-container" class="lg:col-span-1 flex flex-col items-center justify-center space-y-12 py-6">
+                <!-- Arrow: QPU -> AI -->
+                <div id="arrow-qpu-to-ai" class="arrow-box p-2 rounded-lg border-2 w-full dimmed">
+                    <svg class="w-full h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                    </svg>
+                    <p id="arrow-qpu-text" class="text-center font-mono text-sm arrow-text hidden"></p>
+                </div>
+                <!-- Arrow: AI -> QPU -->
+                <div id="arrow-ai-to-qpu" class="arrow-box p-2 rounded-lg border-2 w-full dimmed">
+                    <svg class="w-full h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+                    </svg>
+                    <p id="arrow-ai-text" class="text-center font-mono text-sm arrow-text hidden"></p>
+                </div>
+            </div>
+
+            <!-- AI Optimizer Box --><div id="ai-box" class="loop-box lg:col-span-2 bg-nvidia-mid p-6 rounded-lg shadow-xl border-2 dimmed flex flex-col justify-between">
+                <div>
+                    <h3 class="text-2xl font-semibold text-center text-nvidia-light">AI Supercomputer</h3>
+                    <p id="ai-status" class="text-lg text-center text-nvidia-light h-16 mb-6">Waiting for QPU result.</p>
+                    
+                    <div id="ai-controls" class="hidden">
+                        <!-- Controls are automated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plot Area --><div class="bg-nvidia-mid p-6 rounded-lg shadow-xl border-2 border-nvidia-accent">
+            <h3 class="text-xl font-semibold mb-4 text-center text-nvidia-light">Run History</h3>
+            <div id="energy-list" class="w-full h-32 overflow-y-auto bg-nvidia-dark p-2 rounded-md font-mono text-sm border border-nvidia-accent"></div>
+            <!-- Show Plot Button Removed -->
+            <div id="plot-container" class="w-full h-64 mt-4 hidden">
+                <canvas id="vqe-chart-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Start/Reset Button --><div class="mt-8 text-center">
+            <button id="start-reset-btn" class="bg-nvidia-green text-nvidia-dark font-bold py-4 px-12 rounded-lg shadow-md hover:bg-green-400 transition-colors duration-200 text-xl">
+                START VQE
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const qpuBox = document.getElementById('qpu-box');
+        const aiBox = document.getElementById('ai-box');
+        const qpuStatus = document.getElementById('qpu-status');
+        const qpuResult = document.getElementById('qpu-result');
+        const aiStatus = document.getElementById('ai-status');
+        const startResetBtn = document.getElementById('start-reset-btn');
+        const energyList = document.getElementById('energy-list');
+        // const showPlotBtn = document.getElementById('show-plot-btn'); // Removed
+        const plotContainer = document.getElementById('plot-container');
+        
+        // Arrow elements
+        const arrowQpuToAi = document.getElementById('arrow-qpu-to-ai');
+        const arrowAiToQpu = document.getElementById('arrow-ai-to-qpu');
+        const arrowQpuText = document.getElementById('arrow-qpu-text');
+        const arrowAiText = document.getElementById('arrow-ai-text');
+
+        // Chart.js Setup
+        let vqeChart;
+
+        // --- Global State ---
+        const thetaSteps = [0.67, 1.0, 1.5, 2.0, 2.5, 3.0, 3.142]; // Pre-defined path (7 steps)
+        let currentStep = 0; // This will be the index for thetaSteps
+        let expectationValues = [];
+        let labels = [];
+        let activePhase = 'idle'; // 'idle', 'running', 'finished'
+        let currentTimeout = null;
+
+        // --- Chart Functions ---
+        function initChart() {
+            if (vqeChart) vqeChart.destroy();
+            plotContainer.innerHTML = '<canvas id="vqe-chart-canvas"></canvas>'; // Reset canvas
+            const newCtx = document.getElementById('vqe-chart-canvas').getContext('2d');
+            plotContainer.classList.remove('hidden'); // Show the plot area
+
+            vqeChart = new Chart(newCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '⟨H⟩ (Expectation Value)',
+                        data: expectationValues,
+                        borderColor: '#76b900', // nvidia-green
+                        backgroundColor: 'rgba(118, 185, 0, 0.2)',
+                        pointBackgroundColor: '#76b900',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#76b900',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f0f0f0' // nvidia-light
+                            }
+                        },
+                        title: {
+                            display: false,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Step',
+                                color: '#f0f0f0'
+                            },
+                            ticks: {
+                                color: '#f0f0f0'
+                            },
+                            grid: {
+                                color: '#4a4a4a' // nvidia-accent
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '⟨H⟩',
+                                color: '#f0f0f0'
+                            },
+                            ticks: {
+                                color: '#f0f0f0'
+                            },
+                            grid: {
+                                color: '#4a4a4a'
+                            },
+                            min: -1.1,
+                            max: 1.1
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateHistory(step, expectation) {
+            labels.push(`Step ${step}`);
+            expectationValues.push(expectation);
+
+            const entry = document.createElement('p');
+            entry.textContent = `Step ${step}: ⟨H⟩ = ${expectation.toFixed(5)}`;
+            energyList.appendChild(entry);
+            energyList.scrollTop = energyList.scrollHeight; // Auto-scroll
+
+            // Live update the chart
+            if (vqeChart) {
+                vqeChart.data.labels = labels;
+                vqeChart.data.datasets[0].data = expectationValues;
+                vqeChart.update();
+            }
+        }
+
+        // --- VQE Logic ---
+        /** Calculates expectation value for H = Z, which is cos(theta) for Ry(theta) on |0> */
+        function calculateExpectationZ(theta) {
+            return Math.cos(theta);
+        }
+        
+        function setAllDimmed() {
+            qpuBox.classList.remove('highlighted');
+            aiBox.classList.remove('highlighted');
+            arrowQpuToAi.classList.remove('highlighted');
+            arrowAiToQpu.classList.remove('highlighted');
+            
+            qpuBox.classList.add('dimmed');
+            aiBox.classList.add('dimmed');
+            arrowQpuToAi.classList.add('dimmed');
+            arrowAiToQpu.classList.add('dimmed');
+            
+            arrowQpuText.classList.add('hidden');
+            arrowAiText.classList.add('hidden');
+            qpuResult.classList.add('hidden');
+        }
+
+        /** Main state machine for the automated demo */
+        function runDemoCycle(stepIndex) {
+            if (activePhase !== 'running') return; // Stop if reset was called
+
+            setAllDimmed();
+            
+            // 1. QPU Phase
+            const currentTheta = thetaSteps[stepIndex];
+            qpuBox.classList.remove('dimmed');
+            qpuBox.classList.add('highlighted');
+            qpuStatus.textContent = `Running circuit with θ = ${currentTheta.toFixed(3)}...`;
+            aiStatus.textContent = 'Waiting for QPU result.';
+
+            currentTimeout = setTimeout(() => {
+                if (activePhase !== 'running') return;
+                const expectation = calculateExpectationZ(currentTheta);
+                updateHistory(stepIndex + 1, expectation);
+                qpuResult.textContent = `⟨H⟩ = ${expectation.toFixed(5)}`;
+                qpuResult.classList.remove('hidden');
+
+                // 2. Arrow QPU -> AI Phase
+                setAllDimmed();
+                arrowQpuToAi.classList.remove('dimmed');
+                arrowQpuToAi.classList.add('highlighted');
+                arrowQpuText.textContent = `⟨H⟩ = ${expectation.toFixed(5)}`;
+                arrowQpuText.classList.remove('hidden');
+                aiStatus.textContent = 'Receiving ⟨H⟩...';
+                
+                currentTimeout = setTimeout(() => {
+                    if (activePhase !== 'running') return;
+                    
+                    // 3. AI Supercomputer Phase
+                    setAllDimmed();
+                    aiBox.classList.remove('dimmed');
+                    aiBox.classList.add('highlighted');
+                    
+                    if (stepIndex + 1 < thetaSteps.length) {
+                        const nextTheta = thetaSteps[stepIndex + 1];
+                        aiStatus.textContent = `Calculating... New θ = ${nextTheta.toFixed(3)}.`;
+
+                        currentTimeout = setTimeout(() => {
+                            if (activePhase !== 'running') return;
+
+                            // 4. Arrow AI -> QPU Phase
+                            setAllDimmed();
+                            arrowAiToQpu.classList.remove('dimmed');
+                            arrowAiToQpu.classList.add('highlighted');
+                            arrowAiText.textContent = `θ = ${nextTheta.toFixed(3)}`;
+                            arrowAiText.classList.remove('hidden');
+                            qpuStatus.textContent = 'Receiving new θ...';
+
+                            currentTimeout = setTimeout(() => {
+                                if (activePhase !== 'running') return;
+                                // 5. Recurse for next step
+                                runDemoCycle(stepIndex + 1);
+                            }, 600); // Arrow transfer time
+                        }, 600); // AI calculation time
+                    } else {
+                        // 5. Finished
+                        aiStatus.textContent = `Optimization complete. Final ⟨H⟩: ${expectation.toFixed(5)}`;
+                        qpuStatus.textContent = 'Run complete.';
+                        startResetBtn.textContent = 'Reset';
+                        startResetBtn.disabled = false;
+                        // showPlotBtn.disabled = false; // Removed
+                        activePhase = 'finished';
+                    }
+                }, 600); // Arrow transfer time
+            }, 600); // QPU run time
+        }
+
+        // --- Event Handlers ---
+        function handleStartReset() {
+            if (activePhase === 'idle' || activePhase === 'finished') {
+                // --- START VQE ---
+                activePhase = 'running';
+                startResetBtn.textContent = 'Reset';
+                startResetBtn.disabled = true; // Disable button while running
+                
+                // Clear old run
+                currentStep = 0;
+                expectationValues = [];
+                labels = [];
+                energyList.innerHTML = '';
+                plotContainer.classList.add('hidden'); // Hide plot on start
+                plotContainer.innerHTML = ''; // Clear canvas
+                if (vqeChart) vqeChart.destroy();
+                // showPlotBtn.disabled = true; // Removed
+                
+                // Start the cycle
+                initChart(); // Create the new chart
+                runDemoCycle(0);
+
+            } else if (activePhase === 'running') {
+                // --- RESET ---
+                activePhase = 'idle';
+                if (currentTimeout) clearTimeout(currentTimeout);
+                
+                setAllDimmed();
+                qpuBox.classList.add('dimmed');
+                aiBox.classList.add('dimmed');
+                qpuStatus.textContent = `Current θ: ${thetaSteps[0].toFixed(3)}`;
+                aiStatus.textContent = 'Waiting to start.';
+                startResetBtn.textContent = 'START VQE';
+                startResetBtn.disabled = false;
+                // showPlotBtn.disabled = true; // Removed
+                energyList.innerHTML = '';
+                plotContainer.classList.add('hidden');
+                plotContainer.innerHTML = '';
+                if (vqeChart) { vqeChart.destroy(); vqeChart = null; }
+            }
+        }
+        
+        // --- Initialization ---
+        setAllDimmed();
+        qpuBox.classList.add('dimmed');
+        aiBox.classList.add('dimmed');
+        qpuStatus.textContent = `Current θ: ${thetaSteps[0].toFixed(3)}`;
+        aiStatus.textContent = 'Waiting to start.';
+        activePhase = 'idle';
+        // showPlotBtn.disabled = true; // Removed
+
+        // Add Event Listeners
+        startResetBtn.addEventListener('click', handleStartReset);
+        // showPlotBtn.addEventListener('click', initChart); // Removed
+    </script>
+
+</body>
+</html>
+
