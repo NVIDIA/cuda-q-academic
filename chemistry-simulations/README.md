@@ -12,6 +12,6 @@ simply log in to the account, then click on the icons below to run the notebooks
 | Notebook      | Google Colab |
 | -----------  | ----------- |
 |Lab 1 - ADAPT VQE  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb)|
-|Lab 2 - Krylov Quantum Subspace Diagonalization  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_quantum_subspace_diagonalization.ipynb)|
+|Lab 2 - Krylov Quantum Subspace Diagonalization  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb)|
 
 
