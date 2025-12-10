@@ -62,7 +62,8 @@ This series requires minimal knowledge of AI, treating the AI models as black bo
 
 ---
 ## Chemistry Simulations 
-This collection of notebooks explores techniques for calculating molecular ground state energies, a fundamental problem in chemistry. The notebooks offer a deep dive into implementing and applying the ADAPT-VQE algorithm and Krylov subspace methods.
+This collection of notebooks explores a variety of techniques for simulating the electronic structure of molecules.  This includes techniques like QM/MM, ADAPT-VQE, and Krylov subspace diagonalization.
+
 
 
 
