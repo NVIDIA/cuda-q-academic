@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NH₃ Active Space Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(118, 185, 0, 0.1);
+            border-left: 4px solid #76B900;
+        }
+
+        .header h1 {
+            color: #76B900;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #cccccc;
+            font-size: 0.95em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .controls {
+            background: #2d2d2d;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            color: #76B900;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        input[type="number"] {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #76B900;
+        }
+
+        .info-box {
+            background: rgba(118, 185, 0, 0.15);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 3px solid #76B900;
+        }
+
+        .info-box p {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .error {
+            color: #ff6464;
+            background: rgba(255, 100, 100, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #ff6464;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .visualization {
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            min-height: 600px;
+        }
+
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+        }
+
+        .orbital-diagram {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+        }
+
+        .orbital {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .orbital-number {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .orbital-box {
+            width: 350px;
+            height: 32px;
+            border: 2px solid;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+
+        .electrons {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+
+        .electron {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            position: relative;
+        }
+
+        .electron.up {
+            border-bottom: 12px solid #76B900;
+        }
+
+        .electron.down {
+            border-top: 12px solid #76B900;
+        }
+
+        /* Core orbitals */
+        .orbital.core .orbital-box {
+            background: rgba(100, 100, 255, 0.3);
+            border-color: #6464ff;
+        }
+
+        /* Active space orbitals */
+        .orbital.active .orbital-box {
+            background: rgba(118, 185, 0, 0.3);
+            border-color: #76B900;
+            border-width: 3px;
+            box-shadow: 0 0 15px rgba(118, 185, 0, 0.5);
+        }
+
+        /* Virtual orbitals */
+        .orbital.virtual .orbital-box {
+            background: rgba(255, 100, 100, 0.3);
+            border-color: #ff6464;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 40px;
+            height: 25px;
+            border: 2px solid;
+            border-radius: 4px;
+        }
+
+        .legend-box.core {
+            background: rgba(100, 100, 255, 0.3);
+            border-color: #6464ff;
+        }
+
+        .legend-box.active {
+            background: rgba(118, 185, 0, 0.3);
+            border-color: #76B900;
+            border-width: 3px;
+        }
+
+        .legend-box.virtual {
+            background: rgba(255, 100, 100, 0.3);
+            border-color: #ff6464;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .orbital-box {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .orbital-box {
+                width: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NH₃ Active Space Visualizer</h1>
+            <p>6-31G Basis Set | Interactive Orbital Diagram</p>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="controls">
+                    <div class="input-group">
+                        <label for="numElectrons">Active Space Electrons:</label>
+                        <input type="number" id="numElectrons" min="0" max="10" value="4" step="2">
+                    </div>
+                    <div class="input-group">
+                        <label for="numOrbitals">Active Space Orbitals:</label>
+                        <input type="number" id="numOrbitals" min="0" max="15" value="4">
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>System Info:</strong> NH₃ with 6-31G basis set</p>
+                    <p><strong>Total Electrons:</strong> 10</p>
+                    <p><strong>Total Orbitals:</strong> 15</p>
+                    <p><strong>Current Configuration:</strong></p>
+                    <p><span id="configInfo">4 electrons in 4 orbitals</span></p>
+                </div>
+
+                <div class="error" id="errorMsg"></div>
+            </div>
+
+            <div class="visualization">
+                <div class="diagram-container">
+                    <div class="orbital-diagram" id="orbitalDiagram"></div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-box core"></div>
+                        <span>Core Orbitals</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box active"></div>
+                        <span>Active Space</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box virtual"></div>
+                        <span>Virtual Orbitals</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_ELECTRONS = 10;
+        const TOTAL_ORBITALS = 15;
+
+        const numElectronsInput = document.getElementById('numElectrons');
+        const numOrbitalsInput = document.getElementById('numOrbitals');
+        const configInfo = document.getElementById('configInfo');
+        const errorMsg = document.getElementById('errorMsg');
+        const orbitalDiagram = document.getElementById('orbitalDiagram');
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+        }
+
+        function hideError() {
+            errorMsg.classList.remove('show');
+        }
+
+        function validateInputs(activeElectrons, activeOrbitals) {
+            if (activeElectrons < 0 || activeElectrons > TOTAL_ELECTRONS) {
+                showError(`Active electrons must be between 0 and ${TOTAL_ELECTRONS}`);
+                return false;
+            }
+
+            if (activeOrbitals < 0 || activeOrbitals > TOTAL_ORBITALS) {
+                showError(`Active orbitals must be between 0 and ${TOTAL_ORBITALS}`);
+                return false;
+            }
+
+            if (activeElectrons % 2 !== 0) {
+                showError('Active electrons should be even for closed-shell systems');
+                return false;
+            }
+
+            const minOrbitalsNeeded = Math.ceil(activeElectrons / 2);
+            if (activeOrbitals < minOrbitalsNeeded) {
+                showError(`Need at least ${minOrbitalsNeeded} orbitals for ${activeElectrons} electrons`);
+                return false;
+            }
+
+            const coreElectrons = TOTAL_ELECTRONS - activeElectrons;
+            const coreOrbitals = coreElectrons / 2;
+            
+            if (coreOrbitals + activeOrbitals > TOTAL_ORBITALS) {
+                showError('Configuration exceeds total number of orbitals');
+                return false;
+            }
+
+            return true;
+        }
+
+        function drawDiagram() {
+            const activeElectrons = parseInt(numElectronsInput.value) || 0;
+            const activeOrbitals = parseInt(numOrbitalsInput.value) || 0;
+
+            if (!validateInputs(activeElectrons, activeOrbitals)) {
+                return;
+            }
+
+            hideError();
+            configInfo.textContent = `${activeElectrons} electrons in ${activeOrbitals} orbitals`;
+
+            const coreElectrons = TOTAL_ELECTRONS - activeElectrons;
+            const coreOrbitals = coreElectrons / 2;
+            const virtualOrbitals = TOTAL_ORBITALS - coreOrbitals - activeOrbitals;
+
+            orbitalDiagram.innerHTML = '';
+
+            // Calculate electron distribution in active space
+            const activeOccupiedOrbitals = activeElectrons / 2;
+
+            // Draw all orbitals
+            for (let i = 1; i <= TOTAL_ORBITALS; i++) {
+                const orbital = document.createElement('div');
+                orbital.className = 'orbital';
+
+                let type = '';
+                let electrons = 0;
+
+                if (i <= coreOrbitals) {
+                    type = 'core';
+                    electrons = 2;
+                } else if (i <= coreOrbitals + activeOrbitals) {
+                    type = 'active';
+                    const activeIndex = i - coreOrbitals;
+                    if (activeIndex <= activeOccupiedOrbitals) {
+                        electrons = 2;
+                    }
+                } else {
+                    type = 'virtual';
+                    electrons = 0;
+                }
+
+                orbital.classList.add(type);
+
+                orbital.innerHTML = `
+                    <div class="orbital-number">${i}</div>
+                    <div class="orbital-box">
+                        ${type === 'core' ? 'Core' : type === 'active' ? 'Active' : 'Virtual'}
+                    </div>
+                    <div class="electrons">
+                        ${electrons >= 1 ? '<div class="electron up"></div>' : ''}
+                        ${electrons >= 2 ? '<div class="electron down"></div>' : ''}
+                    </div>
+                `;
+
+                orbitalDiagram.appendChild(orbital);
+            }
+        }
+
+        numElectronsInput.addEventListener('input', drawDiagram);
+        numOrbitalsInput.addEventListener('input', drawDiagram);
+
+        // Initial draw
+        drawDiagram();
+    </script>
+</body>
+</html>

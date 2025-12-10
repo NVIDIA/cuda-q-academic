@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QM/MM Polarized Embedding Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nvidia-green: #76B900;
+            --nvidia-dark-gray: #1A1A1A;
+            --nvidia-light-gray: #333333;
+            --text-color: #EFEFEF;
+            --pole-positive: #f6e05e; /* Yellow */
+            --pole-negative: #63b3ed; /* Blue */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--nvidia-dark-gray);
+            color: var(--text-color);
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid var(--nvidia-light-gray);
+            cursor: pointer;
+            background-color: transparent;
+            color: var(--text-color);
+        }
+        .btn:hover:not(:disabled) {
+            background-color: var(--nvidia-light-gray);
+            border-color: #555;
+        }
+        .btn:disabled {
+            color: #666;
+            border-color: #444;
+            cursor: not-allowed;
+        }
+        
+        /* Highlighting animation */
+        @keyframes pulse-glow-qm {
+            0% { box-shadow: 0 0 15px 5px rgba(118, 185, 0, 0.4); }
+            50% { box-shadow: 0 0 35px 15px rgba(118, 185, 0, 0.8); }
+            100% { box-shadow: 0 0 15px 5px rgba(118, 185, 0, 0.4); }
+        }
+        @keyframes pulse-glow-mm {
+            0% { box-shadow: 0 0 20px 0px rgba(99, 179, 237, 0.4); }
+            50% { box-shadow: 0 0 40px 10px rgba(99, 179, 237, 0.7); }
+            100% { box-shadow: 0 0 20px 0px rgba(99, 179, 237, 0.4); }
+        }
+        .highlight-qm {
+            animation: pulse-glow-qm 1.5s infinite ease-in-out;
+        }
+        .highlight-mm {
+            animation: pulse-glow-mm 1.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+        <div class="w-full max-w-5xl bg-[#2A2A2A] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            
+            <header class="p-6 bg-black bg-opacity-20 border-b border-gray-700">
+                <h1 class="text-2xl md:text-3xl font-bold text-white">Interactive QM/MM Model</h1>
+                <p class="text-sm md:text-base text-gray-400 mt-1">Step-by-Step SCF Polarization</p>
+            </header>
+
+            <div class="flex flex-col lg:flex-row flex-grow">
+                
+                <div class="w-full lg:w-2/3 p-6 md:p-10 flex flex-col items-center justify-center relative border-b lg:border-r lg:border-b-0 border-gray-700">
+                    <div id="visualization-area" class="relative w-full max-w-md aspect-square rounded-full flex items-center justify-center">
+                        <div id="mm-region" class="absolute w-full h-full rounded-full transition-all duration-300"></div>
+                        <div id="qm-region" class="relative w-1/2 h-1/2 border-2 border-dashed border-[var(--nvidia-green)] rounded-full flex items-center justify-center transition-all duration-500 ease-in-out">
+                            <div id="qm-core" class="relative w-16 h-16 bg-white rounded-full flex items-center justify-center transition-all duration-300 ease-in-out">
+                               <div id="qm-density" class="absolute w-full h-full bg-[var(--nvidia-green)] rounded-full opacity-50 transition-all duration-300 ease-in-out"></div>
+                               <span class="relative text-black font-bold text-xl z-10">QM</span>
+                            </div>
+                        </div>
+                        <span id="mm-label" class="absolute top-4 left-4 text-xs font-semibold uppercase tracking-wider text-gray-400 bg-gray-900 px-2 py-1 rounded transition-opacity duration-500">MM Environment</span>
+                    </div>
+                    <p id="step-description" class="text-center mt-8 text-lg text-gray-200 h-auto min-h-[2.5rem]">Press 'Next' to begin.</p>
+                </div>
+
+                <div class="w-full lg:w-1/3 p-6 md:p-8 bg-black bg-opacity-10">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Color Key</h3>
+                            <div class="text-sm text-gray-400 space-y-2">
+                                <p><b>MM Atoms:</b> Neutral gray atoms polarize, creating a <b style="color: var(--pole-negative)">blue</b> negative pole and a <b style="color: var(--pole-positive)">yellow</b> positive pole.</p>
+                                <p><b>QM Density:</b> The green orb represents electron density. A gradient shows it being pulled by the MM field.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-2">SCF Procedure</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed">
+                                <b>1.</b> Define QM/MM regions.<br>
+                                <b>2.</b> Compute QM energy & 1-RDMs.<br>
+                                <b>3.</b> Compute induced dipoles in MM region from 1-RDMs.<br>
+                                <b>4.</b> Repeat steps 2-3 until energy converges.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Navigation Bar -->
+            <div class="flex items-center justify-between p-4 bg-black bg-opacity-25 border-t border-gray-700">
+                <button id="prev-button" class="btn">Previous</button>
+                <span id="step-indicator" class="font-semibold text-gray-300">Step 0</span>
+                <button id="next-button" class="btn">Next</button>
+            </div>
+        </div>
+        <footer class="text-center mt-6 text-gray-500 text-sm">
+            <p>A qualitative model for educational purposes. Not a real simulation.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            const stepIndicator = document.getElementById('step-indicator');
+            const stepDescription = document.getElementById('step-description');
+            const qmRegion = document.getElementById('qm-region');
+            const mmRegion = document.getElementById('mm-region');
+            const mmLabel = document.getElementById('mm-label');
+            const qmDensity = document.getElementById('qm-density');
+
+            const NUM_MM_ATOMS = 24;
+            let currentIndex = 0;
+            const mmAtoms = [];
+
+            const steps = [
+                // 0
+                { label: "Step 0", desc: "The system is empty. Press 'Next' to define the regions.", vis: { show: false }, highlight: 'none' },
+                // 1
+                { label: "Step 1", desc: "1. Defining the QM and MM regions.", vis: { show: true, mmP: 0, qmP: 0, scale: 1.0 }, highlight: 'none' },
+                // Iteration 1 (a)
+                { label: "Step 2a", desc: "2. Computing QM energy & 1-RDMs in the field of the unpolarized MM atoms.", vis: { show: true, mmP: 0, qmP: 0.1, scale: 1.0 }, highlight: 'qm' },
+                { label: "Step 3a", desc: "3. Computing induced dipoles in the MM region.", vis: { show: true, mmP: 0.4, qmP: 0.1, scale: 1.75 }, highlight: 'mm' },
+                // Iteration 2 (b)
+                { label: "Step 2b", desc: "2. Recomputing QM energy & 1-RDMs in the presence of the new MM dipoles.", vis: { show: true, mmP: 0.4, qmP: 0.5, scale: 1.75 }, highlight: 'qm' },
+                { label: "Step 3b", desc: "3. Refining induced dipoles in the MM region.", vis: { show: true, mmP: 0.7, qmP: 0.5, scale: 1.75 }, highlight: 'mm' },
+                // Iteration 3 (c)
+                { label: "Step 2c", desc: "2. Recomputing QM energy & 1-RDMs in the presence of the refined MM dipoles.", vis: { show: true, mmP: 0.7, qmP: 0.85, scale: 1.75 }, highlight: 'qm' },
+                { label: "Step 3c", desc: "3. Finalizing induced dipoles.", vis: { show: true, mmP: 0.9, qmP: 0.85, scale: 1.75 }, highlight: 'mm' },
+                // Convergence
+                { label: "Converged", desc: "4. The energy and density have converged.", vis: { show: true, mmP: 0.9, qmP: 0.9, scale: 1.75 }, highlight: 'none' }
+            ];
+
+            function setupMMRegion() {
+                mmRegion.innerHTML = '';
+                mmAtoms.length = 0;
+                const radius = mmRegion.offsetWidth / 2;
+                for (let i = 0; i < NUM_MM_ATOMS; i++) {
+                    const angle = (i / NUM_MM_ATOMS) * 2 * Math.PI;
+                    const r = radius * (0.75 + (i % 3) * 0.1);
+                    const x = radius + r * Math.cos(angle);
+                    const y = radius + r * Math.sin(angle);
+                    const atom = document.createElement('div');
+                    atom.className = 'absolute w-4 h-4 rounded-full transition-all duration-500 ease-in-out';
+                    atom.style.left = `${x - 8}px`;
+                    atom.style.top = `${y - 8}px`;
+                    const gradient = document.createElement('div');
+                    gradient.className = 'w-full h-full rounded-full transition-all duration-500';
+                    atom.appendChild(gradient);
+                    mmRegion.appendChild(atom);
+                    mmAtoms.push({ element: atom, gradient, angle });
+                }
+            }
+
+            function updateVisuals(vis, highlightType) {
+                // Toggle visibility of main components
+                const opacity = vis.show ? '1' : '0';
+                qmRegion.style.opacity = opacity;
+                mmRegion.style.opacity = opacity;
+                mmLabel.style.opacity = opacity;
+
+                // Reset highlights
+                qmRegion.classList.remove('highlight-qm');
+                mmRegion.classList.remove('highlight-mm');
+
+                if (!vis.show) return;
+
+                const { mmP, qmP, scale } = vis;
+
+                // Update MM Atoms
+                mmAtoms.forEach(atom => {
+                    const direction = Math.cos(atom.angle);
+                    let bgColor = 'radial-gradient(circle, #999, #666)';
+                    if (mmP > 0.01) {
+                        bgColor = direction > 0 ? `radial-gradient(at 30% 30%, var(--pole-positive), #444)` : `radial-gradient(at 70% 70%, var(--pole-negative), #444)`;
+                    }
+                    atom.gradient.style.background = bgColor;
+                    atom.gradient.style.opacity = mmP > 0 ? 0.5 + mmP * 0.5 : 1;
+                    atom.element.style.transform = `scale(${scale})`;
+                });
+
+                // Update QM Density
+                const densityScale = 1 + 0.5 * qmP;
+                const densityShift = 15 * qmP;
+                qmDensity.style.transform = `scale(${densityScale}) translateX(${densityShift}px)`;
+                qmDensity.style.opacity = 0.5 + 0.4 * qmP;
+                const colorA = `rgb(100, 150, 0)`;
+                const colorB = `rgb(180, 255, 80)`;
+                qmDensity.style.background = qmP > 0 ? `linear-gradient(to left, ${colorB}, ${colorA})` : `var(--nvidia-green)`;
+
+                // Apply new highlight
+                if (highlightType === 'qm') qmRegion.classList.add('highlight-qm');
+                if (highlightType === 'mm') mmRegion.classList.add('highlight-mm');
+            }
+
+            function goToStep(index) {
+                const step = steps[index];
+                stepIndicator.textContent = step.label;
+                stepDescription.textContent = step.desc;
+
+                updateVisuals(step.vis, step.highlight);
+
+                // Update button states
+                prevButton.disabled = index === 0;
+                nextButton.disabled = index === steps.length - 1;
+            }
+
+            nextButton.addEventListener('click', () => {
+                if (currentIndex < steps.length - 1) {
+                    currentIndex++;
+                    goToStep(currentIndex);
+                }
+            });
+
+            prevButton.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    goToStep(currentIndex);
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                setupMMRegion();
+                goToStep(currentIndex); // Re-apply current state after resize
+            });
+
+            // Initial Setup
+            setupMMRegion();
+            goToStep(0);
+        });
+    </script>
+
+</body>
+</html>
