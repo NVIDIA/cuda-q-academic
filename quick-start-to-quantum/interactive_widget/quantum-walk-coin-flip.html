@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quantum Random Walk</title>
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark-gray: #333333;
+            --nvidia-mid-gray: #888888;
+            --nvidia-light-gray: #f5f5f5;
+            --background-color: #2a2a2a;
+            --text-color: #ffffff;
+            --container-bg: #3c3c3c;
+            --highlight-yellow: #ffd700;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        h1, h3 {
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .control-panel {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .button-controls button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            font-weight: bold;
+            min-width: 140px;
+        }
+        .button-controls button:active {
+            transform: scale(0.98);
+        }
+        .button-controls button:disabled {
+            background-color: var(--nvidia-dark-gray);
+            color: var(--nvidia-mid-gray);
+            cursor: not-allowed;
+            transform: none;
+            border: 1px solid #444;
+        }
+        
+        .primary-btn {
+            background-color: var(--nvidia-green);
+            color: white;
+        }
+        .primary-btn:hover:not(:disabled) {
+            background-color: var(--nvidia-green-dark);
+        }
+
+        .action-btn {
+            background-color: #0078d7;
+            color: white;
+        }
+        .action-btn:hover:not(:disabled) {
+            background-color: #0063b1;
+        }
+
+        .secondary-btn {
+            background-color: var(--nvidia-mid-gray);
+            color: white;
+        }
+        .secondary-btn:hover:not(:disabled) {
+            background-color: #999999;
+        }
+
+        #stepValueDisplay {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--nvidia-green);
+            margin-top: 10px;
+            height: 30px;
+        }
+
+        .coin-state-display {
+            text-align: center;
+            font-size: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--nvidia-green);
+            margin: 15px 0;
+            height: 30px;
+            background-color: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .coin-label {
+            color: var(--nvidia-light-gray);
+            font-weight: bold;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 16px;
+        }
+
+        .visualization {
+            margin: 20px 0;
+        }
+        .number-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+            height: 160px; /* Increased height to accommodate taller labels */
+            border-bottom: 2px solid var(--nvidia-mid-gray);
+        }
+        .position-marker {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--nvidia-mid-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: var(--container-bg);
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+            margin-top: 80px; /* Push markers down */
+        }
+        
+        #walkerContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .superposition-walker {
+            position: absolute;
+            background-color: var(--nvidia-green);
+            border-radius: 50%;
+            transition: all 0.4s ease-in-out;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            opacity: 0.75;
+            pointer-events: auto;
+            z-index: 10;
+        }
+        .superposition-walker:hover {
+            opacity: 1;
+            box-shadow: 0 0 15px var(--nvidia-green);
+            transform: translate(-50%, -50%) scale(1.1);
+            z-index: 20;
+        }
+
+        /* The yellow label showing the flip result */
+        .flip-result-label {
+            position: absolute;
+            top: -95px; /* Moved higher up */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.9);
+            border: 1px solid var(--highlight-yellow);
+            color: var(--highlight-yellow);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+            z-index: 30;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .flip-result-label::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--highlight-yellow) transparent transparent transparent;
+        }
+
+        .old-state {
+            color: #aaa;
+            font-size: 11px;
+        }
+        .arrow-indicator {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            margin: 2px 0;
+        }
+        .new-state {
+            color: var(--highlight-yellow);
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .distribution {
+            margin-top: 20px;
+        }
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 200px;
+            border-bottom: 2px solid var(--nvidia-mid-gray);
+            margin-bottom: 10px;
+            padding: 0 5px;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, var(--nvidia-green-dark), var(--nvidia-green));
+            margin: 0 2px;
+            position: relative;
+            transition: height 0.5s ease-out;
+            border-radius: 3px 3px 0 0;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+        }
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: var(--nvidia-green);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .bar:hover .bar-value {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quantum Random Walk</h1>
+        
+        <div class="control-panel">
+            <div class="button-controls">
+                <button class="primary-btn" id="flipBtn">1. Flip Coin</button>
+                <button class="action-btn" id="shiftBtn" disabled>2. Shift Position</button>
+                <button class="secondary-btn" id="resetBtn">Reset</button>
+            </div>
+            <div id="stepValueDisplay">Step 0</div>
+        </div>
+        
+        <div class="visualization">
+            <div class="coin-state-display" id="coinStateDisplay">
+                <span class="coin-label">Current Coin State:</span>
+                <span id="coinText">Hover over a position</span>
+            </div>
+            <div class="number-line" id="numberLine">
+                <div id="walkerContainer"></div>
+            </div>
+        </div>
+        
+        <div class="distribution">
+            <h3>Probability Distribution</h3>
+            <div class="bar-chart" id="barChart"></div>
+            <p style="text-align: center; margin-top: 30px;">Walker Position</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Element References ---
+        const numberLine = document.getElementById('numberLine');
+        const barChart = document.getElementById('barChart');
+        const walkerContainer = document.getElementById('walkerContainer');
+        const coinText = document.getElementById('coinText');
+        const stepValueDisplay = document.getElementById('stepValueDisplay');
+        const flipBtn = document.getElementById('flipBtn');
+        const shiftBtn = document.getElementById('shiftBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // --- Constants & State ---
+        const MAX_STEPS = 4;
+        const NUM_POSITIONS = 2 * MAX_STEPS + 1;
+        const CENTER_POS_INDEX = MAX_STEPS;
+        
+        let currentState;
+        let stepCounter;
+        let isFlipPending = true; 
+
+        // --- CORE QUANTUM LOGIC ---
+        
+        function applyCoinFlip() {
+            // 1. Capture the "Old" state before mutation for visualization
+            const preFlipState = new Map();
+            for (const [key, val] of currentState) {
+                preFlipState.set(key, { ...val });
+            }
+
+            // 2. Apply Hadamard gate to create "New" state
+            const nextState = new Map();
+            for (const [posIndex, amps] of currentState.entries()) {
+                const h_c0 = (amps.c0 + amps.c1) / Math.SQRT2;
+                const h_c1 = (amps.c0 - amps.c1) / Math.SQRT2;
+                nextState.set(posIndex, { c0: h_c0, c1: h_c1 });
+            }
+            
+            currentState = nextState;
+            isFlipPending = false;
+            
+            // 3. Update UI with both states to show comparison
+            updateUI(true, preFlipState);
+        }
+
+        function applyShift() {
+            const nextState = new Map();
+            
+            for (const [posIndex, amps] of currentState.entries()) {
+                // Conditional shift: c0 moves left, c1 moves right
+                addToState(nextState, posIndex - 1, amps.c0, 'c0');
+                addToState(nextState, posIndex + 1, amps.c1, 'c1');
+            }
+            
+            currentState = nextState;
+            stepCounter++;
+            isFlipPending = true;
+            updateUI(false); 
+        }
+
+        function addToState(stateMap, posIndex, amp, coinComponent) {
+            if (Math.abs(amp) < 1e-12) return; 
+            if (!stateMap.has(posIndex)) {
+                stateMap.set(posIndex, { c0: 0, c1: 0 });
+            }
+            stateMap.get(posIndex)[coinComponent] += amp;
+        }
+        
+        function resetSimulation() {
+            stepCounter = 0;
+            isFlipPending = true;
+            currentState = new Map();
+            // Initial state: |ψ_0⟩ = |+⟩_C |0⟩_P 
+            const initialAmp = 1 / Math.SQRT2;
+            currentState.set(CENTER_POS_INDEX, { c0: initialAmp, c1: initialAmp });
+            updateUI(false);
+        }
+
+        // --- UI & VISUALIZATION ---
+
+        function initializeUI() {
+            numberLine.innerHTML = '<div id="walkerContainer"></div>';
+            barChart.innerHTML = '';
+            
+            for (let i = 0; i < NUM_POSITIONS; i++) {
+                const posElement = document.createElement('div');
+                posElement.className = 'position-marker';
+                posElement.textContent = i - CENTER_POS_INDEX;
+                numberLine.appendChild(posElement);
+            }
+            
+            for (let i = 0; i < NUM_POSITIONS; i++) {
+                const barContainer = document.createElement('div');
+                barContainer.style.cssText = 'flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end;';
+                barContainer.innerHTML = `
+                    <div class="bar" style="height: 0px; width: 100%;">
+                        <div class="bar-value">0%</div>
+                    </div>
+                    <div class="bar-label">${i - CENTER_POS_INDEX}</div>
+                `;
+                barChart.appendChild(barContainer);
+            }
+        }
+        
+        function updateUI(showLabels = false, preFlipState = null) {
+            stepValueDisplay.textContent = `Step ${stepCounter}`;
+            updateSuperpositionDisplay(currentState, showLabels, preFlipState);
+            updateDistributionChart(currentState);
+            updateButtonStates();
+        }
+
+        function updateSuperpositionDisplay(state, showLabels, preFlipState) {
+            const walkerContainer = document.getElementById('walkerContainer');
+            walkerContainer.innerHTML = '';
+            const markers = document.querySelectorAll('.position-marker');
+            if (markers.length === 0) return;
+
+            const lineRect = numberLine.getBoundingClientRect();
+
+            for (const [posIndex, amps] of state.entries()) {
+                const probability = amps.c0**2 + amps.c1**2;
+                if (probability > 1e-9) {
+                    const marker = markers[posIndex];
+                    if (!marker) continue;
+
+                    const markerRect = marker.getBoundingClientRect();
+                    const markerCenterLeft = (markerRect.left - lineRect.left) + (markerRect.width / 2);
+                    const markerCenterTop = (markerRect.top - lineRect.top) + (markerRect.height / 2);
+
+                    const walker = document.createElement('div');
+                    walker.className = 'superposition-walker';
+                    
+                    walker.style.left = `${markerCenterLeft}px`;
+                    walker.style.top = `${markerCenterTop}px`;
+                    
+                    const size = 10 + 45 * probability;
+                    walker.style.width = `${size}px`;
+                    walker.style.height = `${size}px`;
+
+                    walker.addEventListener('mouseenter', () => {
+                        coinText.innerHTML = formatCoinState(amps);
+                    });
+                     walker.addEventListener('mouseleave', () => {
+                        coinText.innerHTML = "Hover over a position";
+                    });
+
+                    // Add Comparison Label
+                    if (showLabels) {
+                        const oldAmps = preFlipState ? preFlipState.get(posIndex) : null;
+                        const label = document.createElement('div');
+                        label.className = 'flip-result-label';
+                        
+                        // Create comparison HTML
+                        const oldStr = oldAmps ? formatCoinStateShort(oldAmps) : "0";
+                        const newStr = formatCoinStateShort(amps);
+                        
+                        label.innerHTML = `
+                            <span class="old-state">${oldStr}</span>
+                            <span class="arrow-indicator">↓</span>
+                            <span class="new-state">${newStr}</span>
+                        `;
+                        
+                        walker.appendChild(label);
+                    }
+
+                    walkerContainer.appendChild(walker);
+                }
+            }
+        }
+        
+        function updateDistributionChart(state) {
+            const bars = document.querySelectorAll('.bar');
+            for(let i = 0; i < NUM_POSITIONS; i++) {
+                let probability = 0;
+                if(state.has(i)) {
+                    const amps = state.get(i);
+                    probability = amps.c0**2 + amps.c1**2;
+                }
+                const height = probability * 190;
+                bars[i].style.height = `${height}px`;
+                bars[i].querySelector('.bar-value').textContent = `${(probability * 100).toFixed(1)}%`;
+            }
+        }
+        
+        const formatVal = (val) => {
+            const absVal = Math.abs(val);
+            if (Math.abs(absVal - 1) < 1e-9) return "";
+            if (Math.abs(absVal - 1/Math.SQRT2) < 1e-9) return "1/√2 ";
+            if (Math.abs(absVal - 0.5) < 1e-9) return "1/2 ";
+            if (Math.abs(absVal - (1/Math.sqrt(8))) < 1e-9) return "1/√8 ";
+            return `${absVal.toFixed(2)} `;
+        };
+
+        function formatCoinStateShort(amps) {
+            const { c0, c1 } = amps;
+            let str = "";
+            if (Math.abs(c0) > 1e-3) str += `${c0 < 0 ? "-" : ""}${formatVal(c0)}|0⟩`;
+            if (Math.abs(c1) > 1e-3) {
+                let sign = c1 < 0 ? "-" : "+";
+                if(str === "" && c1 > 0) sign = ""; 
+                str += `${sign}${formatVal(c1)}|1⟩`;
+            }
+            if (str === "") return "0";
+            return str;
+        }
+
+        function formatCoinState(amps) {
+            if (!amps) return "Hover over a position";
+            const { c0, c1 } = amps;
+            
+            let terms = [];
+            if (Math.abs(c0) > 1e-9) {
+                terms.push(`${c0 < 0 ? "- " : ""}${formatVal(c0)}|0⟩`);
+            }
+            if (Math.abs(c1) > 1e-9) {
+                let sign = (c1 < 0) ? " - " : " + ";
+                if (terms.length === 0) sign = (c1 < 0) ? "- " : "";
+                terms.push(`${sign}${formatVal(c1)}|1⟩`);
+            }
+            return terms.length > 0 ? terms.join("").trim() : "Zero amplitude.";
+        }
+
+        function updateButtonStates() {
+            if (stepCounter >= MAX_STEPS) {
+                flipBtn.disabled = true;
+                shiftBtn.disabled = true;
+            } else {
+                flipBtn.disabled = !isFlipPending;
+                shiftBtn.disabled = isFlipPending;
+            }
+            
+            resetBtn.disabled = (stepCounter === 0 && isFlipPending);
+        }
+
+        // --- Event Listeners & Initialization ---
+        
+        flipBtn.addEventListener('click', applyCoinFlip);
+        shiftBtn.addEventListener('click', applyShift);
+        
+        resetBtn.addEventListener('click', () => {
+            initializeUI();
+            resetSimulation();
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeUI();
+            resetSimulation();
+        });
+
+    </script>
+</body>
+</html>
