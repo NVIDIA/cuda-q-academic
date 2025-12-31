@@ -19,7 +19,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background-color: var(--background-color);
@@ -45,7 +45,46 @@
             border-radius: 5px;
             display: flex;
             flex-direction: column;
+            gap: 15px;
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 10px;
+            background-color: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .toggle-label {
+            font-weight: bold;
+            color: var(--nvidia-light-gray);
+        }
+
+        .toggle-group {
+            display: flex;
             gap: 10px;
+        }
+
+        .toggle-btn {
+            background-color: var(--nvidia-dark-gray);
+            color: var(--nvidia-mid-gray);
+            border: 1px solid var(--nvidia-mid-gray);
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--nvidia-green);
+            color: white;
+            border-color: var(--nvidia-green);
+            box-shadow: 0 0 8px rgba(118, 185, 0, 0.4);
         }
 
         .button-controls {
@@ -56,14 +95,14 @@
         }
 
         .button-controls button {
-            padding: 10px 25px;
+            padding: 10px 20px;
             font-size: 16px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.1s;
             font-weight: bold;
-            min-width: 140px;
+            min-width: 120px;
         }
         .button-controls button:active {
             transform: scale(0.98);
@@ -99,6 +138,15 @@
         .secondary-btn:hover:not(:disabled) {
             background-color: #999999;
         }
+
+        .back-btn {
+            background-color: #d68a00; /* Orange-ish for undo */
+            color: white;
+        }
+        .back-btn:hover:not(:disabled) {
+            background-color: #b37300;
+        }
+
 
         #stepValueDisplay {
             text-align: center;
@@ -141,12 +189,13 @@
             align-items: center;
             margin: 20px 0;
             position: relative;
-            height: 160px; /* Increased height to accommodate taller labels */
+            height: 160px;
             border-bottom: 2px solid var(--nvidia-mid-gray);
         }
         .position-marker {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
+            font-size: 14px;
             border: 2px solid var(--nvidia-mid-gray);
             border-radius: 50%;
             display: flex;
@@ -157,7 +206,7 @@
             position: relative;
             z-index: 1;
             flex-shrink: 0;
-            margin-top: 80px; /* Push markers down */
+            margin-top: 80px; 
         }
         
         #walkerContainer {
@@ -188,10 +237,9 @@
             z-index: 20;
         }
 
-        /* The yellow label showing the flip result */
         .flip-result-label {
             position: absolute;
-            top: -95px; /* Moved higher up */
+            top: -95px;
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0,0,0,0.9);
@@ -199,7 +247,7 @@
             color: var(--highlight-yellow);
             padding: 8px 12px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-family: 'Courier New', Courier, monospace;
             white-space: nowrap;
             pointer-events: none;
@@ -226,7 +274,7 @@
 
         .old-state {
             color: #aaa;
-            font-size: 11px;
+            font-size: 10px;
         }
         .arrow-indicator {
             font-size: 14px;
@@ -269,13 +317,14 @@
             width: 100%;
             text-align: center;
             font-weight: bold;
+            font-size: 12px;
         }
         .bar-value {
             position: absolute;
             top: -25px;
             width: 100%;
             text-align: center;
-            font-size: 14px;
+            font-size: 12px;
             color: var(--nvidia-green);
             opacity: 0;
             transition: opacity 0.5s;
@@ -291,7 +340,17 @@
         <h1>Quantum Random Walk</h1>
         
         <div class="control-panel">
+            
+            <div class="settings-row">
+                <span class="toggle-label">Initial Coin State:</span>
+                <div class="toggle-group">
+                    <button class="toggle-btn" id="start0" onclick="setStartState(0)">|0⟩</button>
+                    <button class="toggle-btn active" id="start1" onclick="setStartState(1)">|1⟩</button>
+                </div>
+            </div>
+
             <div class="button-controls">
+                <button class="back-btn" id="backBtn" disabled>&laquo; Back</button>
                 <button class="primary-btn" id="flipBtn">1. Flip Coin</button>
                 <button class="action-btn" id="shiftBtn" disabled>2. Shift Position</button>
                 <button class="secondary-btn" id="resetBtn">Reset</button>
@@ -323,29 +382,88 @@
         const walkerContainer = document.getElementById('walkerContainer');
         const coinText = document.getElementById('coinText');
         const stepValueDisplay = document.getElementById('stepValueDisplay');
+        
         const flipBtn = document.getElementById('flipBtn');
         const shiftBtn = document.getElementById('shiftBtn');
         const resetBtn = document.getElementById('resetBtn');
+        const backBtn = document.getElementById('backBtn');
+        
+        const btnStart0 = document.getElementById('start0');
+        const btnStart1 = document.getElementById('start1');
 
         // --- Constants & State ---
-        const MAX_STEPS = 4;
+        const MAX_STEPS = 5;
         const NUM_POSITIONS = 2 * MAX_STEPS + 1;
         const CENTER_POS_INDEX = MAX_STEPS;
         
         let currentState;
         let stepCounter;
         let isFlipPending = true; 
+        
+        // NEW: History Stack for Undo/Back functionality
+        let historyStack = [];
+        // NEW: Config for starting state (0 or 1)
+        let startStateValue = 1; // Default to |1> for interference
+
+        // --- HISTORY MANAGEMENT ---
+
+        function saveState() {
+            // Create a deep copy of the current state Map
+            const stateCopy = new Map();
+            for (const [key, val] of currentState) {
+                stateCopy.set(key, { ...val });
+            }
+
+            historyStack.push({
+                state: stateCopy,
+                step: stepCounter,
+                pending: isFlipPending
+            });
+        }
+
+        function goBack() {
+            if (historyStack.length === 0) return;
+
+            const previous = historyStack.pop();
+            currentState = previous.state;
+            stepCounter = previous.step;
+            isFlipPending = previous.pending;
+
+            // Update UI without showing the "comparison/change" arrows
+            updateUI(false);
+        }
+
+        // --- CONFIGURATION ---
+
+        function setStartState(val) {
+            startStateValue = val;
+            
+            // Update Toggle Visuals
+            if (val === 0) {
+                btnStart0.classList.add('active');
+                btnStart1.classList.remove('active');
+            } else {
+                btnStart0.classList.remove('active');
+                btnStart1.classList.add('active');
+            }
+
+            // Reset simulation immediately to reflect new start state
+            initializeUI();
+            resetSimulation();
+        }
 
         // --- CORE QUANTUM LOGIC ---
         
         function applyCoinFlip() {
-            // 1. Capture the "Old" state before mutation for visualization
+            saveState(); // Save before changing
+
+            // 1. Capture "Old" state for visualization
             const preFlipState = new Map();
             for (const [key, val] of currentState) {
                 preFlipState.set(key, { ...val });
             }
 
-            // 2. Apply Hadamard gate to create "New" state
+            // 2. Apply Hadamard
             const nextState = new Map();
             for (const [posIndex, amps] of currentState.entries()) {
                 const h_c0 = (amps.c0 + amps.c1) / Math.SQRT2;
@@ -356,15 +474,15 @@
             currentState = nextState;
             isFlipPending = false;
             
-            // 3. Update UI with both states to show comparison
             updateUI(true, preFlipState);
         }
 
         function applyShift() {
+            saveState(); // Save before changing
+
             const nextState = new Map();
             
             for (const [posIndex, amps] of currentState.entries()) {
-                // Conditional shift: c0 moves left, c1 moves right
                 addToState(nextState, posIndex - 1, amps.c0, 'c0');
                 addToState(nextState, posIndex + 1, amps.c1, 'c1');
             }
@@ -386,10 +504,21 @@
         function resetSimulation() {
             stepCounter = 0;
             isFlipPending = true;
+            historyStack = []; // Clear history on reset
             currentState = new Map();
-            // Initial state: |ψ_0⟩ = |+⟩_C |0⟩_P 
-            const initialAmp = 1 / Math.SQRT2;
-            currentState.set(CENTER_POS_INDEX, { c0: initialAmp, c1: initialAmp });
+            
+            // Initialize based on Toggle Selection
+            let c0_val = 0;
+            let c1_val = 0;
+            
+            if (startStateValue === 0) {
+                c0_val = 1; // |0>
+            } else {
+                c1_val = 1; // |1>
+            }
+
+            currentState.set(CENTER_POS_INDEX, { c0: c0_val, c1: c1_val });
+            
             updateUI(false);
         }
 
@@ -461,13 +590,11 @@
                         coinText.innerHTML = "Hover over a position";
                     });
 
-                    // Add Comparison Label
                     if (showLabels) {
                         const oldAmps = preFlipState ? preFlipState.get(posIndex) : null;
                         const label = document.createElement('div');
                         label.className = 'flip-result-label';
                         
-                        // Create comparison HTML
                         const oldStr = oldAmps ? formatCoinStateShort(oldAmps) : "0";
                         const newStr = formatCoinStateShort(amps);
                         
@@ -546,6 +673,10 @@
                 shiftBtn.disabled = isFlipPending;
             }
             
+            // Back button enabled only if there is history
+            backBtn.disabled = (historyStack.length === 0);
+            
+            // Reset disabled if we are at start (step 0 and no flip pending)
             resetBtn.disabled = (stepCounter === 0 && isFlipPending);
         }
 
@@ -553,6 +684,7 @@
         
         flipBtn.addEventListener('click', applyCoinFlip);
         shiftBtn.addEventListener('click', applyShift);
+        backBtn.addEventListener('click', goBack);
         
         resetBtn.addEventListener('click', () => {
             initializeUI();
