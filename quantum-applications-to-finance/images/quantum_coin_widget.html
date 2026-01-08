@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Bloch Sphere Coin Visualizer</title>
+    <title>Interactive Bloch Sphere Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -76,9 +76,9 @@
 
     <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
         <header class="text-center mb-8">
-            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Visualizing a Quantum Coin</h1>
+            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Visualizing a Quantum State</h1>
             <p class="text-lg text-gray-400 mt-2">
-                Use the sliders to define the state of a quantum coin, \(\ket{\psi_C} = \alpha\ket{0} + \beta\ket{1}\).
+                Use the sliders to define the quantum state, \(\ket{\psi} = \alpha\ket{0} + \beta\ket{1}\).
                 Adjusting <b>Theta (\(\theta\))</b> and <b>Phi (\(\phi\))</b> changes the state's position on the Bloch sphere and updates the
                 complex amplitudes (\(\alpha\) and \(\beta\)) and measurement probabilities in real-time.
             </p>
@@ -105,7 +105,7 @@
                             <span id="phi-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
                         </div>
                         <input id="phi-slider" type="range" min="0" max="6.28318" step="0.01" value="0">
-                        <p class="text-sm text-gray-400 mt-2">Controls the angle around the equator (relative phase).</p>
+                        <p class="text-sm text-gray-400 mt-2">Controls the angle around the Z-axis (relative phase).</p>
                     </div>
                 </div>
 
