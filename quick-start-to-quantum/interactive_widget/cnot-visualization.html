@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNOT Visualization</title>
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-dark-green: #4a7500;
+            --phase-neg: #4c8bf5; /* Blue for imaginary phase 
+            --phase-imag: #ff4c4c; /* Red for negative phase */
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .widget-container {
+            background-color: var(--card-bg);
+            border: 1px solid #444;
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 30px;
+            width: 600px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--nvidia-green);
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            background: #222;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        select {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        select:focus { border-color: var(--nvidia-green); }
+
+        .circuit-display {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            background: #222;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        /* SVG Styles */
+        .wire { stroke: #555; stroke-width: 2; }
+        .gate-box { fill: var(--nvidia-green); stroke: none; }
+        .gate-text { fill: #000; font-family: monospace; font-weight: bold; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
+        .ctrl-line { stroke: var(--nvidia-green); stroke-width: 2; }
+        .ctrl-dot { fill: var(--nvidia-green); }
+        .target-circle { fill: none; stroke: var(--nvidia-green); stroke-width: 2; }
+        .qubit-label { fill: #aaa; font-family: monospace; font-size: 14px; }
+
+        .results-section { margin-top: 10px; }
+
+        .state-vector {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            background: #222;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 3px solid var(--nvidia-green);
+            margin-bottom: 30px;
+            min-height: 24px;
+            word-spacing: 5px;
+            line-height: 1.5;
+        }
+        
+        /* Color coded spans for state vector */
+        .val-pos { color: var(--nvidia-green); font-weight: bold; }
+        .val-neg { color: var(--phase-neg); font-weight: bold; }
+        .val-imag { color: var(--phase-imag); font-weight: bold; }
+
+        .histogram-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 180px;
+            padding: 30px 20px 0 20px;
+            background: #222;
+            border-radius: 6px;
+            border-bottom: 1px solid #444;
+        }
+
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 15%;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+        }
+
+        .bar {
+            width: 100%;
+            /* Default green, changed dynamically via JS */
+            background-color: var(--nvidia-green); 
+            transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+            border-radius: 3px 3px 0 0;
+            min-height: 2px;
+            position: relative;
+        }
+
+        .bar-label {
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            width: 150%;
+            margin-left: -25%;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .bar-group:hover .bar-value, 
+        .bar[style*="height:"] .bar-value { opacity: 1; }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            justify-content: flex-end;
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; color: #aaa; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    </style>
+</head>
+<body>
+
+<div class="widget-container">
+    <h2>CNOT Gate Simulation</h2>
+
+    <div class="control-panel">
+        <div class="input-group">
+            <label>Qubit 0 (Control)</label>
+            <select id="q0-select" onchange="runSimulation()">
+                <option value="0">|0⟩ (Initialized)</option>
+                <option value="1">|1⟩ (Apply X)</option>
+                <option value="2">|+⟩ (Apply H)</option>
+                <option value="3">|-⟩ (Apply X, then H)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Qubit 1 (Target)</label>
+            <select id="q1-select" onchange="runSimulation()">
+                <option value="0">|0⟩ (Initialized)</option>
+                <option value="1">|1⟩ (Apply X)</option>
+                <option value="2">|+⟩ (Apply H)</option>
+                <option value="3">|-⟩ (Apply X, then H)</option>
+            </select>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <label style="margin-left: 5px;">Circuit</label>
+    </div>
+    <div class="circuit-display" id="circuit-container"></div>
+
+    <div class="results-section">
+        <label>Final State Vector</label>
+        <div id="state-text" class="state-vector">Computing...</div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <label>Measurement Probabilities</label>
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background:var(--nvidia-green)"></div>Positive Phase</div>
+                <div class="legend-item"><div class="dot" style="background:var(--phase-neg)"></div>Negative Phase</div>
+            </div>
+        </div>
+
+        <div class="histogram-container">
+            <div class="bar-group">
+                <div class="bar" id="bar-00" style="height: 0%">
+                    <span class="bar-value">0%</span>
+                </div>
+                <div class="bar-label">|00⟩</div>
+            </div>
+            <div class="bar-group">
+                <div class="bar" id="bar-01" style="height: 0%">
+                    <span class="bar-value">0%</span>
+                </div>
+                <div class="bar-label">|01⟩</div>
+            </div>
+            <div class="bar-group">
+                <div class="bar" id="bar-10" style="height: 0%">
+                    <span class="bar-value">0%</span>
+                </div>
+                <div class="bar-label">|10⟩</div>
+            </div>
+            <div class="bar-group">
+                <div class="bar" id="bar-11" style="height: 0%">
+                    <span class="bar-value">0%</span>
+                </div>
+                <div class="bar-label">|11⟩</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Quantum Math Logic ---
+    class Complex {
+        constructor(re, im) { this.re = re; this.im = im; }
+        add(c) { return new Complex(this.re + c.re, this.im + c.im); }
+        mul(c) { return new Complex(this.re * c.re - this.im * c.im, this.re * c.im + this.im * c.re); }
+        abs() { return Math.sqrt(this.re * this.re + this.im * this.im); }
+        // Determine phase color based on complex value
+        getPhaseColor() {
+            // Pure negative real
+            if (this.re < -0.001) return 'var(--phase-neg)';
+            // Imaginary (positive or negative)
+            if (Math.abs(this.im) > 0.001) return 'var(--phase-imag)';
+            // Default positive real
+            return 'var(--nvidia-green)';
+        }
+        // Get formatted string and class
+        format() {
+            let re = this.re;
+            let im = this.im;
+            
+            if (Math.abs(im) < 0.001) {
+                // Real number
+                if (re < 0) return { str: `-${Math.abs(re).toFixed(3)}`, type: 'val-neg' };
+                return { str: `${re.toFixed(3)}`, type: 'val-pos' };
+            } else {
+                // Complex number (simplified for this widget)
+                let sign = im >= 0 ? "+" : "-";
+                return { str: `${re.toFixed(3)}${sign}${Math.abs(im).toFixed(3)}i`, type: 'val-imag' };
+            }
+        }
+    }
+
+    const ONE_OVER_ROOT_2 = 1 / Math.sqrt(2);
+    
+    const STATES = {
+        0: [new Complex(1, 0), new Complex(0, 0)], 
+        1: [new Complex(0, 0), new Complex(1, 0)], 
+        2: [new Complex(ONE_OVER_ROOT_2, 0), new Complex(ONE_OVER_ROOT_2, 0)], 
+        3: [new Complex(ONE_OVER_ROOT_2, 0), new Complex(-ONE_OVER_ROOT_2, 0)] 
+    };
+
+    function runSimulation() {
+        const q0_val = parseInt(document.getElementById('q0-select').value);
+        const q1_val = parseInt(document.getElementById('q1-select').value);
+
+        updateCircuitSVG(q0_val, q1_val);
+        calculateAndRender(q0_val, q1_val);
+    }
+
+    function updateCircuitSVG(q0, q1) {
+        const svgW = 400; const svgH = 100;
+        const wireY0 = 30; const wireY1 = 70;
+        const startX = 60; const gateSpacing = 50; const cnotX = 300;
+
+        const createGate = (x, y, label) => `
+            <rect x="${x-15}" y="${y-15}" width="30" height="30" class="gate-box" rx="4" />
+            <text x="${x}" y="${y+1}" class="gate-text">${label}</text>
+        `;
+
+        let svgContent = `<svg width="100%" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
+            <line x1="25" y1="${wireY0}" x2="${svgW-25}" y2="${wireY0}" class="wire" />
+            <line x1="25" y1="${wireY1}" x2="${svgW-25}" y2="${wireY1}" class="wire" />
+            <text x="5" y="${wireY0+4}" class="qubit-label">q0</text>
+            <text x="5" y="${wireY1+4}" class="qubit-label">q1</text>`;
+
+        // Q0 Gates
+        let cX0 = startX;
+        if (q0 === 1) svgContent += createGate(cX0, wireY0, "X");
+        else if (q0 === 2) svgContent += createGate(cX0, wireY0, "H");
+        else if (q0 === 3) { svgContent += createGate(cX0, wireY0, "X") + createGate(cX0+gateSpacing, wireY0, "H"); }
+
+        // Q1 Gates
+        let cX1 = startX;
+        if (q1 === 1) svgContent += createGate(cX1, wireY1, "X");
+        else if (q1 === 2) svgContent += createGate(cX1, wireY1, "H");
+        else if (q1 === 3) { svgContent += createGate(cX1, wireY1, "X") + createGate(cX1+gateSpacing, wireY1, "H"); }
+
+        // CNOT
+        svgContent += `
+            <line x1="${cnotX}" y1="${wireY0}" x2="${cnotX}" y2="${wireY1}" class="ctrl-line" />
+            <circle cx="${cnotX}" cy="${wireY0}" r="5" class="ctrl-dot" />
+            <circle cx="${cnotX}" cy="${wireY1}" r="10" class="target-circle" />
+            <line x1="${cnotX}" y1="${wireY1-10}" x2="${cnotX}" y2="${wireY1+10}" class="ctrl-line" />
+            </svg>`;
+        
+        document.getElementById('circuit-container').innerHTML = svgContent;
+    }
+
+    function calculateAndRender(q0_sel, q1_sel) {
+        const v0 = STATES[q0_sel];
+        const v1 = STATES[q1_sel];
+
+        // Tensor Product
+        let state = [
+            v0[0].mul(v1[0]), 
+            v0[0].mul(v1[1]), 
+            v0[1].mul(v1[0]), 
+            v0[1].mul(v1[1]) 
+        ];
+
+        // Apply CNOT (Swap |10> and |11>)
+        let temp = state[2];
+        state[2] = state[3];
+        state[3] = temp;
+
+        updateStateString(state);
+        updateHistogram(state);
+    }
+
+    function updateStateString(state) {
+        let basisLabels = ["|00⟩", "|01⟩", "|10⟩", "|11⟩"];
+        let html = "";
+        let hasTerms = false;
+
+        state.forEach((amp, idx) => {
+            if (amp.abs() > 0.001) {
+                let fmt = amp.format(); // Get string and color class
+                
+                let separator = "";
+                if (hasTerms) {
+                   separator = " + ";
+                }
+                
+                // Wrap the complex number in the color span
+                html += `${separator}<span class="${fmt.type}">(${fmt.str})</span>${basisLabels[idx]}`;
+                hasTerms = true;
+            }
+        });
+        document.getElementById('state-text').innerHTML = html || "0";
+    }
+
+    function updateHistogram(state) {
+        const ids = ["bar-00", "bar-01", "bar-10", "bar-11"];
+        state.forEach((amp, idx) => {
+            let prob = Math.pow(amp.abs(), 2);
+            let percent = (prob * 100).toFixed(1);
+            
+            let bar = document.getElementById(ids[idx]);
+            bar.style.height = `${percent}%`;
+            
+            // Apply color based on phase
+            bar.style.backgroundColor = amp.getPhaseColor();
+
+            let label = bar.querySelector('.bar-value');
+            label.textContent = prob > 0.001 ? `${percent}%` : "0%";
+            label.style.opacity = prob > 0.001 ? 1 : 0;
+        });
+    }
+
+    window.onload = runSimulation;
+
+</script>
+
+</body>
+</html>
