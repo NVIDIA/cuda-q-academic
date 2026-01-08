@@ -1,5 +1,7 @@
 import cudaq
 import numpy as np
+cudaq.set_target('density-matrix-cpu')
+
 
 #First, create an empty noise model
 noise_model = cudaq.NoiseModel()
