@@ -673,7 +673,7 @@
                         <div class="card-desc">${widget.desc}</div>
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-preview" onclick="openPreview('${widget.link}', '${widget.title}')">
+                        <button class="btn btn-preview" onclick="openPreview('${widget.link}', '${widget.title.replace(/'/g, "\\'")}')">
                             <i class="fas fa-play-circle"></i> Live Preview
                         </button>
                         <div class="btn-group">
