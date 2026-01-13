@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUDA-Q Kernel Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-dark: #333;
+            --bg-color: #f8f9fa;
+            --border-color: #ddd;
+            --code-bg: #2d2d2d;
+            --code-text: #f8f8f2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--nvidia-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        .widget-container {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- CONTROLS --- */
+        .controls {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        
+        button { cursor: pointer; }
+
+        .btn-action {
+            background-color: var(--nvidia-dark);
+            color: white;
+            border: 1px solid var(--nvidia-dark);
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .btn-action:hover { 
+            background-color: #555; 
+            border-color: #555;
+        }
+        
+        .btn-clear { 
+            background-color: #fff; border: 1px solid #e74c3c; color: #e74c3c; 
+            font-size: 12px; padding: 6px 12px;
+        }
+        .btn-clear:hover { background-color: #e74c3c; color: white; }
+        
+        .btn-edit {
+            background-color: #fff; border: 1px solid var(--nvidia-green); color: var(--nvidia-green);
+            font-size: 12px; padding: 6px 12px;
+        }
+        .btn-edit:hover { background-color: var(--nvidia-green); color: white; }
+
+        .btn-copy {
+            background-color: #eee; color: #333; border: 1px solid #ddd; font-size: 12px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .btn-copy:hover { background-color: #e0e0e0; }
+
+        /* --- LAYOUT --- */
+        .workspace {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            min-height: 600px;
+        }
+
+        .circuit-area {
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .gate-toolbar {
+            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+            padding-bottom: 15px; border-bottom: 1px dashed #eee;
+        }
+
+        .gate-btn {
+            width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            background: white; border: 2px solid var(--nvidia-green); color: var(--nvidia-green);
+            font-weight: bold; border-radius: 4px; cursor: grab; user-select: none;
+            font-size: 12px; position: relative;
+        }
+        .gate-btn:hover { background: var(--nvidia-green); color: white; }
+
+        .svg-container {
+            flex-grow: 1; border: 1px dashed #eee; border-radius: 4px; min-height: 300px; 
+            position: relative; overflow: hidden;
+        }
+        #circuit-svg { width: 100%; height: 100%; display: block; }
+
+        /* --- SIDEBAR & RESULTS --- */
+        .sidebar {
+            background-color: #fafafa;
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .code-block-wrapper { margin-bottom: 0; }
+        .code-header {
+            padding: 8px 10px; font-size: 11px; font-weight: bold; text-transform: uppercase;
+            color: #777; background: #eee; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .code-box {
+            background-color: var(--code-bg); color: var(--code-text);
+            padding: 10px; font-family: 'Courier New', monospace; font-size: 12px;
+            overflow: auto; white-space: pre; min-height: 100px; max-height: 200px;
+        }
+
+        .exec-panel {
+            padding: 15px; border-top: 1px solid #ddd; background: white;
+            flex-grow: 1; display: flex; flex-direction: column;
+        }
+
+        .mode-selector {
+            display: flex; gap: 0; border: 1px solid #ccc; border-radius: 4px; 
+            overflow: hidden; margin-bottom: 15px;
+        }
+        .mode-btn {
+            flex: 1; padding: 8px; border: none; background: #f8f8f8; cursor: pointer; font-size: 12px;
+            border-right: 1px solid #ccc;
+        }
+        .mode-btn:last-child { border-right: none; }
+        .mode-btn.active { background: var(--nvidia-green); color: white; font-weight: bold; }
+
+        .run-config {
+            padding: 10px; background: #f0f9eb; border: 1px solid #ccebc4; 
+            border-radius: 4px; margin-bottom: 15px; display: none;
+        }
+        .run-config.visible { display: block; }
+        
+        .meas-row {
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 5px; font-size: 12px;
+        }
+        .meas-row select { padding: 2px; width: 60px; }
+
+        .results-display { 
+            margin-top: 15px; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+        }
+        
+        .result-table {
+            width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px;
+        }
+        .result-table th, .result-table td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+        .result-table th { background: #f4f4f4; }
+
+        .raw-output {
+            background: #eee; padding: 10px; font-family: monospace; font-size: 11px;
+            max-height: 150px; overflow-y: auto; border-radius: 4px; margin-top: 5px;
+            white-space: pre-wrap; word-break: break-all;
+        }
+
+        /* --- SVG STYLES --- */
+        line.wire { stroke: #999; stroke-width: 2; pointer-events: none; }
+        line.control-line { stroke: #333; stroke-width: 2; pointer-events: none; }
+        circle.control-dot { fill: #333; pointer-events: none; }
+        
+        /* Gate Styles */
+        g.gate-group { cursor: grab; }
+        g.gate-group:active { cursor: grabbing; }
+        rect.gate-box { fill: #fff; stroke: var(--nvidia-green); stroke-width: 2; }
+        text.gate-text { 
+            font-family: sans-serif; font-size: 12px; fill: #333; 
+            pointer-events: none; user-select: none;
+        }
+        
+        /* Drag Indicator & Ghost */
+        #drop-indicator { stroke: #ff0000; stroke-width: 2; stroke-dasharray: 4; display: none; pointer-events: none; }
+        #ghost-gate { opacity: 0.6; pointer-events: none; display: none; }
+
+        /* Popups */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+            z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.2s;
+        }
+        .modal-overlay.open { visibility: visible; opacity: 1; }
+        .modal { background: white; padding: 20px; border-radius: 8px; width: 300px; }
+        .popup-bubble {
+            position: absolute; background: #333; padding: 5px; border-radius: 4px;
+            display: flex; gap: 5px; z-index: 1000; transform: translate(-50%, -120%);
+        }
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+<div id="action-popup" class="popup-bubble hidden">
+    <button id="btn-edit-gate" class="btn-edit" onclick="editSelectedGate()" style="background:none; border-color:white; color:white;">Edit</button>
+    <div style="width:1px; background:#666; margin: 2px 0;"></div>
+    <button class="btn-clear" onclick="deleteSelectedGate()" style="color:#ff6b6b; border-color: transparent; background:none; font-weight:bold;">Delete</button>
+</div>
+
+<div id="gate-modal" class="modal-overlay">
+    <div class="modal">
+        <h3 id="modal-title" style="margin-top:0;">Configure Gate</h3>
+        <div style="margin-bottom:15px;">
+            <label style="font-size:12px; color:#666;">Control Qubit:</label>
+            <select id="modal-control" style="width:100%;"></select>
+        </div>
+        <div style="margin-bottom:15px;">
+            <label style="font-size:12px; color:#666;">Target Qubit:</label>
+            <select id="modal-target" style="width:100%;"></select>
+        </div>
+        <div style="text-align:right;">
+            <button onclick="closeModal()">Cancel</button>
+            <button class="btn-action" style="background-color: var(--nvidia-green); border:none;" onclick="confirmModalGate()">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="widget-container">
+    <div class="controls">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <strong>CUDA-Q Kernel Visualization</strong>
+            <label style="font-size:14px;">
+                Qubits: 
+                <select id="qubit-select" onchange="updateQubits(this.value)" style="width:50px;">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                </select>
+            </label>
+            <select id="example-select" onchange="loadExample(this.value)" style="margin-left: 10px;">
+                <option value="" disabled selected>Load Example...</option>
+                <option value="bell">Bell State (2 Qubits)</option>
+                <option value="ghz">GHZ State (3 Qubits)</option>
+                <option value="super">Superposition (3 Qubits)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div class="circuit-area" id="circuit-area">
+            <div class="gate-toolbar">
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'h')">H</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'x')">X</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'z')">Z</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cx')">CNOT</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cz')">CZ</div>
+            </div>
+            
+            <div class="svg-container">
+                <svg id="circuit-svg" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOnSvg(event)" onclick="bgClick(event)">
+                    <line id="drop-indicator" x1="0" y1="0" x2="0" y2="400"></line>
+                    <g id="ghost-gate">
+                        <rect width="30" height="30" x="-15" y="-15" fill="rgba(118, 185, 0, 0.5)" stroke="#333" stroke-dasharray="2"></rect>
+                        <text id="ghost-text" x="0" y="5" text-anchor="middle" font-family="sans-serif" font-size="12px" fill="#fff">G</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div style="margin-top: 10px; text-align: right;">
+                <button class="btn-clear" onclick="clearAll()">Clear Circuit</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div style="padding: 10px; background: #eee; border-bottom:1px solid #ddd; text-align: right;">
+                <button id="btn-copy-full" class="btn-copy" style="width:100%; justify-content:center; padding:8px;" onclick="copyFullCode()">
+                    <span>📋 Copy Full Python Script</span>
+                </button>
+            </div>
+            
+            <div class="code-block-wrapper">
+                <div class="code-header">
+                    <span>Kernel Definition</span>
+                </div>
+                <div class="code-box" id="code-kernel"></div>
+            </div>
+
+            <div class="exec-panel">
+                <label style="font-size:12px; font-weight:bold; margin-bottom:5px;">Execution Mode</label>
+                <div class="mode-selector">
+                    <button class="mode-btn" id="mode-state" onclick="setMode('state')">Get State</button>
+                    <button class="mode-btn active" id="mode-sample" onclick="setMode('sample')">Sample</button>
+                    <button class="mode-btn" id="mode-run" onclick="setMode('run')">Run</button>
+                </div>
+                
+                <div id="run-config" class="run-config">
+                    <div style="font-size:11px; font-weight:bold; margin-bottom:5px;">Measurements:</div>
+                    <div id="meas-list"></div>
+                    <div style="font-size:11px; color:#666; margin-top:5px; font-style:italic;">* Run mode fixed to 20 shots</div>
+                </div>
+                
+                <div class="code-block-wrapper" style="margin-top:15px;">
+                    <div class="code-header">
+                        <span>Execution Code</span>
+                    </div>
+                    <div class="code-box" id="code-exec" style="min-height:60px; max-height:80px;"></div>
+                </div>
+
+                <button class="btn-action" style="margin-top:15px; width:100%; padding:10px;" onclick="executeCircuit()">
+                    ▶ Execute
+                </button>
+                
+                <div class="results-display" id="results-area">
+                    <div id="chart-wrapper" style="display:none; width:100%;">
+                        <canvas id="chart-canvas" style="max-height:200px; width:100%;"></canvas>
+                    </div>
+                    <div id="table-container"></div>
+                    <div id="raw-container" style="display:none;">
+                        <div style="font-size:11px; font-weight:bold; margin-top:10px;">Raw Output:</div>
+                        <div class="raw-output" id="raw-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- STATE ---
+    let numQubits = 3;
+    let circuit = []; 
+    let execMode = 'sample'; 
+    let measurements = {}; 
+    let editingGateIdx = -1;
+
+    // --- DOM REFERENCES ---
+    const svg = document.getElementById('circuit-svg');
+    const indicator = document.getElementById('drop-indicator');
+    const popup = document.getElementById('action-popup');
+    const measList = document.getElementById('meas-list');
+    const ghost = document.getElementById('ghost-gate');
+    const ghostText = document.getElementById('ghost-text');
+    
+    // --- INITIALIZATION ---
+    window.onload = () => {
+        updateQubits(3);
+    };
+
+    // --- CODE GENERATOR ---
+    function updateQubits(n) {
+        numQubits = parseInt(n);
+        circuit = circuit.filter(op => op.target < numQubits && (op.control === null || op.control < numQubits));
+        measurements = {}; for(let i=0; i<numQubits; i++) measurements[i] = 'mz';
+        document.getElementById('qubit-select').value = numQubits;
+        renderMeasConfig(); finishUpdate();
+    }
+    function loadExample(type) {
+        if(type === 'bell') { numQubits = 2; circuit = [{gate:'h', target:0, control:null}, {gate:'cx', target:1, control:0}]; }
+        else if (type === 'ghz') { numQubits = 3; circuit = [{gate:'h', target:0, control:null}, {gate:'cx', target:1, control:0}, {gate:'cx', target:2, control:1}]; }
+        else if (type === 'super') { numQubits = 3; circuit = [{gate:'h', target:0, control:null}, {gate:'h', target:1, control:null}, {gate:'h', target:2, control:null}]; }
+        document.getElementById('qubit-select').value = numQubits; updateQubits(numQubits); document.getElementById('example-select').value = "";
+    }
+    function renderMeasConfig() {
+        measList.innerHTML = ''; for(let i=0; i<numQubits; i++) {
+            const row = document.createElement('div'); row.className = 'meas-row';
+            row.innerHTML = `<span>Q[${i}]</span><select onchange="measurements[${i}] = this.value; updateCode();"><option value="mz" ${measurements[i]==='mz'?'selected':''}>mz</option><option value="mx" ${measurements[i]==='mx'?'selected':''}>mx</option><option value="my" ${measurements[i]==='my'?'selected':''}>my</option><option value="none" ${measurements[i]==='none'?'selected':''}>None</option></select>`;
+            measList.appendChild(row);
+        }
+    }
+    function setMode(mode) {
+        execMode = mode; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`mode-${mode}`).classList.add('active');
+        document.getElementById('run-config').classList.toggle('visible', mode === 'run');
+        updateCode();
+        document.getElementById('table-container').innerHTML = ''; document.getElementById('chart-wrapper').style.display = 'none'; document.getElementById('raw-container').style.display = 'none';
+    }
+    function copyFullCode() {
+        const k = document.getElementById('code-kernel').innerText, e = document.getElementById('code-exec').innerText;
+        navigator.clipboard.writeText(`import cudaq\n\n${k}\n\n${e}`).then(() => {
+            const btn = document.getElementById('btn-copy-full'), orig = btn.innerHTML;
+            btn.innerHTML = "<span>✓ Copied!</span>"; btn.style.backgroundColor = "#ccebc4"; 
+            setTimeout(() => { btn.innerHTML = orig; btn.style.backgroundColor = "#eee"; }, 2000);
+        });
+    }
+    function updateCode() {
+        let k = '', am = 0, ai = [];
+        if (execMode === 'run') for(let i=0; i<numQubits; i++) if(measurements[i] !== 'none') { am++; ai.push(i); }
+        if (execMode === 'run') k += `@cudaq.kernel\ndef my_circuit(n: int)${am===1?' -> bool':' -> list[bool]'}:\n    q = cudaq.qvector(n)\n`;
+        else k += `@cudaq.kernel\ndef my_circuit(n: int):\n    q = cudaq.qvector(n)\n`;
+        circuit.forEach(op => {
+            if(op.gate === 'cx') k += `    x.ctrl(q[${op.control}], q[${op.target}])\n`;
+            else if(op.gate === 'cz') k += `    z.ctrl(q[${op.control}], q[${op.target}])\n`;
+            else k += `    ${op.gate}(q[${op.target}])\n`;
+        });
+        
+        // Updated measurement generation logic
+        if (execMode === 'run') {
+             if (am === 1) {
+                 k += `    measurements = ${measurements[ai[0]]}(q[${ai[0]}])\n`;
+                 k += `    return measurements`;
+             } else if (am > 1) {
+                 let measList = ai.map(i => `${measurements[i]}(q[${i}])`).join(', ');
+                 k += `    measurements = [${measList}]\n`;
+                 k += `    return measurements`;
+             } else {
+                 k += `    return [] # Warning: Select measurements`;
+             }
+        }
+        
+        document.getElementById('code-kernel').innerText = k;
+        let e = `n = ${numQubits}\n`;
+        if (execMode === 'state') e += `state = cudaq.get_state(my_circuit, n)\nprint(state)`;
+        else if (execMode === 'sample') e += `counts = cudaq.sample(my_circuit, n, shots_count=1000)\nprint(counts)`;
+        else e += `results = cudaq.run(my_circuit, n, shots_count=20)\nprint(results)`;
+        document.getElementById('code-exec').innerText = e;
+    }
+    
+    // --- EXECUTION ENGINE ---
+    class Complex {
+        constructor(re, im) { this.re = re; this.im = im; }
+        add(c) { return new Complex(this.re + c.re, this.im + c.im); }
+        sub(c) { return new Complex(this.re - c.re, this.im - c.im); }
+        mul(c) { return new Complex(this.re * c.re - this.im * c.im, this.re * c.im + this.im * c.re); }
+        magSq() { return this.re**2 + this.im**2; }
+    }
+    
+    function executeCircuit() {
+        const dim = 1 << numQubits; let state = new Array(dim).fill(null).map(_ => new Complex(0,0)); state[0] = new Complex(1,0);
+        
+        const applyGate = (gate, target, control) => {
+            const newState = new Array(dim).fill(null).map(_ => new Complex(0,0));
+            for(let i=0; i<dim; i++) {
+                if(state[i].magSq() < 1e-10) continue; 
+                let amp = state[i];
+                if(control !== null && !((i >> control) & 1)) { newState[i] = newState[i].add(amp); continue; }
+                if(gate === 'x' || gate === 'cx') newState[i ^ (1 << target)] = newState[i ^ (1 << target)].add(amp); 
+                else if (gate === 'z' || gate === 'cz') newState[i] = ((i >> target) & 1) ? newState[i].sub(amp) : newState[i].add(amp);
+                else if (gate === 'h') {
+                    const j = i ^ (1 << target), sign = ((i >> target) & 1) ? -1 : 1, val = new Complex(amp.re * 0.707106, amp.im * 0.707106);
+                    newState[i] = newState[i].add(val); newState[j] = newState[j].add(val.mul(new Complex(sign, 0)));
+                }
+            }
+            state = newState;
+        };
+
+        // 1. Calculate final state vector (Simulate Circuit)
+        circuit.forEach(op => applyGate(op.gate, op.target, op.control));
+        
+        // 2. Prepare Results Containers
+        const tc = document.getElementById('table-container'), cw = document.getElementById('chart-wrapper'), cc = document.getElementById('chart-canvas'), rc = document.getElementById('raw-container');
+        tc.innerHTML = ''; cw.style.display = 'none'; rc.style.display = 'none'; if(window.myChart) window.myChart.destroy();
+        
+        // 3. Handle specific execution modes
+        if (execMode === 'state') {
+            let html = `<table class="result-table"><thead><tr><th>State</th><th>Amp</th><th>Prob</th></tr></thead><tbody>`, l = [], d = [];
+            state.forEach((c, i) => { const p = c.magSq(); if(p>1e-4) { const b = i.toString(2).padStart(numQubits,'0').split('').reverse().join(''); l.push(b); d.push(p); html+=`<tr><td>|${b}⟩</td><td>${c.re.toFixed(2)}${c.im>=0?'+':''}${c.im.toFixed(2)}j</td><td>${p.toFixed(3)}</td></tr>`; }});
+            tc.innerHTML = html + "</tbody></table>"; cw.style.display = 'block'; rc.style.display = 'block';
+            window.myChart = new Chart(cc, { type: 'bar', data: { labels: l, datasets: [{ label: 'Prob', data: d, backgroundColor: '#76b900' }] }, options: { responsive: true, scales: { y: { beginAtZero: true, max: 1 } } } });
+            document.getElementById('raw-text').innerText = `[${state.map(c => `(${c.re.toFixed(3)}${c.im>=0?'+':''}${c.im.toFixed(3)}j)`).join(', ')}]`;
+        
+        } else if (execMode === 'sample') {
+            const counts = {};
+            const cumProbs = []; let currentCum = 0;
+            for(let i=0; i<dim; i++) { currentCum += state[i].magSq(); cumProbs.push(currentCum); }
+            
+            for(let s=0; s<1000; s++) {
+                let r = Math.random(), outcome = 0;
+                for(let i=0; i<dim; i++) { if(r <= cumProbs[i]) { outcome = i; break; } }
+                const bin = outcome.toString(2).padStart(numQubits, '0').split('').reverse().join('');
+                counts[bin] = (counts[bin] || 0) + 1;
+            }
+            const labels = Object.keys(counts).sort();
+            const data = labels.map(k => counts[k]);
+            
+            cw.style.display = 'block'; rc.style.display = 'block';
+            window.myChart = new Chart(cc, { type: 'bar', data: { labels, datasets: [{ label: `Count (1000)`, data: data, backgroundColor: '#76b900' }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
+            document.getElementById('raw-text').innerText = JSON.stringify(counts, null, 2);
+        
+        } else if (execMode === 'run') {
+            // Check active measurements
+            let activeIndices = [];
+            for(let i=0; i<numQubits; i++) { if(measurements[i] !== 'none') activeIndices.push(i); }
+            if(activeIndices.length === 0) { alert("Select at least one measurement."); return; }
+            
+            // Apply basis rotations for measurement simulation
+            for(let i=0; i<numQubits; i++) { if (measurements[i] === 'mx' || measurements[i] === 'my') applyGate('h', i, null); }
+            
+            // Recalculate probabilities after basis rotation
+            const cumProbs = []; let currentCum = 0;
+            for(let i=0; i<dim; i++) { currentCum += state[i].magSq(); cumProbs.push(currentCum); }
+
+            const results = [];
+            for(let s=0; s<20; s++) {
+                let r = Math.random(), outcome = 0;
+                for(let i=0; i<dim; i++) { if(r <= cumProbs[i]) { outcome = i; break; } }
+                
+                if(activeIndices.length === 1) {
+                    results.push(((outcome >> activeIndices[0]) & 1) === 0);
+                } else {
+                    results.push(activeIndices.map(idx => ((outcome >> idx) & 1) === 0));
+                }
+            }
+            
+            // Aggregate
+            const counts = {};
+            results.forEach(res => { 
+                const k = Array.isArray(res) ? JSON.stringify(res).replace(/true/g, "True").replace(/false/g, "False") : (res ? "True" : "False"); 
+                counts[k] = (counts[k] || 0) + 1; 
+            });
+            
+            let html = `<div style="font-weight:bold; margin-bottom:5px;">Counts (20 Shots)</div><table class="result-table"><thead><tr><th>Result</th><th>Count</th></tr></thead><tbody>`;
+            for(const [r, c] of Object.entries(counts)) html += `<tr><td>${r}</td><td>${c}</td></tr>`;
+            tc.innerHTML = html + "</tbody></table>";
+            
+            rc.style.display = 'block';
+            document.getElementById('raw-text').innerText = JSON.stringify(results).replace(/true/g, "True").replace(/false/g, "False");
+        }
+    }
+
+    // --- INTERACTION LOGIC (Ghost Dragging) ---
+    
+    // 1. TOOLBAR Drag (HTML5 DnD)
+    let draggedType = null;
+    function dragStartNew(ev, type) {
+        draggedType = type; 
+        ev.dataTransfer.effectAllowed = "copy";
+        ev.dataTransfer.setData('text/plain', type);
+        popup.classList.add('hidden');
+    }
+    function dragOver(ev) { 
+        ev.preventDefault(); 
+        const rect = svg.getBoundingClientRect();
+        const lineX = 80 + (Math.round((ev.clientX - rect.left - 80) / 50) * 50);
+        indicator.setAttribute("x1", lineX); indicator.setAttribute("x2", lineX); indicator.setAttribute("y2", rect.height);
+        indicator.style.display = "block";
+    }
+    function dragLeave(ev) { indicator.style.display = "none"; }
+    function dropOnSvg(ev) {
+        ev.preventDefault(); indicator.style.display = "none";
+        // Only handle Toolbar drops here. Internal moves are handled by mouse events.
+        if (!draggedType) return; 
+
+        const rect = svg.getBoundingClientRect();
+        const y = ev.clientY - rect.top;
+        const x = ev.clientX - rect.left;
+        
+        let targetQubit = -1, minD = 999, lineH = (rect.height || 400) / (numQubits + 1);
+        for(let i=0; i<numQubits; i++) { const d = Math.abs(y - (lineH * (i+1))); if(d < minD) { minD = d; targetQubit = i; } }
+        if(minD > 60) return;
+
+        let insertIdx = Math.round((x - 80) / 50);
+        if (insertIdx < 0) insertIdx = 0; if (insertIdx > circuit.length) insertIdx = circuit.length;
+
+        if(['cx','cz'].includes(draggedType)) openModal(draggedType, -1, targetQubit); 
+        else { circuit.splice(insertIdx, 0, {gate: draggedType, target: targetQubit, control: null}); finishUpdate(); }
+        draggedType = null;
+    }
+
+    // 2. INTERNAL GATE DRAG (Custom Mouse Events)
+    let internalDrag = null; // { idx, gate, startX, startY, isMoving }
+
+    function gateMouseDown(e, idx, gate) {
+        e.preventDefault(); e.stopPropagation();
+        internalDrag = { idx: idx, gate: gate, startX: e.clientX, startY: e.clientY, isMoving: false };
+        ghostText.textContent = gate.toUpperCase();
+    }
+
+    window.addEventListener('mousemove', (e) => {
+        if (!internalDrag) return;
+        const dist = Math.hypot(e.clientX - internalDrag.startX, e.clientY - internalDrag.startY);
+        if (!internalDrag.isMoving && dist > 5) {
+            internalDrag.isMoving = true;
+            popup.classList.add('hidden'); 
+            ghost.style.display = 'block';
+        }
+        if (internalDrag.isMoving) {
+            const rect = svg.getBoundingClientRect();
+            const relX = e.clientX - rect.left;
+            const relY = e.clientY - rect.top;
+            ghost.setAttribute('transform', `translate(${relX}, ${relY})`);
+            const lineX = 80 + (Math.round((relX - 80) / 50) * 50);
+            indicator.setAttribute("x1", lineX); indicator.setAttribute("x2", lineX); indicator.setAttribute("y2", rect.height);
+            indicator.style.display = "block";
+        }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+        if (!internalDrag) return;
+        ghost.style.display = 'none'; indicator.style.display = 'none';
+
+        if (internalDrag.isMoving) {
+            const rect = svg.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const x = e.clientX - rect.left;
+            
+            let targetQubit = -1, minD = 999, lineH = (rect.height || 400) / (numQubits + 1);
+            for(let i=0; i<numQubits; i++) { const d = Math.abs(y - (lineH * (i+1))); if(d < minD) { minD = d; targetQubit = i; } }
+            
+            if(minD < 60) {
+                let insertIdx = Math.round((x - 80) / 50);
+                if (insertIdx < 0) insertIdx = 0; if (insertIdx > circuit.length) insertIdx = circuit.length;
+                
+                const op = circuit[internalDrag.idx];
+                let valid = true;
+                if (op.control !== null && op.control === targetQubit) valid = false;
+                if (['cx','cz'].includes(op.gate) && op.target === targetQubit && op.control === targetQubit) valid = false;
+
+                if (valid) {
+                    circuit.splice(internalDrag.idx, 1);
+                    if(internalDrag.idx < insertIdx) insertIdx--; 
+                    op.target = targetQubit; 
+                    circuit.splice(insertIdx, 0, op); 
+                    finishUpdate();
+                }
+            }
+        } else {
+            showPopup(internalDrag.idx, e.clientX, e.clientY);
+        }
+        internalDrag = null;
+    });
+
+    // --- RENDERING ---
+    function renderCircuit() {
+        svg.innerHTML = ''; svg.appendChild(indicator); svg.appendChild(ghost);
+        const minW = svg.parentElement.clientWidth;
+        const calcW = 100 + (circuit.length * 50) + 50;
+        const w = Math.max(minW, calcW);
+        svg.style.width = w + 'px'; const h = 400; svg.style.height = '400px';
+        const lineH = h / (numQubits + 1);
+        
+        for(let i=0; i<numQubits; i++) {
+            const y = lineH * (i+1);
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", 10); t.setAttribute("y", y+5); t.textContent = `q[${i}]`;
+            t.setAttribute("style", "font-family:monospace; font-weight:bold; fill:#333; pointer-events:none; user-select:none;");
+            svg.appendChild(t);
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute("x1", 50); l.setAttribute("y1", y); l.setAttribute("x2", w); l.setAttribute("y2", y);
+            l.setAttribute("class", "wire");
+            svg.appendChild(l);
+        }
+
+        let x = 80;
+        circuit.forEach((op, idx) => {
+            const y = lineH * (op.target + 1);
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("class", "gate-group");
+            g.onmousedown = (e) => gateMouseDown(e, idx, op.gate);
+
+            if(op.control !== null) {
+                const yc = lineH * (op.control + 1);
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                l.setAttribute("x1", x); l.setAttribute("y1", y); l.setAttribute("x2", x); l.setAttribute("y2", yc);
+                l.setAttribute("class", "control-line");
+                g.appendChild(l);
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                c.setAttribute("cx", x); c.setAttribute("cy", yc); c.setAttribute("r", 4);
+                c.setAttribute("class", "control-dot");
+                g.appendChild(c);
+            }
+
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", x-15); rect.setAttribute("y", y-15); 
+            rect.setAttribute("width", 30); rect.setAttribute("height", 30);
+            rect.setAttribute("class", "gate-box");
+            
+            if(op.gate === 'cx') {
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 10);
+                c.setAttribute("fill", "white"); c.setAttribute("stroke", "#333"); c.setAttribute("stroke-width", "2");
+                g.appendChild(c);
+                
+                // Add Cross
+                const v = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                v.setAttribute("x1", x); v.setAttribute("y1", y-10); v.setAttribute("x2", x); v.setAttribute("y2", y+10);
+                v.setAttribute("stroke", "#333"); v.setAttribute("stroke-width", "2"); g.appendChild(v);
+                
+                const h = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                h.setAttribute("x1", x-10); h.setAttribute("y1", y); h.setAttribute("x2", x+10); h.setAttribute("y2", y);
+                h.setAttribute("stroke", "#333"); h.setAttribute("stroke-width", "2"); g.appendChild(h);
+
+            } else {
+                g.appendChild(rect);
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", x); txt.setAttribute("y", y+4); txt.setAttribute("text-anchor", "middle");
+                txt.setAttribute("class", "gate-text");
+                txt.textContent = op.gate.toUpperCase();
+                g.appendChild(txt);
+            }
+            svg.appendChild(g);
+            x += 50;
+        });
+    }
+
+    function finishUpdate() { renderCircuit(); renderMeasConfig(); updateCode(); popup.classList.add('hidden'); }
+    function clearAll() { circuit = []; finishUpdate(); }
+    function showPopup(idx, mx, my) {
+        selectedGateIdx = idx; const op = circuit[idx];
+        document.getElementById('btn-edit-gate').style.display = (op.control !== null) ? 'block' : 'none';
+        popup.style.left = mx + 'px'; popup.style.top = my + 'px'; popup.classList.remove('hidden');
+    }
+    function bgClick(e) { if(e.target.id === 'circuit-svg') popup.classList.add('hidden'); }
+    
+    let selectedGateIdx = -1;
+    function deleteSelectedGate() { if(selectedGateIdx > -1) circuit.splice(selectedGateIdx, 1); finishUpdate(); }
+    let pendingGate = null;
+    function openModal(gate, idx, target) {
+        pendingGate = gate; editingGateIdx = idx; 
+        const mc = document.getElementById('modal-control'), mt = document.getElementById('modal-target'), title = document.getElementById('modal-title');
+        mc.innerHTML = ''; mt.innerHTML = ''; for(let i=0; i<numQubits; i++) { mc.add(new Option(`q[${i}]`, i)); mt.add(new Option(`q[${i}]`, i)); }
+        if (idx > -1) { title.innerText = `Edit ${gate.toUpperCase()}`; mt.value = circuit[idx].target; mc.value = circuit[idx].control; } 
+        else { title.innerText = `Add ${gate.toUpperCase()}`; mt.value = target; mc.value = (target === 0) ? 1 : 0; }
+        document.getElementById('gate-modal').classList.add('open'); popup.classList.add('hidden');
+    }
+    function editSelectedGate() { if (selectedGateIdx > -1) { const op = circuit[selectedGateIdx]; openModal(op.gate, selectedGateIdx, op.target); } }
+    function closeModal() { document.getElementById('gate-modal').classList.remove('open'); }
+    function confirmModalGate() {
+        const c = parseInt(document.getElementById('modal-control').value), t = parseInt(document.getElementById('modal-target').value);
+        if(c === t) { alert("Error: Control and Target qubits cannot be the same."); return; }
+        if (editingGateIdx > -1) { circuit[editingGateIdx].control = c; circuit[editingGateIdx].target = t; }
+        else { circuit.push({gate: pendingGate, target: t, control: c}); }
+        finishUpdate(); closeModal();
+    }
+</script>
+</body>
+</html>
