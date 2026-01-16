@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CUDA-Q Kernel Visualizer & Designer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
@@ -22,6 +22,8 @@
         
         /* --- CONTROLS --- */
         .controls { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fff; border-radius: 8px 8px 0 0; }
+        .control-group { display: flex; align-items: center; gap: 15px; }
+        
         select, button, input { padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
         button { cursor: pointer; }
         .btn-action { background-color: var(--nvidia-dark); color: white; border: 1px solid var(--nvidia-dark); font-weight: bold; font-size: 14px; transition: background-color 0.2s; }
@@ -38,13 +40,9 @@
             margin-top: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
             transition: all 0.2s ease;
+            width: 100%; /* Better for mobile */
         }
-        #btn-execute:hover {
-            background-color: var(--nvidia-green-hover);
-            border-color: var(--nvidia-green-hover);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transform: translateY(-1px);
-        }
+        #btn-execute:hover { background-color: var(--nvidia-green-hover); transform: translateY(-1px); }
 
         .btn-clear { background-color: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 12px; padding: 6px 12px; }
         .btn-clear:hover { background-color: #e74c3c; color: white; }
@@ -58,28 +56,44 @@
         .btn-copy { background-color: #eee; color: #333; border: 1px solid #ddd; font-size: 12px; display: flex; align-items: center; gap: 5px; }
         .btn-copy:hover { background-color: #e0e0e0; }
         
+        /* WORKSPACE */
         .workspace { display: grid; grid-template-columns: 60% 40%; min-height: 650px; }
         
-        .circuit-area { 
-            padding: 20px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative;
-        }
+        .circuit-area { padding: 20px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative; }
         
         .gate-toolbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; padding-bottom: 15px; border-bottom: 1px dashed #eee; align-items: center; user-select: none; -webkit-user-select: none; }
-        .gate-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white; border: 2px solid var(--nvidia-green); color: var(--nvidia-green); font-weight: bold; border-radius: 4px; cursor: grab; font-size: 11px; position: relative; }
+        .gate-btn { 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; border: 2px solid var(--nvidia-green); color: var(--nvidia-green); 
+            font-weight: bold; border-radius: 4px; cursor: grab; font-size: 11px; position: relative;
+            touch-action: none; /* Crucial for mobile drag */
+        }
         .gate-btn:hover { background: var(--nvidia-green); color: white; }
         .gate-btn.param-gate { background: #f0f9eb; border-color: var(--nvidia-green); color: var(--nvidia-green); }
         .gate-btn.custom { border-style: dashed; }
         .gate-btn.paste-btn { border: 2px dashed #3498db; color: #3498db; background: #f0f8ff; width: auto; padding: 0 10px; display: none; }
         .gate-btn.paste-btn.visible { display: flex; }
         
-        /* FIX: Changed overflow from hidden to auto to allow scrolling */
         .svg-container { 
-            flex-grow: 1; border: 1px dashed #eee; border-radius: 4px; min-height: 300px; position: relative; 
-            overflow-x: auto; overflow-y: hidden; background: #fff; 
+            flex-grow: 1; 
+            border: 1px dashed #eee; 
+            border-radius: 4px; 
+            min-height: 300px; 
+            position: relative; 
+            
+            /* --- NEW LINES START --- */
+            width: 100%;        /* Forces it to fill the parent, not the content */
+            max-width: 85vw;    /* Hard limit prevents it from pushing page width */
+            overflow: auto;     /* Enables scrollbars (both X and Y) */
+            display: block;     /* Ensures standard box model behavior */
+            /* --- NEW LINES END --- */
+
+            background: #fff; 
+            -webkit-overflow-scrolling: touch;
         }
         #circuit-svg { height: 100%; display: block; }
         
-        /* --- SIDEBAR & RESULTS --- */
+        /* SIDEBAR */
         .sidebar { background-color: #fafafa; display: flex; flex-direction: column; overflow-y: auto; max-height: 800px; }
         .code-block-wrapper { margin-bottom: 0; }
         .code-header { padding: 8px 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #777; background: #eee; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
@@ -105,27 +119,30 @@
         .result-table th { background: #f4f4f4; }
         .raw-output { background: #eee; padding: 10px; font-family: monospace; font-size: 11px; max-height: 150px; overflow-y: auto; border-radius: 4px; margin-top: 5px; white-space: pre-wrap; word-break: break-all; }
         
-        /* --- SVG STYLES --- */
+        /* SVG ELEMENTS */
         line.wire { stroke: #999; stroke-width: 2; pointer-events: none; }
         line.control-line { stroke: #333; stroke-width: 2; pointer-events: none; }
         circle.control-dot { fill: #333; pointer-events: none; }
-        
         g.gate-group { cursor: pointer; pointer-events: all; user-select: none; -webkit-user-select: none; }
-        
         rect.gate-box { fill: #fff; stroke: var(--nvidia-green); stroke-width: 2; }
-        
-        text.gate-text { 
-            font-family: sans-serif; font-size: 11px; fill: #333; 
-            pointer-events: none; user-select: none; -webkit-user-select: none;
-            font-weight: bold;
-        }
-        
+        text.gate-text { font-family: sans-serif; font-size: 11px; fill: #333; pointer-events: none; user-select: none; -webkit-user-select: none; font-weight: bold; }
         rect.gate-box.param { fill: var(--nvidia-green); stroke: var(--nvidia-green); }
         text.gate-text.param { fill: #fff; }
         #drop-indicator { stroke: #ff0000; stroke-width: 2; stroke-dasharray: 4; display: none; pointer-events: none; }
         #ghost-gate { opacity: 0.6; pointer-events: none; display: none; }
+
+        /* TOUCH HELPER */
+        #touch-helper {
+            position: fixed; z-index: 9999; pointer-events: none; 
+            width: 40px; height: 40px; background: rgba(118, 185, 0, 0.9);
+            border: 2px solid #333; border-radius: 4px; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-family: sans-serif;
+            transform: translate(-50%, -50%); display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
         
-        /* --- MODAL --- */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.2s; }
         .modal-overlay.open { visibility: visible; opacity: 1; }
         .modal { background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw; }
@@ -133,12 +150,8 @@
         .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
         .form-group select, .form-group input, .form-group textarea { width: 100%; box-sizing: border-box; }
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
         
-        /* --- TOOLTIP --- */
+        /* TOOLTIP */
         #matrix-tooltip {
             position: absolute; background: rgba(40,40,40, 0.95); color: #fff; padding: 10px; 
             border-radius: 6px; font-family: 'Times New Roman', serif; font-size: 13px;
@@ -148,64 +161,42 @@
         .matrix-table { border-collapse: collapse; display: inline-table; vertical-align: middle; margin: 0 5px; }
         .matrix-table td { padding: 3px 6px; text-align: center; }
         .bracket { font-size: 2.5em; font-weight: 300; display: inline-block; vertical-align: middle; line-height: 0; position: relative; top: 2px;}
-        /* --- FOOTER INFO BOX --- */
-        .footer-info {
-            padding: 20px;
-            background: #fafafa;
-            border-top: 1px solid var(--border-color);
-            border-radius: 0 0 8px 8px;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .info-item {
-            background: white;
-            border: 1px solid #eee;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 3px solid var(--nvidia-green);
-        }
+
+        /* FOOTER INFO */
+        .footer-info { padding: 20px; background: #fafafa; border-top: 1px solid var(--border-color); border-radius: 0 0 8px 8px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
+        .info-item { background: white; border: 1px solid #eee; padding: 10px; border-radius: 4px; border-left: 3px solid var(--nvidia-green); }
         .info-item h4 { margin: 0 0 5px 0; color: #333; font-size: 12px; font-weight: bold; }
         .info-item p { margin: 0; font-size: 11px; color: #666; line-height: 1.4; }
-        
-        .resource-links {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px dashed #ddd;
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-        .resource-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: #333;
-            font-size: 13px;
-            font-weight: bold;
-            padding: 8px 15px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        .resource-link:hover {
-            border-color: var(--nvidia-green);
-            color: var(--nvidia-green);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .resource-icon {
-            font-size: 16px;
+        .resource-links { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ddd; display: flex; gap: 20px; justify-content: center; }
+        .resource-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #333; font-size: 13px; font-weight: bold; padding: 8px 15px; background: white; border: 1px solid #ddd; border-radius: 4px; transition: all 0.2s ease; }
+        .resource-link:hover { border-color: var(--nvidia-green); color: var(--nvidia-green); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            .widget-container { width: 100%; border: none; box-shadow: none; }
+            .workspace { grid-template-columns: 1fr; display: flex; flex-direction: column; }
+            .sidebar { border-left: none; border-top: 1px solid #ddd; max-height: none; }
+            .controls { flex-direction: column; align-items: stretch; gap: 10px; }
+            .control-group { flex-direction: column; align-items: stretch; width: 100%; gap: 10px; }
+            .control-group label { display: flex; flex-direction: column; font-size: 12px; }
+            select { width: 100%; }
+            .circuit-area { padding: 10px; min-height: 400px; }
+            .gate-toolbar { justify-content: flex-start; gap: 5px; }
+            .gate-btn { width: 44px; height: 44px; font-size: 12px; } 
+            .circuit-area > div:last-child { flex-direction: column; align-items: stretch; }
+            .circuit-area button { margin-bottom: 5px; justify-content: center; }
+            #matrix-tooltip { display: none !important; } /* Hide tooltip on touch */
+            .modal { padding: 15px; width: 95%; }
+            #action-popup { padding: 8px; transform: translate(-50%, -140%); }
+            #action-popup button { font-size: 14px; padding: 8px 12px; }
         }
     </style>
 </head>
 <body>
 
+<div id="touch-helper"></div>
 <div id="matrix-tooltip"></div>
 
 <div id="action-popup" style="position:absolute; background:#333; padding:5px; border-radius:4px; display:flex; gap:5px; z-index:1000; transform:translate(-50%, -120%);" class="hidden">
@@ -246,7 +237,7 @@
 
 <div class="widget-container">
     <div class="controls">
-        <div style="display:flex; align-items:center; gap:15px;">
+        <div class="control-group">
             <strong>CUDA-Q Hello World</strong>
             <label style="font-size:14px;">
                 Qubits: 
@@ -259,7 +250,7 @@
                 </select>
             </label>
             
-            <span style="color:#ccc; margin:0 5px;">|</span>
+            <span style="color:#ccc; margin:0 5px;" class="hide-mobile">|</span>
             <label style="font-size:14px;">
                 Load Example:
                 <select id="example-select" onchange="loadExample(this.value)" style="width:200px;">
@@ -276,21 +267,21 @@
     <div class="workspace">
         <div class="circuit-area" id="circuit-area">
             <div class="gate-toolbar">
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'h')" onmouseenter="showTooltip(event, 'h')" onmouseleave="hideTooltip()">H</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'x')" onmouseenter="showTooltip(event, 'x')" onmouseleave="hideTooltip()">X</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'y')" onmouseenter="showTooltip(event, 'y')" onmouseleave="hideTooltip()">Y</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'z')" onmouseenter="showTooltip(event, 'z')" onmouseleave="hideTooltip()">Z</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 's')" onmouseenter="showTooltip(event, 's')" onmouseleave="hideTooltip()">S</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 't')" onmouseenter="showTooltip(event, 't')" onmouseleave="hideTooltip()">T</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cx')" onmouseenter="showTooltip(event, 'cx')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;">CNOT</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cz')" onmouseenter="showTooltip(event, 'cz')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;">CZ</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'swap')" onmouseenter="showTooltip(event, 'swap')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;">SWAP</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'rx')" onmouseenter="showTooltip(event, 'rx')" onmouseleave="hideTooltip()">RX</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'ry')" onmouseenter="showTooltip(event, 'ry')" onmouseleave="hideTooltip()">RY</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'rz')" onmouseenter="showTooltip(event, 'rz')" onmouseleave="hideTooltip()">RZ</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'u3')" onmouseenter="showTooltip(event, 'u3')" onmouseleave="hideTooltip()">U3</div>
-                <div class="gate-btn custom" draggable="true" ondragstart="dragStartNew(event, 'custom')">Custom</div>
-                <div id="btn-paste" class="gate-btn paste-btn" draggable="true" ondragstart="dragStartPaste(event)">📋 Paste</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'h')" onmouseenter="showTooltip(event, 'h')" onmouseleave="hideTooltip()" data-type="h">H</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'x')" onmouseenter="showTooltip(event, 'x')" onmouseleave="hideTooltip()" data-type="x">X</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'y')" onmouseenter="showTooltip(event, 'y')" onmouseleave="hideTooltip()" data-type="y">Y</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'z')" onmouseenter="showTooltip(event, 'z')" onmouseleave="hideTooltip()" data-type="z">Z</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 's')" onmouseenter="showTooltip(event, 's')" onmouseleave="hideTooltip()" data-type="s">S</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 't')" onmouseenter="showTooltip(event, 't')" onmouseleave="hideTooltip()" data-type="t">T</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cx')" onmouseenter="showTooltip(event, 'cx')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="cx">CNOT</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cz')" onmouseenter="showTooltip(event, 'cz')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="cz">CZ</div>
+                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'swap')" onmouseenter="showTooltip(event, 'swap')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="swap">SWAP</div>
+                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'rx')" onmouseenter="showTooltip(event, 'rx')" onmouseleave="hideTooltip()" data-type="rx">RX</div>
+                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'ry')" onmouseenter="showTooltip(event, 'ry')" onmouseleave="hideTooltip()" data-type="ry">RY</div>
+                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'rz')" onmouseenter="showTooltip(event, 'rz')" onmouseleave="hideTooltip()" data-type="rz">RZ</div>
+                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'u3')" onmouseenter="showTooltip(event, 'u3')" onmouseleave="hideTooltip()" data-type="u3">U3</div>
+                <div class="gate-btn custom" draggable="true" ondragstart="dragStartNew(event, 'custom')" data-type="custom">Custom</div>
+                <div id="btn-paste" class="gate-btn paste-btn" draggable="true" ondragstart="dragStartPaste(event)" data-type="paste">📋 Paste</div>
             </div>
             
             <div class="svg-container">
@@ -302,11 +293,11 @@
                     </g>
                 </svg>
             </div>
-            <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;">
+            <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
                 <button id="btn-copy-kernel" class="btn-copy" onclick="copyKernelOnly()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">📋 Copy CUDA-Q Code</button>
                 <button id="btn-copy-full" class="btn-copy" onclick="copyFullViz()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">📊 Copy CUDA-Q + Viz Code</button>
                 <button id="btn-share" class="btn-copy" onclick="generateShareLink()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">🔗 Share Circuit</button>
-                <div style="border-left: 1px solid #ddd; margin: 0 5px;"></div>
+                <div style="border-left: 1px solid #ddd; margin: 0 5px;" class="hide-mobile"></div>
                 <button class="btn-undo" onclick="undo()" title="Undo Last Action">⎌ Undo</button>
                 <button class="btn-clear" onclick="clearAll()">Clear Circuit</button>
             </div>
@@ -359,7 +350,7 @@
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; font-size:12px; color:#555;">
                 <div>
                     <strong style="color:#333;">1. Build Circuit</strong>
-                    <p style="margin:5px 0 0 0;">Drag gates from the toolbar. Click a placed gate to <strong>Edit, Copy, or Delete</strong>.</p>
+                    <p style="margin:5px 0 0 0;">Drag gates (Mouse or Touch). Click a placed gate to <strong>Edit, Copy, or Delete</strong>.</p>
                 </div>
                  <div>
                     <strong style="color:#333;">2. Select Execution Mode</strong>
@@ -419,7 +410,7 @@
     let clipboardOp = null;
     let selectedIdx = -1;
     
-    // FIX: Added History Stack for Undo
+    // History Stack for Undo
     let historyStack = [];
 
     const MAX_GATES_PER_QUBIT = 10;
@@ -429,6 +420,11 @@
     const ghost = document.getElementById('ghost-gate');
     const measList = document.getElementById('meas-list');
     const tooltip = document.getElementById('matrix-tooltip');
+    
+    // TOUCH: Touch Helper
+    const touchHelper = document.getElementById('touch-helper');
+    let touchGate = null;
+
     const EXAMPLES = {
         'bell': { n: 2, c: [{ gate: 'h', target: 0, control: null, target2: null, params: [] }, { gate: 'cx', target: 1, control: 0, target2: null, params: [] }] },
         'ghz': { n: 3, c: [{ gate: 'h', target: 0, control: null, target2: null, params: [] }, { gate: 'cx', target: 1, control: 0, target2: null, params: [] }, { gate: 'cx', target: 2, control: 1, target2: null, params: [] }] },
@@ -436,31 +432,28 @@
         'teleport': { n: 3, c: [{ gate: 'h', target: 1, control: null, target2: null, params: [] }, { gate: 'cx', target: 2, control: 1, target2: null, params: [] }, { gate: 'rx', target: 0, control: null, target2: null, params: [1.57] }, { gate: 'cx', target: 1, control: 0, target2: null, params: [] }, { gate: 'h', target: 0, control: null, target2: null, params: [] }, { gate: 'cx', target: 2, control: 1, target2: null, params: [] }, { gate: 'cz', target: 2, control: 0, target2: null, params: [] }] }
     };
 
-    // FIX: Save State function
     function saveState() {
-        // Deep copy
         historyStack.push({
             c: JSON.parse(JSON.stringify(circuit)),
             o: JSON.parse(JSON.stringify(customOps))
         });
-        if(historyStack.length > 30) historyStack.shift(); // Keep last 30 actions
+        if(historyStack.length > 30) historyStack.shift();
     }
 
-    // FIX: Undo function
     function undo() {
         if(historyStack.length === 0) return;
         const lastState = historyStack.pop();
         circuit = lastState.c;
         customOps = lastState.o;
-        finishUpdate(true); // true = skip saving state again
+        finishUpdate(true);
     }
 
     function loadExample(key) {
         if (!key || !EXAMPLES[key]) return;
-        saveState(); // Save before load
+        saveState();
         const ex = EXAMPLES[key];
         document.getElementById('qubit-select').value = ex.n;
-        updateQubits(ex.n, true); // true = skip save in updateQubits to avoid double save
+        updateQubits(ex.n, true);
         circuit = JSON.parse(JSON.stringify(ex.c));
         measurements = {}; 
         for(let i=0; i<numQubits; i++) measurements[i] = 'mz';
@@ -485,9 +478,16 @@
     };
 
     window.onload = () => {
+        // Init Touch Listeners Programmatically
+        document.querySelectorAll('.gate-btn').forEach(btn => {
+            btn.addEventListener('touchstart', handleTouchStart, {passive: false});
+            btn.addEventListener('touchmove', handleTouchMove, {passive: false});
+            btn.addEventListener('touchend', handleTouchEnd);
+        });
+
         const urlParams = new URLSearchParams(window.location.search);
         const encodedState = urlParams.get('state');
-        let loadedMode = 'sample'; // Default mode if not shared
+        let loadedMode = 'sample';
         
         if (encodedState) {
             try {
@@ -495,12 +495,9 @@
                 numQubits = data.n; 
                 circuit = data.c;
                 if (data.ops) { for(let key in data.ops) { try { customOps[key] = { matrix: parseMatrix(data.ops[key].definition), definition: data.ops[key].definition }; } catch(e) {} } }
-                
-                // RESTORE SHARED MODE & MEASUREMENTS
                 if(data.mode) loadedMode = data.mode;
                 if(data.m) { measurements = data.m; } 
                 else { for(let i=0; i<numQubits; i++) measurements[i] = 'mz'; }
-
                 document.getElementById('qubit-select').value = numQubits;
             } catch (e) { 
                 updateQubits(3); 
@@ -510,10 +507,111 @@
              for(let i=0; i<numQubits; i++) measurements[i] = 'mz';
         }
         
-        // Set mode explicitly at start to reflect shared state
         setMode(loadedMode);
-        finishUpdate(true); // Don't save initial state
+        finishUpdate(true);
     };
+
+    // --- TOUCH LOGIC START ---
+    function handleTouchStart(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        const type = target.dataset.type;
+        touchGate = type;
+        touchHelper.textContent = target.textContent;
+        touchHelper.style.display = 'flex';
+        moveTouchHelper(e.touches[0].clientX, e.touches[0].clientY);
+        hideTooltip();
+    }
+
+    function handleTouchMove(e) {
+        if(!touchGate) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveTouchHelper(touch.clientX, touch.clientY);
+        
+        // Show indicator if over svg
+        const rect = svg.getBoundingClientRect();
+        if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+            touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+             const { qubit, index } = calculateDropTarget(touch.clientX, touch.clientY);
+             indicator.style.display = "block";
+             // Reuse indicator logic from dragOver would be better, but basic pos is enough
+             // Just show vertical line at correct spot?
+             // Simplification: We reuse the drag logic variables conceptually
+        } else {
+             indicator.style.display = "none";
+        }
+    }
+
+    function handleTouchEnd(e) {
+        if(!touchGate) return;
+        touchHelper.style.display = 'none';
+        indicator.style.display = 'none';
+        
+        const touch = e.changedTouches[0];
+        const rect = svg.getBoundingClientRect();
+        
+        if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+            touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            
+            const { qubit, index } = calculateDropTarget(touch.clientX, touch.clientY);
+            
+            // Map touchGate type to drag logic
+            if(touchGate === 'paste') {
+                if(clipboardOp) {
+                    saveState();
+                    const newOp = JSON.parse(JSON.stringify(clipboardOp));
+                    newOp.target = qubit;
+                    if(newOp.control !== null && newOp.control === qubit) newOp.control = (qubit === 0) ? 1 : 0;
+                    if(newOp.gate === 'custom' && !customOps[newOp.customName] && newOp._definition) {
+                        customOps[newOp.customName] = newOp._definition;
+                    }
+                    if (!isWithinLimit(newOp)) { showLimitModal(); }
+                    else { circuit.splice(index, 0, newOp); finishUpdate(true); }
+                }
+            } else if (GATE_META[touchGate]) {
+                const meta = GATE_META[touchGate];
+                if (meta.type === 'simple') {
+                    saveState();
+                    if (!isWithinLimit({ gate: touchGate, target: qubit, control: null, target2: null })) { showLimitModal(); }
+                    else {
+                        circuit.splice(index, 0, { gate: touchGate, target: qubit, control: null, target2: null, params: [], customName: null });
+                        finishUpdate(true);
+                    }
+                } else openModal(touchGate, -1, qubit, index); // Pass index to modal
+            }
+        }
+        touchGate = null;
+    }
+
+    function moveTouchHelper(x, y) {
+        touchHelper.style.left = x + 'px';
+        touchHelper.style.top = (y - 50) + 'px';
+    }
+
+    function calculateDropTarget(clientX, clientY) {
+        const rect = svg.getBoundingClientRect();
+        const scrollX = svg.parentElement.scrollLeft;
+        const lineH = 400 / (numQubits + 1);
+        
+        // Find Qubit
+        let targetQubit = 0, minD = 999;
+        for(let i=0; i<numQubits; i++) { 
+            const d = Math.abs((clientY - rect.top) - (lineH * (i+1))); 
+            if(d < minD) { minD = d; targetQubit = i; } 
+        }
+        
+        // Find Index
+        let maxBoxWidth = 30; 
+        circuit.forEach(op => { if(op.gate === 'custom') maxBoxWidth = Math.max(maxBoxWidth, 60); if(['rx','ry','rz','u3'].includes(op.gate)) maxBoxWidth = Math.max(maxBoxWidth, 70); });
+        const spacing = (maxBoxWidth > 40) ? 80 : 60; 
+        let idx = Math.round(((clientX - rect.left + scrollX) - 80) / spacing);
+        if (idx < 0) idx = 0; 
+        if (idx > circuit.length) idx = circuit.length;
+        
+        return { qubit: targetQubit, index: idx };
+    }
+    // --- TOUCH LOGIC END ---
 
     function updateQubits(n, skipSave = false) {
         if(!skipSave) saveState();
@@ -578,11 +676,39 @@
     
     function hideTooltip() { tooltip.style.display = 'none'; }
 
+    // Helper to format matrix string for Python syntax
+    function formatPythonMatrix(rawStr) {
+        let s = rawStr;
+        // Replace common math functions with numpy equivalent
+        s = s.replace(/\bsqrt\b/g, 'np.sqrt');
+        s = s.replace(/\bpi\b/g, 'np.pi');
+        s = s.replace(/\bsin\b/g, 'np.sin');
+        s = s.replace(/\bcos\b/g, 'np.cos');
+        s = s.replace(/\bexp\b/g, 'np.exp');
+        
+        // Replace standalone 'i' or 'j' with '1j' (complex unit in Python)
+        // Checks for i/j not preceded or followed by alphanumeric chars
+        s = s.replace(/(?<![a-zA-Z0-9_])i(?![a-zA-Z0-9_])/g, '1j');
+        s = s.replace(/(?<![a-zA-Z0-9_])j(?![a-zA-Z0-9_])/g, '1j');
+        
+        return s;
+    }
+
     function updateCode() {
-        let k = '';
+        // Always include imports at the top
+        let k = 'import cudaq\nimport numpy as np\n\n';
+        
         const usedCustomOps = new Set();
         circuit.forEach(op => { if (op.gate === 'custom' && op.customName) usedCustomOps.add(op.customName); });
-        usedCustomOps.forEach(name => { if (customOps[name]) k += `cudaq.register_operation("${name}", ${customOps[name].definition})\n\n`; });
+        
+        usedCustomOps.forEach(name => { 
+            if (customOps[name]) {
+                // Use the python formatter here for the generated code
+                let pyDef = formatPythonMatrix(customOps[name].definition);
+                k += `cudaq.register_operation("${name}", ${pyDef})\n\n`; 
+            }
+        });
+        
         let am = 0; if (execMode === 'run') for(let i=0; i<numQubits; i++) if(measurements[i] !== 'none') am++;
         if (execMode === 'run') k += `@cudaq.kernel\ndef my_kernel(n: int)${am===1?' -> bool':' -> list[bool]'}:\n    q = cudaq.qvector(n)\n`;
         else k += `@cudaq.kernel\ndef my_kernel(n: int):\n    q = cudaq.qvector(n)\n`;
@@ -614,7 +740,8 @@
     }
 
     function copyKernelOnly() {
-        const txt = "import cudaq\nimport numpy as np\n\n" + document.getElementById('code-kernel').innerText + "\n\n" + document.getElementById('code-exec').innerText;
+        // Imports are now part of code-kernel text, so we don't prepend them manually here to avoid duplicates
+        const txt = document.getElementById('code-kernel').innerText + "\n\n" + document.getElementById('code-exec').innerText;
         navigator.clipboard.writeText(txt).then(() => {
              const btn = document.getElementById('btn-copy-kernel');
              const orig = btn.innerHTML;
@@ -624,8 +751,10 @@
     }
 
     function copyFullViz() {
-        let py = "import cudaq\nimport numpy as np\nimport matplotlib.pyplot as plt\n\n";
+        let py = "";
+        // Imports are already in code-kernel text
         py += document.getElementById('code-kernel').innerText + "\n\n";
+        py += "import matplotlib.pyplot as plt\n"; // Only need to add plt
         py += document.getElementById('code-exec').innerText + "\n\n";
         py += "# --- VISUALIZATION LOGIC ---\n";
         if (execMode === 'state') {
@@ -671,10 +800,7 @@ plt.show()`;
     function generateShareLink() {
         const opsToSave = {};
         for(let key in customOps) opsToSave[key] = { definition: customOps[key].definition };
-        
-        // CHANGED: Added mode and m (measurements) to shared state
         const data = { n: numQubits, c: circuit, ops: opsToSave, mode: execMode, m: measurements };
-        
         const encoded = btoa(JSON.stringify(data));
         const newUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?state=${encoded}`;
         navigator.clipboard.writeText(newUrl).then(() => {
@@ -689,7 +815,6 @@ plt.show()`;
 
     function dragStartNew(ev, type) { draggedType = type; ev.dataTransfer.effectAllowed = "copy"; }
     
-    // --- COPY / PASTE LOGIC WITH DEFINITION PRESERVATION ---
     function copySelectedGate() {
         if(selectedIdx > -1) {
             clipboardOp = JSON.parse(JSON.stringify(circuit[selectedIdx]));
@@ -709,34 +834,17 @@ plt.show()`;
         ev.preventDefault(); 
         indicator.style.display = "none";
         if (!draggedType) return;
-
-        const rect = svg.getBoundingClientRect();
-        // Adjust for scroll
-        const scrollX = svg.parentElement.scrollLeft;
         
-        const lineH = 400 / (numQubits + 1);
-        let targetQubit = 0, minD = 999;
-        for(let i=0; i<numQubits; i++) { 
-            const d = Math.abs((ev.clientY - rect.top) - (lineH * (i+1))); 
-            if(d < minD) { minD = d; targetQubit = i; } 
-        }
-        
-        let maxBoxWidth = 30; 
-        circuit.forEach(op => { if(op.gate === 'custom') maxBoxWidth = Math.max(maxBoxWidth, 60); if(['rx','ry','rz','u3'].includes(op.gate)) maxBoxWidth = Math.max(maxBoxWidth, 70); });
-        const spacing = (maxBoxWidth > 40) ? 80 : 60; 
-
-        // Calculation adjusted for scroll
-        let idx = Math.round(((ev.clientX - rect.left + scrollX) - 80) / spacing);
-        if (idx < 0) idx = 0; 
-        if (idx > circuit.length) idx = circuit.length;
-        pendingInsertIdx = idx;
+        // Reuse calculation logic
+        const { qubit, index } = calculateDropTarget(ev.clientX, ev.clientY);
+        pendingInsertIdx = index;
 
         if (draggedType === 'paste') {
             if(clipboardOp) {
                 saveState(); // SAVE before paste
                 const newOp = JSON.parse(JSON.stringify(clipboardOp));
-                newOp.target = targetQubit; 
-                if(newOp.control !== null && newOp.control === targetQubit) newOp.control = (targetQubit === 0) ? 1 : 0;
+                newOp.target = qubit; 
+                if(newOp.control !== null && newOp.control === qubit) newOp.control = (qubit === 0) ? 1 : 0;
                 
                 // RESTORE DEFINITION IF MISSING
                 if(newOp.gate === 'custom' && !customOps[newOp.customName] && newOp._definition) {
@@ -750,17 +858,16 @@ plt.show()`;
             const meta = GATE_META[draggedType];
             if (meta.type === 'simple') {
                 saveState(); // SAVE before simple drop
-                if (!isWithinLimit({ gate: draggedType, target: targetQubit, control: null, target2: null })) { showLimitModal(); draggedType=null; return; }
-                circuit.splice(pendingInsertIdx, 0, { gate: draggedType, target: targetQubit, control: null, target2: null, params: [], customName: null });
+                if (!isWithinLimit({ gate: draggedType, target: qubit, control: null, target2: null })) { showLimitModal(); draggedType=null; return; }
+                circuit.splice(pendingInsertIdx, 0, { gate: draggedType, target: qubit, control: null, target2: null, params: [], customName: null });
                 finishUpdate(true);
-            } else openModal(draggedType, -1, targetQubit);
+            } else openModal(draggedType, -1, qubit, pendingInsertIdx);
         }
         draggedType = null;
     }
     function dragOver(ev) { ev.preventDefault(); indicator.style.display="block"; }
     function dragLeave(ev) { indicator.style.display="none"; }
     
-    // FIX: Updated showPopup to hide copy button for 2-qubit gates
     function showPopup(idx, mx, my) {
         selectedIdx = idx;
         const op = circuit[idx], meta = GATE_META[op.gate];
@@ -775,7 +882,6 @@ plt.show()`;
              sepCopy.style.display = 'block';
         }
         
-        // Adjust Popup position for scroll
         popup.style.left = mx + 'px'; popup.style.top = my + 'px'; popup.classList.remove('hidden');
     }
     
@@ -791,8 +897,8 @@ plt.show()`;
     
     let editingIdx = -1, pendingGateType = '';
     
-    function openModal(gateType, idx, defaultTarget) {
-        editingIdx = idx; pendingGateType = gateType;
+    function openModal(gateType, idx, defaultTarget, insertIdx = -1) {
+        editingIdx = idx; pendingGateType = gateType; pendingInsertIdx = insertIdx;
         const meta = GATE_META[gateType], content = document.getElementById('modal-content'); content.innerHTML = '';
         const addField = (lbl, id, type='select') => {
             const div = document.createElement('div'); div.className = 'form-group';
@@ -809,8 +915,8 @@ plt.show()`;
         } else if (meta.type === 'param') {
             meta.params.forEach((p, i) => { const inp = addField(`${p} (radians)`, `inp-param-${i}`, 'input'); inp.type='number'; inp.step='0.1'; inp.value='0'; });
         } else if (meta.type === 'custom') {
-            const inpN = addField('Gate Name', 'inp-name', 'input'); inpN.value="my_gate";
-            const inpM = addField('Matrix (Python List of Lists)', 'inp-matrix', 'textarea'); 
+            const inpN = addField('Gate Name (use a valid Python variable name)', 'inp-name', 'input'); inpN.value="my_gate";
+            const inpM = addField('Unitary Matrix (List of Lists)', 'inp-matrix', 'textarea'); 
             inpM.rows=4; inpM.style.fontFamily='monospace'; inpM.value='[[0, 1], [1, 0]]';
         }
 
@@ -822,7 +928,7 @@ plt.show()`;
             if (meta.type === 'custom') {
                 document.getElementById('inp-name').value = op.customName;
                 document.getElementById('inp-matrix').value = customOps[op.customName].definition;
-                document.getElementById('inp-matrix').disabled = true; 
+                // document.getElementById('inp-matrix').disabled = true;  <-- REMOVED: Allow seeing, but we check conflicts on save
             }
             document.getElementById('modal-title').innerText = `Edit ${gateType.toUpperCase()}`;
         } else {
@@ -865,41 +971,61 @@ plt.show()`;
             customName = document.getElementById('inp-name').value.trim();
             if(!customName) return showError("Please provide a name.");
 
+            // VALIDATION: Check valid Python identifier
+            const validNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+            if (!validNameRegex.test(customName)) {
+                return showError("Invalid name. Please use valid Python identifier characters (A-Z, 0-9, _) and do not start with a number.");
+            }
+
             const RESERVED = ['h','x','y','z','s','t','rx','ry','rz','u3','cx','cz','swap','measure','reset','q','n','cudaq','labs','mz','mx','my'];
             if (RESERVED.includes(customName.toLowerCase()) || GATE_META[customName.toLowerCase()]) {
                 return showError("Chose another name for your custom gate, as it is a reserved keyword or standard gate.");
             }
             
-            // Allow re-using definition if it exists, otherwise validate
-            const matrixStr = document.getElementById('inp-matrix').value;
-            if (editingIdx > -1) { 
-                if (!customOps[customName]) customOps[customName] = customOps[circuit[editingIdx].customName]; 
-            } 
-            else {
-                if (!customOps[customName]) {
-                    try {
-                        const matrix = parseMatrix(matrixStr);
-                        if(!isUnitary(matrix)) {
-                            return showError(`<strong>Error: Matrix is not Unitary.</strong>`);
-                        }
-                        customOps[customName] = { matrix: matrix, definition: matrixStr };
-                    } catch(e) { return showError("Invalid Matrix Format: " + e.message); }
+            const matrixStr = document.getElementById('inp-matrix').value.trim();
+            
+            // --- FIX FOR DUPLICATE NAME CONFLICTS ---
+            if (customOps[customName]) {
+                // If name exists, check if definition is different
+                if (customOps[customName].definition !== matrixStr) {
+                    // Check if we are just editing the SAME gate instance's name (which shouldn't happen here as name is key)
+                    // If we are editing an existing gate, and we changed the matrix but kept the name...
+                    // We must forbid this if OTHER gates use this name.
+                    // Simplified policy: If name exists, definition MUST match exactly.
+                    return showError(`Error: The gate name '${customName}' is already used with a different matrix definition. Please choose a unique name.`);
                 }
             }
+            
+            // Parse and Validate Matrix
+            try {
+                const matrix = parseMatrix(matrixStr);
+                if(!isUnitary(matrix)) {
+                    return showError(`<strong>Error: Matrix is not Unitary.</strong>`);
+                }
+                // Only set if not already set (or if same, effectively no-op)
+                if (!customOps[customName]) {
+                    customOps[customName] = { matrix: matrix, definition: matrixStr };
+                }
+            } catch(e) { return showError("Invalid Matrix Format: " + e.message); }
         }
+        
         const opData = { gate: pendingGateType, target, control, target2, params, customName };
         if (!isWithinLimit(opData, editingIdx)) { closeModal(); showLimitModal(); return; }
         
         saveState(); // SAVE before insert/edit confirmed
         
         if (editingIdx > -1) circuit[editingIdx] = opData;
-        else { if (pendingInsertIdx >= 0 && pendingInsertIdx <= circuit.length) circuit.splice(pendingInsertIdx, 0, opData); else circuit.push(opData); }
+        else { 
+            // Handle pendingInsertIdx which might be set by drag drop or modal
+            let idx = (pendingInsertIdx !== undefined && pendingInsertIdx > -1) ? pendingInsertIdx : circuit.length;
+            if(idx > circuit.length) idx = circuit.length;
+            circuit.splice(idx, 0, opData); 
+        }
         finishUpdate(true); closeModal();
     }
     
     function showError(msg) { const d = document.getElementById('modal-error'); d.innerHTML = msg; d.style.display = 'block'; }
     
-    // FIX: Finish update - boolean flag to skip saving state if we just undid something
     function finishUpdate(skipSave = false) { 
         if(!skipSave) saveState();
         cleanCustomOps();
@@ -915,7 +1041,6 @@ plt.show()`;
         finishUpdate(true); 
     }
     
-    // NEW FUNCTION: Garbage Collection for Custom Gates
     function cleanCustomOps() {
         const used = new Set();
         circuit.forEach(op => { if(op.gate === 'custom') used.add(op.customName); });
@@ -937,6 +1062,7 @@ plt.show()`;
         const spacing = (maxBoxWidth > 40) ? 80 : 60; 
         const w = Math.max(800, 100 + (circuit.length * spacing)); 
         svg.style.width = w + 'px';
+        svg.style.height = '400px';
         const lineH = 400 / (numQubits + 1);
         
         for(let i=0; i<numQubits; i++) {
