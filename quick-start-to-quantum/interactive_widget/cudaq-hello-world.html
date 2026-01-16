@@ -754,41 +754,67 @@
         let py = "";
         // Imports are already in code-kernel text
         py += document.getElementById('code-kernel').innerText + "\n\n";
-        py += "import matplotlib.pyplot as plt\n"; // Only need to add plt
+        
+        // Only include matplotlib if we are NOT in 'run' mode (since 'run' now uses a text table)
+        if (execMode !== 'run') {
+            py += "import matplotlib.pyplot as plt\n"; 
+        }
+        
         py += document.getElementById('code-exec').innerText + "\n\n";
         py += "# --- VISUALIZATION LOGIC ---\n";
+        
         if (execMode === 'state') {
             py += `
 data = np.array(state)
-probs = np.abs(data)**2
 n = ${numQubits}
 dim = 1 << n
-print("\\nState Vector Results:")
+
+# 1. Print the full array of coefficients
+print('Statevector array of coefficients:', np.round(data, 4))
+
+print("\\nState Vector Amplitudes:")
 labels = []
 values = []
+
 for i in range(dim):
-    if probs[i] > 1e-6:
+    if np.abs(data[i]) > 1e-6:
         bin_str = format(i, f'0{n}b')[::-1] 
-        print(f"|{bin_str}>    {probs[i]:.4f}")
+        amp = np.round(data[i], 4)
+        print(f"|{bin_str}>    {amp}")
         labels.append(f"|{bin_str}>")
-        values.append(probs[i])
+        values.append(np.abs(data[i])**2) 
+
 plt.bar(labels, values)
+plt.ylabel('Probability')
 plt.show()`;
+
         } else if (execMode === 'sample') {
             py += `
 sorted_counts = dict(sorted(counts.items()))
 print(sorted_counts)
 plt.bar(list(sorted_counts.keys()), list(sorted_counts.values()))
 plt.show()`;
+
         } else if (execMode === 'run') {
+            // --- UPDATED: Prints Text Table instead of Bar Chart ---
             py += `
 from collections import Counter
+
+# Convert measurement results to strings for counting
+# This handles both single bools (True) and lists ([True, False])
 processed_results = [str(r) for r in results]
 counts = Counter(processed_results)
-print(counts)
-plt.bar(list(counts.keys()), list(counts.values()))
-plt.show()`;
+
+# Print formatted table
+print("\\nExecution Results:")
+print(f"{'Result (1=True)':<25} | {'Count':<10}")
+print("-" * 38)
+for result, count in counts.items():
+    print(f"{result:<25} | {count:<10}")
+`;
+            // ------------------------------------------------------
         }
+
         navigator.clipboard.writeText(py).then(() => {
              const btn = document.getElementById('btn-copy-full');
              const orig = btn.innerHTML;
