@@ -1,112 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">    
+<! SPDX-License-Identifier: Apache-2.0 AND CC-BY-NC-4.0
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions and limitations under the License.
+-->
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CUDA-Q Kernel Visualizer & Designer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
     <style>
         :root { 
-            --nvidia-green: #76b900; 
-            --nvidia-green-hover: #6a9e00;
+            /* BRANDING: Original NVIDIA Green */
+            --main-color: #76b900; 
+            --hover-color: #6a9e00;
             --nvidia-dark: #333; 
             --bg-color: #f8f9fa; 
             --border-color: #ddd; 
             --code-bg: #2d2d2d; 
             --code-text: #f8f8f2; 
         }
+
+        /* --- HIGH CONTRAST THEME (ADA) --- */
+        body.high-contrast {
+            --main-color: #000000; /* Strict Black */
+            --hover-color: #333333;
+            --bg-color: #ffffff;
+            --code-bg: #000000;
+            --code-text: #ffffff;
+            --nvidia-dark: #000000;
+        }
+        
+        /* High Contrast Overrides */
+        body.high-contrast .gate-btn { border-width: 2px; font-weight: 900; }
+        body.high-contrast .gate-box { stroke-width: 3px; }
+        body.high-contrast .wire { stroke: #000; stroke-width: 2px; }
+        body.high-contrast button:focus, 
+        body.high-contrast select:focus, 
+        body.high-contrast input:focus {
+            outline: 4px solid #000 !important;
+            outline-offset: 2px;
+        }
+
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--nvidia-dark); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         
         .widget-container { background: white; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 1200px; display: flex; flex-direction: column; }
         
         /* --- CONTROLS --- */
         .controls { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fff; border-radius: 8px 8px 0 0; }
-        .control-group { display: flex; align-items: center; gap: 15px; }
+        .control-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; width: 100%; }
         
         select, button, input { padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
         button { cursor: pointer; }
-        .btn-action { background-color: var(--nvidia-dark); color: white; border: 1px solid var(--nvidia-dark); font-weight: bold; font-size: 14px; transition: background-color 0.2s; }
-        .btn-action:hover { background-color: #555; }
         
-        #btn-execute {
-            background-color: var(--nvidia-green);
-            border: 1px solid var(--nvidia-green);
+        /* EXECUTE BUTTON STYLING */
+        .btn-action {
+            background-color: var(--main-color);
             color: white;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px;
-            margin-top: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            transition: all 0.2s ease;
-            width: 100%; /* Better for mobile */
+            font-weight: bold;
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s;
         }
-        #btn-execute:hover { background-color: var(--nvidia-green-hover); transform: translateY(-1px); }
+        .btn-action:hover {
+            background-color: var(--hover-color);
+        }
+        /* High Contrast Override for Button */
+        body.high-contrast .btn-action {
+            background-color: #000;
+            color: #fff;
+            border: 2px solid #000;
+        }
+        body.high-contrast .btn-action:hover {
+            background-color: #333;
+        }
 
-        .btn-clear { background-color: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 12px; padding: 6px 12px; }
-        .btn-clear:hover { background-color: #e74c3c; color: white; }
-        .btn-undo { background-color: #fff; border: 1px solid #666; color: #666; font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 5px; }
-        .btn-undo:hover { background-color: #666; color: white; }
+        /* Standard Focus Indicators */
+        button:focus, select:focus, input:focus, [tabindex]:focus, g:focus, .gate-btn:focus, .svg-container:focus {
+            outline: 3px solid var(--main-color) !important;
+            outline-offset: 2px;
+            z-index: 100;
+            position: relative; 
+        }
         
-        .btn-edit { background-color: #fff; border: 1px solid var(--nvidia-green); color: var(--nvidia-green); font-size: 12px; padding: 6px 12px; }
-        .btn-edit:hover { background-color: var(--nvidia-green); color: white; }
-        .btn-copy-gate { background-color: #fff; border: 1px solid #3498db; color: #3498db; font-size: 12px; padding: 6px 12px; }
-        .btn-copy-gate:hover { background-color: #3498db; color: white; }
-        .btn-copy { background-color: #eee; color: #333; border: 1px solid #ddd; font-size: 12px; display: flex; align-items: center; gap: 5px; }
-        .btn-copy:hover { background-color: #e0e0e0; }
+        /* --- SVG GATE STYLES --- */
+        /* UPDATED: Darker Green for better visibility */
+        g.gate-group:focus rect.gate-box,
+        g.gate-group.selected rect.gate-box { 
+            stroke: #000; stroke-width: 3px; fill: #a5d6a7; /* Green 200 - darker than before */
+        }
         
-        /* WORKSPACE */
-        .workspace { display: grid; grid-template-columns: 60% 40%; min-height: 650px; }
+        /* UPDATED: Force text to black when selected to ensure contrast */
+        g.gate-group:focus text.gate-text,
+        g.gate-group.selected text.gate-text {
+            fill: #000 !important;
+        }
         
-        .circuit-area { padding: 20px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative; }
+        /* High Contrast Selection Override */
+        body.high-contrast g.gate-group:focus rect.gate-box,
+        body.high-contrast g.gate-group.selected rect.gate-box {
+            fill: #fff; stroke: #000; stroke-width: 4px;
+        }
+
+        g.gate-group:focus, g.gate-group.selected { outline: none; } 
+
+        /* Swap/Control styles */
+        g.gate-group:focus circle.swap-focus-ring, g.gate-group.selected circle.swap-focus-ring { opacity: 1 !important; stroke: var(--main-color); fill: #f0f9eb; }
+        g.gate-group:focus text.swap-text, g.gate-group.selected text.swap-text { fill: var(--main-color) !important; font-weight: bold !important; }
+        g.gate-group:focus line.swap-line, g.gate-group.selected line.swap-line { stroke: var(--main-color) !important; stroke-width: 3px !important; }
+        
+        circle.swap-focus-ring { opacity: 0; transition: opacity 0.1s; stroke-width: 2px; pointer-events: none; }
+        text.swap-text { fill: #333; font-weight: bold; font-size: 20px; transition: fill 0.1s; }
+        line.swap-line { stroke: #333; stroke-width: 2px; transition: stroke 0.1s; }
+
+        g.gate-group:focus line.control-line, g.gate-group.selected line.control-line { stroke: var(--main-color) !important; stroke-width: 3px !important; }
+        g.gate-group:focus circle.control-dot, g.gate-group.selected circle.control-dot { fill: var(--main-color) !important; r: 5px !important; }
+        g.gate-group:focus circle[fill="white"], g.gate-group.selected circle[fill="white"] { stroke: var(--main-color) !important; stroke-width: 3px !important; fill: #f0f9eb !important; }
+
+        /* --- LAYOUT --- */
+        .workspace { 
+            display: grid; 
+            grid-template-columns: 60% 40%; 
+            grid-template-rows: auto 1fr; 
+            grid-template-areas: "circuit sidebar" "actions sidebar";
+            min-height: 650px; 
+        }
+
+        .circuit-area { grid-area: circuit; padding: 20px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative; }
+        .sidebar { grid-area: sidebar; border-left: none; background-color: #fafafa; display: flex; flex-direction: column; overflow-y: auto; max-height: 800px; }
+        body.high-contrast .sidebar { background-color: #fff; border-left: 2px solid #000; }
+
+        .actions-container {
+            grid-area: actions; padding: 15px 20px; border-right: 1px solid var(--border-color); border-top: 1px dashed #eee;
+            display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; background: white; align-items: flex-start; 
+        }
         
         .gate-toolbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; padding-bottom: 15px; border-bottom: 1px dashed #eee; align-items: center; user-select: none; -webkit-user-select: none; }
+        
+        /* TARGET SIZE FIX: 44px min size for WCAG AAA compliance */
         .gate-btn { 
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
-            background: white; border: 2px solid var(--nvidia-green); color: var(--nvidia-green); 
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; 
+            background: white; 
+            border: 2px solid var(--main-color); 
+            color: var(--main-color); 
             font-weight: bold; border-radius: 4px; cursor: grab; font-size: 11px; position: relative;
-            touch-action: none; /* Crucial for mobile drag */
+            touch-action: none; 
         }
-        .gate-btn:hover { background: var(--nvidia-green); color: white; }
-        .gate-btn.param-gate { background: #f0f9eb; border-color: var(--nvidia-green); color: var(--nvidia-green); }
+        .gate-btn:hover { background: var(--main-color); color: white; }
+        .gate-btn.param-gate { background: #f0f9eb; border-color: var(--main-color); color: var(--main-color); }
+        body.high-contrast .gate-btn.param-gate:hover { background: #000; color: #fff; }
+
         .gate-btn.custom { border-style: dashed; }
         .gate-btn.paste-btn { border: 2px dashed #3498db; color: #3498db; background: #f0f8ff; width: auto; padding: 0 10px; display: none; }
         .gate-btn.paste-btn.visible { display: flex; }
         
         .svg-container { 
-            flex-grow: 1; 
-            border: 1px dashed #eee; 
-            border-radius: 4px; 
-            min-height: 300px; 
-            position: relative; 
-            
-            /* --- NEW LINES START --- */
-            width: 100%;        /* Forces it to fill the parent, not the content */
-            max-width: 85vw;    /* Hard limit prevents it from pushing page width */
-            overflow: auto;     /* Enables scrollbars (both X and Y) */
-            display: block;     /* Ensures standard box model behavior */
-            /* --- NEW LINES END --- */
-
-            background: #fff; 
-            -webkit-overflow-scrolling: touch;
+            flex-grow: 1; border: 1px dashed #eee; border-radius: 4px; min-height: 300px; position: relative; width: 100%;        
+            max-width: 85vw; overflow: auto; display: block; background: #fff; -webkit-overflow-scrolling: touch;
         }
-        #circuit-svg { height: 100%; display: block; }
+        body.high-contrast .svg-container { border: 2px solid #000; }
+        #circuit-svg { height: 100%; display: block; outline: none; }
         
-        /* SIDEBAR */
-        .sidebar { background-color: #fafafa; display: flex; flex-direction: column; overflow-y: auto; max-height: 800px; }
         .code-block-wrapper { margin-bottom: 0; }
         .code-header { padding: 8px 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #777; background: #eee; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
         .code-box { background-color: var(--code-bg); color: var(--code-text); padding: 10px; font-family: 'Courier New', monospace; font-size: 12px; overflow: auto; white-space: pre-wrap; word-break: break-all; min-height: 100px; max-height: 250px; }
         .exec-panel { padding: 15px; border-top: 1px solid #ddd; background: white; flex-grow: 1; display: flex; flex-direction: column; }
         
-        .mode-selector { display: flex; gap: 0; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 15px; }
+        .mode-selector { display: flex; gap: 0; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 15px; }
         .mode-btn { flex: 1; padding: 10px 5px; border: none; background: #f8f8f8; cursor: pointer; font-size: 12px; border-right: 1px solid #ccc; transition: background 0.1s; }
-        .mode-btn:last-child { border-right: none; }
+        .mode-btn:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+        .mode-btn:last-child { border-right: none; border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
         .mode-btn:hover { background: #eee; }
         .mode-btn.active { background: #444; color: white; font-weight: bold; border-color: #444; }
+        body.high-contrast .mode-btn.active { background: #000; border-color: #000; }
         
         .run-config { padding: 15px; background: #f0f9eb; border: 1px solid #ccebc4; border-radius: 4px; margin-bottom: 15px; display: none; }
+        body.high-contrast .run-config { background: #fff; border: 2px solid #000; }
         .run-config.visible { display: block; }
         
         .meas-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13px; gap: 10px; }
@@ -123,10 +200,10 @@
         line.wire { stroke: #999; stroke-width: 2; pointer-events: none; }
         line.control-line { stroke: #333; stroke-width: 2; pointer-events: none; }
         circle.control-dot { fill: #333; pointer-events: none; }
-        g.gate-group { cursor: pointer; pointer-events: all; user-select: none; -webkit-user-select: none; }
-        rect.gate-box { fill: #fff; stroke: var(--nvidia-green); stroke-width: 2; }
+        g.gate-group { cursor: pointer; pointer-events: all; user-select: none; -webkit-user-select: none; outline: none; }
+        rect.gate-box { fill: #fff; stroke: var(--main-color); stroke-width: 2; }
         text.gate-text { font-family: sans-serif; font-size: 11px; fill: #333; pointer-events: none; user-select: none; -webkit-user-select: none; font-weight: bold; }
-        rect.gate-box.param { fill: var(--nvidia-green); stroke: var(--nvidia-green); }
+        rect.gate-box.param { fill: var(--main-color); stroke: var(--main-color); }
         text.gate-text.param { fill: #fff; }
         #drop-indicator { stroke: #ff0000; stroke-width: 2; stroke-dasharray: 4; display: none; pointer-events: none; }
         #ghost-gate { opacity: 0.6; pointer-events: none; display: none; }
@@ -146,6 +223,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.2s; }
         .modal-overlay.open { visibility: visible; opacity: 1; }
         .modal { background: white; padding: 20px; border-radius: 8px; width: 400px; max-width: 90vw; }
+        body.high-contrast .modal { border: 2px solid #000; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
         .form-group select, .form-group input, .form-group textarea { width: 100%; box-sizing: border-box; }
@@ -165,29 +243,28 @@
         /* FOOTER INFO */
         .footer-info { padding: 20px; background: #fafafa; border-top: 1px solid var(--border-color); border-radius: 0 0 8px 8px; }
         .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
-        .info-item { background: white; border: 1px solid #eee; padding: 10px; border-radius: 4px; border-left: 3px solid var(--nvidia-green); }
+        .info-item { background: white; border: 1px solid #eee; padding: 10px; border-radius: 4px; border-left: 3px solid var(--main-color); }
         .info-item h4 { margin: 0 0 5px 0; color: #333; font-size: 12px; font-weight: bold; }
         .info-item p { margin: 0; font-size: 11px; color: #666; line-height: 1.4; }
         .resource-links { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #ddd; display: flex; gap: 20px; justify-content: center; }
         .resource-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #333; font-size: 13px; font-weight: bold; padding: 8px 15px; background: white; border: 1px solid #ddd; border-radius: 4px; transition: all 0.2s ease; }
-        .resource-link:hover { border-color: var(--nvidia-green); color: var(--nvidia-green); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .resource-link:hover { border-color: var(--main-color); color: var(--main-color); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
-        /* --- MOBILE RESPONSIVENESS --- */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
         @media (max-width: 768px) {
             body { padding: 5px; }
             .widget-container { width: 100%; border: none; box-shadow: none; }
-            .workspace { grid-template-columns: 1fr; display: flex; flex-direction: column; }
-            .sidebar { border-left: none; border-top: 1px solid #ddd; max-height: none; }
+            .workspace { display: flex; flex-direction: column; }
+            .circuit-area { order: 1; border-right: none; }
+            .actions-container { order: 2; border-right: none; border-bottom: 1px solid #ddd; }
+            .sidebar { order: 3; border-top: none; }
             .controls { flex-direction: column; align-items: stretch; gap: 10px; }
             .control-group { flex-direction: column; align-items: stretch; width: 100%; gap: 10px; }
-            .control-group label { display: flex; flex-direction: column; font-size: 12px; }
             select { width: 100%; }
-            .circuit-area { padding: 10px; min-height: 400px; }
             .gate-toolbar { justify-content: flex-start; gap: 5px; }
             .gate-btn { width: 44px; height: 44px; font-size: 12px; } 
-            .circuit-area > div:last-child { flex-direction: column; align-items: stretch; }
-            .circuit-area button { margin-bottom: 5px; justify-content: center; }
-            #matrix-tooltip { display: none !important; } /* Hide tooltip on touch */
+            #matrix-tooltip { display: none !important; }
             .modal { padding: 15px; width: 95%; }
             #action-popup { padding: 8px; transform: translate(-50%, -140%); }
             #action-popup button { font-size: 14px; padding: 8px 12px; }
@@ -195,105 +272,182 @@
     </style>
 </head>
 <body>
-
-<div id="touch-helper"></div>
-<div id="matrix-tooltip"></div>
-
-<div id="action-popup" style="position:absolute; background:#333; padding:5px; border-radius:4px; display:flex; gap:5px; z-index:1000; transform:translate(-50%, -120%);" class="hidden">
-    <button class="btn-edit" onclick="editSelectedGate()" style="background:none; border-color:white; color:white; padding:4px 8px;">Edit</button>
-    <div style="width:1px; background:#666; margin: 2px 0;"></div>
-    <button id="btn-popup-copy" class="btn-copy-gate" onclick="copySelectedGate()" style="background:none; border-color:white; color:white; padding:4px 8px;">Copy</button>
-    <div id="sep-popup-copy" style="width:1px; background:#666; margin: 2px 0;"></div>
-    <button class="btn-clear" onclick="deleteSelectedGate()" style="color:#ff6b6b; border-color: transparent; background:none; font-weight:bold; padding:4px 8px;">Delete</button>
-</div>
-
-<div id="limit-modal" class="modal-overlay">
-    <div class="modal" style="width: 500px; border-top: 4px solid #f39c12;">
-        <h3 style="margin-top:0; color: #e67e22;">Circuit Limit Reached</h3>
-        <p style="font-size:14px; line-height: 1.5; color: #555;">
-            You have reached the limit of <strong>10 gates per qubit line</strong>.
-        </p>
-        <div style="background:#f9f9f9; padding:10px; border-radius:4px; font-size:13px; color:#333; border:1px solid #eee; margin:15px 0;">
-            <strong>Recommendation:</strong><br>
-            For larger circuits, please copy the code and use the full <code>cudaq</code> environment.
-        </div>
-        <div style="text-align:right;">
-            <button class="btn-action" onclick="closeLimitModal()">Understood</button>
-        </div>
-    </div>
-</div>
-
-<div id="gate-modal" class="modal-overlay">
-    <div class="modal">
-        <h3 id="modal-title" style="margin-top:0;">Configure Gate</h3>
-        <div id="modal-content"></div>
-        <div id="modal-error" style="color:red; font-size:12px; margin-bottom:10px; display:none;"></div>
-        <div style="text-align:right; margin-top:15px;">
-            <button onclick="closeModal()">Cancel</button>
-            <button class="btn-action" style="background-color: var(--nvidia-green); border:none;" onclick="confirmModalGate()">Save</button>
-        </div>
-    </div>
-</div>
-
-<div class="widget-container">
-    <div class="controls">
-        <div class="control-group">
-            <strong>CUDA-Q Hello World</strong>
-            <label style="font-size:14px;">
-                Qubits: 
-                <select id="qubit-select" onchange="updateQubits(this.value)" style="width:auto; min-width: 50px;">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3" selected>3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </label>
-            
-            <span style="color:#ccc; margin:0 5px;" class="hide-mobile">|</span>
-            <label style="font-size:14px;">
-                Load Example:
-                <select id="example-select" onchange="loadExample(this.value)" style="width:200px;">
-                    <option value="">-- Select Circuit --</option>
-                    <option value="bell">Bell State (|Φ⁺⟩)</option>
-                    <option value="ghz">GHZ State (3-Qubit)</option>
-                    <option value="bv">Bernstein-Vazirani</option>
-                    <option value="teleport">Teleportation</option>
-                </select>
-            </label>
-        </div>
+    <div id="touch-helper"></div>
+    <div id="matrix-tooltip"></div>
+    <div id="sr-announcer" class="sr-only" aria-live="assertive"></div>
+    
+    <div id="action-popup" onkeydown="handlePopupKey(event)" style="position:absolute; background:#333; padding:5px; border-radius:4px; display:flex; gap:5px; z-index:1000; transform:translate(-50%, -120%);" class="hidden">
+        <button class="btn-edit" onclick="editSelectedGate()" style="background:none; border-color:white; color:white; padding:4px 8px;">Edit</button>
+        <div style="width:1px; background:#666; margin: 2px 0;"></div>
+        <button id="btn-popup-copy" class="btn-copy-gate" onclick="copySelectedGate()" style="background:none; border-color:white; color:white; padding:4px 8px;">Copy</button>
+        <div id="sep-popup-copy" style="width:1px; background:#666; margin: 2px 0;"></div>
+        <button class="btn-clear" onclick="deleteSelectedGate()" style="color:#ff6b6b; border-color: transparent; background:none; font-weight:bold; padding:4px 8px;">Delete</button>
     </div>
 
-    <div class="workspace">
-        <div class="circuit-area" id="circuit-area">
-            <div class="gate-toolbar">
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'h')" onmouseenter="showTooltip(event, 'h')" onmouseleave="hideTooltip()" data-type="h">H</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'x')" onmouseenter="showTooltip(event, 'x')" onmouseleave="hideTooltip()" data-type="x">X</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'y')" onmouseenter="showTooltip(event, 'y')" onmouseleave="hideTooltip()" data-type="y">Y</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'z')" onmouseenter="showTooltip(event, 'z')" onmouseleave="hideTooltip()" data-type="z">Z</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 's')" onmouseenter="showTooltip(event, 's')" onmouseleave="hideTooltip()" data-type="s">S</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 't')" onmouseenter="showTooltip(event, 't')" onmouseleave="hideTooltip()" data-type="t">T</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cx')" onmouseenter="showTooltip(event, 'cx')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="cx">CNOT</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'cz')" onmouseenter="showTooltip(event, 'cz')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="cz">CZ</div>
-                <div class="gate-btn" draggable="true" ondragstart="dragStartNew(event, 'swap')" onmouseenter="showTooltip(event, 'swap')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="swap">SWAP</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'rx')" onmouseenter="showTooltip(event, 'rx')" onmouseleave="hideTooltip()" data-type="rx">RX</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'ry')" onmouseenter="showTooltip(event, 'ry')" onmouseleave="hideTooltip()" data-type="ry">RY</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'rz')" onmouseenter="showTooltip(event, 'rz')" onmouseleave="hideTooltip()" data-type="rz">RZ</div>
-                <div class="gate-btn param-gate" draggable="true" ondragstart="dragStartNew(event, 'u3')" onmouseenter="showTooltip(event, 'u3')" onmouseleave="hideTooltip()" data-type="u3">U3</div>
-                <div class="gate-btn custom" draggable="true" ondragstart="dragStartNew(event, 'custom')" data-type="custom">Custom</div>
-                <div id="btn-paste" class="gate-btn paste-btn" draggable="true" ondragstart="dragStartPaste(event)" data-type="paste">📋 Paste</div>
+    <div id="limit-modal" class="modal-overlay">
+        <div class="modal" style="width: 500px; border-top: 4px solid #f39c12;">
+            <h3 style="margin-top:0; color: #e67e22;">Circuit Limit Reached</h3>
+            <p style="font-size:14px; line-height: 1.5; color: #555;">
+                You have reached the limit of <strong>10 gates per qubit line</strong>.
+            </p>
+            <div style="background:#f9f9f9; padding:10px; border-radius:4px; font-size:13px; color:#333; border:1px solid #eee; margin:15px 0;">
+                <strong>Recommendation:</strong><br>
+                For larger circuits, please copy the code and use the full <code>cudaq</code> environment.
             </div>
-            
-            <div class="svg-container">
-                <svg id="circuit-svg" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOnSvg(event)" onclick="bgClick(event)">
-                    <line id="drop-indicator" x1="0" y1="0" x2="0" y2="400"></line>
-                    <g id="ghost-gate">
-                        <rect width="30" height="30" x="-15" y="-15" fill="rgba(118, 185, 0, 0.5)" stroke="#333" stroke-dasharray="2"></rect>
-                        <text id="ghost-text" x="0" y="5" text-anchor="middle" font-family="sans-serif" font-size="12px" fill="#fff">G</text>
-                    </g>
-                </svg>
+            <div style="text-align:right;">
+                <button class="btn-action" onclick="closeLimitModal()">Understood</button>
             </div>
-            <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+        </div>
+    </div>
+
+    <div id="gate-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal">
+            <h3 id="modal-title" style="margin-top:0;">Configure Gate</h3>
+            <div id="modal-content"></div>
+            <div id="modal-error" style="color:red; font-size:12px; margin-bottom:10px; display:none;"></div>
+            <p style="font-size:12px; color:#666; text-align:right; margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
+                Press <strong>Enter</strong> to Save, <strong>Esc</strong> to Cancel
+            </p>
+        </div>
+    </div>
+
+    <div class="widget-container">
+        <div class="controls">
+            <div class="control-group">
+                <strong>CUDA-Q Hello World</strong>
+                <label style="font-size:14px;">Qubits: 
+                    <select id="qubit-select" onchange="updateQubits(this.value)" style="width:auto; min-width: 50px;">
+                        <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                    </select>
+                </label>
+                <label style="font-size:14px;">Load Example:
+                    <select id="example-select" onchange="loadExample(this.value)" style="width:160px;">
+                        <option value="">-- Select Circuit --</option>
+                        <option value="bell">Bell State (|Φ⁺⟩)</option>
+                        <option value="ghz">GHZ State (3-Qubit)</option>
+                        <option value="bv">Bernstein-Vazirani</option>
+                        <option value="teleport">Teleportation</option>
+                    </select>
+                </label>
+                <label style="font-size:14px;">Mode:
+                    <select id="top-mode-select" onchange="setMode(this.value, true)" style="width:auto;">
+                        <option value="state">Get State</option>
+                        <option value="sample" selected>Sample</option>
+                        <option value="run">Run</option>
+                    </select>
+                </label>
+                <label style="font-size:14px;">Actions:
+                    <select id="top-action-select" onchange="handleTopAction(this)" style="width:auto; min-width:120px; border-color: #999;">
+                        <option value="" selected disabled>Actions...</option>
+                        
+                        <optgroup label="Execution">
+                            <option value="exec" style="font-weight:bold;">▶ Execute</option>
+                        </optgroup>
+                        
+                        <optgroup label="Editing">
+                            <option value="edit-circuit" style="font-weight:bold; color:var(--main-color);">✎ Edit Circuit Diagram</option>
+                            <option value="edit-meas" style="color:#666;">✎ Edit Measurements</option>
+                            <option value="undo">⎌ Undo</option>
+                            <option value="clear">🗑 Clear Circuit</option>
+                        </optgroup>
+
+                        <optgroup label="Sharing">
+                            <option value="copy-k">📋 Copy Code</option>
+                            <option value="copy-v">📊 Copy Code + Viz</option>
+                            <option value="share">🔗 Share Link</option>
+                        </optgroup>
+
+                        <optgroup label="Settings">
+                            <option value="toggle-theme">Toggle High Contrast</option>
+                        </optgroup>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="circuit-area" id="circuit-area">
+                <div class="gate-toolbar" id="gate-toolbar" role="toolbar" aria-label="Quantum Gate Selection">
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add H Gate" onkeydown="handleGateToolbarKey(event, 'h')" ondragstart="dragStartNew(event, 'h')" onmouseenter="showTooltip(event, 'h')" onmouseleave="hideTooltip()" data-type="h">H</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add X Gate" onkeydown="handleGateToolbarKey(event, 'x')" ondragstart="dragStartNew(event, 'x')" onmouseenter="showTooltip(event, 'x')" onmouseleave="hideTooltip()" data-type="x">X</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add Y Gate" onkeydown="handleGateToolbarKey(event, 'y')" ondragstart="dragStartNew(event, 'y')" onmouseenter="showTooltip(event, 'y')" onmouseleave="hideTooltip()" data-type="y">Y</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add Z Gate" onkeydown="handleGateToolbarKey(event, 'z')" ondragstart="dragStartNew(event, 'z')" onmouseenter="showTooltip(event, 'z')" onmouseleave="hideTooltip()" data-type="z">Z</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add S Gate" onkeydown="handleGateToolbarKey(event, 's')" ondragstart="dragStartNew(event, 's')" onmouseenter="showTooltip(event, 's')" onmouseleave="hideTooltip()" data-type="s">S</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add T Gate" onkeydown="handleGateToolbarKey(event, 't')" ondragstart="dragStartNew(event, 't')" onmouseenter="showTooltip(event, 't')" onmouseleave="hideTooltip()" data-type="t">T</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add CNOT Gate" onkeydown="handleGateToolbarKey(event, 'cx')" ondragstart="dragStartNew(event, 'cx')" onmouseenter="showTooltip(event, 'cx')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="cx">CNOT</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add CZ Gate" onkeydown="handleGateToolbarKey(event, 'cz')" ondragstart="dragStartNew(event, 'cz')" onmouseenter="showTooltip(event, 'cz')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="cz">CZ</div>
+                    <div class="gate-btn" draggable="true" tabindex="0" role="button" aria-label="Add SWAP Gate" onkeydown="handleGateToolbarKey(event, 'swap')" ondragstart="dragStartNew(event, 'swap')" onmouseenter="showTooltip(event, 'swap')" onmouseleave="hideTooltip()" style="border-color:#333; color:#333;" data-type="swap">SWAP</div>
+                    <div class="gate-btn param-gate" draggable="true" tabindex="0" role="button" aria-label="Add RX Gate" onkeydown="handleGateToolbarKey(event, 'rx')" ondragstart="dragStartNew(event, 'rx')" onmouseenter="showTooltip(event, 'rx')" onmouseleave="hideTooltip()" data-type="rx">RX</div>
+                    <div class="gate-btn param-gate" draggable="true" tabindex="0" role="button" aria-label="Add RY Gate" onkeydown="handleGateToolbarKey(event, 'ry')" ondragstart="dragStartNew(event, 'ry')" onmouseenter="showTooltip(event, 'ry')" onmouseleave="hideTooltip()" data-type="ry">RY</div>
+                    <div class="gate-btn param-gate" draggable="true" tabindex="0" role="button" aria-label="Add RZ Gate" onkeydown="handleGateToolbarKey(event, 'rz')" ondragstart="dragStartNew(event, 'rz')" onmouseenter="showTooltip(event, 'rz')" onmouseleave="hideTooltip()" data-type="rz">RZ</div>
+                    <div class="gate-btn param-gate" draggable="true" tabindex="0" role="button" aria-label="Add U3 Gate" onkeydown="handleGateToolbarKey(event, 'u3')" ondragstart="dragStartNew(event, 'u3')" onmouseenter="showTooltip(event, 'u3')" onmouseleave="hideTooltip()" data-type="u3">U3</div>
+                    <div class="gate-btn custom" draggable="true" tabindex="0" role="button" aria-label="Add Custom Gate" onkeydown="handleGateToolbarKey(event, 'custom')" ondragstart="dragStartNew(event, 'custom')" data-type="custom">Custom</div>
+                    <div id="btn-paste" class="gate-btn paste-btn" draggable="true" tabindex="0" role="button" aria-label="Paste Copied Gate" onkeydown="handleGateToolbarKey(event, 'paste')" ondragstart="dragStartPaste(event)" data-type="paste">📋 Paste</div>
+                </div>
+                
+                <div id="circuit-accessibility-container" class="sr-only" aria-live="polite">
+                    <h3>Circuit Description</h3>
+                    <p>Circuit Diagram. Select "Edit Circuit Diagram" in the Actions menu to enter. Inside, use Tab or Arrow Keys to navigate. Press Enter to Edit/Delete.</p>
+                    <table id="accessibility-table">
+                        <caption>Sequential list of quantum gates in the circuit</caption>
+                        <thead><tr><th scope="col">Step</th><th scope="col">Gate</th><th scope="col">Qubits</th><th scope="col">Details</th></tr></thead>
+                        <tbody id="accessibility-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="svg-container" tabindex="-1" aria-label="Quantum Circuit Container">
+                    <svg id="circuit-svg" role="img" aria-labelledby="circuit-title circuit-desc" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOnSvg(event)" onclick="bgClick(event)">
+                        <title id="circuit-title">Quantum Circuit Visualization</title>
+                        <desc id="circuit-desc">Visual representation of the quantum circuit. Gates are placed on horizontal qubit lines.</desc>
+                        <line id="drop-indicator" x1="0" y1="0" x2="0" y2="400"></line>
+                        <g id="ghost-gate">
+                            <rect width="30" height="30" x="-15" y="-15" fill="rgba(118, 185, 0, 0.5)" stroke="#333" stroke-dasharray="2"></rect>
+                            <text id="ghost-text" x="0" y="5" text-anchor="middle" font-family="sans-serif" font-size="12px" fill="#fff">G</text>
+                        </g>
+                    </svg>
+                </div>
+            </div> 
+
+            <div class="sidebar">
+                <div class="code-block-wrapper">
+                    <div class="code-header"><span>Generated Kernel</span></div>
+                    <div class="code-box" id="code-kernel"></div>
+                </div>
+
+                <div class="exec-panel">
+                    <label style="font-size:12px; font-weight:bold; margin-bottom:5px;">Execution Mode</label>
+                    <div class="mode-selector">
+                        <button class="mode-btn" id="mode-state" onclick="setMode('state')">Get State</button>
+                        <button class="mode-btn active" id="mode-sample" onclick="setMode('sample')">Sample</button>
+                        <button class="mode-btn" id="mode-run" onclick="setMode('run')">Run</button>
+                    </div>
+                    
+                    <div id="run-config" class="run-config">
+                        <div style="font-size:11px; font-weight:bold; margin-bottom:8px;">Measurements:</div>
+                        <div id="meas-list"></div>
+                    </div>
+                    
+                    <div class="code-block-wrapper" style="margin-top:10px;">
+                        <div class="code-header"><span>Execution Code</span></div>
+                        <div class="code-box" id="code-exec" style="min-height:60px; max-height:80px;"></div>
+                    </div>
+
+                    <button id="btn-execute" class="btn-action" onclick="executeCircuit()">▶ Execute</button>
+                    
+                    <div class="results-display" id="results-area">
+                        <div id="chart-wrapper" style="display:none; width:100%;">
+                            <canvas id="chart-canvas" role="img" aria-label="Bar chart of simulation results" style="max-height:200px; width:100%;"></canvas>
+                        </div>
+                        <div id="table-container"></div>
+                        <div id="raw-container" style="display:none;">
+                            <div style="font-size:11px; font-weight:bold; margin-top:10px;">Raw Output:</div>
+                            <div class="raw-output" id="raw-text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-container">
                 <button id="btn-copy-kernel" class="btn-copy" onclick="copyKernelOnly()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">📋 Copy CUDA-Q Code</button>
                 <button id="btn-copy-full" class="btn-copy" onclick="copyFullViz()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">📊 Copy CUDA-Q + Viz Code</button>
                 <button id="btn-share" class="btn-copy" onclick="generateShareLink()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">🔗 Share Circuit</button>
@@ -301,104 +455,64 @@
                 <button class="btn-undo" onclick="undo()" title="Undo Last Action">⎌ Undo</button>
                 <button class="btn-clear" onclick="clearAll()">Clear Circuit</button>
             </div>
-        </div> 
 
-        <div class="sidebar">
-            <div class="code-block-wrapper">
-                <div class="code-header"><span>Generated Kernel</span></div>
-                <div class="code-box" id="code-kernel"></div>
-            </div>
-
-            <div class="exec-panel">
-                <label style="font-size:12px; font-weight:bold; margin-bottom:5px;">Execution Mode</label>
-                <div class="mode-selector">
-                    <button class="mode-btn" id="mode-state" onclick="setMode('state')">Get State</button>
-                    <button class="mode-btn active" id="mode-sample" onclick="setMode('sample')">Sample</button>
-                    <button class="mode-btn" id="mode-run" onclick="setMode('run')">Run</button>
-                </div>
-                
-                <div id="run-config" class="run-config">
-                    <div style="font-size:11px; font-weight:bold; margin-bottom:8px;">Measurements:</div>
-                    <div id="meas-list"></div>
-                </div>
-                
-                <div class="code-block-wrapper" style="margin-top:10px;">
-                    <div class="code-header"><span>Execution Code</span></div>
-                    <div class="code-box" id="code-exec" style="min-height:60px; max-height:80px;"></div>
-                </div>
-
-                <button id="btn-execute" class="btn-action" onclick="executeCircuit()">▶ Execute</button>
-                
-                <div class="results-display" id="results-area">
-                    <div id="chart-wrapper" style="display:none; width:100%;">
-                        <canvas id="chart-canvas" style="max-height:200px; width:100%;"></canvas>
+        </div>
+        
+        <div class="footer-info">
+            <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px dashed #ddd;">
+                <h3 style="margin:0 0 15px 0; font-size:13px; color:#444; text-transform:uppercase; letter-spacing:0.5px;">Instructions</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; font-size:12px; color:#555;">
+                    <div>
+                        <strong style="color:#333;">1. Build Circuit</strong>
+                        <p style="margin:5px 0 0 0;">Drag gates or use the <strong>Add Gate</strong> menu. To edit gates with keyboard, select <strong>"Edit Circuit Diagram"</strong> in the Actions menu.</p>
                     </div>
-                    <div id="table-container"></div>
-                    <div id="raw-container" style="display:none;">
-                        <div style="font-size:11px; font-weight:bold; margin-top:10px;">Raw Output:</div>
-                        <div class="raw-output" id="raw-text"></div>
+                     <div>
+                        <strong style="color:#333;">2. Select Execution Mode</strong>
+                        <p style="margin:5px 0 0 0;">
+                            <strong>Get State:</strong> View probability amplitudes.<br>
+                            <strong>Sample:</strong> Simulate 1000 noise-free shots.<br>
+                            <strong>Run:</strong> Shot-based execution with specific measurements.
+                        </p>
+                    </div>
+                    <div>
+                        <strong style="color:#333;">3. Generate Code</strong>
+                        <p style="margin:5px 0 0 0;">The sidebar automatically generates <code>cudaq</code> Python code. Click the "Copy" buttons to use locally.</p>
                     </div>
                 </div>
             </div>
-        </div>
 
-    </div>
-    
-    <div class="footer-info">
-        <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px dashed #ddd;">
-            <h3 style="margin:0 0 15px 0; font-size:13px; color:#444; text-transform:uppercase; letter-spacing:0.5px;">Instructions</h3>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; font-size:12px; color:#555;">
-                <div>
-                    <strong style="color:#333;">1. Build Circuit</strong>
-                    <p style="margin:5px 0 0 0;">Drag gates (Mouse or Touch). Click a placed gate to <strong>Edit, Copy, or Delete</strong>.</p>
+            <h3 style="margin:0 0 10px 0; font-size:13px; color:#444; text-transform:uppercase; letter-spacing:0.5px;">Example Circuits Guide</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h4>Bell State (|Φ⁺⟩)</h4>
+                    <p><strong>2 Qubits:</strong> The simplest example of entanglement. Measures <code>00</code> or <code>11</code> with 50/50 probability.</p>
                 </div>
-                 <div>
-                    <strong style="color:#333;">2. Select Execution Mode</strong>
-                    <p style="margin:5px 0 0 0;">
-                        <strong>Get State:</strong> View probability amplitudes.<br>
-                        <strong>Sample:</strong> Simulate 1000 noise-free shots.<br>
-                        <strong>Run:</strong> Shot-based execution with specific measurements.
-                    </p>
+                <div class="info-item">
+                    <h4>GHZ State</h4>
+                    <p><strong>3 Qubits:</strong> Maximally entangled state for 3 qubits. Results are <code>000</code> or <code>111</code>.</p>
                 </div>
-                <div>
-                    <strong style="color:#333;">3. Generate Code</strong>
-                    <p style="margin:5px 0 0 0;">The sidebar automatically generates <code>cudaq</code> Python code. Click the "Copy" buttons to use locally.</p>
+                <div class="info-item">
+                    <h4>Bernstein-Vazirani</h4>
+                    <p><strong>3 Qubits:</strong> Finds a secret bitstring (101) hidden in an Oracle function in a single step.</p>
+                </div>
+                <div class="info-item">
+                    <h4>Quantum Teleportation</h4>
+                    <p><strong>3 Qubits:</strong> Teleports state from q0 to q2. <br> 
+                    We prepare q0 in the state, |-i>. When teleported, we verify it by measuring q2 in the <code>my</code> basis. 
+                    In "Run" mode, q2 should be <code>True</code> 100% of the time.</p>
                 </div>
             </div>
-        </div>
 
-        <h3 style="margin:0 0 10px 0; font-size:13px; color:#444; text-transform:uppercase; letter-spacing:0.5px;">Example Circuits Guide</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <h4>Bell State (|Φ⁺⟩)</h4>
-                <p><strong>2 Qubits:</strong> The simplest example of entanglement. Measures <code>00</code> or <code>11</code> with 50/50 probability.</p>
-            </div>
-            <div class="info-item">
-                <h4>GHZ State</h4>
-                <p><strong>3 Qubits:</strong> Maximally entangled state for 3 qubits. Results are <code>000</code> or <code>111</code>.</p>
-            </div>
-            <div class="info-item">
-                <h4>Bernstein-Vazirani</h4>
-                <p><strong>3 Qubits:</strong> Finds a secret bitstring (101) hidden in an Oracle function in a single step.</p>
-            </div>
-            <div class="info-item">
-                <h4>Quantum Teleportation</h4>
-                <p><strong>3 Qubits:</strong> Teleports state from q0 to q2. <br> 
-                We prepare q0 in the state, |-i>. When teleported, we verify it by measuring q2 in the <code>my</code> basis. 
-                In "Run" mode, q2 should be <code>True</code> 100% of the time.</p>
+            <div class="resource-links">
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" class="resource-link">
+                    <span class="resource-icon">🎓</span> CUDA-Q Academic Repository
+                </a>
+                <a href="https://nvidia.github.io/cuda-quantum/" target="_blank" class="resource-link">
+                    <span class="resource-icon">📚</span> CUDA-Q Documentation
+                </a>
             </div>
         </div>
-
-        <div class="resource-links">
-            <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" class="resource-link">
-                <span class="resource-icon">🎓</span> CUDA-Q Academic Repository
-            </a>
-            <a href="https://nvidia.github.io/cuda-quantum/" target="_blank" class="resource-link">
-                <span class="resource-icon">📚</span> CUDA-Q Documentation
-            </a>
-        </div>
-    </div>
-</div> 
+    </div> 
 
 <script>
     let numQubits = 3;
@@ -409,8 +523,7 @@
     let pendingInsertIdx = -1;
     let clipboardOp = null;
     let selectedIdx = -1;
-    
-    // History Stack for Undo
+    let lastFocusedElement = null;
     let historyStack = [];
 
     const MAX_GATES_PER_QUBIT = 10;
@@ -420,8 +533,6 @@
     const ghost = document.getElementById('ghost-gate');
     const measList = document.getElementById('meas-list');
     const tooltip = document.getElementById('matrix-tooltip');
-    
-    // TOUCH: Touch Helper
     const touchHelper = document.getElementById('touch-helper');
     let touchGate = null;
 
@@ -431,6 +542,71 @@
         'bv': { n: 3, c: [{ gate: 'h', target: 0, control: null, target2: null, params: [] }, { gate: 'h', target: 1, control: null, target2: null, params: [] }, { gate: 'h', target: 2, control: null, target2: null, params: [] }, { gate: 'z', target: 0, control: null, target2: null, params: [] }, { gate: 'z', target: 2, control: null, target2: null, params: [] }, { gate: 'h', target: 0, control: null, target2: null, params: [] }, { gate: 'h', target: 1, control: null, target2: null, params: [] }, { gate: 'h', target: 2, control: null, target2: null, params: [] }] },
         'teleport': { n: 3, c: [{ gate: 'h', target: 1, control: null, target2: null, params: [] }, { gate: 'cx', target: 2, control: 1, target2: null, params: [] }, { gate: 'rx', target: 0, control: null, target2: null, params: [1.57] }, { gate: 'cx', target: 1, control: 0, target2: null, params: [] }, { gate: 'h', target: 0, control: null, target2: null, params: [] }, { gate: 'cx', target: 2, control: 1, target2: null, params: [] }, { gate: 'cz', target: 2, control: 0, target2: null, params: [] }] }
     };
+
+    function announceToScreenReader(message) {
+        let liveRegion = document.getElementById('sr-announcer');
+        if (liveRegion) {
+            liveRegion.innerText = message;
+            setTimeout(() => { liveRegion.innerText = ''; }, 3000);
+        }
+    }
+
+    function handleTopAction(el) {
+        const val = el.value;
+        if (!val) return;
+
+        switch (val) {
+            case 'toggle-theme': toggleHighContrast(); break;
+            case 'edit-circuit': enterCircuitNav(); break;
+            case 'edit-meas': enterMeasNav(); break;
+            case 'exec': executeCircuit(); break;
+            case 'undo': undo(); break;
+            case 'clear': clearAll(); break;
+            case 'copy-k': copyKernelOnly(); break;
+            case 'copy-v': copyFullViz(); break;
+            case 'share': generateShareLink(); break;
+        }
+        
+        // UPDATED: Always reset to the default placeholder so actions (like Execute) can be re-triggered
+        el.value = "";
+        el.blur();
+    }
+    
+    function toggleHighContrast() {
+        document.body.classList.toggle('high-contrast');
+        const isHigh = document.body.classList.contains('high-contrast');
+        announceToScreenReader(isHigh ? "High contrast mode enabled." : "High contrast mode disabled.");
+        renderCircuit();
+        if(window.myChart) displayResults(lastStateData.state, lastStateData.dim);
+    }
+    
+    // NAVIGATION HELPERS
+    function focusGate(idx) {
+        if(idx < 0 || idx >= circuit.length) return;
+        const gateGroup = document.querySelector(`.gate-group[data-index="${idx}"]`);
+        if(gateGroup) {
+            gateGroup.focus();
+            gateGroup.scrollIntoView({block: 'nearest', inline: 'center'});
+        }
+    }
+
+    function enterCircuitNav() {
+        if (circuit.length > 0) {
+            focusGate(0);
+        } else {
+            alert("Circuit is empty. Add gates first.");
+            document.getElementById('top-action-select').focus();
+        }
+    }
+
+    function enterMeasNav() {
+        if(execMode !== 'run') {
+            alert("Please select 'Run' mode first to configure measurements.");
+            return;
+        }
+        const firstMeas = document.querySelector('#meas-list select');
+        if (firstMeas) firstMeas.focus();
+    }
 
     function saveState() {
         historyStack.push({
@@ -446,6 +622,65 @@
         circuit = lastState.c;
         customOps = lastState.o;
         finishUpdate(true);
+        announceToScreenReader("Undo performed.");
+    }
+    
+    function addGateFromMenu(gateType) {
+        if (!gateType) return;
+        if (gateType === 'paste') {
+            if (clipboardOp) {
+                const op = clipboardOp;
+                openModal(op.gate, -1, 0, -1);
+            }
+        } else {
+            openModal(gateType, -1, 0, -1);
+        }
+    }
+    
+    function setSelectedGate(idx) {
+        document.querySelectorAll('.gate-group').forEach(g => g.classList.remove('selected'));
+        const active = document.querySelector(`.gate-group[data-index="${idx}"]`);
+        if (active) active.classList.add('selected');
+    }
+    
+    function handleGateKey(e, idx) {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault();
+            deleteSelectedGate();
+        } else if (e.key === 'e' || e.key === 'E') {
+            e.preventDefault();
+            editSelectedGate();
+        } else if (e.key === 'c' || e.key === 'C') {
+            e.preventDefault();
+            copySelectedGate();
+        }
+    }
+
+    function handleGateToolbarKey(e, type) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (type === 'paste' && !clipboardOp) return;
+            addGateFromMenu(type);
+            return;
+        }
+        if (e.key === 'Tab' && !e.shiftKey) {
+            const toolbar = document.getElementById('gate-toolbar');
+            const visibleButtons = Array.from(toolbar.querySelectorAll('.gate-btn'))
+                .filter(btn => btn.offsetWidth > 0 && btn.offsetHeight > 0);
+            const isLast = visibleButtons.indexOf(e.currentTarget) === visibleButtons.length - 1;
+
+            if (isLast) {
+                e.preventDefault(); 
+                let target = null;
+                const runConfig = document.getElementById('run-config');
+                if (runConfig && runConfig.offsetWidth > 0) {
+                    const firstMeas = runConfig.querySelector('select');
+                    if (firstMeas) target = firstMeas;
+                } 
+                if (!target) target = document.getElementById('btn-execute');
+                if (target) setTimeout(() => target.focus(), 10);
+            }
+        }
     }
 
     function loadExample(key) {
@@ -462,6 +697,7 @@
             measurements[2] = 'my'; measurements[0] = 'none'; measurements[1] = 'none';
         } else setMode('sample');
         finishUpdate(true);
+        announceToScreenReader(`Loaded example circuit: ${key}`);
         document.getElementById('example-select').value = "";
     }
     const GATE_META = {
@@ -477,12 +713,45 @@
         'u3': '[[cos(θ/2), -e^(iλ)sin(θ/2)], [e^(iϕ)sin(θ/2), e^(i(ϕ+λ))cos(θ/2)]]', 'cx': '4x4 CNOT (Control-X)', 'cz': '4x4 CZ (Control-Z)', 'swap': '4x4 SWAP'
     };
 
+    // --- NEW HELPER: Centralized selection clearing ---
+    function clearGateSelection() {
+        document.querySelectorAll('.gate-group').forEach(g => g.classList.remove('selected'));
+        const popup = document.getElementById('action-popup');
+        if (popup) popup.classList.add('hidden');
+        selectedIdx = -1; // Reset selection state
+    }
+
+    // --- UPDATED: Window Onload with Global Click/Focus Management ---
     window.onload = () => {
-        // Init Touch Listeners Programmatically
         document.querySelectorAll('.gate-btn').forEach(btn => {
             btn.addEventListener('touchstart', handleTouchStart, {passive: false});
             btn.addEventListener('touchmove', handleTouchMove, {passive: false});
             btn.addEventListener('touchend', handleTouchEnd);
+        });
+        
+        const container = document.querySelector('.svg-container');
+        
+        // Updated focusout to use helper
+        container.addEventListener('focusout', (e) => {
+            const popup = document.getElementById('action-popup');
+            // If focus moves to something that is NOT the container and NOT the popup
+            if ( !(e.relatedTarget && container.contains(e.relatedTarget)) && 
+                 !(e.relatedTarget && popup.contains(e.relatedTarget)) ) {
+                clearGateSelection();
+            }
+        });
+
+        // NEW: Global listener to clear selection when clicking/tapping outside circuit
+        document.addEventListener('click', (e) => {
+            const svgContainer = document.querySelector('.svg-container');
+            const popup = document.getElementById('action-popup');
+            
+            // Check if the click target is outside the circuit and outside the popup
+            // We also check if it's NOT a delete button inside the popup to avoid clearing before action
+            if (svgContainer && !svgContainer.contains(e.target) && 
+                popup && !popup.contains(e.target)) {
+                 clearGateSelection();
+            }
         });
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -511,9 +780,16 @@
         finishUpdate(true);
     };
 
-    // --- TOUCH LOGIC START ---
+    // --- UPDATED: Touch Start Handler ---
     function handleTouchStart(e) {
         e.preventDefault();
+        
+        // FIX: Explicitly blur active elements and clear selection logic
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
+        }
+        clearGateSelection(); // Ensures diagram highlight is removed immediately
+
         const target = e.currentTarget;
         const type = target.dataset.type;
         touchGate = type;
@@ -523,21 +799,17 @@
         hideTooltip();
     }
 
+    // --- TOUCH LOGIC START ---
     function handleTouchMove(e) {
         if(!touchGate) return;
         e.preventDefault();
         const touch = e.touches[0];
         moveTouchHelper(touch.clientX, touch.clientY);
-        
-        // Show indicator if over svg
         const rect = svg.getBoundingClientRect();
         if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
             touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
              const { qubit, index } = calculateDropTarget(touch.clientX, touch.clientY);
              indicator.style.display = "block";
-             // Reuse indicator logic from dragOver would be better, but basic pos is enough
-             // Just show vertical line at correct spot?
-             // Simplification: We reuse the drag logic variables conceptually
         } else {
              indicator.style.display = "none";
         }
@@ -553,10 +825,7 @@
         
         if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
             touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-            
             const { qubit, index } = calculateDropTarget(touch.clientX, touch.clientY);
-            
-            // Map touchGate type to drag logic
             if(touchGate === 'paste') {
                 if(clipboardOp) {
                     saveState();
@@ -567,7 +836,7 @@
                         customOps[newOp.customName] = newOp._definition;
                     }
                     if (!isWithinLimit(newOp)) { showLimitModal(); }
-                    else { circuit.splice(index, 0, newOp); finishUpdate(true); }
+                    else { circuit.splice(index, 0, newOp); finishUpdate(true); announceToScreenReader("Gate pasted."); }
                 }
             } else if (GATE_META[touchGate]) {
                 const meta = GATE_META[touchGate];
@@ -577,8 +846,9 @@
                     else {
                         circuit.splice(index, 0, { gate: touchGate, target: qubit, control: null, target2: null, params: [], customName: null });
                         finishUpdate(true);
+                        announceToScreenReader(`${touchGate.toUpperCase()} gate added to Qubit ${qubit}.`);
                     }
-                } else openModal(touchGate, -1, qubit, index); // Pass index to modal
+                } else openModal(touchGate, -1, qubit, index);
             }
         }
         touchGate = null;
@@ -593,22 +863,17 @@
         const rect = svg.getBoundingClientRect();
         const scrollX = svg.parentElement.scrollLeft;
         const lineH = 400 / (numQubits + 1);
-        
-        // Find Qubit
         let targetQubit = 0, minD = 999;
         for(let i=0; i<numQubits; i++) { 
             const d = Math.abs((clientY - rect.top) - (lineH * (i+1))); 
             if(d < minD) { minD = d; targetQubit = i; } 
         }
-        
-        // Find Index
         let maxBoxWidth = 30; 
         circuit.forEach(op => { if(op.gate === 'custom') maxBoxWidth = Math.max(maxBoxWidth, 60); if(['rx','ry','rz','u3'].includes(op.gate)) maxBoxWidth = Math.max(maxBoxWidth, 70); });
         const spacing = (maxBoxWidth > 40) ? 80 : 60; 
         let idx = Math.round(((clientX - rect.left + scrollX) - 80) / spacing);
         if (idx < 0) idx = 0; 
         if (idx > circuit.length) idx = circuit.length;
-        
         return { qubit: targetQubit, index: idx };
     }
     // --- TOUCH LOGIC END ---
@@ -638,18 +903,36 @@
                 <option value="none" ${measurements[i]==='none'?'selected':''}>None</option>
             </select>`;
             measList.appendChild(row);
+            
+            if (i === numQubits - 1) {
+                const lastSelect = row.querySelector('select');
+                lastSelect.addEventListener('keydown', function(e) {
+                    if (e.key === 'Tab' && !e.shiftKey) {
+                        e.preventDefault();
+                        document.getElementById('btn-execute').focus();
+                    }
+                });
+            }
         }
     }
 
-    function setMode(mode) {
+    function setMode(mode, fromUserAction = false) {
         execMode = mode;
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`mode-${mode}`).classList.add('active');
+        document.getElementById('top-mode-select').value = mode;
+
         document.getElementById('run-config').classList.toggle('visible', mode === 'run');
         updateCode();
         document.getElementById('table-container').innerHTML = ''; 
         document.getElementById('chart-wrapper').style.display = 'none';
         document.getElementById('raw-container').style.display = 'none';
+
+        if (mode === 'run' && fromUserAction) {
+            setTimeout(() => {
+                enterMeasNav();
+            }, 50);
+        }
     }
 
     function showTooltip(e, type) {
@@ -676,39 +959,28 @@
     
     function hideTooltip() { tooltip.style.display = 'none'; }
 
-    // Helper to format matrix string for Python syntax
     function formatPythonMatrix(rawStr) {
         let s = rawStr;
-        // Replace common math functions with numpy equivalent
         s = s.replace(/\bsqrt\b/g, 'np.sqrt');
         s = s.replace(/\bpi\b/g, 'np.pi');
         s = s.replace(/\bsin\b/g, 'np.sin');
         s = s.replace(/\bcos\b/g, 'np.cos');
         s = s.replace(/\bexp\b/g, 'np.exp');
-        
-        // Replace standalone 'i' or 'j' with '1j' (complex unit in Python)
-        // Checks for i/j not preceded or followed by alphanumeric chars
         s = s.replace(/(?<![a-zA-Z0-9_])i(?![a-zA-Z0-9_])/g, '1j');
         s = s.replace(/(?<![a-zA-Z0-9_])j(?![a-zA-Z0-9_])/g, '1j');
-        
         return s;
     }
 
     function updateCode() {
-        // Always include imports at the top
         let k = 'import cudaq\nimport numpy as np\n\n';
-        
         const usedCustomOps = new Set();
         circuit.forEach(op => { if (op.gate === 'custom' && op.customName) usedCustomOps.add(op.customName); });
-        
         usedCustomOps.forEach(name => { 
             if (customOps[name]) {
-                // Use the python formatter here for the generated code
                 let pyDef = formatPythonMatrix(customOps[name].definition);
                 k += `cudaq.register_operation("${name}", ${pyDef})\n\n`; 
             }
         });
-        
         let am = 0; if (execMode === 'run') for(let i=0; i<numQubits; i++) if(measurements[i] !== 'none') am++;
         if (execMode === 'run') k += `@cudaq.kernel\ndef my_kernel(n: int)${am===1?' -> bool':' -> list[bool]'}:\n    q = cudaq.qvector(n)\n`;
         else k += `@cudaq.kernel\ndef my_kernel(n: int):\n    q = cudaq.qvector(n)\n`;
@@ -740,7 +1012,6 @@
     }
 
     function copyKernelOnly() {
-        // Imports are now part of code-kernel text, so we don't prepend them manually here to avoid duplicates
         const txt = document.getElementById('code-kernel').innerText + "\n\n" + document.getElementById('code-exec').innerText;
         navigator.clipboard.writeText(txt).then(() => {
              const btn = document.getElementById('btn-copy-kernel');
@@ -752,30 +1023,19 @@
 
     function copyFullViz() {
         let py = "";
-        // Imports are already in code-kernel text
         py += document.getElementById('code-kernel').innerText + "\n\n";
-        
-        // Only include matplotlib if we are NOT in 'run' mode (since 'run' now uses a text table)
-        if (execMode !== 'run') {
-            py += "import matplotlib.pyplot as plt\n"; 
-        }
-        
+        if (execMode !== 'run') py += "import matplotlib.pyplot as plt\n"; 
         py += document.getElementById('code-exec').innerText + "\n\n";
         py += "# --- VISUALIZATION LOGIC ---\n";
-        
         if (execMode === 'state') {
             py += `
 data = np.array(state)
 n = ${numQubits}
 dim = 1 << n
-
-# 1. Print the full array of coefficients
 print('Statevector array of coefficients:', np.round(data, 4))
-
 print("\\nState Vector Amplitudes:")
 labels = []
 values = []
-
 for i in range(dim):
     if np.abs(data[i]) > 1e-6:
         bin_str = format(i, f'0{n}b')[::-1] 
@@ -783,38 +1043,26 @@ for i in range(dim):
         print(f"|{bin_str}>    {amp}")
         labels.append(f"|{bin_str}>")
         values.append(np.abs(data[i])**2) 
-
 plt.bar(labels, values)
 plt.ylabel('Probability')
 plt.show()`;
-
         } else if (execMode === 'sample') {
             py += `
 sorted_counts = dict(sorted(counts.items()))
 print(sorted_counts)
 plt.bar(list(sorted_counts.keys()), list(sorted_counts.values()))
 plt.show()`;
-
         } else if (execMode === 'run') {
-            // --- UPDATED: Prints Text Table instead of Bar Chart ---
             py += `
 from collections import Counter
-
-# Convert measurement results to strings for counting
-# This handles both single bools (True) and lists ([True, False])
 processed_results = [str(r) for r in results]
 counts = Counter(processed_results)
-
-# Print formatted table
 print("\\nExecution Results:")
 print(f"{'Result (1=True)':<25} | {'Count':<10}")
 print("-" * 38)
 for result, count in counts.items():
-    print(f"{result:<25} | {count:<10}")
-`;
-            // ------------------------------------------------------
+    print(f"{result:<25} | {count:<10}")`;
         }
-
         navigator.clipboard.writeText(py).then(() => {
              const btn = document.getElementById('btn-copy-full');
              const orig = btn.innerHTML;
@@ -844,49 +1092,47 @@ for result, count in counts.items():
     function copySelectedGate() {
         if(selectedIdx > -1) {
             clipboardOp = JSON.parse(JSON.stringify(circuit[selectedIdx]));
-            // Capture the definition too, in case the original is deleted
             if(clipboardOp.gate === 'custom' && clipboardOp.customName && customOps[clipboardOp.customName]) {
                 clipboardOp._definition = customOps[clipboardOp.customName];
             }
-            popup.classList.add('hidden');
             const pasteBtn = document.getElementById('btn-paste');
-            pasteBtn.innerHTML = "📋 Paste " + (clipboardOp.gate==='custom' ? clipboardOp.customName : clipboardOp.gate.toUpperCase());
             pasteBtn.classList.add('visible');
+            popup.classList.add('hidden');
+            pasteBtn.focus();
+            announceToScreenReader("Gate copied. 'Paste' button is now available in toolbar.");
         }
     }
+    
     function dragStartPaste(ev) { if(!clipboardOp) return; draggedType = 'paste'; ev.dataTransfer.effectAllowed = "copy"; }
     
     function dropOnSvg(ev) {
         ev.preventDefault(); 
         indicator.style.display = "none";
         if (!draggedType) return;
-        
-        // Reuse calculation logic
         const { qubit, index } = calculateDropTarget(ev.clientX, ev.clientY);
         pendingInsertIdx = index;
 
         if (draggedType === 'paste') {
             if(clipboardOp) {
-                saveState(); // SAVE before paste
+                saveState();
                 const newOp = JSON.parse(JSON.stringify(clipboardOp));
                 newOp.target = qubit; 
                 if(newOp.control !== null && newOp.control === qubit) newOp.control = (qubit === 0) ? 1 : 0;
-                
-                // RESTORE DEFINITION IF MISSING
                 if(newOp.gate === 'custom' && !customOps[newOp.customName] && newOp._definition) {
                     customOps[newOp.customName] = newOp._definition;
                 }
-                
                 if (!isWithinLimit(newOp)) { showLimitModal(); draggedType=null; return; }
                 circuit.splice(pendingInsertIdx, 0, newOp); finishUpdate(true);
+                announceToScreenReader("Gate pasted.");
             }
         } else if (GATE_META[draggedType]) {
             const meta = GATE_META[draggedType];
             if (meta.type === 'simple') {
-                saveState(); // SAVE before simple drop
+                saveState();
                 if (!isWithinLimit({ gate: draggedType, target: qubit, control: null, target2: null })) { showLimitModal(); draggedType=null; return; }
                 circuit.splice(pendingInsertIdx, 0, { gate: draggedType, target: qubit, control: null, target2: null, params: [], customName: null });
                 finishUpdate(true);
+                announceToScreenReader(`${draggedType.toUpperCase()} gate added to Qubit ${qubit}.`);
             } else openModal(draggedType, -1, qubit, pendingInsertIdx);
         }
         draggedType = null;
@@ -898,8 +1144,6 @@ for result, count in counts.items():
         selectedIdx = idx;
         const op = circuit[idx], meta = GATE_META[op.gate];
         const btnCopy = document.getElementById('btn-popup-copy'), sepCopy = document.getElementById('sep-popup-copy');
-        
-        // Disable copy for 2-qubit gates (control or swap types)
         if (meta.type === 'control' || meta.type === 'swap') {
              btnCopy.style.display = 'none'; 
              sepCopy.style.display = 'none';
@@ -907,30 +1151,110 @@ for result, count in counts.items():
              btnCopy.style.display = 'block'; 
              sepCopy.style.display = 'block';
         }
-        
         popup.style.left = mx + 'px'; popup.style.top = my + 'px'; popup.classList.remove('hidden');
+
+        setTimeout(() => {
+            const firstBtn = popup.querySelector('button:not([style*="display: none"])');
+            if(firstBtn) firstBtn.focus();
+        }, 50);
     }
     
+    function handlePopupKey(e) {
+        const btns = Array.from(popup.querySelectorAll('button')).filter(b => b.style.display !== 'none');
+        const activeIndex = btns.indexOf(document.activeElement);
+        
+        if (e.key === 'Escape') {
+            popup.classList.add('hidden');
+            focusGate(selectedIdx);
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = (activeIndex + 1) % btns.length;
+            btns[nextIndex].focus();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = (activeIndex - 1 + btns.length) % btns.length;
+            btns[prevIndex].focus();
+        }
+    }
+
     function bgClick(e) { if(e.target.id === 'circuit-svg') popup.classList.add('hidden'); }
     function editSelectedGate() { if(selectedIdx > -1) { openModal(circuit[selectedIdx].gate, selectedIdx, -1); popup.classList.add('hidden'); } }
+    
     function deleteSelectedGate() { 
         if(selectedIdx > -1) {
-            saveState(); // SAVE before delete
-            circuit.splice(selectedIdx, 1); 
+            const deletedGate = circuit[selectedIdx].gate; 
+            saveState(); 
+            circuit.splice(selectedIdx, 1);
+            let nextFocusIdx = selectedIdx; 
+            if (nextFocusIdx >= circuit.length) nextFocusIdx = circuit.length - 1;
+            
             finishUpdate(true); 
+            announceToScreenReader(`${deletedGate.toUpperCase()} gate deleted.`);
+            
+            setTimeout(() => {
+                if (circuit.length > 0 && nextFocusIdx >= 0) {
+                    focusGate(nextFocusIdx);
+                } else {
+                    document.getElementById('top-action-select').focus();
+                }
+            }, 50);
         }
     }
     
     let editingIdx = -1, pendingGateType = '';
     
+    function trapFocus(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            return;
+        }
+
+        if (e.key !== 'Tab') return;
+
+        const modal = document.getElementById('gate-modal');
+        const focusableElements = Array.from(modal.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )).filter(el => {
+            return el.style.display !== 'none' && el.parentElement.style.display !== 'none';
+        });
+
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) { 
+            if (document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement.focus();
+            }
+        } else { 
+            if (document.activeElement === lastElement) {
+                e.preventDefault();
+                firstElement.focus();
+            }
+        }
+    }
+
     function openModal(gateType, idx, defaultTarget, insertIdx = -1) {
+        lastFocusedElement = document.activeElement;
         editingIdx = idx; pendingGateType = gateType; pendingInsertIdx = insertIdx;
         const meta = GATE_META[gateType], content = document.getElementById('modal-content'); content.innerHTML = '';
+        
         const addField = (lbl, id, type='select') => {
             const div = document.createElement('div'); div.className = 'form-group';
             div.innerHTML = `<label>${lbl}</label><${type} id="${id}"></${type}>`;
-            content.appendChild(div); return div.querySelector(type);
+            content.appendChild(div);
+            const input = div.querySelector(type);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmModalGate();
+                }
+            });
+            return input;
         };
+        
         const selT = addField(gateType==='swap'?'Target Qubit 1':'Target Qubit', 'inp-target');
         for(let i=0; i<numQubits; i++) selT.add(new Option(`q[${i}]`, i));
 
@@ -954,20 +1278,43 @@ for result, count in counts.items():
             if (meta.type === 'custom') {
                 document.getElementById('inp-name').value = op.customName;
                 document.getElementById('inp-matrix').value = customOps[op.customName].definition;
-                // document.getElementById('inp-matrix').disabled = true;  <-- REMOVED: Allow seeing, but we check conflicts on save
             }
             document.getElementById('modal-title').innerText = `Edit ${gateType.toUpperCase()}`;
+        } else if (gateType === clipboardOp?.gate && clipboardOp) {
+             selT.value = defaultTarget; 
+
+             if (meta.type === 'control') document.getElementById('inp-control').value = (clipboardOp.control!==null ? clipboardOp.control : (defaultTarget===0?1:0));
+             if (meta.type === 'swap') document.getElementById('inp-target2').value = (clipboardOp.target2!==null ? clipboardOp.target2 : (defaultTarget===0?1:0));
+             if (meta.type === 'param') meta.params.forEach((_, i) => document.getElementById(`inp-param-${i}`).value = clipboardOp.params[i]);
+             document.getElementById('modal-title').innerText = `Paste ${gateType.toUpperCase()}`;
         } else {
             selT.value = defaultTarget;
             if (meta.type === 'control') document.getElementById('inp-control').value = (defaultTarget===0?1:0);
             if (meta.type === 'swap') document.getElementById('inp-target2').value = (defaultTarget===0?1:0);
             document.getElementById('modal-title').innerText = `Add ${gateType.toUpperCase()}`;
         }
-        document.getElementById('gate-modal').classList.add('open');
+        
+        const modal = document.getElementById('gate-modal');
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
         document.getElementById('modal-error').style.display = 'none';
+
+        const firstInput = modal.querySelector('input, select');
+        if(firstInput) setTimeout(() => firstInput.focus(), 50);
+
+        modal.addEventListener('keydown', trapFocus);
     }
     
-    function closeModal() { document.getElementById('gate-modal').classList.remove('open'); }
+    function closeModal() { 
+        const modal = document.getElementById('gate-modal');
+        modal.classList.remove('open'); 
+        modal.setAttribute('aria-hidden', 'true');
+        modal.removeEventListener('keydown', trapFocus);
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+            lastFocusedElement = null;
+        }
+    }
     function showLimitModal() { document.getElementById('limit-modal').classList.add('open'); }
     function closeLimitModal() { document.getElementById('limit-modal').classList.remove('open'); }
     function isWithinLimit(newOp, indexToReplace = -1) {
@@ -996,86 +1343,106 @@ for result, count in counts.items():
         } else if (meta.type === 'custom') {
             customName = document.getElementById('inp-name').value.trim();
             if(!customName) return showError("Please provide a name.");
-
-            // VALIDATION: Check valid Python identifier
             const validNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
             if (!validNameRegex.test(customName)) {
-                return showError("Invalid name. Please use valid Python identifier characters (A-Z, 0-9, _) and do not start with a number.");
+                return showError("Invalid name. Please use valid Python identifier characters.");
             }
-
             const RESERVED = ['h','x','y','z','s','t','rx','ry','rz','u3','cx','cz','swap','measure','reset','q','n','cudaq','labs','mz','mx','my'];
             if (RESERVED.includes(customName.toLowerCase()) || GATE_META[customName.toLowerCase()]) {
-                return showError("Chose another name for your custom gate, as it is a reserved keyword or standard gate.");
+                return showError("Chose another name for your custom gate, as it is a reserved keyword.");
             }
-            
             const matrixStr = document.getElementById('inp-matrix').value.trim();
-            
-            // --- FIX FOR DUPLICATE NAME CONFLICTS ---
             if (customOps[customName]) {
-                // If name exists, check if definition is different
                 if (customOps[customName].definition !== matrixStr) {
-                    // Check if we are just editing the SAME gate instance's name (which shouldn't happen here as name is key)
-                    // If we are editing an existing gate, and we changed the matrix but kept the name...
-                    // We must forbid this if OTHER gates use this name.
-                    // Simplified policy: If name exists, definition MUST match exactly.
-                    return showError(`Error: The gate name '${customName}' is already used with a different matrix definition. Please choose a unique name.`);
+                    return showError(`Error: The gate name '${customName}' is already used.`);
                 }
             }
-            
-            // Parse and Validate Matrix
             try {
                 const matrix = parseMatrix(matrixStr);
-                if(!isUnitary(matrix)) {
-                    return showError(`<strong>Error: Matrix is not Unitary.</strong>`);
-                }
-                // Only set if not already set (or if same, effectively no-op)
-                if (!customOps[customName]) {
-                    customOps[customName] = { matrix: matrix, definition: matrixStr };
-                }
+                if(!isUnitary(matrix)) return showError(`<strong>Error: Matrix is not Unitary.</strong>`);
+                if (!customOps[customName]) customOps[customName] = { matrix: matrix, definition: matrixStr };
             } catch(e) { return showError("Invalid Matrix Format: " + e.message); }
         }
         
         const opData = { gate: pendingGateType, target, control, target2, params, customName };
         if (!isWithinLimit(opData, editingIdx)) { closeModal(); showLimitModal(); return; }
         
-        saveState(); // SAVE before insert/edit confirmed
-        
-        if (editingIdx > -1) circuit[editingIdx] = opData;
+        saveState(); 
+        if (editingIdx > -1) {
+            circuit[editingIdx] = opData;
+            announceToScreenReader(`${pendingGateType.toUpperCase()} gate edited at Qubit ${target}.`);
+        }
         else { 
-            // Handle pendingInsertIdx which might be set by drag drop or modal
             let idx = (pendingInsertIdx !== undefined && pendingInsertIdx > -1) ? pendingInsertIdx : circuit.length;
             if(idx > circuit.length) idx = circuit.length;
             circuit.splice(idx, 0, opData); 
+            announceToScreenReader(`${pendingGateType.toUpperCase()} gate added to Qubit ${target}.`);
         }
-        finishUpdate(true); closeModal();
+        
+        finishUpdate(true); 
+        
+        const targetIdx = (editingIdx > -1) ? editingIdx : (pendingInsertIdx !== undefined ? pendingInsertIdx : circuit.length - 1);
+        setTimeout(() => focusGate(targetIdx), 50);
+        closeModal();
     }
     
     function showError(msg) { const d = document.getElementById('modal-error'); d.innerHTML = msg; d.style.display = 'block'; }
     
+    function renderAccessibilityTable() {
+        const tbody = document.getElementById('accessibility-table-body');
+        tbody.innerHTML = ''; 
+        if (circuit.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">The circuit is currently empty.</td></tr>';
+            return;
+        }
+        circuit.forEach((op, idx) => {
+            const row = document.createElement('tr');
+            const cellStep = document.createElement('td'); cellStep.innerText = idx + 1; row.appendChild(cellStep);
+            const cellGate = document.createElement('td'); 
+            let gateName = op.gate.toUpperCase(); if (op.gate === 'custom') gateName = op.customName;
+            cellGate.innerText = gateName; row.appendChild(cellGate);
+            const cellQubits = document.createElement('td');
+            let qubitDesc = `Target: q[${op.target}]`;
+            if (op.control !== null) qubitDesc += `, Control: q[${op.control}]`;
+            if (op.gate === 'swap') qubitDesc = `Swapping q[${op.target}] and q[${op.target2}]`;
+            cellQubits.innerText = qubitDesc; row.appendChild(cellQubits);
+            const cellDetails = document.createElement('td');
+            if (op.params && op.params.length > 0) cellDetails.innerText = `Params: ${op.params.join(', ')}`;
+            else cellDetails.innerText = 'None';
+            row.appendChild(cellDetails);
+            tbody.appendChild(row);
+        });
+    }
+
     function finishUpdate(skipSave = false) { 
         if(!skipSave) saveState();
         cleanCustomOps();
         renderCircuit(); 
+        renderAccessibilityTable(); 
         renderMeasConfig(); 
         updateCode(); 
         popup.classList.add('hidden'); 
+
+        // UPDATED: Explicitly clear results containers on any update
+        document.getElementById('table-container').innerHTML = ''; 
+        document.getElementById('chart-wrapper').style.display = 'none';
+        document.getElementById('raw-container').style.display = 'none';
+        if(window.myChart) { window.myChart.destroy(); window.myChart = null; }
     }
     
     function clearAll() { 
-        saveState(); // SAVE before clear
+        saveState(); 
         circuit = []; customOps = {}; 
         finishUpdate(true); 
+        announceToScreenReader("Circuit cleared.");
     }
     
     function cleanCustomOps() {
         const used = new Set();
         circuit.forEach(op => { if(op.gate === 'custom') used.add(op.customName); });
-        for (let name in customOps) {
-            if (!used.has(name)) {
-                delete customOps[name];
-            }
-        }
+        for (let name in customOps) { if (!used.has(name)) delete customOps[name]; }
     }
+    
     
     function renderCircuit() {
         svg.innerHTML = ''; 
@@ -1084,7 +1451,6 @@ for result, count in counts.items():
         
         let maxBoxWidth = 30; 
         circuit.forEach(op => { if(op.gate === 'custom') maxBoxWidth = Math.max(maxBoxWidth, 60); if(['rx','ry','rz','u3'].includes(op.gate)) maxBoxWidth = Math.max(maxBoxWidth, 70); });
-        
         const spacing = (maxBoxWidth > 40) ? 80 : 60; 
         const w = Math.max(800, 100 + (circuit.length * spacing)); 
         svg.style.width = w + 'px';
@@ -1106,53 +1472,111 @@ for result, count in counts.items():
         circuit.forEach((op, idx) => {
             const y = lineH * (op.target + 1);
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g"); 
-            g.setAttribute("class", "gate-group"); 
             
-            let label = GATE_META[op.gate].label, boxW = 30, isParam = false;
-            if(op.gate === 'custom') { label = op.customName.substring(0,7); boxW = 60; } 
-            else if (['rx','ry','rz'].includes(op.gate)) { label = op.gate.toUpperCase() + '(' + op.params[0].toFixed(2) + ')'; boxW = 75; isParam = true; }
-            else if (op.gate === 'u3') { label = 'U3'; boxW = 40; isParam = true; }
+            const isSelected = (idx === selectedIdx);
+            g.setAttribute("class", `gate-group type-${op.gate} ${isSelected ? 'selected' : ''}`); 
+            g.setAttribute("data-index", idx);
+            g.setAttribute("tabindex", "0"); 
+            
+            g.onfocus = () => { setSelectedGate(idx); };
+            g.setAttribute("role", "button");
+            
+            let ariaLabel = `Gate ${idx + 1}: ${op.gate.toUpperCase()} on Qubit ${op.target}. Press Enter to Edit.`;
+            if (op.gate === 'custom') ariaLabel = `Gate ${idx + 1}: Custom Gate ${op.customName}.`;
+            if (op.gate === 'swap') ariaLabel += ` Swaps with Qubit ${op.target2}.`;
+            g.setAttribute("aria-label", ariaLabel);
 
-            const createHitBox = (bx, by, bw, bh, isCircle=false) => {
-                const hit = document.createElementNS("http://www.w3.org/2000/svg", isCircle ? "circle" : "rect"); 
-                if(isCircle) { hit.setAttribute("cx", bx); hit.setAttribute("cy", by); hit.setAttribute("r", bw); } 
-                else { hit.setAttribute("x", bx); hit.setAttribute("y", by); hit.setAttribute("width", bw); hit.setAttribute("height", bh); }
+            g.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const rect = g.getBoundingClientRect();
+                    showPopup(idx, rect.left + window.scrollX + 20, rect.top + window.scrollY + 20);
+                }
+                handleGateKey(e, idx);
+            };
+            
+            const createHitBox = (bx, by, bw, bh) => {
+                const hit = document.createElementNS("http://www.w3.org/2000/svg", "rect"); 
+                hit.setAttribute("x", bx); hit.setAttribute("y", by); hit.setAttribute("width", bw); hit.setAttribute("height", bh);
                 hit.setAttribute("fill", "transparent"); hit.setAttribute("cursor", "pointer"); 
-                hit.onclick = (e) => { e.stopPropagation(); if(draggedType !== 'move') showPopup(idx, e.clientX, e.clientY); };
+                hit.onclick = (e) => { 
+                e.stopPropagation(); 
+                g.focus(); 
+                setSelectedGate(idx); 
+                showPopup(idx, e.clientX, e.clientY); 
+            };
                 return hit;
             };
 
+            let label = GATE_META[op.gate].label, boxW = 30, isParam = false;
+            if(op.gate === 'custom') { label = op.customName.substring(0,7); boxW = 60; } 
+            // UPDATED: Added param display back to diagram labels
+            else if (['rx','ry','rz'].includes(op.gate)) { 
+                label = op.gate.toUpperCase() + '(' + op.params[0].toFixed(2) + ')'; 
+                boxW = 75; 
+                isParam = true; 
+            }
+
             if(op.gate === 'cx' || op.gate === 'cz') {
                 const yc = lineH * (op.control + 1);
-                const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); l.setAttribute("x1", x); l.setAttribute("y1", y); l.setAttribute("x2", x); l.setAttribute("y2", yc); l.setAttribute("class", "control-line"); g.appendChild(l);
-                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); c.setAttribute("cx", x); c.setAttribute("cy", yc); c.setAttribute("r", 4); c.setAttribute("class", "control-dot"); g.appendChild(c);
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); 
+                l.setAttribute("x1", x); l.setAttribute("y1", y); l.setAttribute("x2", x); l.setAttribute("y2", yc); 
+                l.setAttribute("class", "control-line"); 
+                g.appendChild(l);
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); 
+                c.setAttribute("cx", x); c.setAttribute("cy", yc); c.setAttribute("r", 4); c.setAttribute("class", "control-dot"); 
+                g.appendChild(c);
+                
                 if(op.gate==='cx') {
-                    const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle"); c2.setAttribute("cx", x); c2.setAttribute("cy", y); c2.setAttribute("r", 10); c2.setAttribute("fill", "white"); c2.setAttribute("stroke", "#333"); c2.setAttribute("stroke-width", "2"); g.appendChild(c2);
+                    const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle"); 
+                    c2.setAttribute("cx", x); c2.setAttribute("cy", y); c2.setAttribute("r", 10); 
+                    c2.setAttribute("fill", "white"); c2.setAttribute("stroke", "#333"); c2.setAttribute("stroke-width", "2"); 
+                    g.appendChild(c2);
                     const v = document.createElementNS("http://www.w3.org/2000/svg", "line"); v.setAttribute("x1", x); v.setAttribute("y1", y-10); v.setAttribute("x2", x); v.setAttribute("y2", y+10); v.setAttribute("stroke", "#333"); v.setAttribute("stroke-width", "2"); g.appendChild(v);
                     const h = document.createElementNS("http://www.w3.org/2000/svg", "line"); h.setAttribute("x1", x-10); h.setAttribute("y1", y); h.setAttribute("x2", x+10); h.setAttribute("y2", y); h.setAttribute("stroke", "#333"); h.setAttribute("stroke-width", "2"); g.appendChild(h);
-                    g.appendChild(createHitBox(x, y, 12, 0, true));
+                    g.appendChild(createHitBox(x-12, y-12, 24, 24));
                 } else {
-                    const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle"); c2.setAttribute("cx", x); c2.setAttribute("cy", y); c2.setAttribute("r", 4); c2.setAttribute("class", "control-dot"); g.appendChild(c2);
-                    g.appendChild(createHitBox(x, y, 8, 0, true));
+                    const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle"); 
+                    c2.setAttribute("cx", x); c2.setAttribute("cy", y); c2.setAttribute("r", 4); c2.setAttribute("class", "control-dot"); 
+                    g.appendChild(c2);
+                    g.appendChild(createHitBox(x-8, y-8, 16, 16));
                 }
-                g.appendChild(createHitBox(x, yc, 8, 0, true));
             } else if (op.gate === 'swap') {
                 const y2 = lineH * (op.target2 + 1);
-                const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); l.setAttribute("x1", x); l.setAttribute("y1", y); l.setAttribute("x2", x); l.setAttribute("y2", y2); l.setAttribute("class", "control-line"); g.appendChild(l);
+                
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line"); 
+                l.setAttribute("x1", x); l.setAttribute("y1", y); l.setAttribute("x2", x); l.setAttribute("y2", y2); 
+                l.setAttribute("class", "control-line swap-line"); 
+                g.appendChild(l);
+                
                 [y, y2].forEach(yp => { 
+                    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    ring.setAttribute("cx", x); ring.setAttribute("cy", yp); ring.setAttribute("r", 16);
+                    ring.setAttribute("class", "swap-focus-ring");
+                    g.appendChild(ring);
+
                     const txt = document.createElementNS("http://www.w3.org/2000/svg", "text"); 
-                    txt.setAttribute("x", x); txt.setAttribute("y", yp+4); txt.setAttribute("text-anchor", "middle"); txt.textContent = "×"; txt.setAttribute("font-size", "20"); txt.setAttribute("font-weight", "bold"); txt.setAttribute("pointer-events", "none"); g.appendChild(txt); 
+                    txt.setAttribute("x", x); txt.setAttribute("y", yp+5); 
+                    txt.setAttribute("text-anchor", "middle"); txt.textContent = "×"; 
+                    txt.setAttribute("font-size", "20"); txt.setAttribute("font-weight", "bold"); 
+                    txt.setAttribute("class", "swap-text");
+                    txt.setAttribute("pointer-events", "none"); 
+                    g.appendChild(txt); 
+
                     g.appendChild(createHitBox(x-10, yp-10, 20, 20));
                 });
             } else {
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect"); 
-                rect.setAttribute("x", x - (boxW/2)); rect.setAttribute("y", y-15); rect.setAttribute("width", boxW); rect.setAttribute("height", 30);
-                if (isParam) rect.setAttribute("class", "gate-box param"); else rect.setAttribute("class", "gate-box"); 
+                rect.setAttribute("x", x - (boxW/2)); rect.setAttribute("y", y-15); 
+                rect.setAttribute("width", boxW); rect.setAttribute("height", 30);
+                rect.setAttribute("class", isParam ? "gate-box param" : "gate-box"); 
                 g.appendChild(rect);
                 const txt = document.createElementNS("http://www.w3.org/2000/svg", "text"); 
-                txt.setAttribute("x", x); txt.setAttribute("y", y+4); txt.setAttribute("text-anchor", "middle");
-                if (isParam) txt.setAttribute("class", "gate-text param"); else txt.setAttribute("class", "gate-text"); 
-                txt.textContent = label; txt.setAttribute("pointer-events", "none"); 
+                txt.setAttribute("x", x); txt.setAttribute("y", y+4); 
+                txt.setAttribute("text-anchor", "middle");
+                txt.setAttribute("class", isParam ? "gate-text param" : "gate-text"); 
+                txt.textContent = label; 
+                txt.setAttribute("pointer-events", "none"); 
                 g.appendChild(txt);
                 g.appendChild(createHitBox(x - (boxW/2), y-15, boxW, 30));
             }
@@ -1173,6 +1597,9 @@ for result, count in counts.items():
     function applyOneQubit(s, dim, t, m) { const ns=new Array(dim).fill(null).map(_=>C0); for(let i=0;i<dim;i++){if(s[i].magSq()<1e-15)continue; const one=(i>>t)&1, p=i^(1<<t); if(!one){ns[i]=ns[i].add(s[i].mul(m[0][0]));ns[p]=ns[p].add(s[i].mul(m[1][0]));}else{ns[p]=ns[p].add(s[i].mul(m[0][1]));ns[i]=ns[i].add(s[i].mul(m[1][1]));}} return ns; }
     function applyControlled(s, dim, c, t, m) { const ns=new Array(dim).fill(null).map(_=>C0); for(let i=0;i<dim;i++){if(s[i].magSq()<1e-15)continue; if(!((i>>c)&1)){ns[i]=ns[i].add(s[i]);continue;} const one=(i>>t)&1, p=i^(1<<t); if(!one){ns[i]=ns[i].add(s[i].mul(m[0][0]));ns[p]=ns[p].add(s[i].mul(m[1][0]));}else{ns[p]=ns[p].add(s[i].mul(m[0][1]));ns[i]=ns[i].add(s[i].mul(m[1][1]));}} return ns; }
     function applySwap(s, dim, q1, q2) { const ns=new Array(dim).fill(null).map(_=>C0); for(let i=0;i<dim;i++){if(s[i].magSq()<1e-15)continue; const b1=(i>>q1)&1, b2=(i>>q2)&1; if(b1===b2)ns[i]=ns[i].add(s[i]); else{let j=i^(1<<q1)^(1<<q2); ns[j]=ns[j].add(s[i]);}} return ns; }
+    
+    let lastStateData = { state: null, dim: 0 };
+    
     function executeCircuit() {
         const dim=1<<numQubits; let state=new Array(dim).fill(null).map(_=>C0); state[0]=C1;
         try { circuit.forEach(op => {
@@ -1185,11 +1612,20 @@ for result, count in counts.items():
             }
         }); } catch(e) { alert("Error: "+e.message); return; }
         if (execMode === 'run') { for(let i=0; i<numQubits; i++) { if(measurements[i]==='mx') state=applyOneQubit(state,dim,i,SIM_OPS['h']()); else if(measurements[i]==='my') { state=applyOneQubit(state,dim,i,[[C1,C0],[C0,new Complex(0,-1)]]); state=applyOneQubit(state,dim,i,SIM_OPS['h']()); } }}
+        
+        lastStateData = { state, dim };
         displayResults(state, dim);
     }
+    
     function displayResults(state, dim) {
+        if(!state) return;
         const tc = document.getElementById('table-container'), cw = document.getElementById('chart-wrapper'), cc = document.getElementById('chart-canvas'), rc = document.getElementById('raw-container');
         cw.style.display = 'none'; rc.style.display = 'none'; if(window.myChart) window.myChart.destroy();
+        
+        // High contrast check
+        const isHighContrast = document.body.classList.contains('high-contrast');
+        const barColor = isHighContrast ? '#000000' : '#76b900';
+
         if (execMode === 'state') {
             let html = `<table class="result-table"><thead><tr><th>State</th><th>Amplitude</th><th>Probability</th></tr></thead><tbody>`;
             let labels = [], data = [];
@@ -1202,14 +1638,14 @@ for result, count in counts.items():
                 }
             }
             html += "</tbody></table>"; tc.innerHTML = html; cw.style.display = 'block';
-            window.myChart = new Chart(cc, { type: 'bar', data: { labels, datasets: [{ label: 'Probability', data, backgroundColor: '#76b900' }] } });
+            window.myChart = new Chart(cc, { type: 'bar', data: { labels, datasets: [{ label: 'Probability', data, backgroundColor: barColor }] } });
         } else if (execMode === 'sample') {
             let counts = {}; let probs = [], sum = 0; for(let i=0; i<dim; i++) { sum += state[i].magSq(); probs.push(sum); }
             for(let k=0; k<1000; k++) { let r = Math.random(), outcome = 0; for(let i=0; i<dim; i++) { if(r <= probs[i]) { outcome = i; break; } } const bin = outcome.toString(2).padStart(numQubits,'0').split('').reverse().join(''); counts[bin] = (counts[bin] || 0) + 1; }
             let html = `<table class="result-table"><thead><tr><th>State</th><th>Count (1000 shots)</th></tr></thead><tbody>`;
             const sortedKeys = Object.keys(counts).sort(); sortedKeys.forEach(k => { html += `<tr><td>|${k}⟩</td><td>${counts[k]}</td></tr>`; });
             html += "</tbody></table>"; tc.innerHTML = html; cw.style.display = 'block';
-            window.myChart = new Chart(cc, { type: 'bar', data: { labels: sortedKeys, datasets: [{ label: 'Counts', data: sortedKeys.map(k=>counts[k]), backgroundColor: '#76b900' }] } });
+            window.myChart = new Chart(cc, { type: 'bar', data: { labels: sortedKeys, datasets: [{ label: 'Counts', data: sortedKeys.map(k=>counts[k]), backgroundColor: barColor }] } });
         } else if (execMode === 'run') {
             let activeIndices = []; for(let i=0; i<numQubits; i++) if(measurements[i] !== 'none') activeIndices.push(i);
             if (activeIndices.length === 0) { tc.innerHTML = "<em>No measurements selected.</em>"; return; }
