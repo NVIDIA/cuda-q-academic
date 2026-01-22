@@ -9,7 +9,7 @@ For system uniformity during the Winter School we suggest that you run the noteb
 
 | Notebook    | Google Colab[^1] |
 | ----------- | ----------- |
-| Lab 1 - CUDA-Q Quick Start [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16N9SkItS3xpWZMktlo9qq3ugk6F0nYwB?usp=sharing)|
+| Lab 1 - CUDA-Q Quick Start | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16N9SkItS3xpWZMktlo9qq3ugk6F0nYwB?usp=sharing)|
 | Lab 2 - Intros to Quantum Walks  |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1fPHhKlAer1ZAAzoGHDsuZkG8ZFQuHNxF?usp=sharing)| 
 | Lab 3 - Quantum Walks pt. 2 |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1IVTxgrqH8lzUjNu-cxGuvFxJBWDWj8sV?usp=sharing)| 
 | Lab 4 - Noisy Simulation |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QvD6oO7WaA3QQtU5i_yPBJp8OybjFexw?usp=sharing)| 
