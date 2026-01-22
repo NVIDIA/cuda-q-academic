@@ -14,4 +14,4 @@ For system uniformity during the Winter School we suggest that you run the noteb
 | Lab 3 - Quantum Walks pt. 2 |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1IVTxgrqH8lzUjNu-cxGuvFxJBWDWj8sV?usp=sharing)| 
 | Lab 4 - Noisy Simulation |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QvD6oO7WaA3QQtU5i_yPBJp8OybjFexw?usp=sharing)| 
 
-[^1]:You will need to move the Images > noisy folder to your working environment to run the optional interactive widget.
+[^1]:You will need to run the command `!pip install cudaq` in a python code block in each notebook to run on Google CoLab.
