@@ -9,9 +9,9 @@ For system uniformity during the Winter School we suggest that you run the noteb
 
 | Notebook    | Google Colab[^1] |
 | ----------- | ----------- |
-| Lab 1 - CUDA-Q Quick Start | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/01_CUDAQ-Q_Quick_Start.ipynb)|
-| Lab 2 - Intros to Quantum Walks  |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/02_Intro_to_Quantum_Walks.ipynb)| 
-| Lab 3 - Quantum Walks pt. 2 |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/03_Quantum_Walks_pt2.ipynb)| 
-| Lab 4 - QAOA for Max Cut |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/04_QAOA_for_Max_Cut.ipynb)| 
+| Lab 1 - CUDA-Q Quick Start | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/01_CUDAQ-Q_Quick_Start.ipynb)|
+| Lab 2 - Intros to Quantum Walks  |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/02_Intro_to_Quantum_Walks.ipynb)| 
+| Lab 3 - Quantum Walks pt. 2 |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/03_Quantum_Walks_pt2.ipynb)| 
+| Lab 4 - QAOA for Max Cut |  [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/MIT-Winter-School/04_QAOA_for_Max_Cut.ipynb)| 
 
 [^1]:You will need to run the command `!pip install cudaq` in a python code block in each notebook to run on Google CoLab.
