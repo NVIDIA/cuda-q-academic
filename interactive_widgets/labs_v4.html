@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABS Interactive Lab (Strict Navigation)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        window.MathJax = {
+            options: {
+                enableMenu: false,       // Keep menu disabled to reduce clutter
+                enableExplorer: false,   // Disable the complex explorer
+                enableAssistiveMml: true, // ENABLING THIS: Screen readers read MathML!
+                menuOptions: {
+                    settings: {
+                        inTabOrder: false // Tell MathJax NOT to put math in tab order
+                    }
+                }
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        // FORCE REMOVE FOCUS from all MathJax elements after render
+                        // This ensures keyboard flow skips math and goes straight to slider
+                        document.querySelectorAll('mjx-container').forEach(el => {
+                            el.removeAttribute('tabindex');
+                            // We do NOT set aria-hidden="true" anymore, 
+                            // so screen readers can find the AssistiveMML inside.
+                        });
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --nvidia-green: #76B900;
+            --nvidia-dark-bg: #1A1A1A;
+            --nvidia-card-bg: #2A2A2A;
+            
+            /* UPDATED: Lighter grey for WCAG AA Compliance (4.5:1+ against dark bg) */
+            --nvidia-grey: #767676; 
+            
+            /* UPDATED: Brighter text for better legibility */
+            --nvidia-light-text: #F5F5F5;
+            
+            --node-size-px: 56px; 
+            --node-gap-px: 12px;
+        }
+
+        /* WCAG 2.2.2 Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root { --node-size-px: 36px; --node-gap-px: 6px; }
+        }
+        
+        @media (max-width: 400px) {
+            :root { --node-size-px: 30px; --node-gap-px: 4px; }
+        }
+
+        body {
+            background-color: var(--nvidia-dark-bg);
+            color: var(--nvidia-light-text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            line-height: 1.5; 
+        }
+
+        /* STRONG FOCUS INDICATOR - MANDATORY FOR KEYBOARD NAV */
+        *:focus {
+            outline: 4px solid var(--nvidia-green) !important;
+            outline-offset: 4px !important;
+            border-radius: 4px !important;
+            z-index: 100 !important;
+        }
+        .sr-only:focus {
+            outline: none !important;
+        }
+
+        .highlight-bar {
+            filter: drop-shadow(0 0 12px var(--nvidia-green));
+            border: 2px solid white !important;
+            opacity: 1 !important;
+        }
+
+        /* --- NODES --- */
+        .seq-node {
+            width: var(--node-size-px);
+            height: var(--node-size-px);
+            margin-right: var(--node-gap-px); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: clamp(0.7rem, 3.5vw, 1.25rem);
+            border-radius: 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            user-select: none;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .seq-node:last-child { margin-right: 0; }
+
+        .node-plus { 
+            background-color: var(--nvidia-green); 
+            color: black; 
+            box-shadow: 0 4px 0px #5a8d00;
+        }
+        .node-plus:active { transform: translateY(2px); box-shadow: 0 2px 0px #5a8d00; }
+
+        .node-minus { 
+            background-color: var(--nvidia-grey); 
+            color: white; 
+            box-shadow: 0 4px 0px #444; /* Darker shadow for contrast */
+        }
+        .node-minus:active { transform: translateY(2px); box-shadow: 0 2px 0px #444; }
+
+        /* --- PRODUCT NODES --- */
+        .prod-node {
+            width: var(--node-size-px);
+            height: var(--node-size-px);
+            margin-right: var(--node-gap-px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: clamp(0.7rem, 3.5vw, 1.25rem);
+            border-radius: 50%; 
+            transition: all 0.3s ease;
+            user-select: none;
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        .prod-node:last-child { margin-right: 0; }
+
+        .prod-plus {
+            background-color: #E5E7EB; 
+            color: #1A1A1A;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+        }
+        .prod-minus {
+            background-color: #404040; /* Lightened for contrast */
+            color: #E5E5E5; 
+            border-color: #6B7280;
+        }
+
+        .text-calc-plus { color: #E5E7EB; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+        .text-calc-minus { color: #A3A3A3; /* Lightened from 9CA3AF */ }
+        
+        #shifted-sequence-row, #product-row {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+
+        .bar {
+            width: clamp(1rem, 3vw, 2.25rem);
+            transition: height 0.3s, opacity 0.3s, transform 0.2s;
+            border-radius: 4px 4px 0 0;
+            background-color: var(--nvidia-green);
+        }
+
+        .math-card {
+            background: linear-gradient(145deg, #2a2a2a, #242424);
+            border: 1px solid #3d3d3d;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            width: 100%;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 8px;
+            background: #444; /* Slightly lighter track */
+            border-radius: 4px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: var(--nvidia-green);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(118, 185, 0, 0.5);
+        }
+
+        .active-term {
+            opacity: 1 !important;
+            filter: grayscale(0) !important;
+            border-color: rgba(255, 255, 255, 0.3);
+            z-index: 20;
+            transform: scale(1);
+        }
+
+        .inactive-term {
+            opacity: 0.3 !important; /* Increased from 0.1 for visibility */
+            filter: grayscale(0.8) !important;
+            transform: scale(0.85);
+        }
+
+        .label-col {
+            width: 4.5rem;
+            flex-shrink: 0;
+            text-align: right;
+            padding-right: 1rem;
+            font-size: 11px;
+            font-weight: 900;
+            color: #E5E5E5; /* Lightened from #D1D5DB */
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            line-height: 1.2;
+        }
+        @media (min-width: 768px) {
+            .label-col { width: 6rem; font-size: 11px; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-5xl font-black mb-2 tracking-tight text-[--nvidia-green]">LABS Explorer</h1>
+            <p class="text-gray-200 text-sm md:text-lg tracking-tight">Interactive Bit-Shifting & Autocorrelation Optimization</p>
+        </header>
+
+        <div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-8 space-y-6">
+                
+                <section class="bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+                        <h2 class="text-xl font-bold flex items-center gap-3">
+                            <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">1</span>
+                            Sequence <span class="font-serif italic">S</span>
+                        </h2>
+                        <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Tap to toggle bits</span>
+                    </div>
+                    
+                    <div id="input-container" class="flex justify-center flex-wrap md:flex-nowrap py-2 relative z-10"></div>
+                </section>
+
+                <section class="bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl relative overflow-hidden">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-2">
+                        <h2 class="text-xl font-bold flex items-center gap-3">
+                            <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">2</span>
+                            Shift Window <span class="font-serif italic">k</span> = <span id="k-display" class="text-[--nvidia-green]">1</span>
+                        </h2>
+                        <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Active bits are highlighted</span>
+                    </div>
+
+                    <div class="relative py-8 md:py-12 px-1 md:px-6 bg-black/40 rounded-2xl overflow-x-hidden" aria-hidden="true">
+                        <div class="flex mb-4 relative z-10 items-center">
+                            <div class="label-col">Original<br><span class="font-serif lowercase italic">s<sub>i+k</sub></span></div>
+                            <div id="static-row" class="flex"></div>
+                        </div>
+                        
+                        <div class="flex mb-4 relative z-10 items-center">
+                            <div class="label-col">Shifted<br><span class="font-serif lowercase italic">s<sub>i</sub></span></div>
+                            <div class="flex-grow overflow-visible">
+                                <div id="shifted-sequence-row" class="flex"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex relative z-10 items-center border-t border-white/10 pt-4 mt-4">
+                            <div class="label-col text-white">Product<br><span class="font-serif lowercase italic">s<sub>i+k</sub> · s<sub>i</sub></span></div>
+                            <div class="flex-grow overflow-visible">
+                                <div id="product-row" class="flex"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 px-4">
+                        <label for="shift-slider" class="sr-only">Shift amount k</label>
+                        <input type="range" id="shift-slider" min="1" max="6" value="1" aria-valuetext="Shift 1" tabindex="0">
+                        <div class="flex justify-between text-[11px] text-gray-400 mt-2 font-black uppercase tracking-widest" aria-hidden="true">
+                            <span>k=1</span>
+                            <span class="hidden md:inline">Slide to observe overlap</span>
+                            <span>k=6</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl">
+                    <h2 class="text-xl font-bold mb-6 text-gray-200">Squared Sidelobe Plot (<span class="font-serif italic">C<sub>k</sub><sup>2</sup></span>)</h2>
+                    <div id="plot-container" class="h-40 flex items-end justify-around border-b-2 border-gray-700/50 pb-2 px-1 md:px-4" aria-hidden="true"></div>
+                </section>
+            </div>
+
+            <div class="lg:col-span-4 space-y-6">
+                <section class="math-card p-4 md:p-6 rounded-2xl shadow-xl min-h-[300px] flex flex-col">
+                    <h2 class="text-xl font-bold mb-4 md:mb-6 text-[--nvidia-green]">Calculation</h2>
+                    <div id="math-display" class="space-y-4 md:space-y-6 flex-grow w-full overflow-x-hidden"></div>
+                </section>
+
+                <section class="bg-[--nvidia-green] p-4 md:p-6 rounded-2xl text-black shadow-xl">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xs font-black uppercase tracking-wider opacity-80">Total Energy</h3>
+                        <div class="bg-black text-[--nvidia-green] text-[10px] px-2 py-0.5 rounded font-black" aria-hidden="true">Σ C²</div>
+                    </div>
+                    
+                    <div class="text-xs md:text-sm font-serif italic opacity-70 mb-1 border-b border-black/10 pb-2">
+                        <span aria-hidden="true">E = Σ C²</span>
+                        <span class="sr-only">Energy equals Sum of C squared</span>
+                    </div>
+
+                    <div class="text-5xl md:text-6xl font-black mt-2" id="total-energy">0</div>
+                    <p class="text-[11px] md:text-xs mt-3 font-bold bg-black/10 p-2 rounded leading-tight">Lower energy indicates better autocorrelation properties.</p>
+                </section>
+
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                    <p class="text-[11px] text-gray-400 font-bold uppercase mb-1">Target for N=7</p>
+                    <p class="text-sm text-gray-200 font-bold">Minimum Energy E = 3</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const N = 7;
+            let sequence = [1, 1, 1, 1, 1, 1, 1];
+            let currentShift = 1;
+
+            const els = {
+                input: document.getElementById('input-container'),
+                static: document.getElementById('static-row'),
+                shifted: document.getElementById('shifted-sequence-row'),
+                product: document.getElementById('product-row'),
+                slider: document.getElementById('shift-slider'),
+                kDisp: document.getElementById('k-display'),
+                math: document.getElementById('math-display'),
+                plot: document.getElementById('plot-container'),
+                energy: document.getElementById('total-energy'),
+                status: document.getElementById('a11y-status')
+            };
+
+            function init() {
+                renderInputButtons();
+                
+                els.slider.addEventListener('input', (e) => {
+                    currentShift = parseInt(e.target.value);
+                    updateUI(false); 
+                });
+
+                window.addEventListener('resize', () => {
+                    updateUI(false);
+                });
+
+                updateUI(false);
+            }
+
+            function renderInputButtons() {
+                els.input.innerHTML = '';
+                sequence.forEach((val, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = `seq-node ${val === 1 ? 'node-plus' : 'node-minus'}`;
+                    btn.textContent = val === 1 ? '+1' : '-1';
+                    
+                    // Input buttons are the start of our Tab Order
+                    btn.setAttribute('tabindex', '0');
+                    btn.setAttribute('type', 'button'); 
+                    
+                    btn.setAttribute('aria-label', `Bit ${i+1}, value ${val === 1 ? '+1' : '-1'}`);
+                    btn.setAttribute('aria-pressed', val === 1 ? 'true' : 'false');
+                    
+                    btn.onclick = () => {
+                        sequence[i] *= -1;
+                        const newVal = sequence[i] === 1 ? '+1' : '-1';
+                        announce(`Bit ${i+1} changed to ${newVal}`);
+                        updateUI(true); 
+                        setTimeout(() => {
+                            const newBtns = els.input.querySelectorAll('button');
+                            if(newBtns[i]) newBtns[i].focus();
+                        }, 10);
+                    };
+                    els.input.appendChild(btn);
+                });
+            }
+
+            function announce(msg) {
+                els.status.textContent = msg;
+            }
+
+            function updateUI(rebuildInput) {
+                els.slider.setAttribute('aria-valuetext', `Shift ${currentShift}`);
+
+                if(rebuildInput) {
+                    const buttons = els.input.querySelectorAll('button');
+                    buttons.forEach((btn, i) => {
+                        const val = sequence[i];
+                        btn.className = `seq-node ${val === 1 ? 'node-plus' : 'node-minus'}`;
+                        btn.textContent = val === 1 ? '+1' : '-1';
+                        btn.setAttribute('aria-label', `Bit ${i+1}, value ${val === 1 ? '+1' : '-1'}`);
+                        btn.setAttribute('aria-pressed', val === 1 ? 'true' : 'false');
+                    });
+                }
+
+                els.kDisp.textContent = currentShift;
+                
+                renderVisualizationRows();
+
+                const correlations = [];
+                let energy = 0;
+                for (let k = 1; k < N; k++) {
+                    let sum = 0;
+                    for (let i = 0; i < N - k; i++) {
+                        sum += sequence[i] * sequence[i + k];
+                    }
+                    correlations.push(sum);
+                    energy += (sum * sum);
+                }
+
+                renderPlot(correlations);
+                renderMath(correlations[currentShift - 1]);
+                els.energy.textContent = energy;
+
+                // Safe MathJax rendering with STRICT cleanup
+                if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                    window.MathJax.typesetPromise([els.math]).then(() => {
+                        // CRITICAL: Strip tabindex from all math elements to preserve 
+                        // Buttons -> Slider keyboard flow
+                        els.math.querySelectorAll('*').forEach(el => {
+                            if(el.getAttribute('tabindex')) el.removeAttribute('tabindex');
+                        });
+                    });
+                }
+            }
+
+            function renderVisualizationRows() {
+                els.static.innerHTML = '';
+                els.shifted.innerHTML = '';
+                els.product.innerHTML = '';
+
+                sequence.forEach((val, i) => {
+                    const node = document.createElement('div');
+                    node.className = `seq-node ${val === 1 ? 'node-plus' : 'node-minus'}`;
+                    const isActive = (i >= currentShift);
+                    node.classList.add(isActive ? 'active-term' : 'inactive-term');
+                    node.textContent = val === 1 ? '+1' : '-1';
+                    els.static.appendChild(node);
+                });
+
+                sequence.forEach((val, i) => {
+                    const node = document.createElement('div');
+                    node.className = `seq-node ${val === 1 ? 'node-plus' : 'node-minus'}`;
+                    const isActive = (i < (N - currentShift));
+                    node.classList.add(isActive ? 'active-term' : 'inactive-term');
+                    node.textContent = val === 1 ? '+1' : '-1';
+                    els.shifted.appendChild(node);
+                });
+
+                for(let i = 0; i < N - currentShift; i++) {
+                    const valTop = sequence[i + currentShift];
+                    const valBot = sequence[i];
+                    const product = valTop * valBot;
+                    
+                    const node = document.createElement('div');
+                    node.className = `prod-node ${product === 1 ? 'prod-plus' : 'prod-minus'}`;
+                    node.textContent = product === 1 ? '+1' : '-1';
+                    els.product.appendChild(node);
+                }
+
+                const computedStyle = getComputedStyle(document.documentElement);
+                const nodeSize = parseFloat(computedStyle.getPropertyValue('--node-size-px')) || 56;
+                const nodeGap = parseFloat(computedStyle.getPropertyValue('--node-gap-px')) || 12;
+                const offsetPx = currentShift * (nodeSize + nodeGap);
+
+                els.shifted.style.transform = `translateX(${offsetPx}px)`;
+                els.product.style.transform = `translateX(${offsetPx}px)`;
+            }
+
+            function renderPlot(cors) {
+                els.plot.innerHTML = '';
+                const maxValSq = (N - 1) * (N - 1);
+                
+                cors.forEach((val, i) => {
+                    const k = i + 1;
+                    const valSq = val * val;
+                    const active = (k === currentShift);
+                    
+                    const wrapper = document.createElement('div');
+                    // Mouse-only click handler (valid since Slider is keyboard alternative)
+                    wrapper.className = "flex flex-col items-center gap-1 cursor-pointer group flex-1 p-0";
+                    wrapper.onclick = () => {
+                        currentShift = k;
+                        els.slider.value = k;
+                        announce(`Shift ${k} selected`);
+                        updateUI(false);
+                    };
+
+                    const h = (valSq / maxValSq) * 100;
+                    const bar = document.createElement('div');
+                    bar.className = `bar ${active ? 'highlight-bar' : 'opacity-40 group-hover:opacity-60'}`;
+                    bar.style.height = Math.max(4, h + 5) + 'px';
+
+                    const label = document.createElement('span');
+                    label.className = `text-[9px] md:text-[10px] font-black uppercase ${active ? 'text-white' : 'text-gray-400'}`;
+                    label.innerHTML = `C<sub>${k}</sub><sup>2</sup>`;
+
+                    const valLabel = document.createElement('span');
+                    valLabel.className = `text-[10px] md:text-xs font-black ${active ? 'text-[--nvidia-green]' : 'text-gray-200'}`;
+                    valLabel.textContent = valSq;
+
+                    wrapper.appendChild(valLabel);
+                    wrapper.appendChild(bar);
+                    wrapper.appendChild(label);
+                    els.plot.appendChild(wrapper);
+                });
+            }
+
+            function renderMath(ck) {
+                let termsHtml = '';
+                for (let i = 0; i < N - currentShift; i++) {
+                    const s_original = sequence[i + currentShift];
+                    const s_shifted = sequence[i];
+                    const prod = s_original * s_shifted;
+                    const colorClass = (prod === 1) ? 'text-calc-plus' : 'text-calc-minus';
+                    const sign = (prod === 1) ? '+' : ''; 
+                    termsHtml += `<span class="${colorClass} inline-block mx-1 font-bold">${sign}${prod}</span>`;
+                }
+
+                els.math.innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-[11px] font-black text-gray-300 uppercase tracking-widest mb-2">Formula</p>
+                            <div class="bg-black/40 p-3 md:p-4 rounded-xl border border-white/5 text-center text-sm md:text-lg italic overflow-x-hidden whitespace-nowrap">
+                                \\( C_{${currentShift}}^2 = \\left( \\sum_{i=0}^{${N - currentShift - 1}} s_{i+${currentShift}} s_i \\right)^2 \\)
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p class="text-[11px] font-black text-gray-300 uppercase tracking-widest mb-2">Product Summation</p>
+                            <div class="bg-black/20 p-4 md:p-6 rounded-2xl border border-white/5 text-center w-full">
+                                <div class="text-xl md:text-2xl font-mono mb-4 leading-relaxed break-words flex items-center justify-center flex-wrap">
+                                    <span class="text-gray-400 font-serif italic mr-2 whitespace-nowrap">C<sub class="not-italic font-sans text-xs">${currentShift}</sub><sup class="not-italic font-sans text-xs">2</sup> =</span>
+                                    <span class="text-gray-500">(</span>
+                                    ${termsHtml}
+                                    <span class="text-gray-500">)</span><sup class="text-gray-500">2</sup>
+                                </div>
+
+                                <div class="pt-4 border-t border-white/10 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 text-2xl md:text-3xl font-black">
+                                    <div class="text-white flex items-center gap-2">
+                                        <span class="text-gray-400 font-serif italic text-xl md:text-2xl whitespace-nowrap">C<sub class="not-italic font-sans text-xs">${currentShift}</sub><sup class="not-italic font-sans text-xs">2</sup></span>
+                                        <span>=</span>
+                                    </div>
+                                    <div class="text-[--nvidia-green] flex items-center gap-2 whitespace-nowrap">
+                                        <span>(${ck})<sup class="text-lg">2</sup></span>
+                                        <span class="text-white">=</span>
+                                    </div>
+                                    <div class="text-white">
+                                        ${ck * ck}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                init();
+            } else {
+                window.addEventListener('DOMContentLoaded', init);
+            }
+        })();
+    </script>
+</body>
+</html>
