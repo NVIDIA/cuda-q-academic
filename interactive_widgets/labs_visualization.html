@@ -235,8 +235,8 @@
 
     <div class="max-w-6xl mx-auto">
         <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-5xl font-black mb-2 tracking-tight text-[--nvidia-green]">LABS Explorer</h1>
-            <p class="text-gray-200 text-sm md:text-lg tracking-tight">Interactive Bit-Shifting & Autocorrelation Optimization</p>
+            <h1 class="text-3xl md:text-5xl font-black mb-2 tracking-tight text-[--nvidia-green]">Low Autocorrelation Binary Sequence (LABS) Optimization</h1>
+            <p class="text-gray-200 text-sm md:text-lg tracking-tight">Toggle the sequence bits below to find the minimum Total Energy</p>
         </header>
 
         <div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
@@ -263,7 +263,7 @@
                             <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">2</span>
                             Shift Window <span class="font-serif italic">k</span> = <span id="k-display" class="text-[--nvidia-green]">1</span>
                         </h2>
-                        <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Active bits are highlighted</span>
+                        <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Use the scroll bar to view different shifts</span>
                     </div>
 
                     <div class="relative py-8 md:py-12 px-1 md:px-6 bg-black/40 rounded-2xl overflow-x-hidden" aria-hidden="true">
@@ -306,19 +306,18 @@
 
             <div class="lg:col-span-4 space-y-6">
                 <section class="math-card p-4 md:p-6 rounded-2xl shadow-xl min-h-[300px] flex flex-col">
-                    <h2 class="text-xl font-bold mb-4 md:mb-6 text-[--nvidia-green]">Calculation</h2>
+                    <h2 class="text-xl font-bold mb-4 md:mb-6 text-[--nvidia-green]">Calculation for <span class="font-serif italic">C<sub>k</sub><sup>2</sup></span></h2>
                     <div id="math-display" class="space-y-4 md:space-y-6 flex-grow w-full overflow-x-hidden"></div>
                 </section>
 
                 <section class="bg-[--nvidia-green] p-4 md:p-6 rounded-2xl text-black shadow-xl">
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="text-xs font-black uppercase tracking-wider opacity-80">Total Energy</h3>
-                        <div class="bg-black text-[--nvidia-green] text-[10px] px-2 py-0.5 rounded font-black" aria-hidden="true">Σ C²</div>
                     </div>
                     
                     <div class="text-xs md:text-sm font-serif italic opacity-70 mb-1 border-b border-black/10 pb-2">
-                        <span aria-hidden="true">E = Σ C²</span>
-                        <span class="sr-only">Energy equals Sum of C squared</span>
+                        <span aria-hidden="true">\( E = \sum_{k=1}^{N-1} C_k^2 \)</span>
+                        <span class="sr-only">Energy equals Sum of C sub k squared from k=1 to N-1</span>
                     </div>
 
                     <div class="text-5xl md:text-6xl font-black mt-2" id="total-energy">0</div>
