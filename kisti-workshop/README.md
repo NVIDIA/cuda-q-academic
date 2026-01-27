@@ -8,26 +8,26 @@ Explore CUDA-Q through hands-on labs covering quantum computing fundamentals, qu
 
 ## Agenda
 
-Navigate to the [**`tutorials`**](https://github.com/Squirtle007/kisti-workshop/tree/main/tutorials) folder which contains 4 labs:
+Navigate to the **`tutorials`** folder which contains 4 labs:
 
 ### 1. Getting started with CUDA-Q
-* [`quick-start-to-quantum/00_cudaq_basics.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/quick-start-to-quantum/00_cudaq_basics.ipynb)
-* [`quick-start-to-quantum/01_quick_start_to_quantum.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/quick-start-to-quantum/01_quick_start_to_quantum.ipynb)
-* [`quick-start-to-quantum/02_quick_start_to_quantum.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/quick-start-to-quantum/02_quick_start_to_quantum.ipynb)
+* `quick-start-to-quantum/00_cudaq_basics.ipynb`
+* `quick-start-to-quantum/01_quick_start_to_quantum.ipynb`
+* `quick-start-to-quantum/02_quick_start_to_quantum.ipynb`
 
 ### 2. Advanced Applications with CUDA-Q - Quantum Chemistry
-* [`chemistry-simulations/vqe_basics.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/chemistry-simulations/vqe_basics.ipynb)
-* [`chemistry-simulations/adapt_vqe.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/chemistry-simulations/adapt_vqe.ipynb)
+* `chemistry-simulations/vqe_basics.ipynb`
+* `chemistry-simulations/adapt_vqe.ipynb`
 
 ### 3. Advanced Applications with CUDA-Q - Quantum Error Correction
-* [`qec101/01_QEC_Intro.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/qec101/01_QEC_Intro.ipynb)
-* [`qec101/02_QEC_Stabilizers.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/qec101/02_QEC_Stabilizers.ipynb)
+* `qec101/01_QEC_Intro.ipynb`
+* `qec101/02_QEC_Stabilizers.ipynb`
 
 ### 4. Advanced Applications with CUDA-Q - AI for Quantum
-* [`ai-for-quantum/00_[simplified]compiling_unitaries_using_diffusion_models.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/ai-for-quantum/00_%5Bsimplified%5Dcompiling_unitaries_using_diffusion_models.ipynb)
+* `ai-for-quantum/00_[simplified]compiling_unitaries_using_diffusion_models.ipynb`
 
 ### [Bonus] Quantum Phase Classification using Quantum Convolutional Neural Networks (QCNN)
-* [`quantum-machine-learning/QCNN_phase_cudaq.ipynb`](https://github.com/Squirtle007/kisti-workshop/blob/main/tutorials/quantum-machine-learning/QCNN_phase_cudaq.ipynb)
+* `quantum-machine-learning/QCNN_phase_cudaq.ipynb`
 
 
 <br>
