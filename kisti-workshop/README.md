@@ -71,7 +71,7 @@ Make sure your system configuration (Python/driver/CUDA version) meets the [Depe
 
 To set up the CUDA-Q environment, run the following commands in your local terminal:
 ```bash
-sudo apt update && sudo apt install -y gfortran python3.13 python3-pip git
+sudo apt update && sudo apt install -y gfortran python3-pip git
 pip install cudaq==0.13.0 cudaq-solvers==0.5.0 cudaq_qec==0.5.0
 ```
 
