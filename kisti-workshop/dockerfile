@@ -2,9 +2,10 @@ FROM nvcr.io/nvidia/quantum/cuda-quantum:cu13-0.13.0
 USER root
 
 RUN apt-get update && apt-get install -y \
+    gfortran \
+    python3.13 \
     python3-pip \
     git \
-    gfortran \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir -v jupyterlab
