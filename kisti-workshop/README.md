@@ -69,19 +69,18 @@ Make sure your system configuration (Python/driver/CUDA version) meets the [Depe
 
 ### 2. Install dependencies
 
-Run the following commands in your local terminal, with the [`requirements.txt`](./requirements.txt) in your current directory:
+To set up the CUDA-Q environment, run the following commands in your local terminal:
 ```bash
-sudo apt update && sudo apt install -y gfortran python3-pip git
-pip install cudaq==0.13.0
-pip install -r requirements.txt
+sudo apt update && sudo apt install -y gfortran python3.13 python3-pip git
+pip install cudaq==0.13.0 cudaq-solvers==0.5.0 cudaq_qec==0.5.0
 ```
 
 ### 3. Clone the repository
 
-Clone this repository to get the tutorials:
+Clone this repository to get the tutorials and install the necessary libraries with the [`requirements.txt`](./requirements.txt) in your current directory:
 ```bash
 git clone -b 2026-workshops https://github.com/NVIDIA/cuda-q-academic.git
-cd kisti-workshop/tutorials
+cd cuda-q-academic/kisti-workshop && pip install -r requirements.txt
 ```
 
 <br>
