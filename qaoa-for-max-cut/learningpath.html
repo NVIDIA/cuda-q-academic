@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUDA-Q Academic</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+  /* ================================================================================
+     STYLE GUIDE IMPLEMENTATION
+     ================================================================================ */
+  
+  /* 0. GLOBAL RESET */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  /* 1.3 COLOR PALETTE */
+  :root {
+      --nvidia-green: #76b900;
+      --nvidia-dark: #1A1A1A;     /* Page background */
+      --nvidia-mid: #2A2A2A;      /* Container background */
+      --nvidia-accent: #444444;   /* Borders */
+      --nvidia-light: #E0E0E0;    /* Primary text */
+      --nvidia-gray: #AAAAAA;     /* Secondary text */
+      
+      /* Badge Colors */
+      --colab-bg: #1f3a5f; --colab-text: #a8c7fa;
+      --gh-bg: #E0E0E0; --gh-text: #1A1A1A;
+  }
+
+  /* 1.0 Dark Background Default */
+  body { 
+      background-color: var(--nvidia-dark); 
+      color: var(--nvidia-light);
+      font-family: 'Inter', sans-serif; 
+      margin: 0; 
+      padding: 40px 20px;
+  }
+
+  /* 23.1 WIDGET CONTAINER */
+  .widget-container {
+      background-color: var(--nvidia-mid);
+      border: 1px solid var(--nvidia-accent);
+      border-top: 4px solid var(--nvidia-green);
+      border-radius: 8px; 
+      padding: 32px; 
+      width: 100%; 
+      max-width: 950px; 
+      margin: 0 auto; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      position: relative;
+  }
+
+  /* 4.1 Focus Indicators */
+  :focus-visible { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+
+  /* 23.2 HEADER */
+  header { text-align: center; margin-bottom: 32px; border-bottom: 1px solid var(--nvidia-accent); padding-bottom: 24px; }
+  h1 { color: var(--nvidia-green); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px 0; font-weight: 700; }
+  .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; }
+
+  /* FILTERS & NAVIGATION */
+  .filter-bar { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 20px; 
+      margin-bottom: 32px; 
+      flex-wrap: wrap; 
+      padding: 8px 0;
+      border-bottom: 1px solid var(--nvidia-mid); 
+  }
+
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+
+  .filter-label {
+      color: var(--nvidia-gray); font-size: 0.75rem; text-transform: uppercase;
+      font-weight: 700; letter-spacing: 0.5px; margin-right: 8px;
+  }
+
+  .filter-btn {
+      background: transparent; border: 1px solid transparent; color: var(--nvidia-gray);
+      padding: 8px 16px; border-radius: 4px; font-family: 'Inter', sans-serif; font-weight: 600;
+      cursor: pointer; min-height: 38px; transition: all 0.2s; font-size: 0.9rem;
+  }
+  .filter-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; border: 1px solid var(--nvidia-accent); }
+  .filter-btn.active { background: var(--nvidia-green); color: #000000; border: 1px solid var(--nvidia-green); }
+
+  .filter-divider { height: 24px; width: 1px; background-color: var(--nvidia-accent); margin: 0 8px; }
+
+  .create-btn {
+      background: rgba(118, 185, 0, 0.1); color: var(--nvidia-green);
+      border: 1px dashed var(--nvidia-green); margin-left: auto; 
+  }
+  .create-btn:hover { background: var(--nvidia-green); color: black; }
+
+  @media (max-width: 768px) {
+      .filter-bar { justify-content: center; }
+      .filter-group { flex-wrap: wrap; justify-content: center; }
+      .create-btn { margin-left: 0; width: 100%; margin-top: 8px; }
+      .filter-divider { display: none; }
+  }
+
+  /* SINGLE COURSE BANNER */
+  #focus-banner {
+      display: none; background: rgba(118, 185, 0, 0.1); border: 1px solid var(--nvidia-green);
+      padding: 16px; text-align: center; border-radius: 4px; margin-bottom: 32px;
+  }
+  #focus-banner a { color: var(--nvidia-green); font-weight: bold; text-decoration: none; cursor: pointer; }
+  #focus-banner a:hover { text-decoration: underline; }
+
+  /* GRID SYSTEM */
+  .pathway-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+
+  /* CARD STYLING */
+  .pathway-card { 
+      background-color: #222; border: 1px solid var(--nvidia-accent); 
+      border-top: 2px solid var(--nvidia-green); border-radius: 4px;
+      display: flex; flex-direction: column; height: 100%; overflow: hidden;
+  }
+  .pathway-card:hover { transform: translateY(-2px); border-color: var(--nvidia-gray); transition: transform 0.2s; }
+  .pathway-card.custom-card { border-top: 2px dashed var(--nvidia-green); background: #1f221c; }
+
+  .card-banner { color: var(--nvidia-green); padding: 12px 16px 0 16px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; text-align: right; }
+  .card-content { padding: 0 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column; }
+  
+  /* UPDATED: Scrollable Title */
+  .card-title h3 { 
+      margin: 0; font-size: 1.1rem; color: white; font-weight: 700; 
+      white-space: nowrap; overflow-x: auto; scrollbar-width: none;
+  }
+  .card-title h3::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
+  
+  .card-title p { margin: 4px 0 8px 0; font-size: 0.9rem; color: var(--nvidia-gray); }
+
+  /* Readme Preview Button (Moved to Header) */
+  .readme-btn { 
+      color: var(--nvidia-green); background: none; border: none; font-size: 0.75rem; 
+      font-weight: 700; cursor: pointer; text-transform: uppercase; padding: 0; 
+      text-decoration: underline; display: inline-block; margin-bottom: 8px;
+  }
+  .readme-btn:hover { color: white; }
+
+  /* NOTEBOOK LIST */
+  .notebook-list { 
+      list-style: none; padding: 0; margin: 0; 
+      border-top: 1px solid var(--nvidia-accent);
+      max-height: 170px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--nvidia-accent) var(--nvidia-mid);
+  }
+  .notebook-list::-webkit-scrollbar { width: 6px; }
+  .notebook-list::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 3px; }
+
+  .notebook-item { 
+      border-bottom: 1px solid var(--nvidia-accent); padding: 10px 10px; 
+      font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      transition: background-color 0.2s; border-left: 3px solid transparent;
+  }
+  .notebook-item.filter-match { border-left-color: var(--nvidia-green); background-color: rgba(118, 185, 0, 0.08); opacity: 1; }
+  .notebook-item.filter-dim { opacity: 0.3; filter: grayscale(100%); }
+  
+  /* UPDATED: Scrollable Notebook Name */
+  .nb-name { 
+      color: var(--nvidia-light); 
+      white-space: nowrap; 
+      overflow-x: auto; 
+      flex: 1; min-width: 0; 
+      display: flex; align-items: center; gap: 6px;
+      scrollbar-width: none; /* Firefox */
+  }
+  .nb-name::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  .new-badge { font-size: 9px; background: var(--nvidia-green); color: black; padding: 1px 4px; border-radius: 2px; font-weight: 800; flex-shrink: 0; }
+
+  .action-badges { display: flex; gap: 4px; flex-shrink: 0; }
+  .badge-link { display: none; font-size: 9px; padding: 2px 6px; border-radius: 2px; font-weight: 700; text-transform: uppercase; text-decoration: none; }
+  .badge-colab { background: var(--colab-bg); color: var(--colab-text); border: 1px solid var(--colab-text); }
+  .badge-gh { background: var(--gh-bg); color: var(--gh-text); }
+  .badge-tool { background: var(--nvidia-green); color: black; border: 1px solid var(--nvidia-green); display: flex !important; }
+
+  .pathway-card.colab-active .badge-colab, .pathway-card.gh-active .badge-gh { display: flex; }
+  .pathway-card.colab-active .nb-name, .pathway-card.gh-active .nb-name { opacity: 0.7; }
+
+  /* FOOTER */
+  .launch-footer { margin-top: auto; border-top: 1px dashed var(--nvidia-accent); padding: 12px 16px; background: rgba(0,0,0,0.2); }
+  .launch-label { font-size: 0.75rem; color: var(--nvidia-gray); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+  
+  .launch-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .launch-btn { 
+      display: flex; align-items: center; justify-content: center; cursor: pointer; 
+      background: none; border: 1px solid transparent; border-radius: 4px; 
+      min-width: 44px; min-height: 44px; padding: 0; 
+  }
+  .launch-btn:hover { border-color: var(--nvidia-accent); background: rgba(255,255,255,0.05); }
+  .launch-btn img { height: 20px; width: auto; opacity: 0.7; } .launch-btn svg { width: 20px; height: 20px; fill: var(--nvidia-gray); }
+  .launch-btn:hover img { opacity: 1; } .launch-btn:hover svg { fill: white; } 
+  .launch-btn.active { border-color: var(--nvidia-green); background-color: rgba(118, 185, 0, 0.1); }
+  .launch-btn.active svg { fill: var(--nvidia-green); }
+
+  .share-btn { 
+      margin-left: auto; background: transparent; border: none; cursor: pointer; 
+      min-width: 44px; min-height: 44px; color: var(--nvidia-gray); font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center; text-decoration: none;
+      transition: color 0.2s;
+  }
+  .share-btn:hover { color: var(--nvidia-green); }
+  .share-btn.copied { color: var(--nvidia-green); position: relative; }
+  .share-btn.copied::after {
+      content: "Copied!"; position: absolute; top: -30px; right: 0;
+      background: var(--nvidia-green); color: black; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: bold;
+  }
+
+  /* ================================================================================
+     MODAL STYLES (Shared by Builder & Preview)
+     ================================================================================ */
+  .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;
+  }
+  .modal-overlay.open { display: flex; }
+  
+  .builder-container, .preview-container {
+      background-color: var(--nvidia-mid);
+      border: 1px solid var(--nvidia-accent);
+      border-top: 4px solid var(--nvidia-green);
+      border-radius: 8px;
+      width: 90%; max-width: 600px; max-height: 90vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+  }
+  
+  /* Preview is wider */
+  .preview-container { max-width: 900px; height: 85vh; }
+
+  .builder-header { padding: 20px; border-bottom: 1px solid var(--nvidia-accent); display: flex; justify-content: space-between; align-items: center; }
+  .builder-header h2 { margin: 0; color: var(--nvidia-green); text-transform: uppercase; font-size: 1.2rem; }
+  .close-modal { background: none; border: none; color: var(--nvidia-gray); font-size: 1.5rem; cursor: pointer; }
+  .close-modal:hover { color: white; }
+
+  .builder-body { padding: 20px; overflow-y: auto; flex: 1; }
+  
+  /* Preview Content Styling (Markdown) */
+  .preview-content { color: #E0E0E0; font-size: 0.95rem; line-height: 1.6; }
+  .preview-content h1, .preview-content h2, .preview-content h3 { color: var(--nvidia-green); margin-top: 24px; }
+  .preview-content a { color: #76b900; text-decoration: none; }
+  .preview-content a:hover { text-decoration: underline; }
+  .preview-content pre { background: #111; padding: 12px; border-radius: 4px; overflow-x: auto; border: 1px solid #444; }
+  .preview-content code { font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; }
+  .preview-content img { max-width: 100%; border-radius: 4px; border: 1px solid #444; }
+  .preview-content table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  .preview-content th, .preview-content td { border: 1px solid #444; padding: 8px; text-align: left; }
+  .preview-content th { background-color: #333; }
+
+  /* Inputs */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; color: var(--nvidia-gray); font-size: 0.85rem; margin-bottom: 4px; }
+  .nvidia-input, .nvidia-select {
+      width: 100%; background: var(--nvidia-dark); border: 1px solid var(--nvidia-accent);
+      color: var(--nvidia-light); padding: 10px; border-radius: 4px; font-family: 'Inter', sans-serif;
+  }
+  .nvidia-input:focus, .nvidia-select:focus { outline: 3px solid var(--nvidia-green); outline-offset: -1px; }
+
+  .notebook-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; }
+  .row-controls { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+  .control-btn { font-size: 10px; padding: 2px; background: none; border: 1px solid var(--nvidia-accent); color: var(--nvidia-gray); cursor: pointer; }
+  .control-btn:hover { color: white; border-color: white; }
+  .delete-btn { color: #ff5555; border-color: #552222; }
+  .delete-btn:hover { background: #550000; color: white; }
+  .custom-fields { display: none; flex-direction: column; gap: 4px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--nvidia-accent); }
+  .custom-fields.active { display: flex; }
+
+  .btn-nvidia-primary {
+      background: var(--nvidia-mid); color: white; border: 1px solid var(--nvidia-accent);
+      border-bottom: 3px solid var(--nvidia-green); padding: 10px 20px; cursor: pointer; font-weight: bold; width: 100%;
+      text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .btn-nvidia-primary:hover { background: var(--nvidia-green); color: black; border: 1px solid var(--nvidia-green); }
+
+  .btn-secondary {
+      background: transparent; color: var(--nvidia-gray); border: 1px dashed var(--nvidia-accent);
+      padding: 8px 16px; cursor: pointer; font-size: 0.85rem; width: 100%; margin-top: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--nvidia-light); color: var(--nvidia-light); }
+
+  @media (max-width: 900px) { .pathway-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .pathway-grid { grid-template-columns: 1fr; } .widget-container { padding: 16px; } }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="builder-modal">
+    <div class="builder-container">
+        <div class="builder-header">
+            <h2>Create Custom Pathway</h2>
+            <button class="close-modal" onclick="closeModal('builder-modal')">×</button>
+        </div>
+        <div class="builder-body">
+            <div class="form-group">
+                <label for="c-title">Module Title</label>
+                <input type="text" id="c-title" class="nvidia-input" placeholder="e.g. My Study Plan" value="My Custom Track">
+            </div>
+            <div class="form-group">
+                <label for="c-desc">Description</label>
+                <input type="text" id="c-desc" class="nvidia-input" placeholder="Short summary..." value="Personalized learning selection.">
+            </div>
+            
+            <label style="color: var(--nvidia-gray); font-size: 0.85rem;">Select Notebooks</label>
+            <div id="builder-list"></div>
+            
+            <button class="btn-secondary" onclick="addNotebookRow()">+ Add Notebook from Catalog</button>
+            <button class="btn-secondary" style="border-color: var(--nvidia-green); color: var(--nvidia-green);" onclick="addHelloWorld()">+ Add "Hello World" Tool</button>
+            <button class="btn-secondary" style="border-color: var(--nvidia-green); color: var(--nvidia-green);" onclick="addBornsRule()">+ Add "Born's Rule" Tool</button>
+        </div>
+        <div class="builder-header" style="border-top: 1px solid var(--nvidia-accent); border-bottom: none; display:block;">
+            <button class="btn-nvidia-primary" onclick="generateAndSave()">Generate & Copy Link</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="preview-modal">
+    <div class="preview-container">
+        <div class="builder-header">
+            <h2 id="preview-title">Course Guide</h2>
+            <button class="close-modal" onclick="closeModal('preview-modal')">×</button>
+        </div>
+        <div class="builder-body preview-content" id="preview-body">
+            <p style="text-align:center; color: #aaa;">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<div class="widget-container">
+  <header>
+      <h1>CUDA-Q Academic Learning Pathways</h1>
+      <p class="summary-text">Interactive tutorials for quantum-gpu supercomputing.</p>
+  </header>
+  <main>
+    <section class="filter-bar" id="filter-controls">
+        <div class="filter-group">
+            <span class="filter-label">Filter Notebooks:</span>
+            <button class="filter-btn active" onclick="filterNotebooks('all')">All</button>
+            <div class="filter-divider"></div> <button class="filter-btn" onclick="filterNotebooks('intro')">Intro</button>
+            <button class="filter-btn" onclick="filterNotebooks('inter')">Intermediate</button>
+            <button class="filter-btn" onclick="filterNotebooks('adv')">Advanced</button>
+        </div>
+
+        <button class="filter-btn create-btn" onclick="openBuilder()">+ Create Custom Pathway</button>
+    </section>
+
+      <div id="focus-banner">
+          <span aria-hidden="true">⚠️</span> You are viewing a specific learning path. 
+          <a onclick="clearTrack(event)">Return to CUDA-Q Academic Learning Pathways</a>
+      </div>
+
+      <div class="pathway-grid" id="grid-container"></div>
+  </main>
+</div>
+
+<script>
+  // 1. DATA SOURCE
+  // Note: 'folder' property added for Readme Fetching
+  const modules = [
+    {
+        id: "track-quickstart",
+        levelLabel: "",
+        title: "Quick Start to Quantum Computing with CUDA-Q",
+        description: "",
+        folder: "quick-start-to-quantum",
+        notebooks: [
+            { name: "Interactive: Hello World", type: "tool", url: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html", difficulty: "intro" },
+            { name: "Start Small with One Qubit", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/01_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/01_quick_start_to_quantum.ipynb" },
+            { name: "Multiple Qubits and Entanglement", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/02_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/02_quick_start_to_quantum.ipynb" },
+            { name: "Write Your First Parameterized Kernel", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb" },
+            { name: "Build Your First Variational Algorithm", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/04_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/04_quick_start_to_quantum.ipynb" }
+        ]
+    },
+    {
+        id: "track-qis",
+        levelLabel: "",
+        title: "QIS Foundational Algorithms",
+        description: "",
+        folder: "qis-examples", 
+        notebooks: [
+            { name: "Interactive: Hello World", type: "tool", url: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html", difficulty: "intro" },
+            { name: "Interactive: Born's Rule", type: "tool", url: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html", difficulty: "intro" },
+            { name: "Teleportation", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_teleportation.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_teleportation.ipynb" },
+            { name: "Bernstein Vazirani", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/bernstein_vazirani.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/bernstein_vazirani.ipynb" },
+            { name: "Deutsch's Algorithm", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb" },
+            { name: "QFT", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb" },
+            { name: "Grover's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/solutions/grovers-solution.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/solutions/grovers-solution.ipynb" },
+            { name: "Shor's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/teleportation.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb" }
+        ]
+    },
+    {
+        id: "track-qec",
+        levelLabel: "",
+        title: "QEC 101",
+        description: "",
+        folder: "qec101",
+        notebooks: [
+            { name: "Introduction to QEC", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb" },
+            { name: "Stabilizers, Shor Code, Steane Code", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb" },
+            { name: "Noisy Simulation", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb" },
+            { name: "AI Decoders", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb" },
+            { name: "Magic State Distillation", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb" },
+            { name: "Toric and Surface Codes", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb" },
+            { name: "qLDPC Codes", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb" },
+            { name: "Decoder Metrics and Parallel Window Decoding", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb" }
+        ]
+    },
+    {
+        id: "track-chem",
+        levelLabel: "",
+        title: "Chemistry Simulations",
+        description: "",
+        folder: "chemistry-simulations",
+        notebooks: [
+        { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" },
+            { name: "ADAPT-VQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb" },
+            { name: "Krylov_Subspace", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb" },
+            { name: "QMMM", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb" }
+        ]
+    },
+    {
+        id: "track-finance",
+        levelLabel: "",
+        title: "Applications to Finance",
+        description: "",
+        folder: "quantum-applications-to-finance",
+        notebooks: [
+        { name: "Quantum Walks for Finance Part 1", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" },
+            { name: "Quantum Walks for Finance Part 2", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/02_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/02_quantum_walks.ipynb" },
+            { name: "Portfolio Optimization 3 Ways", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb" }
+        ]
+    },
+    {
+        id: "track-qaoa",
+        levelLabel: "",
+        title: "Circuit Cutting & Max Cut",
+        description: "",
+        folder: "qaoa-for-max-cut",
+        notebooks: [
+            { name: "Max Cut for QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" },
+            { name: "Divide and Conquer QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/02_One-level-divide-and-conquer-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/02_One-level-divide-and-conquer-QAOA.ipynb" },
+            { name: "Recursive Divide and Conquer QAOA", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb" },
+            { name: "Weighted Max Cut Project", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb" }
+        ]
+    },
+    {
+        id: "track-ai",
+        levelLabel: "",
+        title: "AI for Quantum",
+        description: "",
+        folder: "ai-for-quantum",
+        notebooks: [
+            { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" },
+            { name: "Compiling Unitaries with Diffusion Models", difficulty: "int", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb" },
+            { name: "AI Decoders", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb" }
+        ]
+    },
+    {
+        id: "track-dynamics",
+        levelLabel: "",
+        title: "Dynamics 101",
+        description: "",
+        folder: "dynamics101",
+        notebooks: [
+            { name: "Jaynes Cummings Hamiltonian", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb" },
+            { name: "Time Dependent Hamiltonians", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb" }
+        ]
+    },
+    {
+        id: "track-hybrid",
+        levelLabel: "",
+        title: "Hybrid Workflows",
+        description: "",
+        folder: "hybrid-workflows",
+        notebooks: [
+            { name: "Quantum Enhanced Optimization", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb" },
+            { name: "QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" },
+            { name: "Quantum Walks", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" },
+            { name: "VQE and GQE", difficulty: "inter", colab: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" }
+        ]
+    }
+  ];
+
+  // 2. RENDER LOGIC
+  function renderCards() {
+      const container = document.getElementById('grid-container');
+      const brevLink = "https://brev.nvidia.com/launchable/deploy?launchableID=env-2zjo3nxqb6jbM5vtfJFQDWrb0Qd";
+      const qBraidLink = "https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git";
+
+      container.innerHTML = modules.map(m => `
+        <article class="pathway-card ${m.isCustom ? 'custom-card' : ''}" id="${m.id}">
+          <div class="card-banner">${m.levelLabel}</div>
+          <div class="card-content">
+            <div class="card-header">
+                <div class="card-title">
+                    <h3>${m.title}</h3>
+                    <p>${m.description}</p>
+                    ${m.folder ? `<button class="readme-btn" onclick="openPreview('${m.id}')">Description</button>` : ''}
+                </div>
+            </div>
+            <ul class="notebook-list" aria-label="${m.title} Notebooks">
+                ${m.notebooks.map(nb => `
+                    <li class="notebook-item" data-difficulty="${nb.difficulty || 'intro'}" data-new="${nb.isNew || false}">
+                        <span class="nb-name" title="${nb.name}">
+                            ${nb.name}
+                            ${nb.isNew ? '<span class="new-badge">NEW</span>' : ''}
+                        </span>
+                        <div class="action-badges">
+                            ${nb.type === 'tool' 
+                                ? `<a class="badge-link badge-tool" href="${nb.url}" target="_blank">Open</a>`
+                                : `<a class="badge-link badge-colab" href="${nb.colab}" target="_blank">Run</a>
+                                   <a class="badge-link badge-gh" href="${nb.gh || '#'}" target="_blank">View</a>`
+                            }
+                        </div>
+                    </li>
+                `).join('')}
+            </ul>
+          </div>
+          <div class="launch-footer">
+            <p class="launch-label">Launch Workspace</p>
+            <div class="launch-row">
+                <a href="${brevLink}" target="_blank" class="launch-btn" title="Launch in Brev"><img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt="Brev"/></a>
+                <a href="${qBraidLink}" target="_blank" class="launch-btn" title="Launch in qBraid"><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="qBraid" style="background:#222; border-radius:2px; padding:2px;"/></a>
+                <button class="launch-btn" onclick="toggleMode('${m.id}', 'colab', this)" title="Colab"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Colab"/></button>
+                <button class="launch-btn gh-btn" onclick="toggleMode('${m.id}', 'gh', this)" title="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></button>
+                
+                <a href="${m.isCustom ? '#' : '?track=' + m.id}" class="share-btn" onclick="copyLink(event, '${m.id}', ${m.isCustom})" title="Copy link to module">🔗</a>
+            </div>
+          </div>
+        </article>
+      `).join('');
+  }
+
+  // 3. FILTERING
+  function filterNotebooks(level) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.notebook-item').forEach(item => {
+          item.classList.remove('filter-match', 'filter-dim');
+          if (level === 'all') return; // If 'all', loop finishes here, everything is visible
+          
+          let match = false;
+          if (level === 'new') {
+              match = (item.dataset.new === 'true');
+          } else {
+              match = (item.dataset.difficulty === level);
+          }
+
+          if (match) item.classList.add('filter-match');
+          else item.classList.add('filter-dim');
+      });
+  }
+
+  // 4. INTERACTION
+  function toggleMode(cardId, mode, btn) {
+      const card = document.getElementById(cardId);
+      if(mode === 'colab') card.classList.toggle('colab-active');
+      else if(mode === 'gh') card.classList.toggle('gh-active');
+      btn.classList.toggle('active');
+  }
+
+  function copyLink(e, cardId, isCustom) {
+      e.preventDefault(); 
+      const url = new URL(window.location.href);
+      
+      if(isCustom) {
+          const mod = modules.find(m => m.id === cardId);
+          if(mod && mod.encodedData) {
+              url.search = '';
+              url.searchParams.set('custom', mod.encodedData);
+          }
+      } else {
+          url.search = '';
+          url.searchParams.set('track', cardId);
+      }
+      
+      const fullLink = url.toString();
+      
+      navigator.clipboard.writeText(fullLink).then(() => {
+          const btn = document.querySelector(`#${cardId} .share-btn`);
+          btn.classList.add('copied'); 
+          setTimeout(() => btn.classList.remove('copied'), 2000);
+      }).catch(() => {
+          window.location.href = fullLink;
+      });
+  }
+
+  function clearTrack(e) {
+      e.preventDefault();
+      const url = new URL(window.location.href);
+      url.searchParams.delete('track');
+      url.searchParams.delete('custom');
+      window.history.pushState({}, '', url);
+      
+      document.querySelector('header').style.display = 'block';
+      document.getElementById('filter-controls').style.display = 'flex';
+      document.getElementById('focus-banner').style.display = 'none';
+      document.querySelectorAll('.pathway-card').forEach(c => c.style.display = 'flex');
+      document.querySelector('.pathway-grid').style.cssText = "";
+  }
+
+  // =========================================================
+  // PREVIEW LOGIC (README FETCHING)
+  // =========================================================
+  
+  async function openPreview(cardId) {
+      const modal = document.getElementById('preview-modal');
+      const contentDiv = document.getElementById('preview-body');
+      const titleDiv = document.getElementById('preview-title');
+      
+      const module = modules.find(m => m.id === cardId);
+      if (!module || !module.folder) return;
+
+      modal.classList.add('open');
+      titleDiv.innerText = module.title;
+      contentDiv.innerHTML = '<p style="text-align:center; color: #aaa;">Fetching Course Guide...</p>';
+
+      const readmeUrl = `https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/${module.folder}/README.md`;
+
+      try {
+          const response = await fetch(readmeUrl);
+          if (!response.ok) throw new Error("Readme not found");
+          
+          let text = await response.text();
+          
+          // Truncate logic: Stop before "Notebooks" header
+          // This regex looks for "# Notebooks" or "## Notebooks" (case insensitive)
+          const splitRegex = /^#+\s*Notebooks/im;
+          const match = text.match(splitRegex);
+          if(match) {
+             text = text.substring(0, match.index);
+          }
+
+          // 1. Convert Markdown to HTML
+          let html = marked.parse(text);
+          
+          // 2. Fix Relative Image Links
+          // Replace src="./image.png" with full raw github path
+          const baseUrl = `https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/${module.folder}/`;
+          html = html.replace(/src="(\.\/|)(?!http)([^"]+)"/g, `src="${baseUrl}$2"`);
+
+          contentDiv.innerHTML = html;
+      } catch (err) {
+          contentDiv.innerHTML = `<p style="color:#ff5555; text-align:center;">Could not load guide. <br> <a href="https://github.com/NVIDIA/cuda-q-academic/tree/main/${module.folder}" target="_blank" style="color:var(--nvidia-green);">View on GitHub</a></p>`;
+      }
+  }
+
+  function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('open');
+  }
+
+  // =========================================================
+  // CUSTOM BUILDER LOGIC
+  // =========================================================
+
+  function openBuilder() {
+      document.getElementById('builder-modal').classList.add('open');
+      document.getElementById('c-title').focus();
+      if(document.querySelectorAll('.notebook-row').length === 0) addNotebookRow();
+  }
+
+  // Generate Options String for Select Dropdown
+  function getCatalogOptions() {
+      let options = `<option value="">-- Select a Notebook --</option>`;
+      
+      modules.forEach(m => {
+          if (m.isCustom) return; 
+          options += `<optgroup label="${m.title}">`;
+          m.notebooks.forEach(nb => {
+              options += `<option value="${m.id}|${nb.name}">${nb.name}</option>`;
+          });
+          options += `</optgroup>`;
+      });
+
+      options += `<option value="custom_entry" style="color:var(--nvidia-green);">+ Custom / External...</option>`;
+      return options;
+  }
+
+  function addNotebookRow(presetValue = null) {
+      const list = document.getElementById('builder-list');
+      const div = document.createElement('div');
+      div.className = 'notebook-row';
+      div.innerHTML = `
+        <div class="row-controls">
+            <button class="control-btn" onclick="moveRow(this, -1)" title="Up">▲</button>
+            <button class="control-btn" onclick="moveRow(this, 1)" title="Down">▼</button>
+        </div>
+        <div style="flex-grow:1; display:flex; flex-direction:column; gap:4px;">
+            <select class="nvidia-select" onchange="handleCatalogSelect(this)">${getCatalogOptions()}</select>
+            <div class="custom-fields">
+                <input type="text" class="nvidia-input" placeholder="Notebook Name" data-field="name">
+                <div style="display:flex; gap:4px;">
+                    <input type="text" class="nvidia-input" style="font-size:0.75rem;" placeholder="Colab URL (or Tool URL)" data-field="colab">
+                    <input type="text" class="nvidia-input" style="font-size:0.75rem;" placeholder="GitHub URL (Optional)" data-field="gh">
+                </div>
+            </div>
+            <input type="hidden" data-field="type" value="notebook">
+            <input type="hidden" data-field="is_catalog" value="false">
+        </div>
+        <button class="control-btn delete-btn" onclick="this.parentElement.remove()">×</button>
+      `;
+      list.appendChild(div);
+  }
+
+  function handleCatalogSelect(selectElem) {
+      const row = selectElem.parentElement;
+      const customFields = row.querySelector('.custom-fields');
+      const val = selectElem.value;
+
+      if (val === 'custom_entry') {
+          customFields.classList.add('active');
+          row.querySelector('[data-field="is_catalog"]').value = "false";
+          row.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+      } else if (val === "") {
+          customFields.classList.remove('active');
+      } else {
+          customFields.classList.remove('active');
+          row.querySelector('[data-field="is_catalog"]').value = "true";
+          
+          const [trackId, nbName] = val.split('|');
+          const track = modules.find(t => t.id === trackId);
+          if (track) {
+              const nb = track.notebooks.find(n => n.name === nbName);
+              if (nb) {
+                  row.querySelector('[data-field="name"]').value = nb.name;
+                  row.querySelector('[data-field="colab"]').value = nb.colab || nb.url || "";
+                  row.querySelector('[data-field="gh"]').value = nb.gh || "";
+                  row.querySelector('[data-field="type"]').value = nb.type || "notebook";
+              }
+          }
+      }
+  }
+
+  function moveRow(btn, dir) {
+      const row = btn.parentElement.parentElement;
+      if (dir === -1 && row.previousElementSibling) row.parentElement.insertBefore(row, row.previousElementSibling);
+      if (dir === 1 && row.nextElementSibling) row.parentElement.insertBefore(row.nextElementSibling, row);
+  }
+
+  function addHelloWorld() {
+      addNotebookRow();
+      const rows = document.querySelectorAll('.notebook-row');
+      const lastRow = rows[rows.length - 1];
+      const select = lastRow.querySelector('select');
+      select.value = 'custom_entry';
+      handleCatalogSelect(select);
+      lastRow.querySelector('[data-field="name"]').value = "Interactive: Hello World";
+      lastRow.querySelector('[data-field="colab"]').value = "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html";
+      lastRow.querySelector('[data-field="type"]').value = "tool";
+  }
+
+  function addBornsRule() {
+      addNotebookRow();
+      const rows = document.querySelectorAll('.notebook-row');
+      const lastRow = rows[rows.length - 1];
+      const select = lastRow.querySelector('select');
+      select.value = 'custom_entry';
+      handleCatalogSelect(select);
+      lastRow.querySelector('[data-field="name"]').value = "Interactive: Born's Rule";
+      lastRow.querySelector('[data-field="colab"]').value = "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html";
+      lastRow.querySelector('[data-field="type"]').value = "tool";
+  }
+
+  function generateAndSave() {
+      const title = document.getElementById('c-title').value || "Custom Track";
+      const desc = document.getElementById('c-desc').value || "User generated pathway.";
+      const rows = document.querySelectorAll('.notebook-row');
+      const nbs = Array.from(rows).map(r => ({
+          name: r.querySelector('[data-field="name"]').value,
+          colab: r.querySelector('[data-field="colab"]').value,
+          gh: r.querySelector('[data-field="gh"]').value,
+          type: r.querySelector('[data-field="type"]').value
+      })).filter(n => n.name); 
+
+      const data = { title, desc, nbs };
+      const str = JSON.stringify(data);
+      const encoded = btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+      
+      const url = new URL(window.location.href);
+      url.search = '';
+      url.searchParams.set('custom', encoded);
+      window.location.href = url.toString();
+  }
+
+  // 5. INITIALIZATION
+  window.addEventListener('DOMContentLoaded', () => {
+      
+      const params = new URLSearchParams(window.location.search);
+      const customData = params.get('custom');
+
+      if (customData) {
+          try {
+              const str = decodeURIComponent(Array.prototype.map.call(atob(customData), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+              const data = JSON.parse(str);
+              
+              const newModule = {
+                  id: "track-custom",
+                  levelLabel: "Custom",
+                  title: data.title,
+                  description: data.desc,
+                  isCustom: true,
+                  encodedData: customData,
+                  notebooks: data.nbs.map(n => ({
+                      name: n.name,
+                      difficulty: "inter",
+                      type: n.type || (n.colab.includes('github.io') ? 'tool' : 'notebook'),
+                      url: n.colab,
+                      colab: n.colab,
+                      gh: n.gh
+                  }))
+              };
+              
+              modules.unshift(newModule);
+              
+              document.querySelector('header').style.display = 'none';
+              document.getElementById('filter-controls').style.display = 'none';
+              document.getElementById('focus-banner').innerHTML = `<span aria-hidden="true">⚠️</span> You are viewing a custom shared pathway. <a onclick="clearTrack(event)">Return to Full Library</a>`;
+              document.getElementById('focus-banner').style.display = 'block';
+              
+          } catch(e) {
+              console.error("Failed to parse custom track", e);
+          }
+      }
+
+      renderCards(); 
+
+      if(customData) {
+          document.querySelectorAll('.pathway-card').forEach(c => {
+             if (c.id !== "track-custom") c.style.display = 'none';
+          });
+          const grid = document.querySelector('.pathway-grid');
+          grid.style.display = 'block';
+          grid.style.maxWidth = '600px';
+          grid.style.margin = '0 auto';
+      }
+
+      const trackId = params.get('track');
+      if (trackId) {
+          document.querySelector('header').style.display = 'none';
+          document.getElementById('filter-controls').style.display = 'none';
+          document.getElementById('focus-banner').style.display = 'block';
+          document.querySelectorAll('.pathway-card').forEach(c => {
+              if (c.id !== trackId) c.style.display = 'none';
+          });
+          const grid = document.querySelector('.pathway-grid');
+          grid.style.display = 'block';
+          grid.style.maxWidth = '600px';
+          grid.style.margin = '0 auto';
+      }
+  });
+
+  // 6. KEYBOARD SHORTCUTS
+  document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { 
+          e.preventDefault(); 
+          if(document.getElementById('builder-modal').classList.contains('open')) {
+              closeModal('builder-modal');
+          } else if(document.getElementById('preview-modal').classList.contains('open')) {
+              closeModal('preview-modal');
+          } else {
+              filterNotebooks('all'); 
+              clearTrack(e); 
+          }
+      }
+  });
+</script>
+</body>
+</html>
