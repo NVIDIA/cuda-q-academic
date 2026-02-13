@@ -10,11 +10,57 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1A1A1A;
-            color: #E0E0E0;
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
         }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: var(--nvidia-dark); color: var(--nvidia-light); }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; font-size: 1rem; line-height: 1.5; }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 { color: var(--nvidia-green); font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 700; }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
         .nvidia-green { color: #76B900; }
         .gate-btn {
             background-color: #2A2A2A;
@@ -31,6 +77,13 @@
             background-color: #2A2A2A;
             border-radius: 0.5rem;
             border: 1px solid #444;
+        }
+        .bloch-viewport {
+            background-color: #000000;
+        }
+        .bloch-viewport:focus {
+            outline: 4px solid var(--nvidia-green);
+            outline-offset: 2px;
         }
         canvas {
             display: block;
@@ -56,24 +109,40 @@
             margin-right: 0.4rem;
             vertical-align: middle;
         }
+        .fidelity-formula {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--nvidia-green);
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body class="antialiased">
-
-    <div class="container mx-auto p-4 max-w-7xl">
-        <header class="text-center mb-4">
-            <h1 class="text-2xl font-bold nvidia-green">Quantum Unitary Matching</h1>
-            <p class="text-gray-400 mt-1 text-sm max-w-2xl mx-auto">
-                Your goal is to match the target unitary transformation shown on the Bloch spheres.
-            </p>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Quantum Unitary Matching</h1>
+            <p class="summary-text">Match the target unitary by building a circuit so that your vectors (translucent) align with the target vectors (solid) on the Bloch sphere for |0⟩, |+⟩, and |+i⟩.</p>
         </header>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol class="list-decimal list-inside text-gray-300 space-y-1 text-sm">
+                <li><strong>Goal:</strong> On the single Bloch sphere, three <strong>solid</strong> arrows show where the <strong>target</strong> unitary sends |0⟩ (green), |+⟩ (cyan), and |+i⟩ (orange). Three <strong>lighter/translucent</strong> arrows show where <strong>your circuit</strong> sends the same states. Match your unitary to the target by applying gates until the translucent arrows align with the solid ones.</li>
+                <li>Apply gates (X, Y, Z, H, S, T) so each of your three vectors coincides with its target. Use Reset Circuit or Undo as needed. Your circuit starts as the identity (your arrows begin at the poles).</li>
+                <li>Maximize the <strong>Unitary Fidelity</strong> (1.0 = perfect match). When all three pairs of arrows overlap, fidelity is 1.</li>
+                <li>Drag the sphere to rotate the view; when focused, use arrow keys to rotate.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Tab</span> to move between gates and the Bloch sphere. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons. When the Bloch sphere is focused, <span class="kbd">←</span><span class="kbd">→</span><span class="kbd">↑</span><span class="kbd">↓</span> rotate the view.</p>
+        </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <div class="flex flex-col space-y-4">
                 <div class="info-box p-2 text-center">
-                    <h3 class="text-md font-semibold mb-1">Unitary Infidelity</h3>
+                    <h3 class="text-md font-semibold mb-1">Unitary Fidelity</h3>
                     <p class="text-2xl font-bold font-mono nvidia-green" id="deviation-display">0.00000</p>
+                    <p class="fidelity-formula mt-2">|Tr(U<sub>target</sub>† U<sub>circuit</sub>) / 2|<sup>2</sup></p>
                 </div>
                 <div class="info-box p-2">
                      <h3 class="text-md font-semibold text-center mb-1 nvidia-green">Target Unitary</h3>
@@ -86,7 +155,7 @@
                 <div class="info-box p-3">
                     <h3 class="text-md font-semibold text-center mb-2 text-yellow-400">Best Match So Far</h3>
                     <div class="text-sm font-mono">
-                        <p>Infidelity: <span id="best-infidelity-display" class="font-bold text-yellow-400">N/A</span></p>
+                        <p>Fidelity: <span id="best-fidelity-display" class="font-bold text-yellow-400">N/A</span></p>
                         <p class="mt-1 break-all">Sequence: <span id="best-sequence-display"></span></p>
                     </div>
                 </div>
@@ -132,37 +201,39 @@
 
             <div class="space-y-4">
                 <div>
-                    <h2 class="text-lg font-semibold text-center mb-1">Action on |0⟩ State</h2>
-                    <div id="sphere-0" class="w-full h-72 rounded-lg overflow-hidden info-box p-0"></div>
+                    <h2 class="text-lg font-semibold text-center mb-1">Target vs. Your Unitary on |0⟩, |+⟩, |+i⟩</h2>
+                    <div id="sphere-main" class="bloch-viewport w-full h-80 rounded-lg overflow-hidden p-0" tabindex="0" role="img" aria-label="Bloch sphere: solid vectors = target unitary on |0⟩, |+⟩, |+i⟩; translucent vectors = your circuit. Use arrow keys to rotate when focused."></div>
                 </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-center mb-1">Action on |1⟩ State</h2>
-                    <div id="sphere-1" class="w-full h-72 rounded-lg overflow-hidden info-box p-0"></div>
-                </div>
-                <div class="flex justify-center items-center space-x-4 text-sm pt-2">
-                    <div class="flex items-center"><span class="legend-dot" style="background-color: #76B900;"></span>Target</div>
-                    <div class="flex items-center"><span class="legend-dot" style="background-color: #FFFFFF;"></span>Your Circuit</div>
+                <div class="flex justify-center gap-8 text-sm pt-2">
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center"><span class="legend-dot" style="background-color: #76B900;"></span>Target</div>
+                        <div class="flex items-center"><span class="legend-dot" style="background-color: rgba(118,185,0,0.6); border: 1px solid #76B900;"></span>Your</div>
+                        <span class="text-xs mt-0.5 font-semibold">|0⟩</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center"><span class="legend-dot" style="background-color: #00b4d8;"></span>Target</div>
+                        <div class="flex items-center"><span class="legend-dot" style="background-color: rgba(0,180,216,0.6); border: 1px solid #00b4d8;"></span>Your</div>
+                        <span class="text-xs mt-0.5 font-semibold">|+⟩</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center"><span class="legend-dot" style="background-color: #f4a261;"></span>Target</div>
+                        <div class="flex items-center"><span class="legend-dot" style="background-color: rgba(244,162,97,0.6); border: 1px solid #f4a261;"></span>Your</div>
+                        <span class="text-xs mt-0.5 font-semibold">|+i⟩</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="info-box p-4 mt-6">
-            <h3 class="text-lg font-bold text-center mb-3">Instructions & Details</h3>
-            <div class="text-sm text-gray-300 space-y-2">
-                <p>
-                    Your goal is to match the target unitary transformation. Apply quantum gates to create a circuit that gets as close as possible to the target's action on the |0⟩ and |1⟩ states.
-                </p>
-                <p>
-                    The <b>Bloch spheres</b> show the result: the <b>green vector</b> is the target and the <b>white vector</b> is your circuit's state. Drag the spheres to view them from different angles.
-                </p>
-                <p>
-                    The <b>Unitary Infidelity</b> score (lower is better, 0.0 is a perfect match) is calculated using the formula:
-                </p>
-                <code class="bg-gray-900 p-2 rounded-md block mt-2 text-center nvidia-green font-mono">
-                    1 - |Tr(U<sub>target</sub>&dagger; &middot; U<sub>circuit</sub>) / 2|<sup>2</sup>
-                </code>
-            </div>
+        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "Compiling Unitaries Using Diffusion Models (AI for Quantum)".
+            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;">here</a>.
         </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
 
     <script type="module">
@@ -184,12 +255,28 @@
         const matrixAdjoint = (A) => [[cconj(A[0][0]), cconj(A[1][0])], [cconj(A[0][1]), cconj(A[1][1])]];
         const matrixTrace = (A) => cadd(A[0][0], A[1][1]);
 
+        function isUnitary(A, tol = 1e-10) {
+            const I = matrixMultiply(matrixAdjoint(A), A);
+            return Math.abs(I[0][0].re - 1) < tol && Math.abs(I[0][0].im) < tol &&
+                   Math.abs(I[1][1].re - 1) < tol && Math.abs(I[1][1].im) < tol &&
+                   Math.abs(I[0][1].re) < tol && Math.abs(I[0][1].im) < tol &&
+                   Math.abs(I[1][0].re) < tol && Math.abs(I[1][0].im) < tol;
+        }
+
+        function unitaryFidelity(U_target, U_user) {
+            const product = matrixMultiply(matrixAdjoint(U_target), U_user);
+            const trace = matrixTrace(product);
+            return cabs_sq(complex(trace.re / 2, trace.im / 2));
+        }
+
         // --- Quantum State & Gates ---
         let targetUnitary, userUnitary, gateSequence;
-        let bestInfidelity, bestGateSequence; // NEW: Variables for best score tracking
+        let bestFidelity, bestGateSequence;
 
-        const state0 = { alpha: complex(1), beta: complex(0) };
-        const state1 = { alpha: complex(0), beta: complex(1) };
+        const inv2 = 1 / Math.sqrt(2);
+        const state0 = { alpha: complex(1), beta: complex(0) };           // |0⟩
+        const statePlus = { alpha: complex(inv2), beta: complex(inv2) }; // |+⟩ = (|0⟩+|1⟩)/√2
+        const stateI = { alpha: complex(inv2), beta: complex(0, inv2) }; // |+i⟩ = (|0⟩+i|1⟩)/√2
         
         const GATES = {
             X: [[complex(0), complex(1)], [complex(1), complex(0)]],
@@ -218,41 +305,54 @@
         }
 
         // --- Core Logic & Display ---
+        // Target unitary chosen so identity has very low fidelity (target is far from I).
         function getFixedTargetUnitary() {
-            const u = [[complex(0.567, -0.234), complex(-0.345, 0.678)], [complex(0.789, 0.123),  complex(0.456, -0.567)]];
-            const det = cadd(cmul(u[0][0], u[1][1]), cmul(complex(-1), cmul(u[0][1], u[1][0])));
-            const norm = Math.sqrt(cabs_sq(det));
-            return [[complex(u[0][0].re/norm, u[0][0].im/norm), complex(u[0][1].re/norm, u[0][1].im/norm)], [complex(u[1][0].re/norm, u[1][0].im/norm), complex(u[1][1].re/norm, u[1][1].im/norm)]];
+            const u = [[complex(0.567, -0.234), complex(-0.345, 0.678)], [complex(0.789, 0.123), complex(0.456, -0.567)]];
+            let c0_0 = complex(u[0][0].re, u[0][0].im), c0_1 = complex(u[1][0].re, u[1][0].im);
+            let c1_0 = complex(u[0][1].re, u[0][1].im), c1_1 = complex(u[1][1].re, u[1][1].im);
+            let n0 = Math.sqrt(cabs_sq(c0_0) + cabs_sq(c0_1));
+            if (n0 < 1e-12) n0 = 1;
+            c0_0 = complex(c0_0.re / n0, c0_0.im / n0);
+            c0_1 = complex(c0_1.re / n0, c0_1.im / n0);
+            const dot = cadd(cmul(cconj(c0_0), c1_0), cmul(cconj(c0_1), c1_1));
+            c1_0 = cadd(c1_0, complex(-dot.re * c0_0.re + dot.im * c0_0.im, -dot.re * c0_0.im - dot.im * c0_0.re));
+            c1_1 = cadd(c1_1, complex(-dot.re * c0_1.re + dot.im * c0_1.im, -dot.re * c0_1.im - dot.im * c0_1.re));
+            let n1 = Math.sqrt(cabs_sq(c1_0) + cabs_sq(c1_1));
+            if (n1 < 1e-12) n1 = 1;
+            c1_0 = complex(c1_0.re / n1, c1_0.im / n1);
+            c1_1 = complex(c1_1.re / n1, c1_1.im / n1);
+            let U = [[c0_0, c1_0], [c0_1, c1_1]];
+            const det = cadd(cmul(U[0][0], U[1][1]), cmul(complex(-1), cmul(U[0][1], U[1][0])));
+            const phase = Math.atan2(det.im, det.re);
+            const phaseCorrection = complex(Math.cos(-phase), Math.sin(-phase));
+            U[0][1] = cmul(phaseCorrection, U[0][1]);
+            U[1][1] = cmul(phaseCorrection, U[1][1]);
+            return U;
         }
 
-        // NEW: Function to update the Best Match display
         function updateBestScoreDisplay() {
-            const infidelityEl = document.getElementById('best-infidelity-display');
+            const fidelityEl = document.getElementById('best-fidelity-display');
             const sequenceEl = document.getElementById('best-sequence-display');
-            if (bestInfidelity === Infinity) {
-                infidelityEl.textContent = 'N/A';
+            if (bestFidelity < 0) {
+                fidelityEl.textContent = 'N/A';
                 sequenceEl.innerHTML = '<span class="text-gray-500">None</span>';
             } else {
-                infidelityEl.textContent = bestInfidelity.toFixed(5);
+                fidelityEl.textContent = bestFidelity.toFixed(5);
                 sequenceEl.innerHTML = bestGateSequence.length > 0 ? bestGateSequence.join(' ') : '<span class="text-gray-500">Identity</span>';
             }
         }
 
         function calculateUnitaryDeviation() {
-            const product = matrixMultiply(matrixAdjoint(targetUnitary), userUnitary);
-            const trace = matrixTrace(product);
-            const fidelity = cabs_sq(complex(trace.re / 2, trace.im / 2));
-            const infidelity = 1.0 - fidelity;
+            const fidelity = unitaryFidelity(targetUnitary, userUnitary);
 
             const displayEl = document.getElementById('deviation-display');
-            displayEl.textContent = infidelity.toFixed(5);
-            displayEl.classList.toggle('text-green-300', infidelity < 0.0001);
-            displayEl.classList.toggle('nvidia-green', infidelity >= 0.0001);
+            displayEl.textContent = fidelity.toFixed(5);
+            displayEl.classList.toggle('text-green-300', fidelity > 0.9999);
+            displayEl.classList.toggle('nvidia-green', fidelity <= 0.9999);
 
-            // NEW: Check if this is a new best score
-            if (infidelity < bestInfidelity) {
-                bestInfidelity = infidelity;
-                bestGateSequence = [...gateSequence]; // Make a copy!
+            if (fidelity > bestFidelity) {
+                bestFidelity = fidelity;
+                bestGateSequence = [...gateSequence];
                 updateBestScoreDisplay();
             }
         }
@@ -296,9 +396,9 @@
             const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
             camera.position.set(0, 1.5, 3.5);
 
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
             renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setClearColor(0x000000, 0);
+            renderer.setClearColor(0x000000, 1);
             container.appendChild(renderer.domElement);
 
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -311,30 +411,71 @@
             scene.add(group);
 
             const sphereGeom = new THREE.SphereGeometry(1, 24, 24);
-            const sphereMat = new THREE.MeshBasicMaterial({ color: 0x555555, transparent: true, opacity: 0.15, wireframe: true });
+            const sphereMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, transparent: true, opacity: 0.15, wireframe: true });
             group.add(new THREE.Mesh(sphereGeom, sphereMat));
 
-            const targetVector = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0x76B900, 0.15, 0.08);
-            group.add(targetVector);
+            const axisColor = 0xCCCCCC;
+            const axisLen = 1.1;
+            const axisMat = new THREE.LineBasicMaterial({ color: axisColor });
+            [
+                [new THREE.Vector3(0, 0, 0), new THREE.Vector3(axisLen, 0, 0)],
+                [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, axisLen, 0)],
+                [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, axisLen)],
+            ].forEach(([a, b]) => {
+                const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
+                group.add(new THREE.Line(geom, axisMat));
+            });
 
-            const userVector = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0xFFFFFF, 0.15, 0.08);
-            group.add(userVector);
+            function createThickArrow(length, colorHex, opaque = true) {
+                const shaftRadius = 0.035;
+                const headRadius = 0.11;
+                const headHeight = length * 0.22;
+                const shaftLength = length - headHeight;
+                const mat = new THREE.MeshBasicMaterial({
+                    color: colorHex,
+                    transparent: !opaque,
+                    opacity: opaque ? 1 : 0.55
+                });
+                const shaft = new THREE.Mesh(new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 16), mat);
+                shaft.rotation.x = Math.PI / 2;
+                shaft.position.set(0, 0, shaftLength / 2);
+                const head = new THREE.Mesh(new THREE.ConeGeometry(headRadius, headHeight, 16), mat);
+                head.rotation.x = Math.PI / 2;
+                head.position.set(0, 0, shaftLength + headHeight / 2);
+                const g = new THREE.Group();
+                g.add(shaft);
+                g.add(head);
+                return g;
+            }
+            const COLOR_0 = 0x76B900, COLOR_PLUS = 0x00b4d8, COLOR_I = 0xf4a261;
+            const targetVector0 = createThickArrow(1, COLOR_0, true);
+            const targetVectorPlus = createThickArrow(1, COLOR_PLUS, true);
+            const targetVectorI = createThickArrow(1, COLOR_I, true);
+            const userVector0 = createThickArrow(1, COLOR_0, false);
+            const userVectorPlus = createThickArrow(1, COLOR_PLUS, false);
+            const userVectorI = createThickArrow(1, COLOR_I, false);
+            group.add(targetVector0); group.add(targetVectorPlus); group.add(targetVectorI);
+            group.add(userVector0); group.add(userVectorPlus); group.add(userVectorI);
 
+            const scale = Math.max(2, window.devicePixelRatio || 1);
             const createLabel = (text, position, fontSize = 32) => {
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                context.font = `Bold ${fontSize}px Inter`;
-                canvas.width = context.measureText(text).width + 20;
-                canvas.height = fontSize * 1.5;
+                const logicalW = context.measureText(text).width + 20;
+                const logicalH = fontSize * 1.5;
+                canvas.width = logicalW * scale;
+                canvas.height = logicalH * scale;
+                context.scale(scale, scale);
                 context.font = `Bold ${fontSize}px Inter`;
                 context.fillStyle = "rgba(224, 224, 224, 0.95)";
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
-                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                context.fillText(text, logicalW / 2, logicalH / 2);
                 const texture = new THREE.CanvasTexture(canvas);
+                texture.minFilter = THREE.LinearFilter;
                 const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
                 const sprite = new THREE.Sprite(spriteMat);
-                sprite.scale.set(canvas.width / 150, canvas.height / 150, 1.0);
+                sprite.scale.set(logicalW / 150, logicalH / 150, 1.0);
                 sprite.position.copy(position);
                 return sprite;
             };
@@ -354,7 +495,11 @@
             };
             window.addEventListener('resize', onWindowResize);
 
-            return { scene, camera, renderer, controls, targetVector, userVector, onWindowResize };
+            return {
+                scene, camera, renderer, controls, onWindowResize,
+                targetVectors: [targetVector0, targetVectorPlus, targetVectorI],
+                userVectors: [userVector0, userVectorPlus, userVectorI]
+            };
         }
 
         function updateVectorPosition(vector, state) {
@@ -362,26 +507,48 @@
             const x = Math.sin(theta) * Math.cos(phi);
             const y = Math.cos(theta);
             const z = Math.sin(theta) * Math.sin(phi);
-            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+            const dir = new THREE.Vector3(x, y, z).normalize();
+            const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+            vector.quaternion.copy(q);
         }
 
-        const viz = {
-            sphere0: createBlochSphere(document.getElementById('sphere-0')),
-            sphere1: createBlochSphere(document.getElementById('sphere-1')),
-        };
+        const sphereContainer = document.getElementById('sphere-main');
+        const viz = { sphere: createBlochSphere(sphereContainer) };
 
+        function rotateBlochCamera(v, deltaAzimuth, deltaPolar) {
+            const cam = v.camera;
+            const pos = cam.position;
+            let radius = pos.length();
+            if (radius < 0.01) radius = 3.5;
+            let theta = Math.acos(Math.max(-1, Math.min(1, pos.y / radius)));
+            let phi = Math.atan2(pos.x, pos.z);
+            theta = Math.max(0.01, Math.min(Math.PI - 0.01, theta + deltaPolar));
+            phi += deltaAzimuth;
+            cam.position.x = radius * Math.sin(theta) * Math.cos(phi);
+            cam.position.y = radius * Math.cos(theta);
+            cam.position.z = radius * Math.sin(theta) * Math.sin(phi);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const el = document.activeElement;
+            if (!el || el.id !== 'sphere-main' || !el.classList.contains('bloch-viewport')) return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const v = viz.sphere;
+            const step = 0.08;
+            if (e.key === 'ArrowLeft') { e.preventDefault(); rotateBlochCamera(v, step, 0); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); rotateBlochCamera(v, -step, 0); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); rotateBlochCamera(v, 0, -step); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); rotateBlochCamera(v, 0, step); }
+        });
+
+        const basisStates = [state0, statePlus, stateI];
         function updateAllVisuals() {
-            const targetState0 = applyUnitaryToState(targetUnitary, state0);
-            const targetState1 = applyUnitaryToState(targetUnitary, state1);
-            const userState0 = applyUnitaryToState(userUnitary, state0);
-            const userState1 = applyUnitaryToState(userUnitary, state1);
-
-            updateVectorPosition(viz.sphere0.targetVector, targetState0);
-            updateVectorPosition(viz.sphere0.userVector, userState0);
-            
-            updateVectorPosition(viz.sphere1.targetVector, targetState1);
-            updateVectorPosition(viz.sphere1.userVector, userState1);
-            
+            for (let i = 0; i < 3; i++) {
+                const targetState = applyUnitaryToState(targetUnitary, basisStates[i]);
+                const userState = applyUnitaryToState(userUnitary, basisStates[i]);
+                updateVectorPosition(viz.sphere.targetVectors[i], targetState);
+                updateVectorPosition(viz.sphere.userVectors[i], userState);
+            }
             displayMatrix('target-matrix-display', targetUnitary);
             displayMatrix('user-matrix-display', userUnitary);
             calculateUnitaryDeviation();
@@ -391,23 +558,34 @@
         function resetCircuit() {
             gateSequence = [];
             recalculateUserUnitary();
-            bestInfidelity = Infinity; // Reset best score
+            bestFidelity = -1;
             bestGateSequence = [];
-            updateBestScoreDisplay(); // Update display to show reset state
+            updateBestScoreDisplay();
             updateAllVisuals();
+        }
+
+        function runFidelityChecks() {
+            const identity = [[complex(1), complex(0)], [complex(0), complex(1)]];
+            console.log('[Unitary widget] === Fidelity checks ===');
+            console.log('1. Target is unitary (U†U = I):', isUnitary(targetUnitary));
+            const fidIdentity = unitaryFidelity(targetUnitary, identity);
+            console.log('2. Fidelity(target, identity) =', fidIdentity.toFixed(6));
+            const fidSelf = unitaryFidelity(targetUnitary, targetUnitary);
+            console.log('3. Fidelity(target, target) =', fidSelf.toFixed(6), '(expect 1.0)');
+            console.log('[Unitary widget] === End checks ===');
         }
 
         function initializeChallenge() {
             targetUnitary = getFixedTargetUnitary();
             resetCircuit();
+            runFidelityChecks();
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            Object.values(viz).forEach(v => {
-                v.controls.update();
-                v.renderer.render(v.scene, v.camera);
-            });
+            const v = viz.sphere;
+            v.controls.update();
+            v.renderer.render(v.scene, v.camera);
         }
 
         document.querySelectorAll('.gate-btn[data-gate]').forEach(button => {
@@ -431,10 +609,22 @@
         initializeChallenge();
         animate();
         
-        setTimeout(() => {
-            Object.values(viz).forEach(v => v.onWindowResize());
-        }, 100);
+        setTimeout(() => viz.sphere.onWindowResize(), 100);
 
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
