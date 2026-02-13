@@ -686,17 +686,33 @@
   }
 
   function clearTrack(e) {
-      e.preventDefault();
+      if(e) e.preventDefault(); // Handle cases where e might be undefined if called manually
+      
+      // 1. Reset URL
       const url = new URL(window.location.href);
       url.searchParams.delete('track');
       url.searchParams.delete('custom');
       window.history.pushState({}, '', url);
       
+      // 2. Show Header and Filters
       document.querySelector('header').style.display = 'block';
       document.getElementById('filter-controls').style.display = 'flex';
-      document.getElementById('focus-banner').style.display = 'none';
-      document.querySelectorAll('.pathway-card').forEach(c => c.style.display = 'flex');
+      
+      // (Note: We removed the line attempting to hide 'focus-banner' since that element is deleted)
+
+      // 3. Show ALL cards again
+      document.querySelectorAll('.pathway-card').forEach(c => {
+          c.style.display = 'flex';
+      });
+
+      // 4. Reset the Grid layout (remove the centering/max-width used for single view)
       document.querySelector('.pathway-grid').style.cssText = "";
+
+      // 5. Remove the "Return" button we added dynamically
+      const returnBtn = document.querySelector('.card-return-link');
+      if (returnBtn) {
+          returnBtn.remove();
+      }
   }
 
   // =========================================================
