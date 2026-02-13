@@ -1,899 +1,520 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hybrid Quantum-Classical Widgets</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --nvidia-green: #76B900;
-            --nvidia-dark: #1A1A1A;
-            --nvidia-black: #000000;
-            --nvidia-grey: #333333;
-            --text-light: #EEEEEE;
-            --text-muted: #CCCCCC;
-            --focus-ring: #FFFFFF;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUDA-Q Visualization Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--nvidia-black);
-            color: var(--text-light);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+<style>
+  /* ================================================================================
+     STYLE GUIDE IMPLEMENTATION
+     ================================================================================ */
+  
+  /* GLOBAL RESET */
+  *, *::before, *::after { box-sizing: border-box; }
 
-        /* --- Accessibility: Skip Link --- */
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            background: var(--nvidia-green);
-            color: var(--nvidia-black);
-            padding: 8px;
-            z-index: 2000;
-            transition: top 0.2s;
-        }
-        .skip-link:focus {
-            top: 0;
-        }
+  /* COLOR PALETTE */
+  :root {
+      --nvidia-green: #76b900;
+      --nvidia-dark: #1A1A1A;
+      --nvidia-mid: #2A2A2A;
+      --nvidia-accent: #444444;
+      --nvidia-light: #E0E0E0;
+      --nvidia-gray: #AAAAAA;
+  }
 
-        /* --- Accessibility: Focus States --- */
-        button:focus-visible, a:focus-visible, .filter-tag:focus-visible {
-            outline: 2px solid var(--focus-ring);
-            outline-offset: 2px;
-        }
+  body { 
+      background-color: var(--nvidia-dark); 
+      color: var(--nvidia-light);
+      font-family: 'Inter', sans-serif; 
+      margin: 0; 
+      padding: 40px 20px;
+  }
 
-        /* --- Header --- */
-        header {
-            background-color: var(--nvidia-dark);
-            border-bottom: 2px solid var(--nvidia-green);
-            padding: 2rem 1rem;
-            text-align: center;
-        }
+  /* WIDGET CONTAINER */
+  .widget-container {
+      background-color: var(--nvidia-mid);
+      border: 1px solid var(--nvidia-accent);
+      border-top: 4px solid var(--nvidia-green);
+      border-radius: 8px; 
+      padding: 32px; 
+      width: 100%; 
+      max-width: 1500px; 
+      margin: 0 auto; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      position: relative;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+  }
 
-        h1 {
-            color: var(--text-light);
-            margin: 0;
-            font-size: clamp(1.8rem, 4vw, 2.5rem); /* Responsive font size */
-            font-weight: 300;
-        }
+  /* HEADER */
+  header { text-align: center; margin-bottom: 32px; border-bottom: 1px solid var(--nvidia-accent); padding-bottom: 24px; }
+  h1 { color: var(--nvidia-green); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px 0; font-weight: 700; }
+  .summary-text { color: var(--nvidia-gray); margin-bottom: 16px; }
 
-        h1 strong {
-            color: var(--nvidia-green);
-            font-weight: 700;
-        }
+  /* NAVIGATION BTN */
+  .gallery-btn {
+      text-decoration: none; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--nvidia-green); 
+      color: var(--nvidia-green);
+      margin-top: 8px;
+      background: transparent;
+      padding: 8px 16px; 
+      border-radius: 4px; 
+      font-family: 'Inter', sans-serif; 
+      font-weight: 600;
+      cursor: pointer; 
+      transition: all 0.2s; 
+      font-size: 0.9rem;
+  }
+  .gallery-btn:hover { background: var(--nvidia-green); color: black; }
 
-        .subtitle {
-            color: var(--text-muted);
-            margin-top: 0.75rem;
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.5;
-        }
+  /* SECTION HEADERS */
+  .section-header {
+      margin: 2rem 0 1rem 0; 
+      color: var(--nvidia-light); 
+      font-weight: 700;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--nvidia-accent);
+  }
+  .section-header i { color: var(--nvidia-green); }
 
-        /* --- Controls & Filter Section --- */
-        .controls {
-            background-color: var(--nvidia-grey);
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
+  /* GRID SYSTEM */
+  .pathway-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.75rem;
-            max-width: 1000px;
-        }
+  /* CARD STYLING */
+  .pathway-card { 
+      background-color: #222; border: 1px solid var(--nvidia-accent); 
+      border-top: 2px solid var(--nvidia-green); border-radius: 4px;
+      display: flex; flex-direction: column; height: 100%; overflow: hidden;
+  }
+  .pathway-card:hover { transform: translateY(-2px); border-color: var(--nvidia-gray); transition: transform 0.2s; }
 
-        .filter-tag {
-            background-color: var(--nvidia-dark);
-            color: var(--text-muted);
-            border: 1px solid #555;
-            padding: 8px 18px; /* Larger touch target */
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-            user-select: none;
-        }
+  .card-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+  
+  .card-title h3 { 
+      margin: 0; font-size: 1.1rem; color: white; font-weight: 700; 
+      white-space: nowrap; overflow-x: auto; scrollbar-width: none;
+  }
+  .card-title p { margin: 8px 0 16px 0; font-size: 0.9rem; color: var(--nvidia-gray); line-height: 1.4; }
 
-        .filter-tag:hover {
-            border-color: var(--nvidia-green);
-            color: white;
-        }
+  /* NOTEBOOK CONTEXT SECTION */
+  .notebook-section {
+      margin-top: auto; /* Pushes to bottom of content area */
+      padding-top: 12px;
+      border-top: 1px solid var(--nvidia-accent);
+  }
+  
+  .notebook-label {
+      font-size: 0.7rem; color: var(--nvidia-gray); 
+      text-transform: uppercase; font-weight: 700; 
+      margin-bottom: 6px; letter-spacing: 0.5px;
+  }
 
-        .filter-tag.active {
-            background-color: var(--nvidia-green);
-            color: var(--nvidia-black);
-            border-color: var(--nvidia-green);
-            font-weight: bold;
-        }
+  .notebook-list { list-style: none; padding: 0; margin: 0; }
 
-        /* --- Grid Layout --- */
-        .catalog-container {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
-        }
+  .notebook-item { 
+      padding: 2px 0; 
+      font-size: 0.85rem; display: flex; align-items: center; gap: 8px; color: var(--nvidia-light);
+  }
+  .notebook-item i { color: var(--nvidia-green); font-size: 0.7rem; }
+  .notebook-item a { color: var(--nvidia-light); text-decoration: none; transition: color 0.2s; border-bottom: 1px dotted var(--nvidia-gray); }
+  .notebook-item a:hover { color: var(--nvidia-green); border-color: var(--nvidia-green); }
 
-        .section-header {
-            margin-bottom: 1.5rem; 
-            color: var(--nvidia-green); 
-            font-weight: 300;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+  /* FOOTER & BUTTONS */
+  .launch-footer { 
+      margin-top: auto; border-top: 1px dashed var(--nvidia-accent); 
+      padding: 12px 16px; background: rgba(0,0,0,0.2); 
+  }
+  
+  .launch-row { display: flex; gap: 8px; align-items: center; width: 100%; }
+  
+  /* PRIMARY BUTTON (Open) - BIGGER */
+  .btn-nvidia-primary {
+      background: var(--nvidia-mid); color: white; border: 1px solid var(--nvidia-accent);
+      border-bottom: 2px solid var(--nvidia-green); padding: 10px 16px; cursor: pointer; 
+      font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;
+      flex-grow: 2; /* Takes up more space */
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      text-decoration: none; border-radius: 4px; transition: all 0.2s;
+  }
+  .btn-nvidia-primary:hover { background: var(--nvidia-green); color: black; border-color: var(--nvidia-green); }
 
-        .widget-grid {
-            display: grid;
-            /* Minimized to 300px for better mobile/tablet fit */
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
+  /* SECONDARY BUTTON (Preview) - SMALLER/OUTLINED */
+  .btn-nvidia-secondary {
+      background: transparent; color: var(--nvidia-gray); 
+      border: 1px solid var(--nvidia-accent);
+      padding: 10px 12px; cursor: pointer;
+      font-size: 0.85rem; border-radius: 4px; font-weight: 600;
+      flex-grow: 1;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all 0.2s;
+  }
+  .btn-nvidia-secondary:hover { border-color: var(--nvidia-light); color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
 
-        /* --- Widget Card --- */
-        .card {
-            background-color: var(--nvidia-grey);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #444;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+  /* ICON BUTTON (Source) */
+  .icon-btn {
+      background: transparent; border: 1px solid var(--nvidia-accent); color: var(--nvidia-gray);
+      min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: white; color: white; background: rgba(255,255,255,0.05); }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            border-color: var(--nvidia-green);
-        }
+  /* MODAL */
+  .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;
+  }
+  .modal-overlay.open { display: flex; }
+  
+  .preview-container {
+      background-color: var(--nvidia-mid);
+      border: 1px solid var(--nvidia-accent);
+      border-top: 4px solid var(--nvidia-green);
+      border-radius: 8px;
+      width: 95%; max-width: 1100px; height: 85vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+  }
 
-        .card-header {
-            background: linear-gradient(90deg, #222 0%, #2a2a2a 100%);
-            padding: 1.25rem;
-            border-bottom: 1px solid #444;
-        }
+  .builder-header { padding: 16px 20px; border-bottom: 1px solid var(--nvidia-accent); display: flex; justify-content: space-between; align-items: center; }
+  .builder-header h2 { margin: 0; color: var(--nvidia-green); text-transform: uppercase; font-size: 1rem; letter-spacing: 0.5px; }
+  .close-modal { background: none; border: none; color: var(--nvidia-gray); font-size: 1.5rem; cursor: pointer; }
+  .close-modal:hover { color: white; }
 
-        .card-title {
-            color: var(--nvidia-green);
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 0.25rem;
-        }
+  .builder-body { flex: 1; position: relative; background: white; }
+  iframe { width: 100%; height: 100%; border: none; display: block; }
 
-        /* Notebook Links Section */
-        .notebook-list {
-            list-style: none;
-            padding: 0;
-            margin: 0.5rem 0 0 0;
-            font-size: 0.85rem;
-        }
-        
-        .notebook-list li {
-            margin-bottom: 4px;
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-        }
+  /* PAGE FOOTER */
+  .page-footer {
+      margin-top: auto; padding-top: 32px; text-align: center;
+      border-top: 1px solid var(--nvidia-accent);
+      color: var(--nvidia-gray); font-size: 0.85rem;
+  }
+  .page-footer a { color: var(--nvidia-green); text-decoration: none; }
+  .page-footer a:hover { text-decoration: underline; }
 
-        .notebook-list a {
-            color: var(--text-muted);
-            text-decoration: none;
-            border-bottom: 1px dotted #666;
-            transition: color 0.2s;
-            line-height: 1.3;
-        }
-
-        .notebook-list a:hover {
-            color: var(--nvidia-green);
-            border-color: var(--nvidia-green);
-        }
-
-        .card-body {
-            padding: 1.25rem;
-            flex-grow: 1;
-        }
-
-        .card-desc {
-            line-height: 1.5;
-            color: #ddd;
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .card-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .tag-pill {
-            font-size: 0.75rem;
-            background-color: rgba(118, 185, 0, 0.1);
-            color: var(--nvidia-green);
-            padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(118, 185, 0, 0.3);
-        }
-
-        .card-footer {
-            padding: 1rem 1.25rem;
-            background-color: rgba(0,0,0,0.2);
-            border-top: 1px solid #444;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Wraps buttons on very small screens */
-            gap: 0.5rem;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 10px 16px; /* Increased padding for touch */
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: none;
-            min-height: 44px; /* ADA Minimum touch target height */
-            box-sizing: border-box;
-        }
-
-        .btn-primary {
-            background-color: var(--nvidia-green);
-            color: var(--nvidia-black);
-        }
-
-        .btn-primary:hover {
-            background-color: #6aaa00;
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--text-muted);
-            border: 1px solid #666;
-        }
-
-        .btn-secondary:hover {
-            border-color: white;
-            color: white;
-        }
-
-        .btn-preview {
-            background-color: #eee;
-            color: var(--nvidia-black);
-            flex-grow: 1; /* Makes preview button stretch on mobile */
-            justify-content: center;
-        }
-        
-        .btn-preview:hover {
-            background-color: white;
-        }
-
-        /* --- Modal for Preview --- */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: var(--nvidia-grey);
-            width: 90%;
-            height: 90%;
-            max-width: 1200px;
-            border-radius: 8px;
-            border: 2px solid var(--nvidia-green);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(118, 185, 0, 0.2);
-            position: relative;
-        }
-
-        .modal-header {
-            padding: 1rem;
-            background-color: var(--nvidia-black);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #444;
-        }
-
-        .modal-title {
-            color: var(--nvidia-green);
-            font-weight: bold;
-            font-size: 1.2rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            padding: 0 1rem;
-            min-width: 44px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-body {
-            flex-grow: 1;
-            background-color: white;
-            position: relative;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            position: relative;
-            z-index: 1;
-        }
-
-        .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #333;
-            z-index: 0;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        /* --- Footer --- */
-        footer {
-            background-color: var(--nvidia-dark);
-            border-top: 2px solid var(--nvidia-green);
-            padding: 3rem 1rem;
-            margin-top: auto; 
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-link {
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.2s;
-            padding: 12px 20px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.05);
-            min-height: 44px; /* ADA Target */
-        }
-
-        .footer-link:hover {
-            color: var(--nvidia-green);
-            border-color: var(--nvidia-green);
-            background: rgba(118, 185, 0, 0.1);
-        }
-
-        .footer-note {
-            margin-top: 2rem;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .footer-note a {
-            color: var(--nvidia-green);
-            text-decoration: none;
-        }
-
-        /* --- Mobile / Tablet Specific Tweaks --- */
-        @media (max-width: 768px) {
-            .catalog-container {
-                padding: 1rem;
-            }
-            
-            .controls {
-                padding: 0.75rem;
-                position: relative; /* Unstick on mobile to save screen space */
-            }
-
-            .widget-grid {
-                gap: 1.5rem;
-            }
-
-            .modal-content {
-                width: 100%;
-                height: 100%;
-                border-radius: 0;
-                border: none;
-            }
-
-            .btn-preview {
-                width: 100%; /* Full width button on mobile */
-                margin-bottom: 0.5rem;
-            }
-
-            .card-footer {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .btn-group {
-                justify-content: space-between;
-            }
-            
-            .btn-group .btn {
-                flex: 1;
-                justify-content: center;
-            }
-        }
-    </style>
+  @media (max-width: 900px) { .pathway-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .pathway-grid { grid-template-columns: 1fr; } .widget-container { padding: 16px; } }
+</style>
 </head>
 <body>
 
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <header role="banner">
-        <h1><strong>CUDA-Q Academic | Visualization Gallery</strong></h1>
-        <p class="subtitle">From fundamental circuit building to advanced simulations, bridging quantum theory with practical application in science and industry.</p>
-    </header>
-
-    <nav class="controls" aria-label="Filter Controls">
-        <div class="tags-container" id="tagsContainer" role="radiogroup" aria-label="Filter by Tag">
-            <button class="filter-tag active" id="allBtn" data-tag="all" role="radio" aria-checked="true">All</button>
+<div class="modal-overlay" id="preview-modal">
+    <div class="preview-container">
+        <div class="builder-header">
+            <h2 id="modal-title">Widget Preview</h2>
+            <button class="close-modal" onclick="closeModal()">×</button>
         </div>
-    </nav>
-
-    <main id="main-content" class="catalog-container">
-        
-        <h2 class="section-header">
-            <i class="fas fa-toolbox" aria-hidden="true"></i> Core Toolkit
-        </h2>
-        <div class="widget-grid" id="coreGrid"></div>
-    
-        <hr style="border: 0; border-top: 1px solid #444; margin: 3rem 0;">
-    
-        <h2 class="section-header">
-            <i class="fas fa-flask" aria-hidden="true"></i> Domain Applications
-        </h2>
-        <div class="widget-grid" id="appGrid"></div>
-        
-        <p id="noResults" style="text-align: center; display: none; margin-top: 2rem; color: #777;" role="alert">
-            No widgets found matching your criteria.
-        </p>
-    </main>
-
-    <div class="modal-overlay" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title" id="modalTitle">Widget Preview</span>
-                <button class="close-btn" onclick="closeModal()" aria-label="Close Preview">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="loader">Loading Widget...</div>
-                <iframe id="previewFrame" title="Widget Visualization Preview" src=""></iframe>
-            </div>
+        <div class="builder-body">
+            <iframe id="preview-frame" src=""></iframe>
         </div>
     </div>
+</div>
 
-    <script>
-        // --- DATA SOURCE ---
-        // Note: 'notebooks' array replaces the single 'context' link
-        const widgets = [
-            {
-                title: "Bloch Sphere Visualizer",
-                isCore: true,
-                desc: "Interactive 3D representation of a qubit. Visualize state vectors, phase changes, and the difference between bit-flips and phase-flips.",
-                notebooks: [
-                    { name: "Quick Start to Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum" }, 
-                    { name: "Applications to Finance", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance" }
-                ],
-                tags: ["Bloch Sphere"],
-                link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/bloch_sphere_visualization.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/bloch_sphere_visualization.html"
-            },
-            {
-                title: "Born's Rule and Sampling",
-                isCore: true,
-                desc: "Explore probability amplitudes on the Bloch Sphere. Demonstrates Born's Rule, sampling histograms, and measurement outcomes.",
-                notebooks: [
-                    { name: "Quick Start to Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum" } 
-                ],
-                tags: ["Bloch Sphere", "Sampling"],
-                link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html"
-            },
-            {
-                title: "CUDA-Q Hello World",
-                isCore: true,
-                desc: "Visual circuit builder that autogenerates CUDA-Q code. Explore 'Get State', 'Sample', and 'Run' modes.",
-                notebooks: [
-                    { name: "Quick Start to Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum" }
-                ],
-                tags: ["Circuit Diagram", "Gates", "CUDA-Q code", "Sampling"],
-                link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html"
-            },
-            {
-                title: "Quantum Gate Visualization",
-                isCore: true,
-                desc: "A sandbox for single-qubit quantum gates. Visualize quantum gates on the Bloch Sphere.",
-                notebooks: [
-                    { name: "Quick Start to Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum" },
-                    { name: "Applications to Finance", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance" }
-                ],
-                tags: ["Circuit Diagram", "Gates", "Bloch Sphere"],
-                link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/gate-widget.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/gate-widget.html"
-            },
-            {
-                title: "Quantum Random Walk",
-                isCore: false,
-                desc: "Explore a quantum random walk driven by a Hadamard gate acting on a quantum coin.",
-                notebooks: [
-                    { name: "Quick Start to Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum" }, 
-                    { name: "Applications to Finance", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance" }
-                ],
-                tags: ["Random Walk", "Superposition"],
-                link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html"
-            },
-            {
-                title: "Classic and Split Step Random Walk",
-                isCore: false,
-                desc: "Classic random walk and a variation where steps are split into two decisions.",
-                notebooks: [
-                    { name: "Applications to Finance", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance" }
-                ],
-                tags: ["Finance", "Random Walk"],
-                link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/ss-random-walk.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/ss-random-walk.html"
-            },
-            {
-                title: "Diffusion Model Visualization",
-                isCore: false,
-                desc: "Visualizes diffusion, showing how noise is added or removed from data—key in thermodynamics and GenAI.",
-                notebooks: [
-                    { name: "AI for Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/ai-for-quantum" }
-                ],
-                tags: ["Generative AI"],
-                link: "https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/diffusion.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/ai-for-quantum/widgets/diffusion.html"
-            },
-            {
-                title: "Unitary Circuit Synthesis",
-                isCore: false,
-                desc: "Visualize the link between Unitary matrices and quantum gates on the Bloch Sphere.",
-                notebooks: [
-                    { name: "AI for Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/ai-for-quantum" }
-                ],
-                tags: ["Linear Algebra", "Bloch Sphere"],
-                link: "https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/unitary_widget.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/ai-for-quantum/widgets/unitary_widget.html"
-            },
-            {
-                title: "CNOT Gate Visualizer",
-                isCore: true,
-                desc: "Interactive breakdown of the CNOT gate. Visualize how control and target qubits interact to create entanglement.",
-                notebooks: [
-                    { name: "Quick Start to Quantum", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum" }
-                ],
-                tags: ["Gates", "Entanglement"],
-                link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cnot-visualization.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/cnot-visualization.html"
-            },
-            {
-                title: "VQE Convergence",
-                isCore: true,
-                desc: "Dynamically visualizes VQE, showing how an optimizer updates parameters to find the ground state.",
-                notebooks: [
-                    { name: "Chemistry Simulations", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/chemistry-simulations" }
-                ],
-                tags: ["Chemistry", "Optimization", "Variational Quantum Eigensolver"],
-                link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/VQE_Widget.html"
-            },
-            {
-                title: "QUBO Portfolio Optimization",
-                isCore: false,
-                desc: "Visualizes the solution to a Quadratic Unconstrained Binary Optimization (QUBO) problem for portfolios.",
-                notebooks: [
-                    { name: "Applications to Finance", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance" }
-                ],
-                tags: ["Optimization", "Finance", "Variational Quantum Algorithm"],
-                link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/QUBO_widget.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/QUBO_widget.html"
-            },
-            {
-                title: "Q-CHOP vs Adiabatic",
-                isCore: false,
-                desc: "Animated comparison of standard adiabatic evolution vs Q-Chop, comparing convergence speed.",
-                notebooks: [
-                    { name: "Applications to Finance", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance" }
-                ],
-                tags: ["Optimization", "Finance", "Adiabatic Evolution"],
-                link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/Q_CHOP_Animated.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/Q_CHOP_Animated.html"
-            },
-            {
-                title: "ADAPT-VQE",
-                isCore: true,
-                desc: "Demonstrates an adaptive algorithm that constructs its own ansatz iteratively to minimize energy.",
-                notebooks: [
-                    { name: "Chemistry Simulations", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/chemistry-simulations" }
-                ],
-                tags: ["Chemistry", "Optimization", "Variational Quantum Eigensolver"],
-                link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/adapt_vqe/adapt_widget.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/adapt_vqe/adapt_widget.html"
-            },
-            {
-                title: "Krylov Subspace",
-                isCore: false,
-                desc: "Visualizes Krylov subspace methods used to approximate eigenvalues of large sparse matrices.",
-                notebooks: [
-                    { name: "Chemistry Simulations", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/chemistry-simulations" }
-                ],
-                tags: ["Linear Algebra"],
-                link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/krylov.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/krylov.html"
-            },
-            {
-                title: "Active Space Selection",
-                isCore: false,
-                desc: "Visualizes choosing a subset of variables (orbitals) to simulate while freezing others.",
-                notebooks: [
-                    { name: "Chemistry Simulations", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/chemistry-simulations" }
-                ],
-                tags: ["Chemistry", "Active Space", "Simulation"],
-                link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/activespace.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/activespace.html"
-            },
-            {
-                title: "Hybrid System (QM/MM)",
-                isCore: false,
-                desc: "Visualizes a multi-scale simulation where a quantum region is embedded within a classical environment.",
-                notebooks: [
-                    { name: "Chemistry Simulations", link: "https://github.com/NVIDIA/cuda-q-academic/tree/main/chemistry-simulations" }
-                ],
-                tags: ["Chemistry", "Simulation"],
-                link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/qmmm_widget.html",
-                source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/qmmm_widget.html"
-            }
-        ];
+<div class="widget-container">
+  <header>
+      <h1>CUDA-Q Visualization Gallery</h1>
+      <p class="summary-text">Interactive visualization tools for learning hybrid quantum-classical computing.</p>
+      
+      <a href="https://nvidia.github.io/cuda-q-academic/learningpath.html" class="gallery-btn">
+          <span>📚</span> Explore CUDA-Q Academic Learning Paths
+      </a>
+  </header>
+  
+  <main>
+      <h2 class="section-header">
+          <i class="fas fa-toolbox"></i> Core Visualization Tools
+      </h2>
+      <div class="pathway-grid" id="core-grid"></div>
 
-        // --- RENDER LOGIC ---
-        const tagsContainer = document.getElementById('tagsContainer');
-        const noResults = document.getElementById('noResults');
-        const modal = document.getElementById('previewModal');
-        const previewFrame = document.getElementById('previewFrame');
-        const modalTitle = document.getElementById('modalTitle');
-        const allBtn = document.getElementById('allBtn');
-        let lastFocusedElement;
+      <h2 class="section-header" style="margin-top: 40px;">
+          <i class="fas fa-flask"></i> Domain Specific Tools
+      </h2>
+      <div class="pathway-grid" id="app-grid"></div>
+  </main>
 
-        // 1. Extract Unique Tags
-        const allTags = new Set();
-        widgets.forEach(w => w.tags.forEach(t => allTags.add(t)));
-        const sortedTags = Array.from(allTags).sort();
+  <footer class="page-footer">
+      <p>
+        These widgets are part of the broader <a href="https://nvidia.github.io/cuda-q-academic/learningpath.html">CUDA-Q Academic</a> curriculum.
+        <br>
+        View full source on <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank">GitHub</a>.
+      </p>
+  </footer>
+</div>
 
-        // 2. Render Tags
-        sortedTags.forEach(tag => {
-            const btn = document.createElement('button');
-            btn.className = 'filter-tag';
-            btn.innerText = tag;
-            btn.dataset.tag = tag;
-            btn.setAttribute('role', 'radio');
-            btn.setAttribute('aria-checked', 'false');
-            btn.addEventListener('click', () => toggleTag(btn));
-            tagsContainer.appendChild(btn);
-        });
+<script>
+    // --- DATA SOURCE ---
+    const widgets = [
+        {
+            title: "Bloch Sphere Visualizer",
+            isCore: true,
+            desc: "Interactive 3D representation of a qubit. Visualize state vectors, phase changes, and the difference between bit-flips and phase-flips.",
+            notebooks: [
+                { name: "Quick Start to Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart" }, 
+                { name: "Applications to Finance", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/bloch_sphere_visualization.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/bloch_sphere_visualization.html"
+        },
+        {
+            title: "Born's Rule and Sampling",
+            isCore: true,
+            desc: "Explore probability amplitudes on the Bloch Sphere. Demonstrates Born's Rule, sampling histograms, and measurement outcomes.",
+            notebooks: [
+                { name: "Quick Start to Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart" } 
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html"
+        },
+        {
+            title: "CUDA-Q Hello World",
+            isCore: true,
+            desc: "Visual circuit builder that autogenerates CUDA-Q code. Explore 'Get State', 'Sample', and 'Run' modes.",
+            notebooks: [
+                { name: "Quick Start to Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html"
+        },
+        {
+            title: "Quantum Gate Visualization",
+            isCore: true,
+            desc: "A sandbox for single-qubit quantum gates. Visualize quantum gates on the Bloch Sphere.",
+            notebooks: [
+                { name: "Quick Start to Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart" },
+                { name: "Applications to Finance", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/gate-widget.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/gate-widget.html"
+        },
+        {
+            title: "Quantum Random Walk",
+            isCore: false,
+            desc: "Explore a quantum random walk driven by a Hadamard gate acting on a quantum coin.",
+            notebooks: [
+                { name: "Quick Start to Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart" }, 
+                { name: "Applications to Finance", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html"
+        },
+        {
+            title: "Classic and Split Step Random Walk",
+            isCore: false,
+            desc: "Classic random walk and a variation where steps are split into two decisions.",
+            notebooks: [
+                { name: "Applications to Finance", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/ss-random-walk.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/ss-random-walk.html"
+        },
+        {
+            title: "Diffusion Model Visualization",
+            isCore: false,
+            desc: "Visualizes diffusion, showing how noise is added or removed from data—key in thermodynamics and GenAI.",
+            notebooks: [
+                { name: "AI for Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-ai" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/diffusion.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/ai-for-quantum/widgets/diffusion.html"
+        },
+        {
+            title: "Unitary Circuit Synthesis",
+            isCore: false,
+            desc: "Visualize the link between Unitary matrices and quantum gates on the Bloch Sphere.",
+            notebooks: [
+                { name: "AI for Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-ai" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/unitary_widget.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/ai-for-quantum/widgets/unitary_widget.html"
+        },
+        {
+            title: "CNOT Gate Visualizer",
+            isCore: true,
+            desc: "Interactive breakdown of the CNOT gate. Visualize how control and target qubits interact to create entanglement.",
+            notebooks: [
+                { name: "Quick Start to Quantum", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cnot-visualization.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quick-start-to-quantum/interactive_widget/cnot-visualization.html"
+        },
+        {
+            title: "VQE Convergence",
+            isCore: true,
+            desc: "Dynamically visualizes VQE, showing how an optimizer updates parameters to find the ground state.",
+            notebooks: [
+                { name: "Chemistry Simulations", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-chem" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/VQE_Widget.html"
+        },
+        {
+            title: "QUBO Portfolio Optimization",
+            isCore: false,
+            desc: "Visualizes the solution to a Quadratic Unconstrained Binary Optimization (QUBO) problem for portfolios.",
+            notebooks: [
+                { name: "Applications to Finance", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/QUBO_widget.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/QUBO_widget.html"
+        },
+        {
+            title: "Q-CHOP vs Adiabatic",
+            isCore: false,
+            desc: "Animated comparison of standard adiabatic evolution vs Q-Chop, comparing convergence speed.",
+            notebooks: [
+                { name: "Applications to Finance", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/Q_CHOP_Animated.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/quantum-applications-to-finance/images/Q_CHOP_Animated.html"
+        },
+        {
+            title: "ADAPT-VQE",
+            isCore: true,
+            desc: "Demonstrates an adaptive algorithm that constructs its own ansatz iteratively to minimize energy.",
+            notebooks: [
+                { name: "Chemistry Simulations", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-chem" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/adapt_vqe/adapt_widget.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/adapt_vqe/adapt_widget.html"
+        },
+        {
+            title: "Krylov Subspace",
+            isCore: false,
+            desc: "Visualizes Krylov subspace methods used to approximate eigenvalues of large sparse matrices.",
+            notebooks: [
+                { name: "Chemistry Simulations", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-chem" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/krylov.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/krylov.html"
+        },
+        {
+            title: "Active Space Selection",
+            isCore: false,
+            desc: "Visualizes choosing a subset of variables (orbitals) to simulate while freezing others.",
+            notebooks: [
+                { name: "Chemistry Simulations", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-chem" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/activespace.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/activespace.html"
+        },
+        {
+            title: "Hybrid System (QM/MM)",
+            isCore: false,
+            desc: "Visualizes a multi-scale simulation where a quantum region is embedded within a classical environment.",
+            notebooks: [
+                { name: "Chemistry Simulations", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-chem" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/qmmm_widget.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/chemistry-simulations/Images/qmmm_widget.html"
+        },
+        {
+        title: "LABS Optimization Search",
+        isCore: false,
+        desc: "Visualizes the energy landscape of the Low-Autocorrelation Binary Sequence (LABS) problem.",
+        notebooks: [
+            { name: "Hybrid Workflows", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-hybrid" }
+        ],
+        link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/labs_visualization.html",
+        source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/labs_visualization.html"
+    }
+    ];
 
-        allBtn.addEventListener('click', () => toggleTag(allBtn));
+    // --- RENDER LOGIC ---
+    function renderWidgets() {
+        const coreGrid = document.getElementById('core-grid');
+        const appGrid = document.getElementById('app-grid');
 
-        // 3. Render Widgets
-        const coreGrid = document.getElementById('coreGrid');
-        const appGrid = document.getElementById('appGrid');
+        // Clear existing
+        coreGrid.innerHTML = '';
+        appGrid.innerHTML = '';
 
-        function renderWidgets(data) {
-            coreGrid.innerHTML = '';
-            appGrid.innerHTML = '';
+        widgets.forEach(w => {
+            const card = document.createElement('article');
+            card.className = 'pathway-card';
+            
+            // Generate Notebook Links HTML
+            const nbHtml = w.notebooks.map(nb => 
+                `<li class="notebook-item"><i class="fas fa-book-open"></i> <a href="${nb.link}" target="_blank">${nb.name}</a></li>`
+            ).join('');
 
-            if (data.length === 0) {
-                noResults.style.display = 'block';
-                return;
-            }
-            noResults.style.display = 'none';
-
-            data.forEach(widget => {
-                const card = document.createElement('article');
-                card.className = 'card';
-                if (widget.isCore) card.style.borderColor = "rgba(118, 185, 0, 0.5)";
-
-                // Build Notebook Links HTML
-                let notebooksHtml = '';
-                if (widget.notebooks && widget.notebooks.length > 0) {
-                    notebooksHtml = `<ul class="notebook-list" aria-label="Relevant Notebooks">`;
-                    widget.notebooks.forEach(nb => {
-                        notebooksHtml += `<li><i class="fas fa-book-open" aria-hidden="true" style="font-size: 0.8rem; margin-top: 3px;"></i> <a href="${nb.link}" target="_blank">${nb.name}</a></li>`;
-                    });
-                    notebooksHtml += `</ul>`;
-                }
-
-                const tagsHtml = widget.tags.map(t => `<span class="tag-pill">${t}</span>`).join('');
+            card.innerHTML = `
+                <div class="card-content">
+                    <div class="card-title">
+                        <h3>${w.title}</h3>
+                        <p>${w.desc}</p>
+                    </div>
+                    
+                    <div class="notebook-section">
+                        <div class="notebook-label">Featured In:</div>
+                        <ul class="notebook-list">
+                            ${nbHtml}
+                        </ul>
+                    </div>
+                </div>
                 
-                card.innerHTML = `
-                    <div class="card-header">
-                        <h3 class="card-title">${widget.title}</h3>
-                        ${notebooksHtml}
-                    </div>
-                    <div class="card-body">
-                        <div class="card-tags" aria-label="Tags">${tagsHtml}</div>
-                        <div class="card-desc">${widget.desc}</div>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-preview" onclick="openPreview('${widget.link}', '${widget.title.replace(/'/g, "\\'")}', this)">
-                            <i class="fas fa-play-circle" aria-hidden="true"></i> Live Preview
+                <div class="launch-footer">
+                    <div class="launch-row">
+                        <a href="${w.link}" target="_blank" class="btn-nvidia-primary" title="Open in New Tab">
+                            <i class="fas fa-external-link-alt"></i> Open
+                        </a>
+                        <button class="btn-nvidia-secondary" onclick="openPreview('${w.link}', '${w.title.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-play-circle"></i> Preview
                         </button>
-                        <div class="btn-group">
-                            <a href="${widget.link}" target="_blank" class="btn btn-primary" aria-label="Open ${widget.title} in new tab">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                            </a>
-                            <a href="${widget.source}" target="_blank" class="btn btn-secondary" aria-label="View Source Code for ${widget.title}">
-                                <i class="fab fa-github" aria-hidden="true"></i>
-                            </a>
-                        </div>
+                        <a href="${w.source}" target="_blank" class="icon-btn" title="View Source Code">
+                            <i class="fab fa-github"></i>
+                        </a>
                     </div>
-                `;
+                </div>
+            `;
 
-                if (widget.isCore) {
-                    coreGrid.appendChild(card);
-                } else {
-                    appGrid.appendChild(card);
-                }
-            });
-
-            // Handle empty sections visually
-            coreGrid.previousElementSibling.style.display = coreGrid.children.length ? 'flex' : 'none';
-            appGrid.previousElementSibling.style.display = appGrid.children.length ? 'flex' : 'none';
-            
-            const divider = document.querySelector('hr');
-            if(divider) divider.style.display = (coreGrid.children.length && appGrid.children.length) ? 'block' : 'none';
-        }
-
-        // --- FILTER LOGIC ---
-        let activeTag = 'all';
-
-        function toggleTag(btn) {
-            document.querySelectorAll('.filter-tag').forEach(b => {
-                b.classList.remove('active');
-                b.setAttribute('aria-checked', 'false');
-            });
-            
-            btn.classList.add('active');
-            btn.setAttribute('aria-checked', 'true');
-            activeTag = btn.dataset.tag;
-            
-            filterWidgets();
-        }
-
-        function filterWidgets() {
-            const filtered = widgets.filter(w => {
-                return activeTag === 'all' || w.tags.includes(activeTag);
-            });
-            renderWidgets(filtered);
-        }
-        
-        // Initial Render
-        renderWidgets(widgets);
-
-        // --- MODAL LOGIC (Accessible) ---
-        window.openPreview = function(url, title, triggerBtn) {
-            lastFocusedElement = triggerBtn; // Remember focus
-            modalTitle.innerText = title;
-            previewFrame.src = url;
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Move focus to close button inside modal
-            setTimeout(() => {
-                const closeBtn = modal.querySelector('.close-btn');
-                if(closeBtn) closeBtn.focus();
-            }, 100);
-
-            // Close on Escape key
-            document.addEventListener('keydown', handleEsc);
-        }
-
-        window.closeModal = function() {
-            modal.classList.remove('active');
-            previewFrame.src = ''; 
-            document.body.style.overflow = 'auto';
-            
-            // Return focus
-            if(lastFocusedElement) lastFocusedElement.focus();
-            document.removeEventListener('keydown', handleEsc);
-        }
-
-        function handleEsc(e) {
-            if (e.key === "Escape") closeModal();
-        }
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
+            if (w.isCore) coreGrid.appendChild(card);
+            else appGrid.appendChild(card);
         });
+    }
 
-    </script>
-    <footer role="contentinfo">
-        <div class="footer-links">
-            <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" class="footer-link">
-                <i class="fab fa-github" aria-hidden="true"></i>
-                Full Repository
-            </a>
-            <a href="https://nvidia.github.io/cuda-quantum/" target="_blank" class="footer-link">
-                <i class="fas fa-book" aria-hidden="true"></i>
-                CUDA-Q Docs
-            </a>
-            <a href="https://developer.nvidia.com/cuda-quantum" target="_blank" class="footer-link">
-                <i class="fas fa-microchip" aria-hidden="true"></i>
-                NVIDIA CUDA-Q
-            </a>
-        </div>
-        <p class="footer-note">
-            These widgets are part of the broader <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank">CUDA-Q Academic</a> curriculum. 
-        </p>
-    </footer>
+    // --- MODAL LOGIC ---
+    const modal = document.getElementById('preview-modal');
+    const iframe = document.getElementById('preview-frame');
+    const modalTitle = document.getElementById('modal-title');
+
+    function openPreview(url, title) {
+        modalTitle.textContent = title;
+        iframe.src = url;
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        iframe.src = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close on Escape / Click Outside
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Initialize
+    renderWidgets();
+
+</script>
 </body>
 </html>
