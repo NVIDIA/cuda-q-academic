@@ -136,7 +136,24 @@
 
   .card-banner { color: var(--nvidia-green); padding: 12px 16px 0 16px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; text-align: right; }
   .card-content { padding: 0 16px 16px 16px; flex-grow: 1; display: flex; flex-direction: column; }
-  
+  /* Add this to your CSS */
+    .card-return-link {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        background: #1f221c; /* Slightly different dark background */
+        color: var(--nvidia-green);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border-top: 1px solid var(--nvidia-accent);
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .card-return-link:hover {
+        background: rgba(118, 185, 0, 0.1);
+        text-decoration: underline;
+    }
   /* UPDATED: Scrollable Title */
   .card-title h3 { 
       margin: 0; font-size: 1.1rem; color: white; font-weight: 700; 
@@ -415,10 +432,6 @@
         <button class="filter-btn create-btn" onclick="openBuilder()">+ Create Custom Pathway</button>
     </section>
 
-      <div id="focus-banner">
-          <span aria-hidden="true">⚠️</span> You are viewing a specific learning path. 
-          <a onclick="clearTrack(event)">Return to CUDA-Q Academic Learning Pathways</a>
-      </div>
 
       <div class="pathway-grid" id="grid-container"></div>
   </main>
@@ -869,11 +882,24 @@
       window.location.href = url.toString();
   }
 
-  // 5. INITIALIZATION
-  window.addEventListener('DOMContentLoaded', () => {
+// 5. INITIALIZATION
+window.addEventListener('DOMContentLoaded', () => {
       
       const params = new URLSearchParams(window.location.search);
       const customData = params.get('custom');
+      const trackId = params.get('track');
+
+      // Helper function to add the return link inside the specific card
+      const addReturnLink = (targetId) => {
+          const card = document.getElementById(targetId);
+          if(card) {
+             const returnBtn = document.createElement('div');
+             returnBtn.className = 'card-return-link';
+             returnBtn.innerHTML = '← Return to Full Library';
+             returnBtn.onclick = clearTrack; // Uses your existing clearTrack function
+             card.appendChild(returnBtn);
+          }
+      };
 
       if (customData) {
           try {
@@ -899,10 +925,9 @@
               
               modules.unshift(newModule);
               
+              // Hide main interface elements
               document.querySelector('header').style.display = 'none';
               document.getElementById('filter-controls').style.display = 'none';
-              document.getElementById('focus-banner').innerHTML = `<span aria-hidden="true">⚠️</span> You are viewing a custom shared pathway. <a onclick="clearTrack(event)">Return to Full Library</a>`;
-              document.getElementById('focus-banner').style.display = 'block';
               
           } catch(e) {
               console.error("Failed to parse custom track", e);
@@ -911,30 +936,30 @@
 
       renderCards(); 
 
-      if(customData) {
-          document.querySelectorAll('.pathway-card').forEach(c => {
-             if (c.id !== "track-custom") c.style.display = 'none';
-          });
-          const grid = document.querySelector('.pathway-grid');
-          grid.style.display = 'block';
-          grid.style.maxWidth = '600px';
-          grid.style.margin = '0 auto';
-      }
+      // LOGIC FOR SINGLE VIEW (Custom or Standard)
+      if (customData || trackId) {
+          const activeId = customData ? "track-custom" : trackId;
 
-      const trackId = params.get('track');
-      if (trackId) {
+          // 1. Hide header/filters
           document.querySelector('header').style.display = 'none';
           document.getElementById('filter-controls').style.display = 'none';
-          document.getElementById('focus-banner').style.display = 'block';
+
+          // 2. Hide all other cards
           document.querySelectorAll('.pathway-card').forEach(c => {
-              if (c.id !== trackId) c.style.display = 'none';
+              if (c.id !== activeId) c.style.display = 'none';
           });
+
+          // 3. Center the grid
           const grid = document.querySelector('.pathway-grid');
           grid.style.display = 'block';
           grid.style.maxWidth = '600px';
           grid.style.margin = '0 auto';
+
+          // 4. Inject the "Return" link inside the card footer
+          addReturnLink(activeId);
       }
   });
+
 
   // 6. KEYBOARD SHORTCUTS
   document.addEventListener('keydown', (e) => {
