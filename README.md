@@ -12,11 +12,10 @@ Instructions to install CUDA-Q can be found in the [instructions.md](instruction
 
 
 # Educational Resources and Modules
-* The [sample syllabus](Sample-Syllabus.md) is intended to assist faculty or students in identifying CUDA-Q resources that align with their quantum information science or quantum computing syllabi or learning path.
 
 * The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
 
-* This repository contents are detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
+* This repository contents are detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
 
 ---
 ## Quick Start to Quantum Computing with CUDA-Q
