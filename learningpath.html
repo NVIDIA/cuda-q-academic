@@ -46,7 +46,7 @@
       border-radius: 8px; 
       padding: 32px; 
       width: 100%; 
-      max-width: 950px; 
+      max-width: 1500px; 
       margin: 0 auto; 
       box-shadow: 0 10px 40px rgba(0,0,0,0.4);
       position: relative;
@@ -58,7 +58,7 @@
   /* 23.2 HEADER */
   header { text-align: center; margin-bottom: 32px; border-bottom: 1px solid var(--nvidia-accent); padding-bottom: 24px; }
   h1 { color: var(--nvidia-green); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px 0; font-weight: 700; }
-  .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; }
+  .summary-text { color: var(--nvidia-gray); margin-bottom: 16px; }
 
   /* FILTERS & NAVIGATION */
   .filter-bar { 
@@ -94,6 +94,18 @@
       border: 1px dashed var(--nvidia-green); margin-left: auto; 
   }
   .create-btn:hover { background: var(--nvidia-green); color: black; }
+  
+  /* GALLERY BTN (Added Style) */
+  .gallery-btn {
+      text-decoration: none; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px;
+      border: 1px solid var(--nvidia-green); 
+      color: var(--nvidia-green);
+      margin-top: 8px;
+  }
+  .gallery-btn:hover { background: var(--nvidia-green); color: black; }
 
   @media (max-width: 768px) {
       .filter-bar { justify-content: center; }
@@ -184,8 +196,11 @@
 
   /* FOOTER */
   .launch-footer { margin-top: auto; border-top: 1px dashed var(--nvidia-accent); padding: 12px 16px; background: rgba(0,0,0,0.2); }
-  .launch-label { font-size: 0.75rem; color: var(--nvidia-gray); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-  
+  /* Updated footer classes for clarity */
+  .launch-section { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+  .launch-label { font-size: 0.7rem; color: var(--nvidia-gray); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; display:flex; justify-content: space-between;}
+  .launch-sub { font-weight: 400; opacity: 0.7; text-transform: none; }
+
   .launch-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .launch-btn { 
       display: flex; align-items: center; justify-content: center; cursor: pointer; 
@@ -329,11 +344,63 @@
         </div>
     </div>
 </div>
-
+<div class="modal-overlay" id="qbraid-modal">
+    <div class="builder-container" style="max-width: 500px;">
+        <div class="builder-header">
+            <h2>Launch Instructions</h2>
+            <button class="close-modal" onclick="closeModal('qbraid-modal')">×</button>
+        </div>
+        <div class="builder-body">
+            <p style="color: var(--nvidia-light); margin-bottom: 16px;">
+                To access this project on qBraid:
+            </p>
+            <ol style="color: var(--nvidia-gray); line-height: 1.6; margin-bottom: 24px; padding-left: 20px;">
+                <li style="margin-bottom:8px;"><strong>Log in</strong> to your qBraid account.</li>
+                <li style="margin-bottom:8px;">Click <strong>Explore</strong> in the left-hand menu.</li>
+                <li>Select the <strong>CUDA-Q Academic</strong> project card.</li>
+            </ol>
+            
+            <div style="text-align: center; margin-top: 24px;">
+                <a href="https://account.qbraid.com" target="_blank" onclick="closeModal('qbraid-modal')" style="display: inline-block; transition: transform 0.2s;">
+                   <img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="Launch on qBraid" style="height: 50px; width: auto; cursor: pointer;">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="brev-modal">
+    <div class="builder-container" style="max-width: 500px;">
+        <div class="builder-header">
+            <h2>Launch Instructions</h2>
+            <button class="close-modal" onclick="closeModal('brev-modal')">×</button>
+        </div>
+        <div class="builder-body">
+            <p style="color: var(--nvidia-light); margin-bottom: 16px;">
+                To access this project on Brev:
+            </p>
+            <ol style="color: var(--nvidia-gray); line-height: 1.6; margin-bottom: 24px; padding-left: 20px;">
+                <li style="margin-bottom:8px;"><strong>Log in</strong> to your Brev account.</li>
+                <li style="margin-bottom:8px;">Click the <strong>Deploy Launchable</strong> button.</li>
+                <li style="margin-bottom:8px;">Click <strong>Go to Instance Page</strong>.</li>
+                <li>Wait for the GPU to spin up, then select <strong>Open Notebook</strong> when it turns green.</li>
+            </ol>
+            
+            <div style="text-align: center; margin-top: 24px;">
+                <a href="https://brev.nvidia.com/launchable/deploy?launchableID=env-2zjo3nxqb6jbM5vtfJFQDWrb0Qd" target="_blank" onclick="closeModal('brev-modal')" style="display: inline-block; transition: transform 0.2s;">
+                   <img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt="Launch in Brev" style="height: 44px; width: auto; cursor: pointer;">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="widget-container">
   <header>
       <h1>CUDA-Q Academic Learning Pathways</h1>
       <p class="summary-text">Interactive tutorials for quantum-gpu supercomputing.</p>
+      
+      <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" class="filter-btn gallery-btn">
+          <span>🎨</span> Visualization Gallery
+      </a>
   </header>
   <main>
     <section class="filter-bar" id="filter-controls">
@@ -489,7 +556,7 @@
   function renderCards() {
       const container = document.getElementById('grid-container');
       const brevLink = "https://brev.nvidia.com/launchable/deploy?launchableID=env-2zjo3nxqb6jbM5vtfJFQDWrb0Qd";
-      const Link = "https://account..com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git";
+      const qBraidLink = "https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git";
 
       container.innerHTML = modules.map(m => `
         <article class="pathway-card ${m.isCustom ? 'custom-card' : ''}" id="${m.id}">
@@ -520,17 +587,32 @@
                 `).join('')}
             </ul>
           </div>
+          
           <div class="launch-footer">
-            <p class="launch-label">Launch Workspace</p>
-            <div class="launch-row">
-                <a href="${brevLink}" target="_blank" class="launch-btn" title="Launch in Brev"><img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt="Brev"/></a>
-                <a href="${Link}" target="_blank" class="launch-btn" title="Launch in "><img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="qBraid" style="background:#222; border-radius:2px; padding:2px;"/></a>
-                <button class="launch-btn" onclick="toggleMode('${m.id}', 'colab', this)" title="Colab"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Colab"/></button>
-                <button class="launch-btn gh-btn" onclick="toggleMode('${m.id}', 'gh', this)" title="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></button>
-                
-                <a href="${m.isCustom ? '#' : '?track=' + m.id}" class="share-btn" onclick="copyLink(event, '${m.id}', ${m.isCustom})" title="Copy link to module">🔗</a>
+            <div class="launch-section">
+                <div class="launch-label">Project Workspace <span class="launch-sub">(Full Repo Access)</span></div>
+                <div class="launch-row">
+                    <button class="launch-btn" onclick="openBrevModal()" title="Launch in Brev">
+                        <img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt="Brev"/>
+                    </button>
+                    
+                    <button class="launch-btn" onclick="openQbraidModal()" title="Launch in qBraid">
+                        <img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="qBraid" style="background:#222; border-radius:2px; padding:2px;"/>
+                    </button>
+                </div>
             </div>
-          </div>
+            
+            <div style="border-top: 1px dashed #444; margin: 4px 0 8px 0;"></div>
+
+            <div class="launch-section" style="margin-bottom:0;">
+                <div class="launch-label">Run, View, or Share <span class="launch-sub"></span></div>
+                <div class="launch-row">
+                    <button class="launch-btn" onclick="toggleMode('${m.id}', 'colab', this)" title="Open in Colab"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Colab"/></button>
+                    <button class="launch-btn gh-btn" onclick="toggleMode('${m.id}', 'gh', this)" title="View in GitHub"><svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></button>
+                    <a href="${m.isCustom ? '#' : '?track=' + m.id}" class="share-btn" onclick="copyLink(event, '${m.id}', ${m.isCustom})" title="Copy link to module">🔗</a>
+                </div>
+            </div>
+        </div>
         </article>
       `).join('');
   }
@@ -868,6 +950,12 @@
           }
       }
   });
+  function openQbraidModal() {
+    document.getElementById('qbraid-modal').classList.add('open');
+}
+function openBrevModal() {
+    document.getElementById('brev-modal').classList.add('open');
+}
 </script>
 </body>
 </html>
