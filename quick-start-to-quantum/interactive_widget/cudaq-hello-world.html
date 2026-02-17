@@ -218,7 +218,45 @@ See the License for the specific language governing permissions and limitations 
             transform: translate(-50%, -50%); display: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        
+        /* --- Modal Button Styles --- */
+        .modal-btn-primary {
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-btn-primary:hover {
+            background-color: var(--hover-color);
+        }
+        .modal-btn-secondary {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .modal-btn-secondary:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* High Contrast Overrides */
+        body.high-contrast .modal-btn-primary {
+            background-color: #000;
+            border: 2px solid #000;
+        }
+        body.high-contrast .modal-btn-primary:hover {
+            background-color: #333;
+        }
+        body.high-contrast .modal-btn-secondary {
+            border: 2px solid #000;
+            color: #000;
+            font-weight: bold;
+        }
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; visibility: hidden; opacity: 0; transition: opacity 0.2s; }
         .modal-overlay.open { visibility: visible; opacity: 1; }
@@ -305,9 +343,10 @@ See the License for the specific language governing permissions and limitations 
             <h3 id="modal-title" style="margin-top:0;">Configure Gate</h3>
             <div id="modal-content"></div>
             <div id="modal-error" style="color:red; font-size:12px; margin-bottom:10px; display:none;"></div>
-            <p style="font-size:12px; color:#666; text-align:right; margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
-                Press <strong>Enter</strong> to Save, <strong>Esc</strong> to Cancel
-            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                <button class="modal-btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn-primary" onclick="confirmModalGate()">Save</button>
+           </div>
         </div>
     </div>
 
@@ -1212,26 +1251,40 @@ for result, count in counts.items():
         if (e.key !== 'Tab') return;
 
         const modal = document.getElementById('gate-modal');
+        
+        // Get all focusable elements in DOM order
         const focusableElements = Array.from(modal.querySelectorAll(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         )).filter(el => {
-            return el.style.display !== 'none' && el.parentElement.style.display !== 'none';
+            return !el.hasAttribute('disabled') && 
+                   !el.getAttribute('aria-hidden') && 
+                   el.offsetParent !== null; 
         });
 
         if (focusableElements.length === 0) return;
 
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
+        
+        // Find the index of the element we are currently on
+        const currentIndex = focusableElements.indexOf(document.activeElement);
+
+        // PREVENT DEFAULT: We will manually handle the move to ensure no skipping happens
+        e.preventDefault();
 
         if (e.shiftKey) { 
-            if (document.activeElement === firstElement) {
-                e.preventDefault();
-                lastElement.focus();
+            // Shift + Tab: Move Backwards
+            if (currentIndex > 0) {
+                focusableElements[currentIndex - 1].focus();
+            } else {
+                lastElement.focus(); // Loop to Save button
             }
         } else { 
-            if (document.activeElement === lastElement) {
-                e.preventDefault();
-                firstElement.focus();
+            // Tab: Move Forwards
+            if (currentIndex >= 0 && currentIndex < focusableElements.length - 1) {
+                focusableElements[currentIndex + 1].focus(); // Force move to next (e.g. Cancel/Save)
+            } else {
+                firstElement.focus(); // Loop to top input
             }
         }
     }
