@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CNOT Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
             --nvidia-dark-green: #4a7500;
-            --phase-neg: #4c8bf5; /* Blue for imaginary phase 
-            --phase-imag: #ff4c4c; /* Red for negative phase */
+            --phase-neg: #4c8bf5;
+            --phase-imag: #ff4c4c;
             --bg-color: #1a1a1a;
             --card-bg: #2d2d2d;
             --text-main: #ffffff;
@@ -17,8 +24,12 @@
             --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
+        :focus { outline: 3px solid #76b900; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
         body {
-            font-family: var(--font-family);
+            font-family: 'Inter', var(--font-family);
             background-color: var(--bg-color);
             color: var(--text-main);
             display: flex;
@@ -29,15 +40,59 @@
         }
 
         .widget-container {
-            background-color: var(--card-bg);
-            border: 1px solid #444;
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
             border-top: 4px solid var(--nvidia-green);
             border-radius: 8px;
-            padding: 30px;
-            width: 600px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
-
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid #76b900; outline-offset: 2px; }
         h2 {
             margin-top: 0;
             color: var(--nvidia-green);
@@ -95,14 +150,16 @@
             overflow-x: auto;
         }
 
-        /* SVG Styles */
-        .wire { stroke: #555; stroke-width: 2; }
-        .gate-box { fill: var(--nvidia-green); stroke: none; }
-        .gate-text { fill: #000; font-family: monospace; font-weight: bold; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
-        .ctrl-line { stroke: var(--nvidia-green); stroke-width: 2; }
-        .ctrl-dot { fill: var(--nvidia-green); }
-        .target-circle { fill: none; stroke: var(--nvidia-green); stroke-width: 2; }
-        .qubit-label { fill: #aaa; font-family: monospace; font-size: 14px; }
+        /* Canonical circuit CSS — same as Pauli prop and Bloch sphere vis (SVG only, same classes) */
+        .circuit-wire { stroke: #E0E0E0; stroke-width: 2; }
+        .circuit-gate-box { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
+        .circuit-gate-text { fill: #E0E0E0; font-family: Inter, sans-serif; font-weight: bold; font-size: 16px; text-anchor: middle; dominant-baseline: middle; }
+        .circuit-gate-param { fill: #E0E0E0; font-family: Inter, sans-serif; font-weight: bold; font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+        .circuit-qubit-label { fill: #76b900; font-family: Inter, sans-serif; font-size: 14px; font-weight: bold; }
+        .circuit-ctrl-dot { fill: #76b900; stroke: none; }
+        .circuit-ctrl-line { stroke: #E0E0E0; stroke-width: 2; }
+        .circuit-target-circle { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
+        .circuit-target-plus { stroke: #76b900; stroke-width: 2; }
 
         .results-section { margin-top: 10px; }
 
@@ -193,9 +250,21 @@
     </style>
 </head>
 <body>
-
-<div class="widget-container">
-    <h2>CNOT Gate Simulation</h2>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>CNOT Gate Simulation</h1>
+            <p class="summary-text">Choose initial states for control and target qubits and see the circuit output and measurement probabilities.</p>
+        </header>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Choose initial states for Qubit 0 (control) and Qubit 1 (target) from the dropdowns.</li>
+                <li>The circuit shows X, H, and CNOT. The final state vector and measurement probabilities update automatically.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate controls.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
     <div class="control-panel">
         <div class="input-group">
@@ -262,7 +331,14 @@
             </div>
         </div>
     </div>
-</div>
+
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
+    </div>
 
 <script>
     // --- Quantum Math Logic ---
@@ -320,15 +396,15 @@
         const startX = 60; const gateSpacing = 50; const cnotX = 300;
 
         const createGate = (x, y, label) => `
-            <rect x="${x-15}" y="${y-15}" width="30" height="30" class="gate-box" rx="4" />
-            <text x="${x}" y="${y+1}" class="gate-text">${label}</text>
+            <rect x="${x-22}" y="${y-18}" width="44" height="36" class="circuit-gate-box" rx="4" />
+            <text x="${x}" y="${y+2}" class="circuit-gate-text">${label}</text>
         `;
 
-        let svgContent = `<svg width="100%" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
-            <line x1="25" y1="${wireY0}" x2="${svgW-25}" y2="${wireY0}" class="wire" />
-            <line x1="25" y1="${wireY1}" x2="${svgW-25}" y2="${wireY1}" class="wire" />
-            <text x="5" y="${wireY0+4}" class="qubit-label">q0</text>
-            <text x="5" y="${wireY1+4}" class="qubit-label">q1</text>`;
+        let svgContent = `<svg width="100%" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" aria-label="Quantum circuit">
+            <line x1="25" y1="${wireY0}" x2="${svgW-25}" y2="${wireY0}" class="circuit-wire" />
+            <line x1="25" y1="${wireY1}" x2="${svgW-25}" y2="${wireY1}" class="circuit-wire" />
+            <text x="5" y="${wireY0+4}" class="circuit-qubit-label">q0</text>
+            <text x="5" y="${wireY1+4}" class="circuit-qubit-label">q1</text>`;
 
         // Q0 Gates
         let cX0 = startX;
@@ -342,12 +418,13 @@
         else if (q1 === 2) svgContent += createGate(cX1, wireY1, "H");
         else if (q1 === 3) { svgContent += createGate(cX1, wireY1, "X") + createGate(cX1+gateSpacing, wireY1, "H"); }
 
-        // CNOT
+        const r = 10;
         svgContent += `
-            <line x1="${cnotX}" y1="${wireY0}" x2="${cnotX}" y2="${wireY1}" class="ctrl-line" />
-            <circle cx="${cnotX}" cy="${wireY0}" r="5" class="ctrl-dot" />
-            <circle cx="${cnotX}" cy="${wireY1}" r="10" class="target-circle" />
-            <line x1="${cnotX}" y1="${wireY1-10}" x2="${cnotX}" y2="${wireY1+10}" class="ctrl-line" />
+            <line x1="${cnotX}" y1="${wireY0}" x2="${cnotX}" y2="${wireY1}" class="circuit-ctrl-line" />
+            <circle cx="${cnotX}" cy="${wireY0}" r="5" class="circuit-ctrl-dot" />
+            <circle cx="${cnotX}" cy="${wireY1}" r="${r}" class="circuit-target-circle" />
+            <line x1="${cnotX - r}" y1="${wireY1}" x2="${cnotX + r}" y2="${wireY1}" class="circuit-target-plus" />
+            <line x1="${cnotX}" y1="${wireY1 - r}" x2="${cnotX}" y2="${wireY1 + r}" class="circuit-target-plus" />
             </svg>`;
         
         document.getElementById('circuit-container').innerHTML = svgContent;

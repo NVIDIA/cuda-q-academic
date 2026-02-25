@@ -12,21 +12,80 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #121212;
-            color: #E0E0E0;
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
         }
-        .nvidia-green { color: #76B900; }
-        .bg-nvidia-green { background-color: #76B900; }
-        .border-nvidia-green { border-color: #76B900; }
-        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+        }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+        .nvidia-green { color: #76b900; }
+        .bg-nvidia-green { background-color: #76b900; }
+        .border-nvidia-green { border-color: #76b900; }
         .info-box {
-            background-color: #1F1F1F;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            border: 1px solid #333;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 16px 24px;
         }
         
         canvas {
@@ -43,12 +102,24 @@
             background: transparent;
         }
         input[type=range]:focus { outline: none; }
+        /* Keyboard focus: sliders are selected with Tab; box shows which is focused */
+        input[type=range]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px var(--nvidia-green);
+        }
+        input[type=range]:focus::-moz-range-thumb {
+            box-shadow: 0 0 0 3px var(--nvidia-green);
+        }
+        .slider-wrap:focus-within {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
-            height: 6px;
+            height: 4px;
             cursor: pointer;
             background: #444;
-            border-radius: 3px;
+            border-radius: 5px;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -57,9 +128,23 @@
             border-radius: 50%;
             background: #76B900;
             cursor: pointer;
-            margin-top: -6px;
-            border: 2px solid #fff;
-            box-shadow: 0 0 10px rgba(118, 185, 0, 0.5);
+            margin-top: -7px;
+            border: 2px solid #1A1A1A;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            border: 2px solid #1A1A1A;
         }
 
         /* Toggle Switch Styling */
@@ -101,23 +186,31 @@
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .prob-bar { background: linear-gradient(to top, #5e9400, #76b900); }
+
+        #bloch-sphere-container:focus {
+            outline: 4px solid var(--nvidia-green);
+            outline-offset: 4px;
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col p-4 lg:p-6">
-
-    <div class="container mx-auto max-w-[1400px] flex-grow">
-        
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-bold nvidia-green">Interactive Bloch Sphere</h1>
-            <p class="text-gray-300 mt-2 max-w-4xl mx-auto text-sm lg:text-base leading-relaxed">
-                Visualizing the qubit state: <span class="text-white font-mono font-bold mx-1">\( |\psi\rangle = \alpha|0\rangle + \beta|1\rangle \)</span>
-            </p>
-            <p class="text-gray-300 text-xs mt-2 max-w-3xl mx-auto">
-                <b>Born's Rule</b> tells us that the probability of measuring 
-                state \(|0\rangle\) or \(|1\rangle\) is determined by the squared magnitude of the state's amplitudes.
-            </p>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container flex-grow" id="main-content">
+        <header>
+            <h1>Interactive Bloch Sphere (Born's Rule)</h1>
+            <p class="summary-text">Visualize the qubit state on the Bloch sphere and explore Born's rule with measurement probabilities and sampling.</p>
         </header>
-
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Adjust <b>Theta (θ)</b> and <b>Phi (φ)</b> sliders to set the qubit state on the Bloch sphere. <strong>Tab</strong> to move between sliders; the focused slider shows a green focus ring.</li>
+                <li>Toggle <b>Measure</b> to switch between state view and sampling: click the measure buttons to see outcomes and the histogram.</li>
+                <li><strong>Bloch sphere:</strong> Click or <strong>Tab</strong> to focus the sphere; then drag to rotate, or use <strong>Arrow keys</strong> to rotate the view. A green outline shows when the sphere has keyboard focus.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between sliders and the Bloch sphere. <span class="kbd">Arrow</span> keys rotate the sphere when it is focused; <span class="kbd">Enter</span>/<span class="kbd">Space</span> activate buttons.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             <div class="lg:col-span-4 space-y-5">
@@ -125,22 +218,22 @@
                 <div class="info-box">
                     <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-4 border-b border-gray-600 pb-2">State Parameters</h2>
                     
-                    <div class="mb-5">
+                    <div class="slider-wrap mb-5">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="font-bold text-white">Theta (\(\theta\))</label>
+                            <label for="theta-slider" class="font-bold text-white">Theta (\(\theta\))</label>
                             <span id="theta-value" class="font-mono text-xs nvidia-green bg-black px-2 py-0.5 rounded border border-gray-700">0.00 \(\pi\)</span>
                         </div>
-                        <input id="theta-slider" type="range" min="0" max="3.14159" step="0.01" value="0">
+                        <input id="theta-slider" type="range" min="0" max="3.14159" step="0.01" value="0" aria-label="Theta angle in radians">
                         <p class="text-[10px] text-gray-300 mt-1">
-                            Controls the angle between the statevector and the z-axis.                       </p>
+                            Controls the angle between the statevector and the z-axis.</p>
                     </div>
 
-                    <div class="mb-6">
+                    <div class="slider-wrap mb-6">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="font-bold text-white">Phi (\(\phi\))</label>
+                            <label for="phi-slider" class="font-bold text-white">Phi (\(\phi\))</label>
                             <span id="phi-value" class="font-mono text-xs nvidia-green bg-black px-2 py-0.5 rounded border border-gray-700">0.00 \(\pi\)</span>
                         </div>
-                        <input id="phi-slider" type="range" min="0" max="6.28318" step="0.01" value="0">
+                        <input id="phi-slider" type="range" min="0" max="6.28318" step="0.01" value="0" aria-label="Phi angle in radians">
                         <p class="text-[10px] text-gray-300 mt-1">
                             Controls relative phase. Rotates around the z-axis, the axis containing \(|0\rangle\) and \(|1\rangle\).
                         </p>
@@ -185,20 +278,6 @@
                     </div>
                 </div>
 
-                <div class="info-box">
-                    <h2 class="text-sm font-bold text-white uppercase tracking-wider mb-3 border-b border-gray-600 pb-2">How to Use</h2>
-                    <ol class="list-decimal list-outside ml-4 space-y-3 text-xs text-gray-300 leading-relaxed">
-                        <li>
-                            <strong class="text-white">Set the State:</strong> Use the <b>Theta</b> and <b>Phi</b> sliders to set the quantum state.
-                        <li>
-                            <strong class="text-white">Visualize:</strong> Watch the <b>Bloch Sphere</b> to see the statevector's position and the <b>Amplitudes</b> box to see the quantum state's complex coefficients.
-                        </li>
-                        <li>
-                            <strong class="text-white">Analyze:</strong> Enable the <b>Measurement Tools</b> above. Use the <i>Probability Distribution</i> to see the theoretical odds ( Rule) and <i>Simulate Measurement</i> to simulate actual quantum measurements ("shots").
-                        </li>
-                    </ol>
-                </div>
-
             </div>
 
             <div class="lg:col-span-8 flex flex-col gap-6">
@@ -209,7 +288,7 @@
                         <p class="text-xs text-gray-400">Geometric representation of the state vector</p>
                     </div>
                     
-                    <div id="bloch-sphere-container" class="w-full h-full"></div>
+                    <div id="bloch-sphere-container" class="w-full h-full" tabindex="0" role="img" aria-label="Bloch sphere: 3D view of the qubit state. Use arrow keys to rotate when focused."></div>
                     
                     <div class="absolute bottom-4 right-4 bg-gray-900/80 p-2 rounded backdrop-blur-sm border border-gray-700 text-xs text-gray-300 pointer-events-none">
                         <div class="flex items-center gap-2"><div class="w-2 h-2 bg-[#76B900] rounded-full"></div> State Vector \(|\psi\rangle\)</div>
@@ -231,11 +310,11 @@
                         <div class="absolute inset-0 flex items-end justify-around px-2 z-10">
                             <div class="w-16 flex flex-col justify-end items-center h-full group">
                                 <span id="hist-val-0" class="font-mono font-bold text-xs mb-1 text-white">100%</span>
-                                <div id="bar-0" class="hist-bar w-full bg-gradient-to-t from-blue-900 to-blue-500 rounded-t shadow-[0_0_10px_rgba(59,130,246,0.4)]" style="height: 100%;"></div>
+                                <div id="bar-0" class="hist-bar w-full rounded-t prob-bar" style="height: 100%;"></div>
                             </div>
                             <div class="w-16 flex flex-col justify-end items-center h-full group">
                                 <span id="hist-val-1" class="font-mono font-bold text-xs mb-1 text-white">0%</span>
-                                <div id="bar-1" class="hist-bar w-full bg-gradient-to-t from-blue-900 to-blue-500 rounded-t shadow-[0_0_10px_rgba(59,130,246,0.4)]" style="height: 0%;"></div>
+                                <div id="bar-1" class="hist-bar w-full rounded-t prob-bar" style="height: 0%;"></div>
                             </div>
                         </div>
                     </div>
@@ -269,6 +348,12 @@
             </div>
 
         </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
 
     <script type="module">
@@ -309,14 +394,26 @@
             const p1 = new THREE.PointLight(0xffffff, 0.8); p1.position.set(5, 5, 5); scene.add(p1);
             const p2 = new THREE.PointLight(0x76B900, 0.3); p2.position.set(-5, -5, 2); scene.add(p2);
 
-            // State Vector
-            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
+            // State vector: clean green line from origin to state (cylinder + cone along +Z)
+            const shaftRadius = 0.035, headRadius = 0.11, length = 1.0;
+            const headHeight = length * 0.22;
+            const shaftLength = length - headHeight;
+            const vectorMat = new THREE.MeshBasicMaterial({ color: 0x76B900 });
+            const vectorGeom = new THREE.Group();
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 16), vectorMat);
+            shaft.rotation.x = Math.PI / 2;
+            shaft.position.z = shaftLength / 2;
+            const head = new THREE.Mesh(new THREE.ConeGeometry(headRadius, headHeight, 16), vectorMat);
+            head.rotation.x = Math.PI / 2;
+            head.position.z = shaftLength + headHeight / 2;
+            vectorGeom.add(shaft);
+            vectorGeom.add(head);
             group.add(vectorGeom);
-            
-            // Axes Helper
+
+            // Axes: light gray #CCCCCC
             const axesGroup = new THREE.Group();
             const axisLength = 1.2;
-            const axisColor = 0x666666;
+            const axisColor = 0xCCCCCC;
             axesGroup.add(new THREE.ArrowHelper(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,0), axisLength, axisColor, 0.05, 0.03));
             axesGroup.add(new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), axisLength, axisColor, 0.05, 0.03));
             axesGroup.add(new THREE.ArrowHelper(new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0), axisLength, axisColor, 0.05, 0.03));
@@ -365,7 +462,9 @@
             const x = Math.sin(theta) * Math.cos(phi);
             const y = Math.sin(theta) * Math.sin(phi);
             const z = Math.cos(theta);
-            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+            const dir = new THREE.Vector3(x, y, z).normalize();
+            const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+            vector.quaternion.copy(q);
         }
         
         // --- Main Logic ---
@@ -394,6 +493,16 @@
         });
         toggleExp.addEventListener('change', (e) => {
             boxExp.style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        [toggleHist, toggleExp].forEach(cb => {
+            cb.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    cb.checked = !cb.checked;
+                    cb.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
         });
 
         let currentProb0 = 1.0;
@@ -492,10 +601,54 @@
         [sliderTheta, sliderPhi].forEach(slider => {
             slider.addEventListener('input', updateAll);
         });
+
+        // Bloch sphere: arrow-key rotation when container is focused
+        const blochContainer = document.getElementById('bloch-sphere-container');
+        const ROTATE_STEP = 0.08;
+        blochContainer.addEventListener('keydown', (e) => {
+            if (document.activeElement !== blochContainer) return;
+            const cam = blochSphereViz.camera;
+            const target = blochSphereViz.controls.target;
+            const pos = cam.position.clone();
+            const dir = pos.clone().sub(target);
+            const radius = dir.length();
+            const theta = Math.atan2(dir.x, dir.z);
+            const phi = Math.acos(Math.max(-1, Math.min(1, dir.y / radius)));
+            let newTheta = theta, newPhi = phi;
+            switch (e.key) {
+                case 'ArrowLeft':  newTheta = theta - ROTATE_STEP; break;
+                case 'ArrowRight': newTheta = theta + ROTATE_STEP; break;
+                case 'ArrowUp':    newPhi = Math.max(0.05, phi - ROTATE_STEP); break;
+                case 'ArrowDown':  newPhi = Math.min(Math.PI - 0.05, phi + ROTATE_STEP); break;
+                default: return;
+            }
+            e.preventDefault();
+            cam.position.x = target.x + radius * Math.sin(newPhi) * Math.sin(newTheta);
+            cam.position.y = target.y + radius * Math.cos(newPhi);
+            cam.position.z = target.z + radius * Math.sin(newPhi) * Math.cos(newTheta);
+            cam.lookAt(target);
+        });
         
         updateAll();
         animate();
         setTimeout(() => { blochSphereViz.onWindowResize(); }, 100);
+
+        // Keep tab order only on real controls: sliders, toggles, buttons, Bloch sphere (not MathJax/labels)
+        function restrictTabOrder() {
+            const main = document.getElementById('main-content');
+            if (!main) return;
+            const allowedIds = new Set(['theta-slider', 'phi-slider', 'toggle-hist', 'toggle-exp', 'bloch-sphere-container']);
+            const focusable = main.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            focusable.forEach(el => {
+                if (allowedIds.has(el.id)) return;
+                if (el.tagName === 'BUTTON') return;
+                if (el.tagName === 'INPUT' && (el.type === 'range' || el.type === 'checkbox')) return;
+                el.setAttribute('tabindex', '-1');
+            });
+        }
+        restrictTabOrder();
+        window.MathJax && window.MathJax.startup && window.MathJax.startup.promise.then(restrictTabOrder).catch(() => restrictTabOrder());
+        setTimeout(restrictTabOrder, 1500);
 
     </script>
 </body>

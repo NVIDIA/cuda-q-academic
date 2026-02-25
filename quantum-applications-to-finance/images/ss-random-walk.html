@@ -9,6 +9,11 @@
             --nvidia-green: #76b900;
             --nvidia-green-dark: #5e9400;
             --nvidia-yellow: #FFDE00;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
             --nvidia-dark-gray: #333333;
             --nvidia-mid-gray: #888888;
             --nvidia-light-gray: #f5f5f5;
@@ -18,25 +23,56 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0 auto;
             padding: 20px;
             background-color: var(--background-color);
             color: var(--text-color);
         }
 
-        .container {
-            background-color: var(--container-bg);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
         }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; font-size: 1rem; line-height: 1.5; }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 { color: var(--nvidia-green); font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 700; }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 
-        h1, h3 {
-            color: var(--text-color);
-            text-align: center;
-        }
+        h3 { color: var(--text-color); text-align: center; }
 
         .control-panel {
             margin-bottom: 30px;
@@ -277,11 +313,22 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Random Walks</h1>
-        
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Random Walks</h1>
+            <p class="summary-text">Classical or split-step walks: set steps and probabilities, then run single or many walks and view the distribution.</p>
+        </header>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Set <b>Number of Steps</b> and <b>Step Type</b> (Classical or Split Step). Use the slider(s) to set move probabilities.</li>
+                <li>Click <b>Run Single Walk</b> or <b>Run 100 Walks</b> to simulate. <b>Reset All</b> clears the distribution.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons. <span class="kbd">←</span>/<span class="kbd">→</span> to move between buttons in a row.</p>
+        </section>
         <div class="control-panel">
-            <div class="settings-group" style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div class="settings-group" style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;" data-arrow-nav="horizontal" role="group" aria-label="Settings">
                  <div>
                     <label for="numStepsSelect">Number of Steps: </label>
                     <select id="numStepsSelect">
@@ -341,7 +388,7 @@
                 </div>
             </div>
             
-            <div style="text-align: center; margin-top: 10px;">
+            <div style="text-align: center; margin-top: 10px;" data-arrow-nav="horizontal" role="group" aria-label="Walk actions">
                 <button class="primary-btn" id="singleWalkBtn" onclick="runSingleWalk()">Run Single Walk</button>
                 <button class="secondary-btn" id="multiWalkBtn" onclick="run100Walks()">+ Run 100 Walks</button>
                 <button class="secondary-btn" onclick="resetAll()">Reset All</button>
@@ -373,6 +420,16 @@
             </ul>
             <p>The final movement for the step is the combination of these two outcomes, meaning the walker can end up moving left, right, or staying in the same position.</p>
         </div>
+        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "Quantum Walks for Finance Part 1".
+            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;">here</a>.
+        </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -648,6 +705,22 @@
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
+
+        // Arrow-key navigation between buttons in the same row
+        document.addEventListener('keydown', (e) => {
+            const group = document.activeElement?.closest('[data-arrow-nav="horizontal"]');
+            if (!group || e.ctrlKey || e.metaKey || e.altKey) return;
+            const focusable = [...group.querySelectorAll('button:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+            const i = focusable.indexOf(document.activeElement);
+            if (i === -1) return;
+            if (e.key === 'ArrowLeft' && i > 0) {
+                e.preventDefault();
+                focusable[i - 1].focus();
+            } else if (e.key === 'ArrowRight' && i < focusable.length - 1) {
+                e.preventDefault();
+                focusable[i + 1].focus();
+            }
+        });
 
         // --- Run on page load ---
         initialize();

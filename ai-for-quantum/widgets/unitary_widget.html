@@ -516,29 +516,25 @@
         const viz = { sphere: createBlochSphere(sphereContainer) };
 
         function rotateBlochCamera(v, deltaAzimuth, deltaPolar) {
-            const cam = v.camera;
-            const pos = cam.position;
-            let radius = pos.length();
-            if (radius < 0.01) radius = 3.5;
-            let theta = Math.acos(Math.max(-1, Math.min(1, pos.y / radius)));
-            let phi = Math.atan2(pos.x, pos.z);
-            theta = Math.max(0.01, Math.min(Math.PI - 0.01, theta + deltaPolar));
-            phi += deltaAzimuth;
-            cam.position.x = radius * Math.sin(theta) * Math.cos(phi);
-            cam.position.y = radius * Math.cos(theta);
-            cam.position.z = radius * Math.sin(theta) * Math.sin(phi);
+            const offset = new THREE.Vector3().copy(v.camera.position).sub(v.controls.target);
+            const spherical = new THREE.Spherical().setFromVector3(offset);
+            spherical.theta -= deltaAzimuth;
+            spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi + deltaPolar));
+            spherical.makeSafe();
+            offset.setFromSpherical(spherical);
+            v.camera.position.copy(v.controls.target).add(offset);
+            v.camera.lookAt(v.controls.target);
+            v.controls.update();
         }
 
-        document.addEventListener('keydown', (e) => {
-            const el = document.activeElement;
-            if (!el || el.id !== 'sphere-main' || !el.classList.contains('bloch-viewport')) return;
+        sphereContainer.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.metaKey || e.altKey) return;
             const v = viz.sphere;
-            const step = 0.08;
-            if (e.key === 'ArrowLeft') { e.preventDefault(); rotateBlochCamera(v, step, 0); }
+            const step = 0.15;
+            if (e.key === 'ArrowLeft')  { e.preventDefault(); rotateBlochCamera(v,  step, 0); }
             else if (e.key === 'ArrowRight') { e.preventDefault(); rotateBlochCamera(v, -step, 0); }
-            else if (e.key === 'ArrowUp') { e.preventDefault(); rotateBlochCamera(v, 0, -step); }
-            else if (e.key === 'ArrowDown') { e.preventDefault(); rotateBlochCamera(v, 0, step); }
+            else if (e.key === 'ArrowUp')    { e.preventDefault(); rotateBlochCamera(v, 0, -step); }
+            else if (e.key === 'ArrowDown')  { e.preventDefault(); rotateBlochCamera(v, 0,  step); }
         });
 
         const basisStates = [state0, statePlus, stateI];
@@ -614,17 +610,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

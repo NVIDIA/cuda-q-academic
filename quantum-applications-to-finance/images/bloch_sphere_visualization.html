@@ -10,12 +10,81 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1A1A1A;
-            color: #E0E0E0;
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
         }
-        .nvidia-green { color: #76B900; }
+        :focus { outline: 3px solid #76b900; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+        }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus { top: 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .nvidia-green { color: #76b900; }
         .info-box {
             background-color: #2A2A2A;
             border-radius: 0.5rem;
@@ -27,56 +96,72 @@
             width: 100% !important;
             height: 100% !important;
         }
-        /* Custom slider styles */
-        input[type=range] {
-            -webkit-appearance: none;
+        .angle-input {
             width: 100%;
-            background: transparent;
+            background: #1A1A1A;
+            color: var(--nvidia-light);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-family: 'Inter', monospace;
+            font-size: 1rem;
+            min-height: 44px;
+            box-sizing: border-box;
+            transition: border-color 0.15s;
         }
-        input[type=range]:focus {
-            outline: none;
+        .angle-input:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            border-color: var(--nvidia-green);
         }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: #444;
-            border-radius: 5px;
+        .angle-input::placeholder { color: var(--nvidia-gray); opacity: 0.6; }
+        .input-hint {
+            color: var(--nvidia-gray);
+            font-size: 0.8rem;
+            margin-top: 4px;
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 18px;
-            width: 18px;
-            border-radius: 50%;
-            background: #76B900;
-            cursor: pointer;
-            margin-top: -7px;
-            border: 2px solid #1A1A1A;
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid #76b900; outline-offset: 2px; }
+        #bloch-sphere-container {
+            background-color: #000000;
         }
-        input[type=range]::-moz-range-track {
-            width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: #444;
-            border-radius: 5px;
+        #bloch-sphere-container:focus {
+            outline: 4px solid var(--nvidia-green);
+            outline-offset: 4px;
         }
-        input[type=range]::-moz-range-thumb {
-            height: 14px;
-            width: 14px;
-            border-radius: 50%;
-            background: #76B900;
-            cursor: pointer;
-            border: 2px solid #1A1A1A;
-        }
+        /* Canonical circuit CSS — same as Pauli prop and CNOT vis (SVG only, same classes) */
+        .circuit-wire { stroke: #E0E0E0; stroke-width: 2; }
+        .circuit-gate-box { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
+        .circuit-gate-text { fill: #E0E0E0; font-family: Inter, sans-serif; font-weight: bold; font-size: 16px; text-anchor: middle; dominant-baseline: middle; }
+        .circuit-gate-param { fill: #E0E0E0; font-family: Inter, sans-serif; font-weight: bold; font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+        .circuit-qubit-label { fill: #76b900; font-family: Inter, sans-serif; font-size: 14px; font-weight: bold; }
+        .circuit-ctrl-dot { fill: #76b900; stroke: none; }
+        .circuit-ctrl-line { stroke: #E0E0E0; stroke-width: 2; }
+        .circuit-target-circle { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
+        .circuit-target-plus { stroke: #76b900; stroke-width: 2; }
     </style>
 </head>
 <body class="antialiased">
-
-    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Bloch Sphere Visualization</h1>
-            <p class="text-lg text-gray-400 mt-2">Visualize the circuit's output on the Bloch Sphere by using the sliders to adjust the angle of each rotation gate.</p>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Bloch Sphere Visualization</h1>
+            <p class="summary-text">Visualize the circuit's output on the Bloch Sphere by entering rotation angles for each gate.</p>
         </header>
+
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Type rotation angles (in radians, 0 &ndash; 6.28) for R<sub>x</sub>, R<sub>y</sub>, and R<sub>z</sub> into the input fields. Use <strong>Tab</strong> to move between fields.</li>
+                <li>Watch the circuit diagram and the Bloch sphere update in real time as you type.</li>
+                <li><strong>Bloch sphere:</strong> Click or <strong>Tab</strong> to focus the sphere window; then drag to rotate the view, or use <strong>Arrow keys</strong> to rotate. A green outline shows when the sphere has keyboard focus.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between inputs and the Bloch sphere. <span class="kbd">Arrow</span> keys rotate the sphere when it is focused; <span class="kbd">Enter</span>/<span class="kbd">Space</span> activate buttons.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
             
@@ -85,34 +170,28 @@
                     <h2 class="text-2xl font-semibold text-center">Rotation Angles (Radians)</h2>
                     
                     <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label for="theta-x-slider" class="font-bold text-xl">R<sub>x</sub>(&theta;<sub>x</sub>)</label>
-                            <span id="theta-x-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
-                        </div>
-                        <input id="theta-x-slider" type="range" min="0" max="6.283" step="0.01" value="0">
+                        <label for="theta-x-input" class="font-bold text-xl block mb-2">R<sub>x</sub>(&theta;<sub>x</sub>)</label>
+                        <input id="theta-x-input" type="number" class="angle-input" min="0" max="6.283" step="0.01" value="0" placeholder="0.00" tabindex="0" aria-label="R x rotation angle in radians">
+                        <p class="input-hint">Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
                     </div>
 
                     <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label for="theta-y-slider" class="font-bold text-xl">R<sub>y</sub>(&theta;<sub>y</sub>)</label>
-                            <span id="theta-y-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
-                        </div>
-                        <input id="theta-y-slider" type="range" min="0" max="6.283" step="0.01" value="0">
+                        <label for="theta-y-input" class="font-bold text-xl block mb-2">R<sub>y</sub>(&theta;<sub>y</sub>)</label>
+                        <input id="theta-y-input" type="number" class="angle-input" min="0" max="6.283" step="0.01" value="0" placeholder="0.00" tabindex="0" aria-label="R y rotation angle in radians">
+                        <p class="input-hint">Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
                     </div>
-                    
+
                     <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label for="theta-z-slider" class="font-bold text-xl">R<sub>z</sub>(&theta;<sub>z</sub>)</label>
-                            <span id="theta-z-value" class="font-mono text-lg nvidia-green bg-gray-900 px-2 py-1 rounded">0.00</span>
-                        </div>
-                        <input id="theta-z-slider" type="range" min="0" max="6.283" step="0.01" value="0">
+                        <label for="theta-z-input" class="font-bold text-xl block mb-2">R<sub>z</sub>(&theta;<sub>z</sub>)</label>
+                        <input id="theta-z-input" type="number" class="angle-input" min="0" max="6.283" step="0.01" value="0" placeholder="0.00" tabindex="0" aria-label="R z rotation angle in radians">
+                        <p class="input-hint">Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
                     </div>
                 </div>
 
                 <div class="info-box mt-8">
                      <h2 class="text-2xl font-semibold text-center mb-4">Quantum Circuit</h2>
                      <div id="circuit-container" class="bg-gray-900 p-4 rounded-md">
-                        <svg id="circuit-svg" width="100%" height="60" viewBox="0 0 400 60"></svg>
+                        <svg id="circuit-svg" width="100%" height="70" viewBox="0 0 400 70"></svg>
                      </div>
                 </div>
             </div>
@@ -120,11 +199,18 @@
             <div class="lg:col-span-3">
                  <div class="flex flex-col items-center space-y-2">
                     <h2 class="text-2xl font-semibold">Bloch Sphere</h2>
-                    <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden info-box p-0"></div>
+                    <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden p-0" tabindex="0" role="img" aria-label="Bloch sphere: 3D view of the qubit state. Use arrow keys to rotate when focused."></div>
                 </div>
             </div>
 
         </div>
+
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
 
     <script type="module">
@@ -187,6 +273,7 @@
             camera.position.set(3.5, 1.5, 0); 
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.max(2, window.devicePixelRatio));
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setClearColor(0x000000, 0);
             container.appendChild(renderer.domElement);
@@ -202,39 +289,58 @@
             // This rotation makes the Bloch Z-axis (|0⟩) point up in the scene's Y-axis.
             group.rotation.x = -Math.PI / 2;
 
-            // Sphere
+            // Sphere (wireframe translucent per standard Bloch design)
             const sphereGeom = new THREE.SphereGeometry(1, 32, 32);
             const sphereMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, transparent: true, opacity: 0.15, wireframe: true });
             group.add(new THREE.Mesh(sphereGeom, sphereMat));
 
-            // State Vector
-            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
+            // State vector: single clean green line from origin to state (cylinder + cone along +Z)
+            const shaftRadius = 0.035, headRadius = 0.11, length = 1.0;
+            const headHeight = length * 0.22;
+            const shaftLength = length - headHeight;
+            const vectorMat = new THREE.MeshBasicMaterial({ color: 0x76B900 });
+            const shaftGeom = new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 16);
+            const headGeom = new THREE.ConeGeometry(headRadius, headHeight, 16);
+            const shaft = new THREE.Mesh(shaftGeom, vectorMat);
+            shaft.rotation.x = Math.PI / 2;
+            shaft.position.z = shaftLength / 2;
+            const head = new THREE.Mesh(headGeom, vectorMat);
+            head.rotation.x = Math.PI / 2;
+            head.position.z = shaftLength + headHeight / 2;
+            const vectorGeom = new THREE.Group();
+            vectorGeom.add(shaft);
+            vectorGeom.add(head);
             group.add(vectorGeom);
-            
-            // Axes
+
+            // Axes: light gray #CCCCCC
             const createAxis = (dir, color) => new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.2, color, 0.05, 0.03);
             group.add(createAxis(new THREE.Vector3(1,0,0), 0xCCCCCC)); // X: |+⟩
             group.add(createAxis(new THREE.Vector3(0,1,0), 0xCCCCCC)); // Y: |i⟩
             group.add(createAxis(new THREE.Vector3(0,0,1), 0xCCCCCC)); // Z: |0⟩
 
             // Labels
-            const createLabel = (text, position, color = "rgba(224, 224, 224, 0.95)", fontSize =20) => {
+            const createLabel = (text, position, color = "rgba(224, 224, 224, 0.95)", fontSize = 20) => {
+                const scale = Math.max(2, window.devicePixelRatio);
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 context.font = `Bold ${fontSize}px Inter`;
                 const textWidth = context.measureText(text).width;
-                canvas.width = textWidth + 20;
-                canvas.height = fontSize * 1.5;
-                context.font = `Bold ${fontSize}px Inter`; // Re-set font after canvas resize
+                const cssW = textWidth + 20;
+                const cssH = fontSize * 1.5;
+                canvas.width = cssW * scale;
+                canvas.height = cssH * scale;
+                context.scale(scale, scale);
+                context.font = `Bold ${fontSize}px Inter`;
                 context.fillStyle = color;
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
-                context.fillText(text, canvas.width / 2, canvas.height / 2);
-                
+                context.fillText(text, cssW / 2, cssH / 2);
+
                 const texture = new THREE.CanvasTexture(canvas);
+                texture.minFilter = THREE.LinearFilter;
                 const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
                 const sprite = new THREE.Sprite(spriteMat);
-                sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+                sprite.scale.set(cssW / 100, cssH / 100, 1.0);
                 sprite.position.copy(position);
                 return sprite;
             };
@@ -258,101 +364,59 @@
 
         function updateVectorPosition(vector, coords) {
             const { theta, phi } = coords;
-            // The vector is part of the rotated group, so we calculate its position
-            // in the group's local coordinate system (standard spherical coordinates).
             const x = Math.sin(theta) * Math.cos(phi);
             const y = Math.sin(theta) * Math.sin(phi);
             const z = Math.cos(theta);
-            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+            const dir = new THREE.Vector3(x, y, z).normalize();
+            const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+            vector.quaternion.copy(q);
         }
         
-        // --- Circuit Diagram SVG ---
+        // --- Circuit Diagram SVG (canonical construction: same classes as Pauli prop & CNOT vis) ---
         function updateCircuitDiagram(thetaX, thetaY, thetaZ) {
             const svg = document.getElementById('circuit-svg');
-            svg.innerHTML = ''; // Clear previous circuit
-            
             const svgNS = "http://www.w3.org/2000/svg";
-            const createText = (x, y, content, size = 10) => {
-                const text = document.createElementNS(svgNS, 'text');
-                text.setAttribute('x', x);
-                text.setAttribute('y', y);
-                text.setAttribute('fill', '#E0E0E0');
-                text.setAttribute('font-family', 'Inter, sans-serif');
-                text.setAttribute('font-size', size);
-                text.setAttribute('text-anchor', 'middle');
-                text.textContent = content;
-                return text;
-            };
-
-            const createGate = (x, name, value) => {
-                const g = document.createElementNS(svgNS, 'g');
-                
-                const rect = document.createElementNS(svgNS, 'rect');
-                rect.setAttribute('x', x);
-                rect.setAttribute('y', 15);
-                rect.setAttribute('width', 50);
-                rect.setAttribute('height', 30);
-                rect.setAttribute('fill', '#2A2A2A');
-                rect.setAttribute('stroke', '#76B900');
-                rect.setAttribute('stroke-width', 1.5);
-                g.appendChild(rect);
-                
-                const nameText = createText(x + 25, 34, name, 14);
-                g.appendChild(nameText);
-                
-                const valText = createText(x + 25, 55, `(${value.toFixed(2)})`, 10);
-                g.appendChild(valText);
-                
-                return g;
-            };
-
-            // Qubit wire
-            const line = document.createElementNS(svgNS, 'line');
-            line.setAttribute('x1', 20);
-            line.setAttribute('y1', 30);
-            line.setAttribute('x2', 380);
-            line.setAttribute('y2', 30);
-            line.setAttribute('stroke', '#E0E0E0');
-            line.setAttribute('stroke-width', 1);
-            svg.appendChild(line);
-            
-            // Qubit label
-            svg.appendChild(createText(10, 34, "q₀",14 ));
-
-            // Gates
-            svg.appendChild(createGate(60, 'Rx', thetaX));
-            svg.appendChild(createGate(170, 'Ry', thetaY));
-            svg.appendChild(createGate(280, 'Rz', thetaZ));
+            const w = 56, h = 48;
+            const wireY = 35;
+            const gates = [
+                { x: 60, name: 'Rx', val: thetaX },
+                { x: 170, name: 'Ry', val: thetaY },
+                { x: 280, name: 'Rz', val: thetaZ }
+            ];
+            let html = `<line x1="40" y1="${wireY}" x2="380" y2="${wireY}" class="circuit-wire" />`;
+            html += `<text x="4" y="${wireY + 5}" class="circuit-qubit-label">|0⟩</text>`;
+            gates.forEach(g => {
+                const cx = g.x + w / 2;
+                html += `<rect x="${g.x}" y="8" width="${w}" height="${h}" class="circuit-gate-box" rx="4" />`;
+                html += `<text x="${cx}" y="26" class="circuit-gate-text" style="font-size:14px">${g.name}</text>`;
+                html += `<text x="${cx}" y="42" class="circuit-gate-param">(${g.val.toFixed(2)})</text>`;
+            });
+            svg.innerHTML = html;
         }
 
         // --- Main Setup & Update Functions ---
         const blochSphereViz = createBlochSphere(document.getElementById('bloch-sphere-container'));
         
-        const sliderX = document.getElementById('theta-x-slider');
-        const sliderY = document.getElementById('theta-y-slider');
-        const sliderZ = document.getElementById('theta-z-slider');
-        
-        const valueX = document.getElementById('theta-x-value');
-        const valueY = document.getElementById('theta-y-value');
-        const valueZ = document.getElementById('theta-z-value');
-        
-        function updateAll() {
-            const theta_x = parseFloat(sliderX.value);
-            const theta_y = parseFloat(sliderY.value);
-            const theta_z = parseFloat(sliderZ.value);
+        const inputX = document.getElementById('theta-x-input');
+        const inputY = document.getElementById('theta-y-input');
+        const inputZ = document.getElementById('theta-z-input');
 
-            // Update value displays
-            valueX.textContent = theta_x.toFixed(2);
-            valueY.textContent = theta_y.toFixed(2);
-            valueZ.textContent = theta_z.toFixed(2);
-            
-            // Calculate final state
+        function clampAngle(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return 0;
+            return Math.max(0, Math.min(6.283, num));
+        }
+
+        function updateAll() {
+            const theta_x = clampAngle(inputX.value);
+            const theta_y = clampAngle(inputY.value);
+            const theta_z = clampAngle(inputZ.value);
+
             const initialState = { alpha: complex(1, 0), beta: complex(0, 0) };
             const stateAfterRx = applyRx(theta_x, initialState);
             const stateAfterRy = applyRy(theta_y, stateAfterRx);
             const finalState = applyRz(theta_z, stateAfterRy);
 
-            // Update visuals
             const blochCoords = stateToBloch(finalState);
             updateVectorPosition(blochSphereViz.vectorGeom, blochCoords);
             updateCircuitDiagram(theta_x, theta_y, theta_z);
@@ -365,8 +429,35 @@
         }
 
         // --- Event Listeners ---
-        [sliderX, sliderY, sliderZ].forEach(slider => {
-            slider.addEventListener('input', updateAll);
+        [inputX, inputY, inputZ].forEach(el => {
+            el.addEventListener('input', updateAll);
+        });
+
+        // Bloch sphere: arrow-key rotation when container is focused
+        const blochContainer = document.getElementById('bloch-sphere-container');
+        const ROTATE_STEP = 0.08;
+        blochContainer.addEventListener('keydown', (e) => {
+            if (document.activeElement !== blochContainer) return;
+            const cam = blochSphereViz.camera;
+            const target = blochSphereViz.controls.target;
+            const pos = cam.position.clone();
+            const dir = pos.clone().sub(target);
+            const radius = dir.length();
+            const theta = Math.atan2(dir.x, dir.z);
+            const phi = Math.acos(Math.max(-1, Math.min(1, dir.y / radius)));
+            let newTheta = theta, newPhi = phi;
+            switch (e.key) {
+                case 'ArrowLeft':  newTheta = theta - ROTATE_STEP; break;
+                case 'ArrowRight': newTheta = theta + ROTATE_STEP; break;
+                case 'ArrowUp':    newPhi = Math.max(0.05, phi - ROTATE_STEP); break;
+                case 'ArrowDown':  newPhi = Math.min(Math.PI - 0.05, phi + ROTATE_STEP); break;
+                default: return;
+            }
+            e.preventDefault();
+            cam.position.x = target.x + radius * Math.sin(newPhi) * Math.sin(newTheta);
+            cam.position.y = target.y + radius * Math.cos(newPhi);
+            cam.position.z = target.z + radius * Math.sin(newPhi) * Math.cos(newTheta);
+            cam.lookAt(target);
         });
         
         // --- Initial Call ---

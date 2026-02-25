@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steane Code Noise Model Explorer | NVIDIA Edition</title>
+    <!-- Dependencies: Google Fonts (Inter). Permissive licenses only per widget creator policy (MIT/BSD/Apache 2.0/ISC/zlib). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Section 1.3: Standard Color Palette */
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;     /* Page background */
+            --nvidia-mid: #2A2A2A;      /* Container background */
+            --nvidia-accent: #444444;   /* Borders */
+            --nvidia-light: #E0E0E0;    /* Primary text */
+            --nvidia-gray: #AAAAAA;     /* Secondary text */
+            --error-red: #FF4444;
+            --focus-outline: 3px solid #76b900;
+            
+            /* Stabilizer Colors (High Contrast on Dark) */
+            --stab-s1: #ef9100; /* Orange */
+            --stab-s2: #3399FF; /* Blue */
+            --stab-s3: #E0E0E0; /* White/Gray */
+        }
+
+        /* Section 1.0: Dark Background Default */
+        body {
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px; /* Added padding around the widget container */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.5;
+            box-sizing: border-box;
+        }
+
+        /* Section 8.1: Skip Links */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.2s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus {
+            top: 0;
+            outline: var(--focus-outline);
+        }
+
+        /* Section 7.2: Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Section 23.1: The Widget Container (Exact CSS from Guide) */
+        .widget-container {
+            background-color: var(--nvidia-mid); /* #2A2A2A */
+            border: 1px solid var(--nvidia-accent); /* #444444 */
+            border-top: 4px solid var(--nvidia-green); /* #76B900 */
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+            box-sizing: border-box; /* Ensure padding doesn't overflow width */
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+        /* Section 23.2: The Standard Header (Typography Rules) */
+        .widget-header h1 { 
+            color: var(--nvidia-green); 
+            font-size: 1.5rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            margin: 0 0 16px 0; 
+        }
+        .widget-header .summary-text { 
+            color: var(--nvidia-gray); 
+            margin: 0 0 8px 0; 
+            font-size: 1rem; 
+        }
+        .widget-header .keyboard-help { 
+            color: var(--nvidia-gray); 
+            font-size: 0.85rem; 
+            margin: 8px 0 0 0; 
+        }
+        .widget-header .keyboard-help strong {
+            color: var(--nvidia-light);
+        }
+
+        /* Internal Layout Structure */
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        /* Top Bar: Controls & Legend */
+        .top-controls {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* Control Panels inside the widget */
+        .control-panel {
+            flex: 1 1 250px;
+            background: rgba(0,0,0,0.2); /* Slightly darker than mid to stand out */
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 4px;
+            padding: 16px;
+        }
+
+        /* Visualization Section: Full Width Middle */
+        .visualization-section {
+            width: 100%;
+            background-color: #151515; /* Darker background for contrast with container */
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 4px;
+            padding: 0;
+            height: 480px; /* Fixed height for canvas stability */
+            position: relative;
+            overflow: hidden; 
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            color: var(--nvidia-green);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--nvidia-accent);
+            padding-bottom: 8px;
+            display: block;
+        }
+
+        /* Section 4.1: Focus Indicators */
+        :focus {
+            outline: var(--focus-outline);
+            outline-offset: 2px;
+        }
+        
+        /* Form Elements */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--nvidia-light);
+        }
+
+        select {
+            width: 100%;
+            background: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            border: 1px solid var(--nvidia-accent);
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            min-height: 44px; 
+        }
+
+        .mode-desc {
+            font-size: 0.85rem;
+            color: var(--nvidia-gray);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* Visualization Canvas */
+        #circuitCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: pointer;
+            outline: none; 
+        }
+
+        #circuitCanvas:focus {
+            outline: var(--focus-outline);
+            outline-offset: -3px;
+        }
+
+        /* Status & Badges */
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-family: 'Inter', monospace;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            display: block;
+        }
+        .badge.clean { background: rgba(118, 185, 0, 0.15); color: var(--nvidia-green); border: 1px solid var(--nvidia-green); }
+        .badge.error { background: rgba(255, 68, 68, 0.15); color: var(--error-red); border: 1px solid var(--error-red); }
+
+        /* Venn Diagram */
+        .venn-container {
+            width: 180px;
+            height: 180px;
+            margin: 10px auto;
+            position: relative;
+        }
+
+        .venn-circle {
+            position: absolute;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--nvidia-accent);
+            mix-blend-mode: screen;
+            transition: all 0.3s;
+        }
+
+        .venn-circle.active {
+            background-color: currentColor;
+            box-shadow: 0 0 15px currentColor;
+            opacity: 0.4;
+        }
+
+        /* Keyboard Key Styling */
+        .kbd {
+            background: #444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+            font-family: monospace;
+            font-size: 0.85em;
+            border-bottom: 2px solid #222;
+        }
+
+        /* Section 24: Standard Footer Navigation */
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: var(--focus-outline);
+            outline-offset: 2px;
+        }
+
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        
+        /* Color Keys for Legend */
+        .color-key {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div id="status-announce" role="status" aria-live="polite" class="sr-only"></div>
+
+<!-- Section 23.1: Widget Container -->
+<div class="widget-container">
+    
+    <!-- Section 23.2: Standard Header (First Child) -->
+    <header class="widget-header">
+        <h1>Steane Code Noise Model Explorer</h1>
+        <p class="summary-text">Simulate and correct quantum errors using Code Capacity, Circuit Level, and Phenomenological noise models.</p>
+    </header>
+
+    <section class="instructions-section" aria-labelledby="instructions-heading">
+        <h2 id="instructions-heading">Instructions</h2>
+        <p><strong>What to do:</strong> Place an error at one of the <strong>green dashed [E] boxes</strong> on the circuit (each marks a valid error slot). Then watch how the syndrome and correction change. Try different noise models to see where errors can occur.</p>
+        <ol>
+            <li>Choose a <strong>Noise Model</strong>: Code Capacity (data qubits only, before checks), Circuit Level (data or ancilla), or Phenomenological (extra slots between rounds).</li>
+            <li><strong>Mouse:</strong> Click any <strong>green dashed [E] box</strong> on the circuit to place or remove an error. <strong>Keyboard:</strong> Press <span class="kbd">Tab</span> until the circuit is focused, then <span class="kbd">Enter</span> to enter keyboard mode. Use <span class="kbd">Arrow keys</span> to move between error slots (all valid locations in the current mode), and <span class="kbd">Space</span> to place or remove an error.</li>
+            <li>After placing an error, the <strong>Syndrome</strong> (S1, S2, S3) and <strong>Correction</strong> update. The decoder suggests which qubit to correct; if it matches the actual error, status shows Corrected.</li>
+            <li>Press <span class="kbd">ESC</span> once to clear the error or exit keyboard mode; press again to reset.</li>
+        </ol>
+        <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> — move to circuit (after dropdown). <span class="kbd">Enter</span> — start moving between [E] slots. <span class="kbd">Arrow keys</span> — next/previous error slot. <span class="kbd">Space</span> — place or remove error. <span class="kbd">ESC</span> — exit or reset.</p>
+    </section>
+
+    <main id="main-content" class="main-layout">
+
+        <!-- Controls Row -->
+        <div class="top-controls" role="region" aria-label="Controls">
+            
+            <div class="control-panel">
+                <label for="modeSelect" class="panel-title">Noise Model</label>
+                <select id="modeSelect" tabindex="0" onchange="setMode()">
+                    <option value="capacity">Code Capacity</option>
+                    <option value="circuit">Circuit Level Noise</option>
+                    <option value="phenom">Phenomenological Model</option>
+                </select>
+                <div id="modeDesc" class="mode-desc">
+                    Errors only occur on Data Qubits before checks run.
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="panel-title">Legend</div>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div>
+                        <div class="status-row" style="justify-content: flex-start; gap: 8px; align-items: center; margin-bottom: 5px;">
+                            <span style="color:var(--error-red); font-weight:bold;">[ E ]</span> 
+                            <span>Active Error</span>
+                        </div>
+                        <div class="status-row" style="justify-content: flex-start; gap: 8px; align-items: center; margin-bottom: 5px;">
+                            <div style="width:20px; height:20px; background: rgba(118,185,0,0.2); border:2px dashed var(--nvidia-green); border-radius:2px;"></div>
+                            <span>Error injection site</span>
+                        </div>
+                    </div>
+                    <div style="border-left: 1px solid #444; padding-left: 15px;">
+                        <div style="font-size:0.85rem; margin-bottom: 4px;"><strong>Stabilizers:</strong></div>
+                        <div style="font-size:0.85rem; color: var(--nvidia-light);">
+                            <span class="color-key" style="background: var(--stab-s1);"></span>S1 (Orange)<br>
+                            <span class="color-key" style="background: var(--stab-s2);"></span>S2 (Blue)<br>
+                            <span class="color-key" style="background: var(--stab-s3);"></span>S3 (Light)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Section -->
+        <section class="visualization-section" aria-label="Interactive Quantum Circuit">
+            <p class="circuit-hint" style="margin:0 0 8px 0; font-size:0.9rem; color: var(--nvidia-gray);">Circuit: click a green [E] box to place an error, or <strong>Tab</strong> here then <strong>Enter</strong> to move between slots with the keyboard.</p>
+            <canvas id="circuitCanvas" tabindex="0" aria-label="Quantum circuit with error slots. Tab to focus, then Enter to use arrow keys to move between error slots; Space to place or remove error."></canvas>
+        </section>
+
+        <!-- Results Row -->
+        <div class="top-controls" role="region" aria-label="Results">
+            
+            <div class="control-panel">
+                <div class="panel-title">System Status</div>
+                <div class="status-row">
+                    <span>Syndrome:</span>
+                    <span id="syn-val" style="color: var(--nvidia-light)">0 0 0</span>
+                </div>
+                <div class="status-row">
+                    <span>Correction:</span>
+                    <span id="corr-val" style="color: var(--nvidia-gray)">None</span>
+                </div>
+                <div class="status-row">
+                    <span>Actual Error:</span>
+                    <span id="err-val" style="color: var(--error-red)">None</span>
+                </div>
+                <div id="status-badge" class="badge clean">System Stable</div>
+            </div>
+
+            <div class="control-panel" style="display:flex; flex-direction:column; align-items:center;">
+                <div class="panel-title" style="width:100%">Syndrome Map</div>
+                <div class="venn-container" aria-hidden="true">
+                    <div id="v-s1" class="venn-circle" style="top: 0; left: 40px; border-color: var(--stab-s1); color: var(--stab-s1);"></div>
+                    <div id="v-s2" class="venn-circle" style="top: 60px; left: 0; border-color: var(--stab-s2); color: var(--stab-s2);"></div>
+                    <div id="v-s3" class="venn-circle" style="top: 60px; left: 80px; border-color: var(--stab-s3); color: var(--stab-s3);"></div>
+                    
+                    <div style="position:absolute; top:5px; left:85px; font-weight:700; font-size:11px; color:var(--stab-s1)">S1</div>
+                    <div style="position:absolute; top:90px; left:5px; font-weight:700; font-size:11px; color:var(--stab-s2)">S2</div>
+                    <div style="position:absolute; top:90px; right:5px; font-weight:700; font-size:11px; color:var(--stab-s3)">S3</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
+    <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <div class="widget-footer-links">
+            <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+            <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+        </div>
+    </footer>
+</div>
+
+<script>
+/**
+ * Steane Code Circuit Visualizer - NVIDIA Style Guide Compliant
+ */
+
+const canvas = document.getElementById('circuitCanvas');
+const ctx = canvas.getContext('2d');
+const announcer = document.getElementById('status-announce');
+
+// -- Dynamic Configuration --
+let PADDING_TOP = 40;
+let LINE_H = 45;   
+let GATE_W = 60;   
+let START_X = 80; 
+
+// Standard Colors
+const COLORS = {
+    dark: '#1A1A1A',
+    mid: '#2A2A2A',
+    accent: '#444444',
+    wire: '#E0E0E0', 
+    error: '#FF4444',
+    s1: '#ef9100', 
+    s2: '#3399FF', 
+    s3: '#E0E0E0'
+};
+
+const STABILIZERS = [
+    { name: "S1", qubits: [0, 2, 4, 6], color: COLORS.s1, ancillaIdx: 0 },
+    { name: "S2", qubits: [1, 2, 5, 6], color: COLORS.s2, ancillaIdx: 1 },
+    { name: "S3", qubits: [3, 4, 5, 6], color: COLORS.s3, ancillaIdx: 2 }
+];
+
+const DECODER = {
+    "000": null, "001": 0, "010": 1, "011": 2,
+    "100": 3, "101": 4, "110": 5, "111": 6
+};
+
+// -- Global State --
+let width, height;
+let errorInjection = null; 
+let currentMode = 'capacity'; 
+let mouseX = 0, mouseY = 0;
+let isInteracting = false; 
+let kbCursor = { row: 0, t: 0 };
+let kbValidIndex = 0; // index into getValidLocations() for keyboard-only navigation
+
+const GATES = [];
+
+function buildCircuit() {
+    GATES.length = 0;
+    let t = 1;
+    STABILIZERS[0].qubits.forEach(q => {
+        GATES.push({ t: t++, control: q, target: 7 + 0, color: STABILIZERS[0].color });
+    });
+    t++; 
+    STABILIZERS[1].qubits.forEach(q => {
+        GATES.push({ t: t++, control: q, target: 7 + 1, color: STABILIZERS[1].color });
+    });
+    t++; 
+    STABILIZERS[2].qubits.forEach(q => {
+        GATES.push({ t: t++, control: q, target: 7 + 2, color: STABILIZERS[2].color });
+    });
+    return t; 
+}
+const MAX_TIME = buildCircuit(); 
+const ANCILLA_MEASURE_TIME = MAX_TIME + 1; 
+
+function setMode() {
+    const sel = document.getElementById('modeSelect');
+    currentMode = sel.value;
+    errorInjection = null;
+    const valid = getValidLocations();
+    kbValidIndex = 0;
+    if (valid.length) {
+        kbCursor.row = valid[0].row;
+        kbCursor.t = valid[0].t;
+    }
+    const desc = document.getElementById('modeDesc');
+    if (currentMode === 'capacity') {
+        desc.innerText = "Errors only occur on Data Qubits before checks run.";
+    } else if (currentMode === 'circuit') {
+        desc.innerText = "Errors on Data Qubits (pre-check) OR Ancilla Qubits (pre-measurement).";
+    } else {
+        desc.innerText = "Adds errors between stabilizer rounds on partially checked qubits.";
+    }
+    announce(`Mode changed to ${sel.options[sel.selectedIndex].text}`);
+    update();
+}
+
+function announce(text) {
+    announcer.textContent = text;
+}
+
+function isValidLocation(type, idx, t) {
+    if (currentMode === 'capacity') {
+        return type === 'data' && t === 0;
+    }
+    if (currentMode === 'circuit') {
+        if (type === 'data' && t === 0) return true;
+        if (type === 'ancilla' && t === ANCILLA_MEASURE_TIME) return true;
+        return false;
+    }
+    if (currentMode === 'phenom') {
+        if (type === 'data' && t === 0) return true;
+        if (type === 'ancilla' && t === ANCILLA_MEASURE_TIME) return true;
+        if (type === 'data') {
+            if (t === 5) {
+                const inS1 = STABILIZERS[0].qubits.includes(idx);
+                const inS2 = STABILIZERS[1].qubits.includes(idx);
+                const inS3 = STABILIZERS[2].qubits.includes(idx);
+                return inS1 && (inS2 || inS3);
+            }
+            if (t === 10) {
+                const inS2 = STABILIZERS[1].qubits.includes(idx);
+                const inS3 = STABILIZERS[2].qubits.includes(idx);
+                return inS2 && inS3;
+            }
+        }
+    }
+    return false;
+}
+
+// All valid (row, t) slots for current mode — for keyboard cycling
+function getValidLocations() {
+    const out = [];
+    for (let r = 0; r < 10; r++) {
+        const type = r < 7 ? 'data' : 'ancilla';
+        const idx = r < 7 ? r : r - 7;
+        const tSteps = [0];
+        if (currentMode !== 'capacity') tSteps.push(ANCILLA_MEASURE_TIME);
+        if (currentMode === 'phenom') tSteps.push(5, 10);
+        tSteps.forEach(t => {
+            if (isValidLocation(type, idx, t)) out.push({ row: r, t });
+        });
+    }
+    return out;
+}
+
+// -- Interaction --
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+    draw(); 
+});
+
+canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const row = Math.floor((y - PADDING_TOP + (LINE_H/2)) / LINE_H);
+    const t = Math.round((x - START_X) / GATE_W);
+
+    handleInteraction(row, t);
+});
+
+canvas.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!isInteracting) {
+            isInteracting = true;
+            const valid = getValidLocations();
+            kbValidIndex = 0;
+            if (valid.length) {
+                kbCursor.row = valid[0].row;
+                kbCursor.t = valid[0].t;
+            }
+            announce("Keyboard mode. Arrow keys move between error slots (" + getValidLocations().length + " total). Space to place or remove error. Escape to exit.");
+            draw();
+            return;
+        }
+        handleInteraction(kbCursor.row, kbCursor.t);
+        return;
+    }
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        if (isInteracting) {
+            isInteracting = false;
+            announce("Exited keyboard mode. Focus remains on circuit.");
+            draw();
+        } else {
+            if (errorInjection !== null) {
+                errorInjection = null;
+                update();
+                announce("Simulation reset.");
+            }
+        }
+        return;
+    }
+    if (isInteracting) {
+        const valid = getValidLocations();
+        let moved = false;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            kbValidIndex = (kbValidIndex + 1 + valid.length) % valid.length;
+            kbCursor.row = valid[kbValidIndex].row;
+            kbCursor.t = valid[kbValidIndex].t;
+            moved = true;
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            kbValidIndex = (kbValidIndex - 1 + valid.length) % valid.length;
+            kbCursor.row = valid[kbValidIndex].row;
+            kbCursor.t = valid[kbValidIndex].t;
+            moved = true;
+        }
+        if (moved) {
+            e.preventDefault();
+            const r = kbCursor.row;
+            const t = kbCursor.t;
+            const type = r < 7 ? 'data' : 'ancilla';
+            const idx = r < 7 ? r : r - 7;
+            announce("Slot " + (kbValidIndex + 1) + " of " + valid.length + ": " + (type === 'data' ? "Data Q" + idx : "Ancilla A" + (idx + 1)) + " at time " + t + ". Press Space to place error.");
+            draw();
+        }
+        if (e.key === ' ') {
+            e.preventDefault();
+            handleInteraction(kbCursor.row, kbCursor.t);
+        }
+    }
+});
+
+canvas.addEventListener('blur', () => {
+    isInteracting = false;
+    draw();
+});
+
+function handleInteraction(row, t) {
+    if (row >= 0 && row < 10) {
+        let type = row < 7 ? 'data' : 'ancilla';
+        let idx = row < 7 ? row : row - 7;
+
+        if (isValidLocation(type, idx, t)) {
+            if (errorInjection && 
+                errorInjection.type === type && 
+                errorInjection.index === idx && 
+                errorInjection.timeStep === t) {
+                errorInjection = null;
+                announce("Error removed.");
+            } else {
+                errorInjection = { type: type, index: idx, timeStep: t };
+                announce(`Error injected at ${type} qubit ${idx} time step ${t}`);
+            }
+            update();
+        }
+    }
+}
+
+function simulate() {
+    let dataState = new Array(7).fill(false);
+    let ancillaState = new Array(3).fill(false);
+    
+    for (let t = 0; t <= ANCILLA_MEASURE_TIME; t++) {
+        if (errorInjection && errorInjection.timeStep === t) {
+            if (errorInjection.type === 'data') {
+                dataState[errorInjection.index] = !dataState[errorInjection.index];
+            } else if (errorInjection.type === 'ancilla') {
+                ancillaState[errorInjection.index] = !ancillaState[errorInjection.index];
+            }
+        }
+        const activeGates = GATES.filter(g => g.t === t);
+        activeGates.forEach(g => {
+            if (dataState[g.control]) {
+                ancillaState[g.target - 7] = !ancillaState[g.target - 7];
+            }
+        });
+    }
+    return { syndrome: ancillaState };
+}
+
+function draw() {
+    const dpr = Math.max(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    
+    const targetWidth = Math.floor(rect.width * dpr);
+    const targetHeight = Math.floor(rect.height * dpr);
+
+    if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+    }
+    
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    
+    width = rect.width;
+    height = rect.height;
+
+    // -- Fit Logic --
+    // Calculate Gate Width to fit the full circuit horizontally
+    const totalSteps = ANCILLA_MEASURE_TIME + 2; // +2 for padding
+    const availableWidth = width - 100; // Left label padding
+    const optimalGateW = availableWidth / totalSteps;
+    
+    // Scale Logic
+    PADDING_TOP = 40;
+    LINE_H = 40; 
+    START_X = 80;
+    GATE_W = Math.max(30, Math.min(65, optimalGateW)); // Clamp between 30 and 65
+
+    // Background
+    ctx.fillStyle = "#151515";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.lineWidth = 2;
+    ctx.font = "bold 14px Inter, sans-serif";
+    ctx.textBaseline = "middle";
+
+    const WIRE_END_T = ANCILLA_MEASURE_TIME + 0.8;
+    const wireEndX = START_X + WIRE_END_T * GATE_W;
+
+    // Draw Data Qubit Wires (q0-q6)
+    for(let i=0; i<7; i++) {
+        const y = PADDING_TOP + i * LINE_H;
+        ctx.fillStyle = COLORS.wire;
+        ctx.textAlign = "right";
+        ctx.fillText(`q${i}`, START_X - 15, y); 
+        ctx.textAlign = "start";
+        ctx.strokeStyle = COLORS.wire;
+        ctx.beginPath(); ctx.moveTo(START_X, y); ctx.lineTo(wireEndX, y); ctx.stroke();
+    }
+
+    // Draw Ancilla Wires (A1-A3)
+    for(let i=0; i<3; i++) {
+        const y = PADDING_TOP + (7 + i) * LINE_H + 20; 
+        const stabColor = STABILIZERS[i].color;
+        ctx.fillStyle = stabColor;
+        ctx.fillRect(10, y - 8, 4, 16); 
+
+        ctx.fillStyle = COLORS.wire;
+        ctx.textAlign = "right";
+        ctx.fillText(`A${i+1}`, START_X - 15, y);
+        ctx.textAlign = "start";
+
+        ctx.strokeStyle = COLORS.wire;
+        ctx.beginPath(); ctx.moveTo(START_X, y); ctx.lineTo(wireEndX, y); ctx.stroke();
+        
+        const mx = wireEndX;
+        ctx.fillStyle = "#151515"; 
+        ctx.strokeStyle = stabColor;
+        ctx.lineWidth = 2;
+        ctx.fillRect(mx - 15, y - 15, 30, 30); 
+        ctx.strokeRect(mx - 15, y - 15, 30, 30);
+        ctx.fillStyle = COLORS.wire; ctx.textAlign = "center";
+        ctx.fillText("M", mx, y);
+        ctx.textAlign = "start";
+    }
+
+    // Draw Gates
+    GATES.forEach(g => {
+        const x = START_X + g.t * GATE_W;
+        const yControl = PADDING_TOP + g.control * LINE_H;
+        const yTarget = PADDING_TOP + g.target * LINE_H + 20;
+        const gateColor = g.color;
+
+        ctx.strokeStyle = gateColor; 
+        ctx.beginPath(); ctx.moveTo(x, yControl); ctx.lineTo(x, yTarget); ctx.stroke();
+        
+        ctx.fillStyle = "#151515"; 
+        ctx.strokeStyle = gateColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, yControl, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        
+        ctx.beginPath(); ctx.arc(x, yTarget, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, yTarget-10); ctx.lineTo(x, yTarget+10);
+        ctx.moveTo(x-10, yTarget); ctx.lineTo(x+10, yTarget); ctx.stroke();
+    });
+
+    // Interaction Cursor & Errors
+    let cursorRow = -1, cursorT = -1;
+    
+    if (isInteracting) {
+        cursorRow = kbCursor.row;
+        cursorT = kbCursor.t;
+    } else {
+        cursorRow = Math.floor((mouseY - PADDING_TOP + (LINE_H/2)) / LINE_H);
+        cursorT = Math.round((mouseX - START_X) / GATE_W);
+    }
+
+    const boxSz = 26;
+
+    for (let r=0; r<10; r++) {
+        let type = r < 7 ? 'data' : 'ancilla';
+        let idx = r < 7 ? r : r - 7;
+        let tSteps = [0];
+        if (currentMode !== 'capacity') tSteps.push(ANCILLA_MEASURE_TIME);
+        if (currentMode === 'phenom') tSteps.push(5, 10);
+
+        tSteps.forEach(t => {
+            if (isValidLocation(type, idx, t)) {
+                const x = START_X + t * GATE_W;
+                const y = PADDING_TOP + r * LINE_H + (r >= 7 ? 20 : 0);
+                const isHover = (r === cursorRow && t === cursorT);
+
+                // DRAW VISUAL INDICATOR FOR VALID SLOT — highly visible so users see where to click
+                if (!errorInjection || errorInjection.timeStep !== t || errorInjection.index !== idx) {
+                    ctx.fillStyle = "rgba(118, 185, 0, 0.15)";
+                    ctx.fillRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
+                    ctx.strokeStyle = '#76b900';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 3]);
+                    ctx.strokeRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = "rgba(118, 185, 0, 0.6)";
+                    ctx.font = "bold 11px Inter, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("E", x, y);
+                    ctx.textBaseline = "middle";
+                }
+
+                // Draw Error if present
+                if (errorInjection && errorInjection.type === type && errorInjection.index === idx && errorInjection.timeStep === t) {
+                    ctx.shadowBlur = 10; ctx.shadowColor = COLORS.error; 
+                    ctx.fillStyle = COLORS.error;
+                    ctx.fillRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
+                    
+                    ctx.fillStyle = "#000"; 
+                    ctx.font = "bold 14px Inter";
+                    ctx.shadowBlur = 0; 
+                    ctx.textAlign = "center";
+                    ctx.fillText("E", x, y + 1);
+                    ctx.textAlign = "start";
+                    
+                    if (isHover && isInteracting) {
+                        ctx.strokeStyle = "#FFF"; ctx.lineWidth = 2;
+                        ctx.strokeRect(x - boxSz/2 - 4, y - boxSz/2 - 4, boxSz + 8, boxSz + 8);
+                    }
+                } 
+                // Hover Highlight
+                else if (isHover) {
+                    ctx.fillStyle = "#151515";
+                    ctx.fillRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
+                    ctx.strokeStyle = '#76b900';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
+                    
+                    if (isInteracting) {
+                        ctx.beginPath(); 
+                        ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y);
+                        ctx.moveTo(x, y - 4); ctx.lineTo(x, y + 4);
+                        ctx.stroke();
+                    }
+                } 
+            }
+        });
+    }
+}
+
+function update() {
+    const res = simulate();
+    const syn = res.syndrome;
+    const s1 = syn[0] ? 1 : 0;
+    const s2 = syn[1] ? 1 : 0;
+    const s3 = syn[2] ? 1 : 0;
+
+    draw();
+
+    document.getElementById('v-s1').classList.toggle('active', s1 === 1);
+    document.getElementById('v-s2').classList.toggle('active', s2 === 1);
+    document.getElementById('v-s3').classList.toggle('active', s3 === 1);
+
+    const synStr = `${s3}${s2}${s1}`;
+    document.getElementById('syn-val').innerText = synStr.split('').join(' ');
+    const predictedQubit = DECODER[synStr];
+    
+    let statusText = "System Stable";
+    let statusClass = "clean";
+    let realErrText = "None";
+
+    if (errorInjection) {
+        realErrText = errorInjection.type === 'data' ? `Data Q${errorInjection.index}` : `Ancilla A${errorInjection.index+1}`;
+    }
+
+    if (predictedQubit === null) {
+        document.getElementById('corr-val').innerText = "No Action";
+        if (errorInjection) {
+            statusText = "Detection Failed";
+            statusClass = "error";
+        }
+    } else {
+        document.getElementById('corr-val').innerText = `Apply X on Q${predictedQubit}`;
+        if (errorInjection && errorInjection.type === 'data' && errorInjection.index === predictedQubit) {
+            statusText = "Corrected Successfully";
+            statusClass = "clean";
+        } else {
+            statusText = "Internal Error / Ambiguity";
+            statusClass = "error";
+        }
+    }
+
+    document.getElementById('err-val').innerText = realErrText;
+    const badge = document.getElementById('status-badge');
+    badge.className = `badge ${statusClass}`;
+    badge.innerText = statusText;
+}
+
+window.addEventListener('resize', draw);
+setMode();
+
+</script>
+</body>
+</html>
