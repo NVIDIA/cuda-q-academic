@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive QFT Visualizer</title>
+  
+  <!-- Dependencies: Google Fonts (Inter), MathJax (Apache 2.0). Permissive licenses only per widget creator policy. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- MathJax (Apache 2.0) -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* --- NVIDIA STYLE GUIDE VARIABLES --- */
+    :root {
+      --nvidia-dark: #1A1A1A;
+      --nvidia-mid: #2A2A2A;
+      --nvidia-accent: #444444;
+      --nvidia-light: #E0E0E0;
+      --nvidia-gray: #AAAAAA;
+      --nvidia-green: #76b900;
+      --nvidia-green-dark: #5e9400;
+      --focus-outline: 3px solid var(--nvidia-green);
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* --- GLOBAL RESETS & TYPOGRAPHY --- */
+    body {
+      background-color: var(--nvidia-dark);
+      color: var(--nvidia-light);
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 20px;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 { margin: 0; font-weight: 600; }
+    
+    /* Skip Link for Accessibility */
+    .skip-link {
+      position: absolute; top: -40px; left: 0;
+      background: var(--nvidia-green); color: #000;
+      padding: 8px; z-index: 100; text-decoration: none; font-weight: bold;
+      transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* =========================================
+       Rule 23.1: STANDARD WIDGET CONTAINER 
+       Exact CSS implementation from style guide
+       ========================================= */
+    .widget-container {
+        background-color: var(--nvidia-mid); /* #2A2A2A */
+        border: 1px solid var(--nvidia-accent); /* #444444 */
+        border-top: 4px solid var(--nvidia-green); /* #76B900 */
+        border-radius: 8px;
+        padding: 24px;
+        width: 100%;
+        max-width: 1100px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        margin: 0 auto;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+    /* =========================================
+       Rule 23.2: STANDARD HEADER TYPOGRAPHY
+       ========================================= */
+    
+    /* Ensure the header container aligns center */
+    .widget-container header {
+        text-align: left;
+        margin-bottom: 32px;
+        width: 100%;
+    }
+
+    .widget-container h1 {
+        color: var(--nvidia-green);
+        font-size: 1.5rem; 
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        margin-top: 0;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .widget-container .summary-text {
+        color: var(--nvidia-gray);
+        margin-bottom: 8px;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .widget-container .keyboard-help {
+        color: var(--nvidia-gray);
+        font-size: 0.85rem;
+        margin-top: 8px;
+    }
+
+    /* --- LAYOUT WRAPPER (Adapter for internal columns) --- */
+    .layout-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+    }
+
+    @media (min-width: 900px) {
+      .layout-wrapper { flex-direction: row; align-items: flex-start; }
+    }
+
+    /* --- CARDS (Modified for visual hierarchy inside container) --- */
+    .card {
+      background-color: var(--nvidia-dark); /* Changed from mid to dark for contrast inside container */
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 4px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* removed external shadow as container handles it */
+      position: relative;
+    }
+
+    .card-header {
+      width: 100%;
+      border-bottom: 1px solid var(--nvidia-accent);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      color: var(--nvidia-green);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* --- CONTROLS SECTION --- */
+    .controls-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    /* NVIDIA Primary Button Style (Section 16.1) */
+    .btn-nvidia-primary {
+      background-color: var(--nvidia-mid);
+      color: #FFFFFF;
+      border: 1px solid var(--nvidia-accent);
+      border-bottom: 3px solid var(--nvidia-green);
+      padding: 12px 24px;
+      font-family: var(--font-family);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      min-width: 44px; /* Touch target */
+      min-height: 44px;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+    }
+
+    .btn-nvidia-primary:hover:not(:disabled) {
+      background-color: var(--nvidia-green);
+      color: #000000;
+      border-color: var(--nvidia-green);
+    }
+
+    .btn-nvidia-primary:focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: 2px;
+    }
+
+    .btn-nvidia-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-bottom-color: var(--nvidia-accent);
+    }
+
+    /* NVIDIA Secondary Button Style (Section 16.2) */
+    .btn-nvidia-secondary {
+      background: transparent;
+      color: var(--nvidia-gray);
+      border: 1px solid transparent;
+      padding: 8px 16px;
+      font-family: var(--font-family);
+      font-size: 0.875rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-nvidia-secondary:hover {
+      background: rgba(255,255,255,0.05);
+      color: #FFFFFF;
+      border-color: var(--nvidia-accent);
+    }
+
+    .btn-nvidia-secondary:focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: 2px;
+    }
+
+    /* --- VISUALIZATION (UNIT CIRCLE) --- */
+    #circle-container {
+      outline: none; /* Custom focus style handles this */
+      border-radius: 50%;
+      padding: 10px;
+      transition: box-shadow 0.2s;
+    }
+    
+    #circle-container:focus-visible {
+      box-shadow: 0 0 0 3px var(--nvidia-green);
+    }
+
+    #circle-svg {
+      overflow: visible;
+      touch-action: manipulation;
+      max-width: 100%;
+      height: auto;
+      background: radial-gradient(circle, #222 0%, #000 70%);
+      border-radius: 50%;
+      border: 1px solid #333;
+    }
+
+    .point-group { cursor: pointer; }
+    .point-group circle.visible-point { transition: all 0.2s; }
+    
+    /* Hover/Focus State for Points */
+    .point-group:hover circle.visible-point,
+    .point-group.keyboard-focus circle.visible-point {
+      fill: #FFF;
+      r: 10;
+      stroke: var(--nvidia-green);
+      stroke-width: 3px;
+    }
+
+    /* Target Hint Animation */
+    .point-group.target-highlight circle.visible-point {
+      fill: #FFF;
+      stroke: var(--nvidia-green);
+      stroke-width: 3px;
+      animation: pulse-point 1.5s infinite;
+    }
+    
+    #vector {
+      transform-origin: 190px 190px;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    }
+    #vector.vector-dimmed {
+      opacity: 0.15;
+    }
+
+    /* Disable circle interaction during guided mode but keep it visible */
+    .circle-disabled .point-group {
+      pointer-events: none;
+    }
+
+    @keyframes pulse-point {
+      0% { r: 6; stroke-opacity: 1; box-shadow: 0 0 0 0 rgba(118, 185, 0, 0.7); }
+      50% { r: 10; stroke-opacity: 0.5; box-shadow: 0 0 0 10px rgba(118, 185, 0, 0); }
+      100% { r: 6; stroke-opacity: 1; box-shadow: 0 0 0 0 rgba(118, 185, 0, 0); }
+    }
+
+    text {
+      font-family: var(--font-family); /* Use Inter to match UI */
+      fill: #FFFFFF;
+      font-weight: 700;
+      font-size: 14px;
+      pointer-events: none;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .angle-label {
+      font-size: 11px;
+      fill: var(--nvidia-gray);
+      font-weight: normal;
+    }
+
+    /* --- MATRIX STYLES --- */
+    .matrix-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      /* Scrollbar styling */
+      scrollbar-width: thin;
+      scrollbar-color: var(--nvidia-accent) var(--nvidia-mid);
+    }
+
+    .matrix-wrapper::-webkit-scrollbar { height: 8px; }
+    .matrix-wrapper::-webkit-scrollbar-track { background: var(--nvidia-mid); }
+    .matrix-wrapper::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 4px; }
+
+    .matrix-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .scalar {
+      font-family: monospace;
+      color: var(--nvidia-green);
+      font-size: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 40px;
+    }
+    .scalar span { border-top: 1px solid var(--nvidia-green); padding: 0 4px; }
+
+    table { border-collapse: separate; border-spacing: 4px; }
+
+    th {
+      color: var(--nvidia-gray);
+      font-weight: normal;
+      padding: 8px;
+      font-size: 0.9rem;
+      position: relative;
+    }
+
+    /* Column Headers (Input j) */
+    th.col-header {
+      border-bottom: 2px solid var(--nvidia-accent);
+      transition: all 0.2s;
+      cursor: default;
+      border-radius: 4px 4px 0 0;
+    }
+    
+    th.col-header:focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: -2px;
+      background: #333;
+    }
+
+    th.col-header.selectable { cursor: pointer; border-color: #666; }
+    th.col-header.selectable:hover { color: var(--nvidia-green); border-color: var(--nvidia-green); }
+    
+    th.col-header.active {
+      background-color: var(--nvidia-green);
+      color: #000;
+      border-color: var(--nvidia-green);
+      font-weight: bold;
+    }
+
+    th.col-header.completed {
+      border-bottom-color: var(--nvidia-green);
+      color: var(--nvidia-green);
+    }
+
+    /* Cells */
+    td {
+      width: 44px; height: 44px;
+      background: #111;
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 4px;
+      text-align: center;
+      color: #FFF;
+      font-size: 0.75rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    td.active {
+      border: 2px solid #FFF;
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+
+    /* Corner Label */
+    .corner-header { width: 50px; height: 40px; position: relative; }
+    .corner-header svg { position: absolute; top:0; left:0; width:100%; height:100%; }
+    .corner-text { font-size: 0.75rem; font-weight: bold; }
+    
+    /* --- STATUS & ALERTS --- */
+    #status-region {
+      min-height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--nvidia-light);
+      background: rgba(255,255,255,0.03);
+      border-radius: 4px;
+      padding: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
+    }
+    
+    .status-success { color: var(--nvidia-green) !important; font-weight: 600; }
+    .status-error { color: #ff5555 !important; font-weight: 600; }
+
+    .formula-box {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 4px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* --- KEYBOARD HELP TEXT (Internal panels) --- */
+    /* This overrides the global one for specific panels if needed, 
+       but we keep the class for consistency */
+    .panel-help {
+      font-size: 0.75rem;
+      color: var(--nvidia-gray);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* Section 24: Standard Footer Navigation */
+    .widget-footer {
+      margin-top: 32px;
+      border-top: 1px solid var(--nvidia-accent);
+      padding-top: 16px;
+      text-align: center;
+    }
+    .widget-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+    }
+    .widget-footer-links a {
+      color: #76b900;
+      text-decoration: none;
+      min-height: 44px;
+      padding: 12px 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .widget-footer-links a:hover {
+      color: var(--nvidia-light);
+      background: rgba(255,255,255,0.05);
+    }
+    .widget-footer-links a:focus {
+      outline: var(--focus-outline);
+      outline-offset: 2px;
+    }
+
+    /* Section 25: Instructions */
+    .instructions-section {
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 8px;
+    }
+    .instructions-section h2 {
+      color: var(--nvidia-green);
+      font-size: 1.1rem;
+      margin: 0 0 12px 0;
+      font-weight: 700;
+    }
+    .instructions-section ol, .instructions-section p {
+      color: var(--nvidia-light);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0 0 8px 0;
+    }
+    .instructions-section .kbd {
+      background: var(--nvidia-accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9em;
+    }
+
+    /* Expanded Sum Display */
+    #expanded-sum {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 4px;
+      text-align: center;
+      display: none;
+    }
+    #expanded-sum.visible { display: block; }
+    .sum-header {
+      font-size: 1rem;
+      color: var(--nvidia-light);
+      margin-bottom: 10px;
+    }
+    .sum-terms {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+      font-size: 0.95rem;
+      line-height: 2;
+    }
+    .sum-term {
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+    .sum-term.filled { font-weight: bold; }
+    .sum-term.active-term {
+      background: rgba(118, 185, 0, 0.15);
+      outline: 1px solid var(--nvidia-green);
+    }
+    .sum-computation {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      color: var(--nvidia-green);
+      font-weight: 600;
+    }
+
+    /* Clickable unfilled cells in interactive mode */
+    td.clickable {
+      cursor: pointer;
+      position: relative;
+    }
+    td.clickable:hover {
+      border-color: var(--nvidia-green) !important;
+      transform: scale(1.08);
+      box-shadow: 0 0 8px rgba(118, 185, 0, 0.3);
+      z-index: 5;
+    }
+    td.clickable:focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: -2px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="widget-container" id="main-content">
+    <header>
+        <h1>Interactive QFT Visualizer</h1>
+        <p class="summary-text">Explore the Quantum Fourier Transform by interacting with phase rotations on the unit circle and observing the resulting matrix construction.</p>
+    </header>
+
+    <section class="instructions-section" aria-labelledby="instructions-heading">
+        <h2 id="instructions-heading">Instructions</h2>
+        <ol>
+            <li>Click <strong>Visualize Column |0⟩</strong> to run a guided animation that fills the first column of the QFT matrix using phase rotations on the unit circle.</li>
+            <li>Click <strong>Visualize Column |1⟩</strong> to fill the second column the same way. After that, the matrix switches to interactive mode.</li>
+            <li>Click any <strong>empty cell</strong> to start filling a column. Once started, you must complete the column before moving to another. Use the unit circle to choose the correct phase: click a point, or use <strong>Arrow keys</strong> and <strong>Enter</strong> to confirm.</li>
+            <li>Use <strong>Auto-Fill Remaining</strong> to complete the rest of the matrix, or <strong>Reset Matrix</strong> to start over.</li>
+        </ol>
+        <p><strong>Keyboard shortcuts:</strong> <span class="kbd">ESC</span> — reset. <span class="kbd">Enter</span> / <span class="kbd">Space</span> — select or place. <span class="kbd">Arrow keys</span> — navigate the unit circle when focused.</p>
+    </section>
+
+    <!-- Layout Wrapper (Flex columns) -->
+    <div class="layout-wrapper">
+    
+        <!-- LEFT COLUMN: VISUALIZER & CONTROLS -->
+        <section class="card" style="flex: 0 0 380px;" aria-labelledby="vis-heading">
+        <div class="card-header">
+            <h2 id="vis-heading">Phase Unit Circle</h2>
+        </div>
+
+        <!-- Live Status Region -->
+        <div id="status-region" role="status" aria-live="polite">
+            Select 'Visualize Column |0⟩' to begin the guided tour.
+        </div>
+
+        <!-- Unit Circle (Focusable for Keyboard Access) -->
+        <div id="circle-container" tabindex="0" role="application" aria-label="Unit Circle Phase Selector. Use Arrow Keys to rotate, Enter to select.">
+            <svg id="circle-svg" width="380" height="380" viewBox="0 0 380 380" aria-hidden="true">
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#76b900" />
+                </marker>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+                </pattern>
+            </defs>
+
+            <!-- Background Grid -->
+            <circle cx="190" cy="190" r="158" fill="url(#grid)" opacity="0.5" />
+            
+            <!-- Axes -->
+            <line x1="190" y1="50" x2="190" y2="330" stroke="#444" stroke-dasharray="4" />
+            <line x1="50" y1="190" x2="330" y2="190" stroke="#444" stroke-dasharray="4" />
+            <circle cx="190" cy="190" r="120" fill="none" stroke="#666" stroke-width="2"/>
+
+            <!-- Points Layer -->
+            <g id="points-layer"></g>
+
+            <!-- The Vector -->
+            <line id="vector" x1="190" y1="190" x2="310" y2="190" 
+                stroke="#76b900" stroke-width="4" marker-end="url(#arrow)" 
+                stroke-linecap="round" />
+            
+            <!-- Center Dot -->
+            <circle cx="190" cy="190" r="4" fill="#fff"/>
+            </svg>
+        </div>
+
+        <p style="text-align:center; color:var(--nvidia-green); font-size:0.9rem; margin:12px 0 4px; line-height:1.6;">
+            where ω = e<sup>2πi/N</sup>, N = 8
+        </p>
+
+        <!-- Controls -->
+        <div class="controls-section">
+            <button id="main-action-btn" class="btn-nvidia-primary" tabindex="0">Visualize Column |0⟩</button>
+            <button id="fill-all-btn" class="btn-nvidia-primary" tabindex="0" style="display:none; background-color: #333; border-bottom-color: #999;">Auto-Fill Remaining</button>
+            <button id="reset-btn" class="btn-nvidia-secondary" tabindex="0">Reset Matrix</button>
+        </div>
+        
+        </section>
+
+        <!-- RIGHT COLUMN: MATRIX -->
+        <section class="card" style="flex:1; min-width:0;" aria-labelledby="matrix-heading">
+        <div class="card-header">
+            <h2 id="matrix-heading">QFT Matrix (N=8)</h2>
+        </div>
+        
+        <div class="matrix-wrapper">
+            <div class="matrix-container">
+            <div class="scalar" aria-hidden="true">1<span>√8</span></div>
+            <table id="matrix" role="grid" aria-label="Quantum Fourier Transform Matrix">
+                <thead>
+                <tr id="header-row">
+                    <!-- Top-Left Corner Label -->
+                    <th class="corner-header" aria-label="k rows, j columns">
+                    <svg viewBox="0 0 50 40">
+                        <line x1="0" y1="40" x2="50" y2="0" stroke="#444" stroke-width="1"/>
+                        <text x="5" y="35" fill="#76b900" font-size="12" font-weight="bold" font-family="'Inter', sans-serif">k</text>
+                        <text x="40" y="12" fill="#E0E0E0" font-size="12" font-weight="bold" font-family="'Inter', sans-serif">j</text>
+                    </svg>
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="matrix-body"></tbody>
+            </table>
+            </div>
+        </div>
+
+        <div class="formula-box">
+            <div style="font-size: 1.25rem; color: #fff; margin-bottom: 8px;">
+            $$ QFT|j\rangle = \frac{1}{\sqrt{N}} \sum_{k=0}^{N-1} \omega^{jk} |k\rangle $$
+            </div>
+            <div id="expanded-sum" aria-live="polite">
+                <div class="sum-header" id="sum-header"></div>
+                <div class="sum-terms" id="sum-terms"></div>
+                <div class="sum-computation" id="sum-computation"></div>
+            </div>
+        </div>
+        </section>
+    </div> <!-- End Layout Wrapper -->
+
+    <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
+    <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <div class="widget-footer-links">
+            <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+            <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+        </div>
+    </footer>
+  </div> <!-- End Widget Container -->
+
+<script>
+(() => {
+  const N = 8;
+  const SVG_CENTER = 190;
+  const SVG_RADIUS = 120;
+  const ANGLES = ['0', 'π/4', 'π/2', '3π/4', 'π', '5π/4', '3π/2', '7π/4'];
+
+  let activeCell = null;
+  let isAnimating = false;
+  let cellFilled = Array.from({length: N}, () => Array(N).fill(false));
+  let workflowState = 0;
+  let activeColumn = null;
+
+  let keyboardHighlightIndex = -1;
+  let currentCssRotation = 0;
+
+  const statusEl = document.getElementById('status-region');
+  const vectorEl = document.getElementById('vector');
+  const pointsLayer = document.getElementById('points-layer');
+  const mainBtn = document.getElementById('main-action-btn');
+  const fillAllBtn = document.getElementById('fill-all-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const circleContainer = document.getElementById('circle-container');
+  const expandedSumEl = document.getElementById('expanded-sum');
+  const sumHeaderEl = document.getElementById('sum-header');
+  const sumTermsEl = document.getElementById('sum-terms');
+  const sumComputationEl = document.getElementById('sum-computation');
+
+  function isColumnComplete(j) { return cellFilled.every(row => row[j]); }
+  function allComplete() { return cellFilled.every(row => row.every(Boolean)); }
+
+  function init() {
+    buildMatrix();
+    buildCirclePoints();
+    dimVector();
+    circleContainer.classList.add('circle-disabled');
+
+    resetBtn.addEventListener('click', resetAll);
+    mainBtn.addEventListener('click', onMainAction);
+    fillAllBtn.addEventListener('click', autoCompleteMatrix);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') resetAll(); });
+    circleContainer.addEventListener('keydown', handleCircleKeyNav);
+
+    updateStatus("Click 'Visualize' to see how the phases rotate.");
+  }
+
+  // --- BUILDERS ---
+
+  function buildMatrix() {
+    const headerRow = document.getElementById('header-row');
+    const tbody = document.getElementById('matrix-body');
+
+    for (let j = 0; j < N; j++) {
+      const th = document.createElement('th');
+      th.className = 'col-header';
+      th.id = `head-${j}`;
+      th.innerHTML = `|${j}⟩`;
+      th.setAttribute('role', 'columnheader');
+      th.setAttribute('tabindex', '-1');
+      headerRow.appendChild(th);
+    }
+
+    for (let k = 0; k < N; k++) {
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.innerHTML = `|${k}⟩`;
+      th.scope = "row";
+      tr.appendChild(th);
+
+      for (let j = 0; j < N; j++) {
+        const td = document.createElement('td');
+        td.id = `cell-${k}-${j}`;
+        td.addEventListener('click', () => onCellClick(k, j));
+        td.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCellClick(k, j); }
+        });
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+  }
+
+  function buildCirclePoints() {
+    pointsLayer.innerHTML = '';
+    for (let i = 0; i < N; i++) {
+      const angle = i * (Math.PI * 2 / N);
+      const x = SVG_CENTER + SVG_RADIUS * Math.cos(angle);
+      const y = SVG_CENTER - SVG_RADIUS * Math.sin(angle);
+
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute('class', 'point-group');
+      g.id = `point-${i}`;
+      g.onclick = () => onPointClick(i);
+
+      g.addEventListener('mouseenter', () => {
+        if (activeCell && !isAnimating) {
+          brightenVector();
+          setVectorRotation(i * (360 / N));
+        }
+      });
+      g.addEventListener('mouseleave', () => {
+        if (activeCell && !isAnimating && keyboardHighlightIndex < 0) {
+          dimVector();
+        }
+      });
+
+      const hitCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      hitCircle.setAttribute("cx", x); hitCircle.setAttribute("cy", y);
+      hitCircle.setAttribute("r", 25); hitCircle.setAttribute("fill", "transparent");
+
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute('class', 'visible-point');
+      circle.setAttribute("cx", x); circle.setAttribute("cy", y);
+      circle.setAttribute("r", 6); circle.setAttribute("fill", "#444");
+      const hue = (i * 360 / N) % 360;
+      circle.setAttribute("stroke", `hsl(${hue}, 70%, 50%)`);
+      circle.setAttribute("stroke-width", "2");
+
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      const tx = SVG_CENTER + (SVG_RADIUS + 30) * Math.cos(angle);
+      const ty = SVG_CENTER - (SVG_RADIUS + 30) * Math.sin(angle);
+      text.setAttribute("x", tx); text.setAttribute("y", ty);
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("dominant-baseline", "middle");
+      text.setAttribute("font-family", "'Inter', sans-serif");
+      text.textContent = i === 0 ? '1' : `ω${toSuper(i)}`;
+
+      const subText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      subText.setAttribute('class', 'angle-label');
+      subText.setAttribute("x", tx); subText.setAttribute("y", ty + 15);
+      subText.setAttribute("text-anchor", "middle");
+      subText.setAttribute("font-family", "'Inter', sans-serif");
+      subText.textContent = `(${ANGLES[i]})`;
+
+      g.appendChild(hitCircle);
+      g.appendChild(circle);
+      g.appendChild(text);
+      g.appendChild(subText);
+      pointsLayer.appendChild(g);
+    }
+  }
+
+  // --- STATUS ---
+
+  function updateStatus(msg, type = 'normal') {
+    statusEl.textContent = msg;
+    statusEl.className = '';
+    if (type === 'success') statusEl.classList.add('status-success');
+    if (type === 'error') statusEl.classList.add('status-error');
+  }
+
+  // --- KEYBOARD NAV ---
+
+  function handleCircleKeyNav(e) {
+    if (activeCell === null || isAnimating) return;
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      keyboardHighlightIndex = keyboardHighlightIndex < 0 ? 0 : (keyboardHighlightIndex + 1) % N;
+      updateKeyboardHighlight();
+    } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      keyboardHighlightIndex = keyboardHighlightIndex < 0 ? 0 : (keyboardHighlightIndex - 1 + N) % N;
+      updateKeyboardHighlight();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      if (keyboardHighlightIndex >= 0) onPointClick(keyboardHighlightIndex);
+    }
+  }
+
+  function updateKeyboardHighlight() {
+    document.querySelectorAll('.point-group').forEach(p => p.classList.remove('keyboard-focus'));
+    if (keyboardHighlightIndex >= 0) {
+      const group = document.getElementById(`point-${keyboardHighlightIndex}`);
+      if (group) group.classList.add('keyboard-focus');
+      brightenVector();
+      setVectorRotation(keyboardHighlightIndex * (360 / N));
+    }
+  }
+
+  // --- CORE LOGIC ---
+
+  async function onMainAction() {
+    if (isAnimating) return;
+    if (workflowState === 0) {
+      await fillColumnGuided(0);
+      workflowState = 1;
+      mainBtn.textContent = "Visualize Column |1⟩";
+    } else if (workflowState === 1) {
+      await fillColumnGuided(1);
+      workflowState = 2;
+      circleContainer.classList.remove('circle-disabled');
+      mainBtn.disabled = true;
+      mainBtn.textContent = "Guided Mode Complete";
+      updateStatus("Select any empty cell to fill manually, or use Auto-Fill.", "success");
+      fillAllBtn.style.display = 'block';
+      enableInteractiveMode();
+    }
+  }
+
+  function enableInteractiveMode() {
+    activeColumn = null;
+    updateClickableCells();
+  }
+
+  function updateClickableCells() {
+    for (let k = 0; k < N; k++) {
+      for (let j = 2; j < N; j++) {
+        const cell = document.getElementById(`cell-${k}-${j}`);
+        if (cellFilled[k][j]) continue;
+        if (activeColumn === null || activeColumn === j) {
+          cell.classList.add('clickable');
+          cell.setAttribute('tabindex', '0');
+        } else {
+          cell.classList.remove('clickable');
+          cell.removeAttribute('tabindex');
+        }
+      }
+    }
+  }
+
+  async function autoCompleteMatrix() {
+    if (isAnimating) return;
+    isAnimating = true;
+    fillAllBtn.disabled = true;
+    fillAllBtn.textContent = "Filling...";
+
+    if (activeCell) {
+      highlightCell(activeCell.k, activeCell.j, false);
+      activeCell = null;
+    }
+    activeColumn = null;
+    dimVector();
+
+    for (let j = 0; j < N; j++) {
+      if (isColumnComplete(j)) continue;
+      const th = document.getElementById(`head-${j}`);
+      th.classList.add('active');
+      renderExpandedSum(j, null);
+
+      for (let k = 0; k < N; k++) {
+        if (cellFilled[k][j]) continue;
+        const power = (k * j) % N;
+        setCell(k, j, formatOmega(power), power);
+        cellFilled[k][j] = true;
+        const cell = document.getElementById(`cell-${k}-${j}`);
+        cell.classList.remove('clickable');
+        cell.removeAttribute('tabindex');
+      }
+
+      renderExpandedSum(j, null);
+      await wait(100);
+      th.classList.remove('active');
+      th.classList.add('completed');
+    }
+
+    isAnimating = false;
+    fillAllBtn.style.display = 'none';
+    hideExpandedSum();
+    updateStatus("Matrix Complete! You've built the QFT.", 'success');
+  }
+
+  // --- INTERACTIVE: CLICK ANY CELL ---
+
+  function onCellClick(k, j) {
+    if (isAnimating || workflowState < 2) return;
+    if (cellFilled[k][j]) return;
+    if (activeColumn !== null && activeColumn !== j) return;
+
+    if (activeColumn === null) {
+      activeColumn = j;
+      updateClickableCells();
+    }
+
+    if (activeCell) highlightCell(activeCell.k, activeCell.j, false);
+
+    activeCell = {k, j};
+    highlightCell(k, j, true);
+
+    document.querySelectorAll('.col-header').forEach((h, idx) => {
+      h.classList.toggle('active', idx === j && !isColumnComplete(j));
+    });
+
+    renderExpandedSum(j, k);
+    dimVector();
+    keyboardHighlightIndex = -1;
+    document.querySelectorAll('.point-group').forEach(p => p.classList.remove('keyboard-focus', 'target-highlight'));
+
+    circleContainer.focus();
+    updateStatus(`Cell (k=${k}, j=${j}): Select the correct phase on the unit circle.`);
+  }
+
+  async function onPointClick(pointIndex) {
+    if (isAnimating || activeCell === null) return;
+    const {k, j} = activeCell;
+    const expectedIndex = (j * k) % N;
+
+    if (pointIndex === expectedIndex) {
+      brightenVector();
+      setVectorRotation(calculateRotation(k, j));
+
+      setCell(k, j, formatOmega(expectedIndex), expectedIndex);
+      cellFilled[k][j] = true;
+      highlightCell(k, j, false);
+      highlightTargetPoint(null);
+
+      const cell = document.getElementById(`cell-${k}-${j}`);
+      cell.classList.remove('clickable');
+      cell.removeAttribute('tabindex');
+
+      if (isColumnComplete(j)) {
+        document.getElementById(`head-${j}`).classList.remove('active');
+        document.getElementById(`head-${j}`).classList.add('completed');
+        activeColumn = null;
+        updateClickableCells();
+      }
+
+      activeCell = null;
+      renderExpandedSum(j, null);
+
+      if (allComplete()) {
+        updateStatus("Matrix Complete! You've built the QFT.", "success");
+        fillAllBtn.style.display = 'none';
+        hideExpandedSum();
+      } else if (isColumnComplete(j)) {
+        updateStatus("Column complete! Select a cell in any remaining column.", "success");
+      } else {
+        updateStatus("Correct! Continue filling this column.", "success");
+      }
+
+      setTimeout(() => dimVector(), 600);
+    } else {
+      updateStatus(`Incorrect. For cell (k=${k}, j=${j}): ω^{${j}·${k}} = ω^{${expectedIndex}}.`, 'error');
+      shakeVector();
+    }
+  }
+
+  // --- GUIDED ANIMATION ---
+
+  async function fillColumnGuided(j) {
+    isAnimating = true;
+    activeCell = {k: 0, j};
+    const th = document.getElementById(`head-${j}`);
+    th.classList.add('active');
+
+    dimVector();
+    renderExpandedSum(j, null);
+    await wait(200);
+
+    for (let k = 0; k < N; k++) {
+      activeCell = {k, j};
+      highlightCell(k, j, true);
+      renderExpandedSum(j, k);
+
+      const power = (k * j) % N;
+      highlightTargetPoint(power);
+      brightenVector();
+      setVectorRotation(k * j * (360 / N));
+
+      await wait(400);
+
+      setCell(k, j, formatOmega(power), power);
+      cellFilled[k][j] = true;
+      highlightCell(k, j, false);
+      highlightTargetPoint(null);
+      renderExpandedSum(j, null);
+
+      await wait(150);
+    }
+
+    activeCell = null;
+    th.classList.remove('active');
+    th.classList.add('completed');
+    isAnimating = false;
+
+    await wait(500);
+    dimVector();
+    renderExpandedSum(j, null);
+  }
+
+  // --- VECTOR HELPERS ---
+
+  function dimVector() { vectorEl.classList.add('vector-dimmed'); }
+  function brightenVector() { vectorEl.classList.remove('vector-dimmed'); }
+
+  function resetVectorToZero() {
+    vectorEl.style.transition = 'none';
+    currentCssRotation = 0;
+    vectorEl.style.transform = 'rotate(0deg)';
+    void vectorEl.offsetWidth;
+    vectorEl.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease';
+    keyboardHighlightIndex = -1;
+    document.querySelectorAll('.point-group').forEach(p => p.classList.remove('keyboard-focus'));
+    dimVector();
+  }
+
+  function setVectorRotation(targetMathDeg) {
+    const targetCssDeg = -targetMathDeg;
+    const delta = targetCssDeg - currentCssRotation;
+    const shortestDelta = delta - 360 * Math.round(delta / 360);
+    currentCssRotation += shortestDelta;
+    vectorEl.style.transform = `rotate(${currentCssRotation}deg)`;
+  }
+
+  function calculateRotation(k, j) { return (k * j) * (360 / N); }
+
+  function highlightTargetPoint(idx) {
+    document.querySelectorAll('.point-group').forEach(p => p.classList.remove('target-highlight'));
+    if (idx !== null) document.getElementById(`point-${idx}`).classList.add('target-highlight');
+  }
+
+  // --- CELL HELPERS ---
+
+  function setCell(row, col, html, power) {
+    const cell = document.getElementById(`cell-${row}-${col}`);
+    if (!cell) return;
+    cell.innerHTML = html;
+    if (power !== null) {
+      const hue = (power * 360 / N) % 360;
+      cell.style.backgroundColor = `hsla(${hue}, 70%, 40%, 0.3)`;
+      cell.style.borderColor = `hsla(${hue}, 70%, 50%, 0.5)`;
+    } else {
+      cell.style.backgroundColor = '';
+      cell.style.borderColor = '';
+    }
+    if (window.MathJax) MathJax.typesetPromise([cell]).catch(() => {});
+  }
+
+  function highlightCell(row, col, active) {
+    const cell = document.getElementById(`cell-${row}-${col}`);
+    if (cell) cell.classList.toggle('active', active);
+  }
+
+  function shakeVector() {
+    vectorEl.style.transition = "transform 0.1s";
+    vectorEl.setAttribute('stroke', '#ff4444');
+    setTimeout(() => vectorEl.setAttribute('stroke', '#76b900'), 300);
+  }
+
+  // --- EXPANDED SUM DISPLAY ---
+
+  function renderExpandedSum(j, activeK) {
+    expandedSumEl.classList.add('visible');
+
+    sumHeaderEl.innerHTML = `QFT|${j}⟩ = <span style="color:var(--nvidia-green)">(1/√8)</span> &times;`;
+
+    let html = '<span style="color:#666">[</span> ';
+    for (let k = 0; k < N; k++) {
+      const power = (j * k) % N;
+      const hue = (power * 360 / N) % 360;
+      const filled = cellFilled[k][j];
+      const isActive = (activeK === k);
+
+      if (k > 0) html += ' <span style="color:#555">+</span> ';
+
+      let cls = 'sum-term';
+      let style = '';
+      if (filled) {
+        cls += ' filled';
+        style = `color: hsl(${hue}, 70%, 65%);`;
+      } else if (isActive) {
+        cls += ' active-term';
+        style = 'color: var(--nvidia-green);';
+      } else {
+        cls += ' dimmed';
+        style = 'color: #555;';
+      }
+
+      const label = filled ? (power === 0 ? '1' : `ω${toSuper(power)}`) : '?';
+      html += `<span class="${cls}" style="${style}">${label}|${k}⟩</span>`;
+    }
+    html += ' <span style="color:#666">]</span>';
+    sumTermsEl.innerHTML = html;
+
+    sumComputationEl.style.display = 'none';
+  }
+
+  function hideExpandedSum() { expandedSumEl.classList.remove('visible'); }
+
+  // --- RESET ---
+
+  function resetAll() {
+    if (isAnimating) return;
+    activeCell = null;
+    activeColumn = null;
+    workflowState = 0;
+    cellFilled = Array.from({length: N}, () => Array(N).fill(false));
+    circleContainer.classList.add('circle-disabled');
+    resetVectorToZero();
+
+    mainBtn.disabled = false;
+    mainBtn.textContent = "Visualize Column |0⟩";
+    fillAllBtn.style.display = 'none';
+    fillAllBtn.disabled = false;
+    fillAllBtn.textContent = "Auto-Fill Remaining";
+    fillAllBtn.style.backgroundColor = "#333";
+
+    document.querySelectorAll('td').forEach(td => {
+      td.className = '';
+      td.innerHTML = '';
+      td.style.backgroundColor = '';
+      td.style.borderColor = '';
+      td.removeAttribute('tabindex');
+    });
+
+    document.querySelectorAll('.col-header').forEach(th => {
+      th.className = 'col-header';
+      th.setAttribute('tabindex', '-1');
+    });
+
+    hideExpandedSum();
+    updateStatus("Reset complete. Ready to start.");
+    highlightTargetPoint(null);
+  }
+
+  // --- UTILITIES ---
+
+  function toSuper(num) {
+    const supers = ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+    return num.toString().split('').map(d => supers[d] || '').join('');
+  }
+
+  function formatOmega(power) {
+    if (power === 0) return '1';
+    return `ω${toSuper(power)}`;
+  }
+
+  function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  init();
+})();
+</script>
+</body>
+</html>

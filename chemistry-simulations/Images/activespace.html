@@ -4,63 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NH₃ Active Space Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            margin: 0;
             padding: 20px;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
 
-        .container {
-            max-width: 1400px;
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             margin: 0 auto;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(118, 185, 0, 0.1);
-            border-left: 4px solid #76B900;
+        @media (min-width: 768px) {
+            .widget-container { padding: 32px; }
         }
 
-        .header h1 {
-            color: #76B900;
-            font-size: 2em;
-            margin-bottom: 10px;
+        header { margin-bottom: 32px; }
+
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
         }
 
-        .header p {
-            color: #cccccc;
-            font-size: 0.95em;
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            transition: top 0.2s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus { top: 0; }
+
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        .instructions-section .kbd {
+            background: var(--nvidia-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
         }
 
         .main-content {
-            display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 30px;
-            align-items: start;
-        }
-
-        .left-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 32px;
         }
 
-        .controls {
-            background: #2d2d2d;
-            padding: 25px;
+        .controls-section {
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            padding: 24px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         .input-group {
@@ -68,44 +123,49 @@
             flex-direction: column;
             margin-bottom: 20px;
         }
-
-        .input-group:last-child {
-            margin-bottom: 0;
-        }
+        .input-group:last-child { margin-bottom: 0; }
 
         label {
-            color: #76B900;
-            font-weight: bold;
+            color: var(--nvidia-green);
+            font-weight: 600;
             margin-bottom: 8px;
             font-size: 0.9em;
         }
 
         input[type="number"] {
-            background: #1a1a1a;
-            border: 2px solid #444;
-            color: #ffffff;
+            background: var(--nvidia-dark);
+            border: 1px solid var(--nvidia-accent);
+            color: var(--nvidia-light);
             padding: 12px;
             border-radius: 4px;
+            font-family: 'Inter', sans-serif;
             font-size: 1em;
-            transition: border-color 0.3s;
+            transition: border-color 0.2s;
         }
 
-        input[type="number"]:focus {
-            outline: none;
-            border-color: #76B900;
+        input[type="number"]:focus,
+        .orbital:focus-within {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            border-color: transparent;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
         }
 
         .info-box {
-            background: rgba(118, 185, 0, 0.15);
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
             padding: 20px;
             border-radius: 8px;
-            border-left: 3px solid #76B900;
+            margin-top: 20px;
         }
-
-        .info-box p {
-            margin: 8px 0;
-            font-size: 0.9em;
-        }
+        .info-box p { margin: 8px 0; font-size: 0.95em; }
 
         .error {
             color: #ff6464;
@@ -113,199 +173,260 @@
             padding: 15px;
             border-radius: 8px;
             border-left: 3px solid #ff6464;
+            margin-top: 20px;
             display: none;
         }
-
-        .error.show {
-            display: block;
-        }
+        .error.show { display: block; }
 
         .visualization {
-            background: #2d2d2d;
+            background: var(--nvidia-mid);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            min-height: 600px;
-        }
-
-        .diagram-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            border: 1px solid var(--nvidia-accent);
             min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .orbital-diagram {
             display: flex;
             flex-direction: column-reverse;
-            gap: 6px;
+            gap: 0;
+            margin-bottom: 30px;
+            max-width: 420px;
         }
 
-        .orbital {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 8px 15px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .orbital-number {
-            font-weight: bold;
-            min-width: 30px;
-            text-align: right;
-            font-size: 0.9em;
-        }
-
-        .orbital-box {
-            width: 350px;
-            height: 32px;
+        .mo-group {
             border: 2px solid;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.85em;
-            transition: all 0.3s ease;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
         }
-
-        .electrons {
-            display: flex;
-            gap: 10px;
-            margin-left: 10px;
-        }
-
-        .electron {
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            position: relative;
-        }
-
-        .electron.up {
-            border-bottom: 12px solid #76B900;
-        }
-
-        .electron.down {
-            border-top: 12px solid #76B900;
-        }
-
-        /* Core orbitals */
-        .orbital.core .orbital-box {
-            background: rgba(100, 100, 255, 0.3);
+        .mo-group:last-child { margin-bottom: 0; }
+        .mo-group.core {
+            background: rgba(100, 100, 255, 0.12);
             border-color: #6464ff;
         }
-
-        /* Active space orbitals */
-        .orbital.active .orbital-box {
-            background: rgba(118, 185, 0, 0.3);
-            border-color: #76B900;
-            border-width: 3px;
-            box-shadow: 0 0 15px rgba(118, 185, 0, 0.5);
+        .mo-group.active {
+            background: rgba(118, 185, 0, 0.12);
+            border-color: var(--nvidia-green);
         }
-
-        /* Virtual orbitals */
-        .orbital.virtual .orbital-box {
-            background: rgba(255, 100, 100, 0.3);
+        .mo-group.virtual {
+            background: rgba(255, 100, 100, 0.12);
             border-color: #ff6464;
         }
+
+        .mo-group-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+        .mo-group.core .mo-group-label { color: #aaaaff; }
+        .mo-group.active .mo-group-label { color: var(--nvidia-green); }
+        .mo-group.virtual .mo-group-label { color: #ffaaaa; }
+
+        .mo-orbitals {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 2px;
+        }
+
+        .mo-orbital {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 32px;
+        }
+
+        .mo-orbital-index {
+            font-weight: 600;
+            width: 24px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--nvidia-gray);
+        }
+
+        .mo-orbital-line {
+            flex: 1;
+            position: relative;
+            min-width: 60px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .mo-dash {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 0;
+            border-bottom: 2px solid var(--nvidia-light);
+        }
+
+        .mo-electrons {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--nvidia-green);
+            padding: 0 8px;
+            background: var(--nvidia-dark);
+        }
+        .mo-electrons .arrow { display: inline-block; line-height: 1; }
 
         .legend {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
+            gap: 24px;
             flex-wrap: wrap;
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--nvidia-accent);
+            width: 100%;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 0.9em;
+            color: var(--nvidia-gray);
         }
 
         .legend-box {
-            width: 40px;
-            height: 25px;
+            width: 30px;
+            height: 20px;
             border: 2px solid;
             border-radius: 4px;
         }
+        .legend-box.core { background: rgba(100, 100, 255, 0.15); border-color: #6464ff; }
+        .legend-box.active { background: rgba(118, 185, 0, 0.15); border-color: var(--nvidia-green); }
+        .legend-box.virtual { background: rgba(255, 100, 100, 0.15); border-color: #ff6464; }
+        .legend-item .arrow { color: var(--nvidia-green); font-weight: bold; }
 
-        .legend-box.core {
-            background: rgba(100, 100, 255, 0.3);
-            border-color: #6464ff;
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
 
-        .legend-box.active {
-            background: rgba(118, 185, 0, 0.3);
-            border-color: #76B900;
-            border-width: 3px;
+        .lesson-footer {
+            margin-top: 32px;
+            font-size: 0.85rem;
+            color: var(--nvidia-gray);
+            text-align: center;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+        }
+        .lesson-footer a {
+            color: var(--nvidia-green);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .lesson-footer a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
         }
 
-        .legend-box.virtual {
-            background: rgba(255, 100, 100, 0.3);
-            border-color: #ff6464;
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
         }
-
-        @media (max-width: 1200px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .orbital-box {
-                width: 280px;
-            }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
         }
-
-        @media (max-width: 768px) {
-            .orbital-box {
-                width: 220px;
-            }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="widget-container" id="main-content">
+        <header>
             <h1>NH₃ Active Space Visualizer</h1>
-            <p>6-31G Basis Set | Interactive Orbital Diagram</p>
-        </div>
+            <p class="summary-text">Interactive orbital diagram for Ammonia (NH₃) using the 6-31G Basis Set.</p>
+        </header>
 
-        <div class="main-content">
-            <div class="left-panel">
-                <div class="controls">
-                    <div class="input-group">
-                        <label for="numElectrons">Active Space Electrons:</label>
-                        <input type="number" id="numElectrons" min="0" max="10" value="4" step="2">
-                    </div>
-                    <div class="input-group">
-                        <label for="numOrbitals">Active Space Orbitals:</label>
-                        <input type="number" id="numOrbitals" min="0" max="15" value="4">
-                    </div>
-                </div>
-                
-                <div class="info-box">
-                    <p><strong>System Info:</strong> NH₃ with 6-31G basis set</p>
-                    <p><strong>Total Electrons:</strong> 10</p>
-                    <p><strong>Total Orbitals:</strong> 15</p>
-                    <p><strong>Current Configuration:</strong></p>
-                    <p><span id="configInfo">4 electrons in 4 orbitals</span></p>
-                </div>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li><strong>Standard MO diagram:</strong> Each horizontal line is an orbital; ↑ = spin up, ↓ = spin down. Colored boxes show Core, Active, and Virtual regions from your selection.</li>
+                <li>Set <strong>Active Space Electrons</strong> (0–10, even number) and <strong>Active Space Orbitals</strong> (0–15) using the inputs above.</li>
+                <li>The diagram updates automatically. Core orbitals (blue) are always filled; active (green) and virtual (red) depend on your choices.</li>
+                <li>Ensure electrons ≤ 2×orbitals in the active space and that the total configuration fits within 10 electrons and 15 orbitals.</li>
+            </ol>
+            <p><strong>Keyboard shortcuts:</strong> Press <span class="kbd">ESC</span> to reset to default (4 electrons, 4 orbitals). Use <span class="kbd">Tab</span> to move between inputs; press <span class="kbd">Enter</span> after typing to confirm.</p>
+        </section>
 
-                <div class="error" id="errorMsg"></div>
-            </div>
+        <main class="main-content">
+            <section class="controls-section info-box" aria-labelledby="controls-heading">
+                <h2 id="controls-heading" class="sr-only">Configuration Controls</h2>
 
-            <div class="visualization">
-                <div class="diagram-container">
-                    <div class="orbital-diagram" id="orbitalDiagram"></div>
+                <div class="input-group">
+                    <label for="numElectrons">Active Space Electrons</label>
+                    <input type="number" id="numElectrons" min="0" max="10" value="4" step="2" aria-describedby="electron-help">
+                    <span id="electron-help" class="sr-only">Enter an even number of electrons between 0 and 10.</span>
                 </div>
 
-                <div class="legend">
+                <div class="input-group">
+                    <label for="numOrbitals">Active Space Orbitals</label>
+                    <input type="number" id="numOrbitals" min="0" max="15" value="4" aria-describedby="orbital-help">
+                    <span id="orbital-help" class="sr-only">Enter number of orbitals between 0 and 15.</span>
+                </div>
+
+                <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+                <div class="info-box" role="status" aria-live="polite">
+                    <p><strong>System:</strong> NH₃ (6-31G)</p>
+                    <p><strong>Configuration:</strong> <span id="configInfo">4 electrons in 4 orbitals</span></p>
+                </div>
+
+                <div class="error" id="errorMsg" role="alert"></div>
+            </section>
+
+            <div class="visualization info-box" role="img" aria-label="Molecular orbital diagram: dashes for each orbital, spin arrows in occupied orbitals, colored boxes for core, active, and virtual space">
+                <div class="orbital-diagram" id="orbitalDiagram"></div>
+
+                <div class="legend" role="img" aria-label="Legend: Core, Active Space, Virtual orbitals; arrows show spin up and spin down electrons">
                     <div class="legend-item">
                         <div class="legend-box core"></div>
-                        <span>Core Orbitals</span>
+                        <span>Core</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-box active"></div>
@@ -313,22 +434,59 @@
                     </div>
                     <div class="legend-item">
                         <div class="legend-box virtual"></div>
-                        <span>Virtual Orbitals</span>
+                        <span>Virtual</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="arrow" aria-hidden="true">↑</span>
+                        <span>Spin up</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="arrow" aria-hidden="true">↓</span>
+                        <span>Spin down</span>
                     </div>
                 </div>
             </div>
+        </main>
+
+        <div class="lesson-footer">
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "QM/MM Hybrid Workflows - Combining VQE with a Polarizable Embedding Framework".
+            You can learn more about its context by visiting the link <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb" target="_blank" rel="noopener noreferrer">here</a>.
         </div>
+
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
 
     <script>
         const TOTAL_ELECTRONS = 10;
         const TOTAL_ORBITALS = 15;
+        const DEFAULT_ELECTRONS = 4;
+        const DEFAULT_ORBITALS = 4;
 
         const numElectronsInput = document.getElementById('numElectrons');
         const numOrbitalsInput = document.getElementById('numOrbitals');
         const configInfo = document.getElementById('configInfo');
         const errorMsg = document.getElementById('errorMsg');
         const orbitalDiagram = document.getElementById('orbitalDiagram');
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                resetSimulation();
+            }
+        });
+
+        function resetSimulation() {
+            numElectronsInput.value = DEFAULT_ELECTRONS;
+            numOrbitalsInput.value = DEFAULT_ORBITALS;
+            drawDiagram();
+            const el = document.getElementById('status-announce');
+            if (el) el.textContent = 'Configuration reset to default.';
+        }
 
         function showError(message) {
             errorMsg.textContent = message;
@@ -337,104 +495,101 @@
 
         function hideError() {
             errorMsg.classList.remove('show');
+            errorMsg.textContent = '';
         }
 
         function validateInputs(activeElectrons, activeOrbitals) {
             if (activeElectrons < 0 || activeElectrons > TOTAL_ELECTRONS) {
-                showError(`Active electrons must be between 0 and ${TOTAL_ELECTRONS}`);
+                showError('Active electrons must be between 0 and ' + TOTAL_ELECTRONS);
                 return false;
             }
-
             if (activeOrbitals < 0 || activeOrbitals > TOTAL_ORBITALS) {
-                showError(`Active orbitals must be between 0 and ${TOTAL_ORBITALS}`);
+                showError('Active orbitals must be between 0 and ' + TOTAL_ORBITALS);
                 return false;
             }
-
             if (activeElectrons % 2 !== 0) {
                 showError('Active electrons should be even for closed-shell systems');
                 return false;
             }
-
             const minOrbitalsNeeded = Math.ceil(activeElectrons / 2);
             if (activeOrbitals < minOrbitalsNeeded) {
-                showError(`Need at least ${minOrbitalsNeeded} orbitals for ${activeElectrons} electrons`);
+                showError('Need at least ' + minOrbitalsNeeded + ' orbitals for ' + activeElectrons + ' electrons');
                 return false;
             }
-
             const coreElectrons = TOTAL_ELECTRONS - activeElectrons;
             const coreOrbitals = coreElectrons / 2;
-            
             if (coreOrbitals + activeOrbitals > TOTAL_ORBITALS) {
                 showError('Configuration exceeds total number of orbitals');
                 return false;
             }
-
             return true;
         }
 
         function drawDiagram() {
-            const activeElectrons = parseInt(numElectronsInput.value) || 0;
-            const activeOrbitals = parseInt(numOrbitalsInput.value) || 0;
+            const activeElectrons = parseInt(numElectronsInput.value, 10) || 0;
+            const activeOrbitals = parseInt(numOrbitalsInput.value, 10) || 0;
 
-            if (!validateInputs(activeElectrons, activeOrbitals)) {
-                return;
-            }
+            if (!validateInputs(activeElectrons, activeOrbitals)) return;
 
             hideError();
-            configInfo.textContent = `${activeElectrons} electrons in ${activeOrbitals} orbitals`;
+            configInfo.textContent = activeElectrons + ' electrons in ' + activeOrbitals + ' orbitals';
+            const ann = document.getElementById('status-announce');
+            if (ann) ann.textContent = activeElectrons + ' electrons in ' + activeOrbitals + ' orbitals.';
 
             const coreElectrons = TOTAL_ELECTRONS - activeElectrons;
             const coreOrbitals = coreElectrons / 2;
-            const virtualOrbitals = TOTAL_ORBITALS - coreOrbitals - activeOrbitals;
 
             orbitalDiagram.innerHTML = '';
-
-            // Calculate electron distribution in active space
             const activeOccupiedOrbitals = activeElectrons / 2;
 
-            // Draw all orbitals
-            for (let i = 1; i <= TOTAL_ORBITALS; i++) {
-                const orbital = document.createElement('div');
-                orbital.className = 'orbital';
+            function addOrbitalRow(container, index, electrons) {
+                const row = document.createElement('div');
+                row.className = 'mo-orbital';
+                row.setAttribute('role', 'listitem');
+                const arrows = electrons === 2 ? '<span class="arrow" aria-label="Spin up">↑</span><span class="arrow" aria-label="Spin down">↓</span>' : (electrons === 1 ? '<span class="arrow" aria-label="Spin up">↑</span>' : '');
+                row.innerHTML = '<span class="mo-orbital-index" aria-hidden="true">' + index + '</span><div class="mo-orbital-line"><div class="mo-dash" aria-hidden="true"></div><div class="mo-electrons" aria-hidden="true">' + arrows + '</div></div>';
+                row.setAttribute('aria-label', 'Orbital ' + index + ': ' + electrons + ' electron(s)');
+                container.appendChild(row);
+            }
 
-                let type = '';
-                let electrons = 0;
-
-                if (i <= coreOrbitals) {
-                    type = 'core';
-                    electrons = 2;
-                } else if (i <= coreOrbitals + activeOrbitals) {
-                    type = 'active';
-                    const activeIndex = i - coreOrbitals;
-                    if (activeIndex <= activeOccupiedOrbitals) {
-                        electrons = 2;
-                    }
-                } else {
-                    type = 'virtual';
-                    electrons = 0;
+            function buildGroup(type, label, startIdx, count, electronsPerOrbital) {
+                const group = document.createElement('div');
+                group.className = 'mo-group ' + type;
+                group.setAttribute('aria-label', label + ' orbitals');
+                const labelEl = document.createElement('div');
+                labelEl.className = 'mo-group-label';
+                labelEl.textContent = label;
+                group.appendChild(labelEl);
+                const orbitalsEl = document.createElement('div');
+                orbitalsEl.className = 'mo-orbitals';
+                orbitalsEl.setAttribute('role', 'list');
+                for (let k = 0; k < count; k++) {
+                    const idx = startIdx + k;
+                    const electrons = Array.isArray(electronsPerOrbital) ? (electronsPerOrbital[k] || 0) : electronsPerOrbital;
+                    addOrbitalRow(orbitalsEl, idx, electrons);
                 }
+                group.appendChild(orbitalsEl);
+                return group;
+            }
 
-                orbital.classList.add(type);
-
-                orbital.innerHTML = `
-                    <div class="orbital-number">${i}</div>
-                    <div class="orbital-box">
-                        ${type === 'core' ? 'Core' : type === 'active' ? 'Active' : 'Virtual'}
-                    </div>
-                    <div class="electrons">
-                        ${electrons >= 1 ? '<div class="electron up"></div>' : ''}
-                        ${electrons >= 2 ? '<div class="electron down"></div>' : ''}
-                    </div>
-                `;
-
-                orbitalDiagram.appendChild(orbital);
+            if (coreOrbitals > 0) {
+                orbitalDiagram.appendChild(buildGroup('core', 'Core', 1, coreOrbitals, 2));
+            }
+            if (activeOrbitals > 0) {
+                const activeElectronCounts = [];
+                for (let j = 0; j < activeOrbitals; j++) {
+                    activeElectronCounts.push(j < activeOccupiedOrbitals ? 2 : 0);
+                }
+                orbitalDiagram.appendChild(buildGroup('active', 'Active', coreOrbitals + 1, activeOrbitals, activeElectronCounts));
+            }
+            const virtualCount = TOTAL_ORBITALS - coreOrbitals - activeOrbitals;
+            if (virtualCount > 0) {
+                orbitalDiagram.appendChild(buildGroup('virtual', 'Virtual', coreOrbitals + activeOrbitals + 1, virtualCount, 0));
             }
         }
 
         numElectronsInput.addEventListener('input', drawDiagram);
         numOrbitalsInput.addEventListener('input', drawDiagram);
-
-        // Initial draw
         drawDiagram();
     </script>
 </body>

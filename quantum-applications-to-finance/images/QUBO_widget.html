@@ -3,131 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUBO Portfolio Optimization Visualizer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom Styles for NVIDIA Theme */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111111; /* Near black */
-        }
-        .nvidia-green {
-            color: #76b900;
-        }
-        .nvidia-bg-dark {
-            background-color: #222222;
-        }
-        .nvidia-border {
-            border-color: #333333;
-        }
-        /* Custom slider track */
-        input[type="range"]::-webkit-slider-runnable-track {
-            background: #444444;
-        }
-        input[type="range"]::-moz-range-track {
-            background: #444444;
-        }
-        /* Custom slider thumb */
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #76b900;
-            cursor: pointer;
-            border-radius: 50%;
-            margin-top: -6px; /* Center thumb on track */
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #76b900;
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        .accent-nvidia {
-             accent-color: #76b900;
-        }
-    </style>
+    <title>QUBO Portfolio Optimization</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-</head>
-<body class="text-white">
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
+        }
 
-    <div class="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold nvidia-green mb-2">QUBO Portfolio Optimization Visualizer</h1>
-            <p class="text-lg text-gray-400">
-                Interactively explore how risk (β) and return (α) weights affect the QUBO matrix and optimal portfolio selection.
-            </p>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        @media (min-width: 768px) {
+            .widget-container { padding: 32px; }
+        }
+
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol,
+        .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        .instructions-section .kbd {
+            background: var(--nvidia-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus { top: 0; }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .info-box {
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 16px 24px;
+        }
+
+        .slider-wrap:focus-within {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]:focus::-webkit-slider-thumb {
+            box-shadow: 0 0 0 3px var(--nvidia-green);
+        }
+        input[type=range]:focus::-moz-range-thumb {
+            box-shadow: 0 0 0 3px var(--nvidia-green);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            margin-top: -7px;
+            border: 2px solid #1A1A1A;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #444;
+            border-radius: 5px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #76B900;
+            cursor: pointer;
+            border: 2px solid #1A1A1A;
+        }
+
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 900px) {
+            .layout-grid {
+                grid-template-columns: 1fr 1.6fr;
+            }
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--nvidia-light);
+            margin-bottom: 8px;
+        }
+        .control-group .value-display {
+            color: var(--nvidia-green);
+            font-weight: 700;
+        }
+
+        .results-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .results-list li {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            border: 1px solid var(--nvidia-accent);
+        }
+        .results-list .label {
+            font-size: 0.9rem;
+            color: var(--nvidia-gray);
+        }
+        .results-list .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--nvidia-light);
+        }
+        .results-list .value.nvidia-green { color: var(--nvidia-green); }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .heatmap-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: clamp(0.75rem, 2.5vw, 1rem);
+            font-weight: 700;
+            color: var(--nvidia-light);
+            min-height: 44px;
+        }
+        .heatmap-cell.lower {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--nvidia-accent);
+        }
+
+        .formula-box {
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--nvidia-gray);
+            text-align: center;
+        }
+        .formula-box code {
+            color: var(--nvidia-green);
+            font-family: inherit;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--nvidia-green);
+            margin: 0 0 12px 0;
+        }
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--nvidia-light);
+            margin: 0 0 12px 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>QUBO Portfolio Optimization</h1>
+            <p class="summary-text">Explore how risk (β) and return (α) weights affect the QUBO matrix and optimal portfolio selection.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Panel: Controls and Results -->
-            <div class="lg:col-span-1 nvidia-bg-dark p-6 rounded-2xl shadow-lg border nvidia-border">
-                <!-- Controls -->
-                <div class="mb-6">
-                    <h2 class="text-2xl font-semibold text-white mb-4">Parameters</h2>
-                    <div class="mb-4">
-                        <label for="alpha" class="block nvidia-green font-medium mb-2">α (Return Factor): <span id="alpha-value">1.00</span></label>
-                        <input type="range" id="alpha" min="0" max="3" step="0.05" value="1.0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-nvidia">
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Adjust the <strong>α (Return)</strong> and <strong>β (Risk)</strong> sliders to change the QUBO objective. The matrix and optimal portfolio update in real time.</li>
+                <li>Compare the selected assets and portfolio risk/return. Lower QUBO quality (minimized) corresponds to the chosen trade-off.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between sliders (focused slider has a green ring). <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate. <span class="kbd">ESC</span> to reset if applicable.</p>
+        </section>
+
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+        <div class="layout-grid">
+            <div class="info-box">
+                <h3 class="panel-title">Parameters</h3>
+                <div class="control-group">
+                    <label for="alpha">α (Return factor): <span id="alpha-value" class="value-display" aria-live="polite">1.00</span></label>
+                    <div class="slider-wrap">
+                        <input type="range" id="alpha" min="0" max="3" step="0.05" value="1" tabindex="0" aria-label="Return factor alpha" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1">
                     </div>
-                    <div>
-                        <label for="beta" class="block nvidia-green font-medium mb-2">β (Risk Factor): <span id="beta-value">1.00</span></label>
-                        <input type="range" id="beta" min="0" max="3" step="0.05" value="1.0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-nvidia">
+                </div>
+                <div class="control-group">
+                    <label for="beta">β (Risk factor): <span id="beta-value" class="value-display" aria-live="polite">1.00</span></label>
+                    <div class="slider-wrap">
+                        <input type="range" id="beta" min="0" max="3" step="0.05" value="1" tabindex="0" aria-label="Risk factor beta" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1">
                     </div>
                 </div>
 
-                <!-- Results -->
-                <div>
-                    <h2 class="text-2xl font-semibold text-white mb-4 border-t nvidia-border pt-6">Optimal Portfolio</h2>
-                    <div class="space-y-3">
-                        <div class="bg-gray-700 p-4 rounded-lg">
-                            <p class="text-sm text-gray-400">Selected Assets</p>
-                            <p id="result-selection" class="text-xl font-mono font-bold text-white">N/A</p>
-                        </div>
-                        <div class="bg-gray-700 p-4 rounded-lg">
-                            <p class="text-sm text-gray-400">Portfolio Risk</p>
-                            <p id="result-risk" class="text-xl font-bold nvidia-green">0.0000</p>
-                        </div>
-                        <div class="bg-gray-700 p-4 rounded-lg">
-                            <p class="text-sm text-gray-400">Portfolio Return</p>
-                            <p id="result-return" class="text-xl font-bold nvidia-green">0.0000</p>
-                        </div>
-                        <div class="bg-gray-700 p-4 rounded-lg">
-                            <p class="text-sm text-gray-400">Total QUBO Quality (minimized)</p>
-                            <p id="result-quality" class="text-xl font-bold nvidia-green">0.0000</p>
-                        </div>
-                    </div>
-                </div>
+                <h3 class="panel-title" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--nvidia-accent);">Optimal Portfolio</h3>
+                <ul class="results-list" aria-live="polite">
+                    <li>
+                        <span class="label">Selected assets</span>
+                        <p id="result-selection" class="value">N/A</p>
+                    </li>
+                    <li>
+                        <span class="label">Portfolio risk</span>
+                        <p id="result-risk" class="value nvidia-green">0.0000</p>
+                    </li>
+                    <li>
+                        <span class="label">Portfolio return</span>
+                        <p id="result-return" class="value nvidia-green">0.0000</p>
+                    </li>
+                    <li>
+                        <span class="label">Total QUBO quality (minimized)</span>
+                        <p id="result-quality" class="value nvidia-green">0.0000</p>
+                    </li>
+                </ul>
             </div>
 
-            <!-- Right Panel: Heatmap -->
-            <div class="lg:col-span-2 nvidia-bg-dark p-6 rounded-2xl shadow-lg border nvidia-border">
-                <h2 class="text-2xl font-semibold text-white mb-2 text-center">QUBO Matrix Heatmap (Q)</h2>
-                <p class="text-center text-sm text-gray-400 mb-4">
-                    Lower values (<span class="text-blue-400">blue</span>) contribute to higher-quality portfolios.
-                </p>
-                <div class="flex flex-col items-center justify-center">
-                    <div id="heatmap-container" class="grid grid-cols-4 gap-1 p-2 bg-gray-900 rounded-lg">
-                        <!-- Heatmap cells will be generated by JavaScript -->
-                    </div>
+            <div class="info-box">
+                <h3 class="section-title" style="text-align: center;">QUBO matrix heatmap (Q)</h3>
+                <p style="text-align: center; font-size: 0.9rem; color: var(--nvidia-gray); margin-bottom: 16px;">Green cells = negative values (lower cost, favorable for the portfolio). Red cells = positive values (higher cost, unfavorable). Numeric values are displayed in each cell for accessibility.</p>
+                <div id="heatmap-container" class="heatmap-grid" role="img" aria-label="QUBO matrix heatmap">
+                    <!-- Filled by JS -->
                 </div>
             </div>
         </div>
 
-        <!-- Footer with formula -->
-        <footer class="mt-8 text-center text-gray-500 text-sm">
-            <p>QUBO Matrix Definition:</p>
-            <p><span class="font-mono nvidia-green">Q[i,i] = -αμ_i + βΣ_ii</span></p>
-            <p><span class="font-mono nvidia-green">Q[i,j] = 2βΣ_ij</span> for i &lt; j</p>
+        <div class="formula-box">
+            <p style="margin: 0 0 8px 0;">QUBO matrix definition:</p>
+            <p style="margin: 0;"><code>Q[i,i] = −αμ_i + βΣ_ii</code></p>
+            <p style="margin: 0;"><code>Q[i,j] = 2βΣ_ij</code> for i &lt; j</p>
+        </div>
+
+        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "Portfolio Optimization with QAOA, Annealing, and QChop (Quantum Applications to Finance)".
+            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;">here</a>.
+        </div>
+
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
         </footer>
     </div>
 
     <script>
-        // --- Static Data ---
         const mu = [0.80, 0.70, 0.25, 0.20];
         const Sigma = [
             [0.90, 0.45, 0.55, 0.10],
@@ -137,7 +403,6 @@
         ];
         const nAssets = mu.length;
 
-        // --- DOM Element References ---
         const alphaSlider = document.getElementById('alpha');
         const betaSlider = document.getElementById('beta');
         const alphaValueSpan = document.getElementById('alpha-value');
@@ -147,12 +412,8 @@
         const resultRisk = document.getElementById('result-risk');
         const resultReturn = document.getElementById('result-return');
         const resultQuality = document.getElementById('result-quality');
+        const statusAnnounce = document.getElementById('status-announce');
 
-        // --- Core Functions ---
-
-        /**
-         * Calculates the upper-triangular QUBO matrix.
-         */
         function calculateQubo(alpha, beta) {
             const n = mu.length;
             const Q = Array(n).fill(0).map(() => Array(n).fill(0));
@@ -165,9 +426,6 @@
             return Q;
         }
 
-        /**
-         * Finds the best portfolio by iterating through all 2^n combinations.
-         */
         function findBestPortfolio(Q) {
             let bestSelection = [];
             let minQuality = Infinity;
@@ -201,73 +459,76 @@
             return { selection: bestSelection, risk, return: returnValue, quality: minQuality };
         }
 
-        /**
-         * Generates a color for the heatmap cell.
-         */
-        function getColor(value, min, max) {
-            if (value === 0 && min < 0 && max > 0) return 'rgba(200, 200, 200, 0.1)';
-            if (max === min) return 'rgba(128, 128, 255, 0.8)';
-
-            const opacity = Math.abs(value) / Math.max(Math.abs(min), Math.abs(max));
-            if (value > 0) { // Shades of red for positive
-                return `rgba(255, ${150 - opacity * 100}, ${150 - opacity * 100}, ${0.2 + opacity * 0.8})`;
+        function getHeatmapColor(value, minVal, maxVal) {
+            if (maxVal === minVal) return 'rgba(118, 185, 0, 0.5)';
+            const t = (value - minVal) / (maxVal - minVal);
+            if (value <= 0) {
+                const intensity = 0.3 + 0.6 * (1 - Math.abs(value) / Math.max(Math.abs(minVal), 1e-6));
+                return `rgba(94, 148, 0, ${intensity})`;
             }
-            if (value < 0) { // Shades of blue for negative
-                return `rgba(${150 - opacity * 100}, ${150 - opacity * 100}, 255, ${0.2 + opacity * 0.8})`;
-            }
-            return 'rgba(255, 255, 255, 0.1)';
+            const redIntensity = 0.3 + 0.6 * t;
+            return `rgba(229, 32, 32, ${redIntensity})`;
         }
 
-        /**
-         * Main update function to refresh the UI.
-         */
         function update() {
             const alpha = parseFloat(alphaSlider.value);
             const beta = parseFloat(betaSlider.value);
 
-            // Update slider value displays
             alphaValueSpan.textContent = alpha.toFixed(2);
             betaValueSpan.textContent = beta.toFixed(2);
+            alphaSlider.setAttribute('aria-valuenow', alpha);
+            betaSlider.setAttribute('aria-valuenow', beta);
 
-            // Calculate QUBO and find best portfolio
             const quboMatrix = calculateQubo(alpha, beta);
             const portfolio = findBestPortfolio(quboMatrix);
 
-            // Update results display
-            resultSelection.textContent = `[${portfolio.selection.join(', ')}]`;
+            resultSelection.textContent = '[' + portfolio.selection.join(', ') + ']';
             resultRisk.textContent = portfolio.risk.toFixed(4);
             resultReturn.textContent = portfolio.return.toFixed(4);
             resultQuality.textContent = portfolio.quality.toFixed(4);
 
-            // Update heatmap
-            heatmapContainer.innerHTML = ''; // Clear previous heatmap
-            const values = quboMatrix.flat().filter(v => v !== 0);
-            const stats = { min: Math.min(...values, 0), max: Math.max(...values, 0) };
+            if (statusAnnounce) {
+                statusAnnounce.textContent = 'Alpha ' + alpha.toFixed(2) + ', Beta ' + beta.toFixed(2) + '. Optimal portfolio ' + portfolio.selection.join(', ') + ', quality ' + portfolio.quality.toFixed(4);
+            }
 
+            const values = quboMatrix.flat();
+            const minVal = Math.min(...values);
+            const maxVal = Math.max(...values);
+
+            heatmapContainer.innerHTML = '';
             for (let i = 0; i < nAssets; i++) {
                 for (let j = 0; j < nAssets; j++) {
                     const value = quboMatrix[i][j];
                     const cell = document.createElement('div');
-                    cell.className = 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center rounded-md transition-colors duration-200';
-                    
+                    cell.className = 'heatmap-cell';
                     if (i > j) {
-                        cell.classList.add('bg-gray-800');
+                        cell.classList.add('lower');
+                        cell.textContent = value.toFixed(2);
+                        cell.setAttribute('aria-label', 'Row ' + (i + 1) + ' column ' + (j + 1) + ' value ' + value.toFixed(2) + ' (lower triangle)');
                     } else {
-                        cell.style.backgroundColor = getColor(value, stats.min, stats.max);
-                        cell.innerHTML = `<span class="text-xs sm:text-sm md:text-base font-semibold text-white drop-shadow-md">${value.toFixed(2)}</span>`;
+                        cell.style.backgroundColor = getHeatmapColor(value, minVal, maxVal);
+                        cell.style.border = '1px solid var(--nvidia-accent)';
+                        cell.textContent = value.toFixed(2);
+                        cell.setAttribute('aria-label', 'Row ' + (i + 1) + ' column ' + (j + 1) + ' value ' + value.toFixed(2));
                     }
                     heatmapContainer.appendChild(cell);
                 }
             }
         }
 
-        // --- Event Listeners ---
         alphaSlider.addEventListener('input', update);
         betaSlider.addEventListener('input', update);
 
-        // --- Initial Load ---
-        window.onload = update;
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                alphaSlider.value = 1;
+                betaSlider.value = 1;
+                update();
+            }
+        });
 
+        update();
     </script>
 </body>
 </html>

@@ -4,39 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diffusion Model Widget</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* NVIDIA-inspired Color Palette */
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
             --background-color: #1a1a1a;
             --widget-background: #2a2a2a;
             --text-color: #e0e0e0;
-            --header-color: #ffffff;
             --border-color: #444444;
-            --accent-color: #76b900; /* NVIDIA Green */
-            --accent-hover: #88cc00; /* Lighter green for hover */
+            --accent-color: #76b900;
+            --accent-hover: #88cc00;
         }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: #76b900; color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 2rem 1rem;
             box-sizing: border-box;
-        }
-
-        #widget-container {
-            background-color: var(--widget-background);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            padding: 2rem 2.5rem;
-            max-width: 900px;
-            width: 100%;
         }
 
         h1, h2 {
@@ -154,9 +202,21 @@
     </style>
 </head>
 <body>
-
-<div id="widget-container">
-    <h1>Diffusion Model Simulation</h1>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Diffusion Model Simulation</h1>
+            <p class="summary-text">Explore forward (noise) and reverse (generation) diffusion processes with interactive controls.</p>
+        </header>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li><strong>Forward process:</strong> Move the "Diffusion Step" slider to see how the image is corrupted by noise.</li>
+                <li><strong>Reverse process:</strong> Click "Generate New Images" to watch the model create images from noise. Use the speed dropdown to change animation speed.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons. <span class="kbd">ESC</span> to stop or reset if applicable.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
     
     <section id="forward-process">
         <h2>1. Forward Process: Corrupting an Image</h2>
@@ -216,7 +276,18 @@
              </div>
         </div>
     </section>
-</div>
+
+    <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: #AAAAAA; text-align: center; border-top: 1px solid #444; padding-top: 16px; width: 100%;">
+        Note: This widget is part of the CUDA-Q Academic lesson entitled "Compiling Unitaries Using Diffusion Models (AI for Quantum)".
+        You can learn more about its context by visiting the link <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900; text-decoration: none; font-weight: bold;">here</a>.
+    </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

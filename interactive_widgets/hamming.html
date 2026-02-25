@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVIDIA Hamming [7,4,3] Matrix Demo</title>
+    <!-- Dependencies: Google Fonts (Inter). Permissive licenses only per widget creator policy (MIT/BSD/Apache 2.0/ISC/zlib). -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Rule 1.3: Standard Color Palette */
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;     /* Page background */
+            --nvidia-mid: #2A2A2A;      /* Container background */
+            --nvidia-accent: #444444;   /* Borders */
+            --nvidia-light: #E0E0E0;    /* Primary text */
+            --nvidia-gray: #AAAAAA;     /* Secondary text */
+            /* Error/indicator: muted red for dark backgrounds (WCAG-friendly, not harsh) */
+            --nvidia-error: #c45c5c;
+            --nvidia-error-rgba: rgba(196, 92, 92, 0.2);
+            /* Parity check colors (matching Steane widget) */
+            --parity-p1: #ef9100;
+            --parity-p2: #3399FF;
+            --parity-p3: #E0E0E0;
+        }
+
+        /* Rule 1.0 & 2.1 & 2.2: Body Defaults, Typography, Spacing */
+        body {
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.5;
+            letter-spacing: 0.01em;
+            word-spacing: 0.16em;
+        }
+
+        /* Rule 6.1: Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+
+        /* Rule 4.1: Focus Indicators */
+        :focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            border-color: CanvasText;
+        }
+
+        /* Rule 8.1: Skip Link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            transition: top 0.2s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+        /* Rule 21.1: Header Styling */
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            color: var(--nvidia-green);
+            margin: 0 0 16px 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Summary text per Rule 21.1 */
+        .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Rule 3.3: Keyboard Help */
+        .keyboard-help {
+            font-size: 0.85rem;
+            color: var(--nvidia-gray);
+            margin-top: 8px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (min-width: 768px) {
+            .controls { grid-template-columns: 1fr 1fr; }
+            h1 { font-size: 1.8rem; letter-spacing: 2px; }
+            .container { padding: 32px; }
+        }
+
+        .panel {
+            background: var(--nvidia-dark);
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid var(--nvidia-accent);
+        }
+
+        .label {
+            font-size: 0.85rem;
+            color: var(--nvidia-green);
+            margin-bottom: 16px;
+            display: block;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .bit-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Rule 16.1: Button Styling Standards (Primary Interactive) */
+        .bit-btn {
+            /* Rule 5.1: Minimum Size 44x44 */
+            min-width: 48px;
+            min-height: 58px;
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-bottom: 3px solid var(--nvidia-green);
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0;
+        }
+
+        .bit-btn:hover {
+            background: var(--nvidia-green);
+            color: #000000; /* High Contrast Rule 16.1 */
+            border-color: var(--nvidia-green);
+        }
+
+        .bit-btn.active {
+            background: var(--nvidia-green);
+            color: #000000;
+            border-color: var(--nvidia-green);
+        }
+
+        /* Differentiate Parity/Error visually while maintaining contrast */
+        .bit-btn.parity {
+             /* Secondary style indicator */
+             border-top: 3px solid transparent; 
+        }
+        
+        .bit-btn.parity-1:not(:hover):not(.active) { color: var(--parity-p1); }
+        .bit-btn.parity-2:not(:hover):not(.active) { color: var(--parity-p2); }
+        .bit-btn.parity-3:not(:hover):not(.active) { color: var(--parity-p3); }
+        .bit-btn.parity-1 .sub-label { color: var(--parity-p1); }
+        .bit-btn.parity-2 .sub-label { color: var(--parity-p2); }
+        .bit-btn.parity-3 .sub-label { color: var(--parity-p3); }
+
+        .bit-btn.error {
+            background: var(--nvidia-error) !important;
+            border-color: var(--nvidia-error) !important;
+            color: white !important;
+        }
+
+        .bit-btn.codeword-highlight {
+            box-shadow: 0 0 10px rgba(118, 185, 0, 0.5);
+            border-top: 3px solid var(--nvidia-green);
+            background: rgba(118, 185, 0, 0.18) !important;
+        }
+        .bit-btn.error.codeword-highlight {
+            box-shadow: 0 0 10px rgba(118, 185, 0, 0.5), 0 0 0 2px var(--nvidia-green);
+        }
+        .bit-btn.highlight-p1 {
+            box-shadow: 0 0 12px rgba(239, 145, 0, 0.6);
+            border-top: 3px solid var(--parity-p1) !important;
+            background: rgba(239, 145, 0, 0.15) !important;
+        }
+        .bit-btn.highlight-p2 {
+            box-shadow: 0 0 12px rgba(51, 153, 255, 0.6);
+            border-top: 3px solid var(--parity-p2) !important;
+            background: rgba(51, 153, 255, 0.15) !important;
+        }
+        .bit-btn.highlight-p3 {
+            box-shadow: 0 0 12px rgba(224, 224, 224, 0.4);
+            border-top: 3px solid var(--parity-p3) !important;
+            background: rgba(224, 224, 224, 0.1) !important;
+        }
+        .bit-btn.highlight-self {
+            box-shadow: 0 0 14px rgba(118, 185, 0, 0.7);
+            border-top: 3px solid var(--nvidia-green) !important;
+            background: rgba(118, 185, 0, 0.2) !important;
+        }
+
+        .mapping-note {
+            font-size: 0.78rem;
+            color: var(--nvidia-gray);
+            margin-top: 10px;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .mapping-note span {
+            margin: 0 4px;
+        }
+
+        .sub-label {
+            position: absolute;
+            bottom: 4px;
+            font-size: 0.65rem;
+            opacity: 0.9;
+            font-weight: bold;
+        }
+
+        .main-viz {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            width: 100%;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        canvas {
+            background: var(--nvidia-dark);
+            border-radius: 8px;
+            border: 1px solid var(--nvidia-accent);
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+
+        .status-box {
+            width: 100%;
+            padding: 16px;
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 6px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .status-text { 
+            font-size: 1.3rem; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+        }
+
+        .logical-alert { 
+            color: var(--nvidia-error); 
+            font-weight: bold; 
+            margin-top: 12px; 
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+
+        .matrix-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--nvidia-accent);
+            width: 100%;
+        }
+
+        .matrix-scroll-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px 0;
+            font-family: 'Inter', monospace; /* Rule 18.1 */
+        }
+
+        .matrix-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 8px;
+        }
+
+        .matrix-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            position: relative;
+            padding: 0 12px;
+        }
+
+        .vector-container {
+            display: grid;
+            grid-template-rows: repeat(7, 1fr);
+            gap: 4px;
+            position: relative;
+            padding: 0 12px;
+        }
+
+        .syndrome-container {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px;
+            position: relative;
+            padding: 0 12px;
+        }
+
+        /* Brackets */
+        .bracket::before, .bracket::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 8px;
+            border: 2px solid var(--nvidia-light);
+        }
+        .bracket::before { border-right: none; left: 0; }
+        .bracket::after { border-left: none; right: 0; }
+
+        .cell {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--nvidia-gray);
+        }
+        
+        .cell.one { color: var(--nvidia-light); }
+        
+        .cell.err-bit { 
+            background: var(--nvidia-error); 
+            color: white; 
+            border-radius: 2px;
+        }
+
+        .cell.syndrome-bit {
+            color: var(--nvidia-green);
+        }
+        .cell.syndrome-err {
+            color: var(--nvidia-error);
+            font-weight: bold;
+        }
+
+        .operator {
+            font-size: 1.5rem;
+            color: var(--nvidia-green);
+            font-weight: bold;
+            margin: 0 8px;
+        }
+        
+        .matrix-legend {
+            font-size: 0.75rem;
+            color: var(--nvidia-gray);
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* Section 24: Standard Footer Navigation */
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        .instructions-section .kbd {
+            background: var(--nvidia-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+
+        /* Rule 7.2: Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        @media (max-width: 480px) {
+            .cell { width: 24px; height: 24px; font-size: 0.9rem; }
+            .bit-btn { min-width: 42px; min-height: 52px; font-size: 1.1rem; }
+            .matrix-container { gap: 2px; padding: 0 8px; }
+            .vector-container, .syndrome-container { gap: 2px; }
+            .operator { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Rule 8.1: Skip Link (REQUIRED for accessibility) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="widget-container" id="main-content" role="main">
+    <header>
+        <h1>Hamming [7, 4, 3] Visualizer</h1>
+        <!-- Rule 21.1: Summary -->
+        <p class="summary-text">A visualization of error correction using parity bits and matrix multiplication to detect and correct single-bit errors.</p>
+    </header>
+
+    <section class="instructions-section" aria-labelledby="instructions-heading">
+        <h2 id="instructions-heading">Instructions</h2>
+        <ol>
+            <li><strong>1. Original Message</strong> — Toggle data bits D1–D4 (0 or 1) to set the 4-bit message. The codeword (7 bits: D1,D2,D3,D4,P1,P2,P3) updates automatically.</li>
+            <li><strong>2. Codeword</strong> — Click any of the 7 bits in the codeword strip to inject an error (bit is highlighted in the error color). Click again to remove it. Add one error to see correction; add two or more to see undetected logical errors.</li>
+            <li>Watch the Venn diagram and the <strong>Parity Check (H × r = s)</strong> to see how the syndrome identifies the flipped bit. Status shows HEALTHY or ERROR DETECTED.</li>
+        </ol>
+        <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> — move between sections. <span class="kbd">Left</span> / <span class="kbd">Right</span> — move between the 11 bit buttons (4 message bits, then 7 codeword bits). <span class="kbd">Enter</span> or <span class="kbd">Space</span> — toggle the focused bit. <span class="kbd">ESC</span> — reset simulation.</p>
+    </section>
+
+    <div class="controls">
+        <section class="panel" aria-labelledby="label-original">
+            <span class="label" id="label-original">1. Original Message</span>
+            <div class="bit-row" id="data-inputs">
+                <!-- D1-D4 buttons filled by JS -->
+            </div>
+        </section>
+        <section class="panel" aria-labelledby="label-codeword">
+            <span class="label" id="label-codeword">2. Codeword (Click to add errors)</span>
+            <div class="bit-row" id="message-strip">
+                <!-- 7 bits strip filled by JS -->
+            </div>
+            <p class="mapping-note" aria-hidden="true">Hover a data bit to highlight its codeword position. Order: <span>D1</span> <span>D2</span> <span>D3</span> <span>D4</span> <span style="color:var(--parity-p1)">P1</span> <span style="color:var(--parity-p2)">P2</span> <span style="color:var(--parity-p3)">P3</span></p>
+            <p class="mapping-note" aria-hidden="true" style="margin-top:4px;">Parity checks: <span style="color:var(--parity-p1);">&#9632; Parity 1 (P1)</span> &nbsp; <span style="color:var(--parity-p2);">&#9632; Parity 2 (P2)</span> &nbsp; <span style="color:var(--parity-p3);">&#9632; Parity 3 (P3)</span></p>
+        </section>
+    </div>
+
+    <div class="main-viz">
+        <div class="canvas-wrapper" aria-hidden="true">
+            <canvas id="hammingCanvas"></canvas>
+        </div>
+        
+        <div class="status-box" role="status" aria-live="polite">
+            <div class="status-text" id="status-summary">Status: <span style="color:var(--nvidia-green)">Healthy</span></div>
+            <div id="logical-status"></div>
+        </div>
+
+        <section class="matrix-section">
+            <div class="label">Parity Check Operation (H &times; r = s)</div>
+            <div class="matrix-scroll-wrapper">
+                
+                <div class="matrix-block">
+                    <div class="matrix-container bracket" id="matrix-H" aria-label="Parity Check Matrix H">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="matrix-legend">Matrix (H)</div>
+                </div>
+
+                <div class="operator" aria-hidden="true">&times;</div>
+
+                <div class="matrix-block">
+                    <div class="vector-container bracket" id="vector-r" aria-label="Received Vector r">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="matrix-legend">Received (r)</div>
+                </div>
+
+                <div class="operator" aria-hidden="true">=</div>
+
+                <div class="matrix-block">
+                    <div class="syndrome-container bracket" id="vector-s" aria-label="Syndrome Vector s">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="matrix-legend">Syndrome (s)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Educational Context Footer -->
+        <div style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "The Basics of Classical and Quantum Error Correction". 
+            You can learn more about its context by visiting the link <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb" target="_blank" rel="noopener noreferrer" style="color: var(--nvidia-green); text-decoration: none; font-weight: bold;">here</a>.
+        </div>
+
+        <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('hammingCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function getErrorColor() {
+        return getComputedStyle(document.documentElement).getPropertyValue('--nvidia-error').trim();
+    }
+    function getErrorColorRgba() {
+        return getComputedStyle(document.documentElement).getPropertyValue('--nvidia-error-rgba').trim();
+    }
+    function hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1,3), 16);
+        const g = parseInt(hex.slice(3,5), 16);
+        const b = parseInt(hex.slice(5,7), 16);
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    // App State
+    let data = [1, 0, 1, 1]; 
+    let errorMask = [0, 0, 0, 0, 0, 0, 0]; 
+    let hoveredBitIdx = -1;
+    let lastReceived = null;
+    let lastSyndrome = [0, 0, 0];
+
+    // Rule 3.2: Global Keyboard Shortcuts
+    document.addEventListener('keydown', function(event) {
+        // ESC key - Reset
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            resetSimulation();
+        }
+        // Arrow Left/Right: navigate between the 11 bit buttons (4 data + 7 codeword)
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            const dataBtns = Array.from(document.querySelectorAll('#data-inputs .bit-btn'));
+            const stripBtns = Array.from(document.querySelectorAll('#message-strip .bit-btn'));
+            const allBitButtons = dataBtns.concat(stripBtns);
+            const idx = allBitButtons.indexOf(event.target);
+            if (idx !== -1) {
+                event.preventDefault();
+                const next = event.key === 'ArrowRight'
+                    ? (idx + 1) % allBitButtons.length
+                    : (idx - 1 + allBitButtons.length) % allBitButtons.length;
+                allBitButtons[next].focus();
+                return;
+            }
+        }
+        // Enter/Space on focused button
+        if (event.target.matches('button')) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.target.click();
+            }
+        }
+    });
+
+    function resetSimulation() {
+        data = [1, 0, 1, 1];
+        errorMask = [0, 0, 0, 0, 0, 0, 0];
+        initUI();
+    }
+
+    const H_MATRIX = [
+        [1, 1, 0, 1, 1, 0, 0], 
+        [1, 0, 1, 1, 0, 1, 0], 
+        [0, 1, 1, 1, 0, 0, 1]  
+    ];
+
+    function getParity(d) {
+        return [
+            d[0] ^ d[1] ^ d[3], 
+            d[0] ^ d[2] ^ d[3], 
+            d[1] ^ d[2] ^ d[3]  
+        ];
+    }
+
+    function initUI() {
+        // Render Input Data Bits
+        const dataInputs = document.getElementById('data-inputs');
+        dataInputs.innerHTML = data.map((bit, i) => {
+            const label = `Data Bit D${i+1}`;
+            return `
+                <button type="button" class="bit-btn ${bit ? 'active' : ''}" 
+                        tabindex="0"
+                        data-bit-index="${i}"
+                        onclick="toggleData(${i})" 
+                        aria-pressed="${bit === 1}"
+                        aria-label="${label}: currently ${bit}. Press Space or Enter to toggle.">
+                    ${bit}
+                    <span class="sub-label" aria-hidden="true">D${i+1}</span>
+                </button>
+            `;
+        }).join('');
+
+        const parity = getParity(data);
+        const fullMsg = [...data, ...parity]; 
+        const received = fullMsg.map((bit, i) => bit ^ errorMask[i]);
+
+        // Render Received Strip Bits
+        const msgStrip = document.getElementById('message-strip');
+        msgStrip.innerHTML = received.map((bit, i) => {
+            const isParity = i >= 4;
+            const isError = errorMask[i];
+            const bitType = isParity ? 'Parity' : 'Data';
+            const bitNum = isParity ? i-3 : i+1;
+            const label = `${bitType} Bit ${isParity ? 'P' : 'D'}${bitNum}`;
+            const errorStatus = isError ? "Error added" : "Correct";
+            
+            const parityClass = isParity ? `parity parity-${bitNum}` : '';
+            return `
+                <button type="button" class="bit-btn ${parityClass} ${isError ? 'error' : ''}" 
+                        tabindex="0"
+                        data-codeword-index="${i}"
+                        onclick="toggleError(${i})"
+                        aria-pressed="${isError === 1}"
+                        aria-label="${label}: value ${bit}, ${errorStatus}. Press Space or Enter to toggle error.">
+                    ${bit}
+                    <span class="sub-label" aria-hidden="true">${isParity ? 'P'+bitNum : 'D'+bitNum}</span>
+                </button>
+            `;
+        }).join('');
+
+        updateLogic(received);
+    }
+
+    function toggleData(i) {
+        data[i] = data[i] ? 0 : 1;
+        initUI();
+        // Restore focus to the same bit button so keyboard nav is not lost
+        requestAnimationFrame(() => {
+            const btn = document.querySelector('#data-inputs button[data-bit-index="' + i + '"]');
+            if (btn) btn.focus();
+        });
+    }
+
+    function toggleError(i) {
+        errorMask[i] = errorMask[i] ? 0 : 1;
+        initUI();
+        requestAnimationFrame(() => {
+            const btn = document.querySelector('#message-strip button[data-codeword-index="' + i + '"]');
+            if (btn) btn.focus();
+        });
+    }
+
+    function updateLogic(received) {
+        const c1_fail = received[0] ^ received[1] ^ received[3] ^ received[4]; 
+        const c2_fail = received[0] ^ received[2] ^ received[3] ^ received[5]; 
+        const c3_fail = received[1] ^ received[2] ^ received[3] ^ received[6]; 
+
+        const actualErrorCount = errorMask.reduce((a, b) => a + b, 0);
+        const statusEl = document.getElementById('status-summary');
+        const logicalEl = document.getElementById('logical-status');
+
+        if (!c1_fail && !c2_fail && !c3_fail) {
+            statusEl.innerHTML = `Status: <span style="color:var(--nvidia-green)">HEALTHY</span>`;
+            if (actualErrorCount > 1) {
+                logicalEl.innerHTML = `<div class="logical-alert">LOGICAL ERROR: Undetected Multi-bit Flip!</div>`;
+            } else {
+                logicalEl.innerHTML = "";
+            }
+        } else {
+            if (actualErrorCount > 1) {
+                statusEl.innerHTML = `Status: <span style="color:var(--nvidia-error)">ERROR DETECTED</span>`;
+                logicalEl.innerHTML = `<div class="logical-alert">LOGICAL ERROR: Multiple Bits Flipped!</div>`;
+            } else {
+                statusEl.innerHTML = `Status: <span style="color:var(--nvidia-error)">ERROR DETECTED BUT CORRECTABLE</span>`;
+                const synVal = (c3_fail << 2) | (c2_fail << 1) | c1_fail;
+                const synMap = { 1: "P1", 2: "P2", 3: "D1", 4: "P3", 5: "D2", 6: "D3", 7: "D4" };
+                const errLabel = synMap[synVal] || "Unknown";
+
+                logicalEl.innerHTML = `<div style="color:var(--nvidia-green); font-weight: bold; margin-top: 10px;">
+                    Syndrome: [${c1_fail}, ${c2_fail}, ${c3_fail}] &rarr; Error in ${errLabel}
+                </div>`;
+            }
+        }
+
+        lastReceived = received;
+        lastSyndrome = [c1_fail, c2_fail, c3_fail];
+        drawVenn(c1_fail, c2_fail, c3_fail, received, hoveredBitIdx);
+        renderMatrixMath(received, lastSyndrome);
+    }
+
+    const PARITY_COLORS = ['var(--parity-p1)', 'var(--parity-p2)', 'var(--parity-p3)'];
+    const PARITY_HEX = ['#ef9100', '#3399FF', '#E0E0E0'];
+
+    function renderMatrixMath(receivedSystematic, syndrome) {
+        const labels = ["D1", "D2", "D3", "D4", "P1", "P2", "P3"];
+        
+        const hContainer = document.getElementById('matrix-H');
+        hContainer.innerHTML = '';
+        H_MATRIX.forEach((row, rowIdx) => {
+            row.forEach(val => {
+                const d = document.createElement('div');
+                d.className = 'cell';
+                d.textContent = val;
+                d.style.color = val ? PARITY_COLORS[rowIdx] : 'var(--nvidia-gray)';
+                if (val) d.style.fontWeight = 'bold';
+                hContainer.appendChild(d);
+            });
+        });
+
+        const rContainer = document.getElementById('vector-r');
+        rContainer.innerHTML = '';
+        receivedSystematic.forEach((val, idx) => {
+            const isError = errorMask[idx] === 1;
+            const d = document.createElement('div');
+            d.className = `cell ${isError ? 'err-bit' : 'one'}`;
+            d.innerHTML = `${val}<span style="font-size:0.5rem; margin-left:3px; opacity:0.6">${labels[idx]}</span>`;
+            rContainer.appendChild(d);
+        });
+
+        const sContainer = document.getElementById('vector-s');
+        sContainer.innerHTML = '';
+        syndrome.forEach((bit, i) => {
+            const d = document.createElement('div');
+            d.className = 'cell';
+            d.textContent = bit;
+            d.style.color = bit ? 'var(--nvidia-error)' : PARITY_COLORS[i];
+            d.style.fontWeight = 'bold';
+            sContainer.appendChild(d);
+        });
+    }
+
+    function drawVenn(f1, f2, f3, received, highlightIdx) {
+        if (highlightIdx === undefined) highlightIdx = -1;
+        // Rule 15.1: High-DPI Canvas Rendering
+        const cssWidth = 800;
+        const cssHeight = 600;
+        
+        // Ensure scale is at least 2 for sharpness
+        const scale = Math.max(2, window.devicePixelRatio || 1);
+        
+        // Update display size
+        canvas.style.width = cssWidth + "px";
+        canvas.style.height = cssHeight + "px";
+        
+        // Update actual size
+        canvas.width = cssWidth * scale;
+        canvas.height = cssHeight * scale;
+        
+        // Normalize context
+        ctx.scale(scale, scale);
+
+        ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+        const centerX = cssWidth / 2;
+        const centerY = cssHeight / 2;
+        const radius = Math.min(cssWidth, cssHeight) * 0.25; 
+        const offset = radius * 0.6;
+
+        const circles = [
+            { x: centerX, y: centerY - offset, failed: f1, label: 'Parity 1', color: PARITY_HEX[0] }, 
+            { x: centerX - offset, y: centerY + offset * 0.5, failed: f2, label: 'Parity 2', color: PARITY_HEX[1] }, 
+            { x: centerX + offset, y: centerY + offset * 0.5, failed: f3, label: 'Parity 3', color: PARITY_HEX[2] }
+        ];
+
+        const errColor = getErrorColor();
+        const errRgba = getErrorColorRgba();
+        circles.forEach(c => {
+            const baseColor = c.color;
+            const baseRgba = hexToRgba(baseColor, 0.08);
+
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = c.failed ? errColor : baseColor;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.fillStyle = c.failed ? errRgba : baseRgba;
+            ctx.fill();
+
+            ctx.fillStyle = c.failed ? errColor : baseColor;
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            let ly = (c.label.includes('1')) ? c.y - radius - 10 : c.y + radius + 20;
+            ctx.fillText(c.label, c.x, ly);
+        });
+
+        const bitPositions = [
+            { id: 'D1', x: centerX - offset/1.8, y: centerY - offset/4, val: received[0], idx: 0 }, 
+            { id: 'D2', x: centerX + offset/1.8, y: centerY - offset/4, val: received[1], idx: 1 }, 
+            { id: 'D3', x: centerX, y: centerY + offset*0.6, val: received[2], idx: 2 },            
+            { id: 'D4', x: centerX, y: centerY + offset*0.1, val: received[3], idx: 3 },            
+            { id: 'P1', x: centerX, y: centerY - offset - 40, val: received[4], idx: 4 },           
+            { id: 'P2', x: centerX - offset - 40, y: centerY + offset, val: received[5], idx: 5 },
+            { id: 'P3', x: centerX + offset + 40, y: centerY + offset, val: received[6], idx: 6 } 
+        ];
+
+        const parityBitColors = { 4: PARITY_HEX[0], 5: PARITY_HEX[1], 6: PARITY_HEX[2] };
+        bitPositions.forEach(b => {
+            const isError = errorMask[b.idx];
+            const isParity = b.idx >= 4;
+            const bitColor = isParity ? parityBitColors[b.idx] : '#888';
+            const isHovered = (b.idx === highlightIdx);
+
+            if (isHovered) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, 32, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(118, 185, 0, 0.25)';
+                ctx.fill();
+                ctx.strokeStyle = '#76b900';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, 24, 0, Math.PI * 2);
+            ctx.fillStyle = isError ? getErrorColor() : (isHovered ? '#2a2a2a' : '#1a1a1a');
+            ctx.fill();
+            ctx.strokeStyle = isHovered ? '#76b900' : bitColor;
+            ctx.lineWidth = isHovered ? 3 : 2;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 22px Inter, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(b.val, b.x, b.y - 2);
+
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.fillStyle = isHovered ? '#76b900' : bitColor;
+            ctx.fillText(b.id, b.x, b.y + 16);
+        });
+    }
+
+    // Parity-aware highlighting: show which parity checks each bit participates in.
+    // H_MATRIX rows: [P1 checks, P2 checks, P3 checks]
+    // Codeword order: [D1, D2, D3, D4, P1, P2, P3] (indices 0-6)
+    const HIGHLIGHT_CLASSES = ['highlight-p1', 'highlight-p2', 'highlight-p3', 'highlight-self'];
+
+    function clearAllHighlights() {
+        const allBtns = document.querySelectorAll('#message-strip .bit-btn, #data-inputs .bit-btn');
+        allBtns.forEach(el => HIGHLIGHT_CLASSES.forEach(c => el.classList.remove(c)));
+        if (hoveredBitIdx !== -1) {
+            hoveredBitIdx = -1;
+            if (lastReceived) drawVenn(lastSyndrome[0], lastSyndrome[1], lastSyndrome[2], lastReceived, -1);
+        }
+    }
+
+    function setVennHighlight(cwIdx) {
+        hoveredBitIdx = cwIdx;
+        if (lastReceived) drawVenn(lastSyndrome[0], lastSyndrome[1], lastSyndrome[2], lastReceived, cwIdx);
+    }
+
+    function highlightParityGroup(cwIdx) {
+        clearAllHighlights();
+        const cwBtn = document.querySelector('#message-strip button[data-codeword-index="' + cwIdx + '"]');
+        if (cwBtn) cwBtn.classList.add('highlight-self');
+
+        H_MATRIX.forEach((row, parityIdx) => {
+            if (row[cwIdx] === 1) {
+                row.forEach((val, colIdx) => {
+                    if (val === 1 && colIdx !== cwIdx) {
+                        const btn = document.querySelector('#message-strip button[data-codeword-index="' + colIdx + '"]');
+                        if (btn) btn.classList.add('highlight-p' + (parityIdx + 1));
+                    }
+                });
+            }
+        });
+    }
+
+    function highlightFromDataBit(dataIdx) {
+        clearAllHighlights();
+        const cwBtn = document.querySelector('#message-strip button[data-codeword-index="' + dataIdx + '"]');
+        if (cwBtn) cwBtn.classList.add('highlight-self');
+
+        const dataBtn = document.querySelector('#data-inputs button[data-bit-index="' + dataIdx + '"]');
+        if (dataBtn) dataBtn.classList.add('highlight-self');
+
+        H_MATRIX.forEach((row, parityIdx) => {
+            if (row[dataIdx] === 1) {
+                row.forEach((val, colIdx) => {
+                    if (val === 1 && colIdx !== dataIdx) {
+                        const btn = document.querySelector('#message-strip button[data-codeword-index="' + colIdx + '"]');
+                        if (btn) btn.classList.add('highlight-p' + (parityIdx + 1));
+                    }
+                });
+            }
+        });
+    }
+
+    (function attachHighlightListeners() {
+        const dataBox = document.getElementById('data-inputs');
+        const cwBox = document.getElementById('message-strip');
+
+        dataBox.addEventListener('mouseover', function(e) {
+            const btn = e.target.closest('.bit-btn');
+            if (!btn || btn.dataset.bitIndex == null) return;
+            const idx = parseInt(btn.dataset.bitIndex, 10);
+            highlightFromDataBit(idx);
+            setVennHighlight(idx);
+        });
+        dataBox.addEventListener('mouseleave', clearAllHighlights);
+        dataBox.addEventListener('focusin', function(e) {
+            const btn = e.target.closest('.bit-btn');
+            if (!btn || btn.dataset.bitIndex == null) return;
+            const idx = parseInt(btn.dataset.bitIndex, 10);
+            highlightFromDataBit(idx);
+            setVennHighlight(idx);
+        });
+        dataBox.addEventListener('focusout', clearAllHighlights);
+
+        cwBox.addEventListener('mouseover', function(e) {
+            const btn = e.target.closest('.bit-btn');
+            if (!btn || btn.dataset.codewordIndex == null) return;
+            const idx = parseInt(btn.dataset.codewordIndex, 10);
+            highlightParityGroup(idx);
+            setVennHighlight(idx);
+        });
+        cwBox.addEventListener('mouseleave', clearAllHighlights);
+        cwBox.addEventListener('focusin', function(e) {
+            const btn = e.target.closest('.bit-btn');
+            if (!btn || btn.dataset.codewordIndex == null) return;
+            const idx = parseInt(btn.dataset.codewordIndex, 10);
+            highlightParityGroup(idx);
+            setVennHighlight(idx);
+        });
+        cwBox.addEventListener('focusout', clearAllHighlights);
+    })();
+
+    // Handle initial sizing and resize
+    window.addEventListener('resize', () => {
+        initUI();
+    });
+
+    initUI();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trajectory Noise Demo</title>
+    <!-- Dependencies: Google Fonts (Inter). Permissive licenses only per widget creator policy (MIT/BSD/Apache 2.0/ISC/zlib). -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1.3 Standard Color Palette & Variables */
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;     /* Page background */
+            --nvidia-mid: #2A2A2A;      /* Container background */
+            --nvidia-accent: #444444;   /* Borders */
+            --nvidia-light: #E0E0E0;    /* Primary text */
+            --nvidia-gray: #AAAAAA;     /* Secondary text */
+            --nvidia-error: #c44;       /* Reddish for error path (1.4.1: not sole indicator) */
+            --focus-outline: 3px solid var(--nvidia-green);
+        }
+
+        /* 1.0 Dark Background Default */
+        body {
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        /* 23.1 The Widget Container */
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .widget-container { padding: 32px; }
+        }
+
+        /* 23.2 The Standard Header */
+        header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--nvidia-accent);
+            padding-bottom: 16px;
+        }
+
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px; /* Adjusted per visual hierarchy */
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-top: 0;
+        }
+
+        .widget-container .keyboard-help {
+            color: var(--nvidia-gray);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        /* 7.2 Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Slider under tree (single column) */
+        .tree-controls {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+
+        /* Qubit toggles in one row */
+        .qubit-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .qubit-row .control-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        /* Slider Styling */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--nvidia-light);
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--nvidia-accent);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--nvidia-green);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background .15s ease-in-out;
+        }
+
+        input[type="range"]:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 4px;
+        }
+        
+        /* 16. Button Styling Standards */
+        .toggle-group {
+            display: flex;
+            gap: 0; /* Connected buttons */
+            margin-top: 4px;
+        }
+
+        .toggle-btn {
+            background: var(--nvidia-mid);
+            color: var(--nvidia-gray);
+            border: 1px solid var(--nvidia-accent);
+            padding: 12px 16px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex: 1;
+            transition: all 0.2s ease;
+            min-height: 44px; /* 5.1 Touch Targets */
+            min-width: 44px;
+        }
+
+        .toggle-btn:first-child {
+            border-radius: 4px 0 0 4px;
+            border-right: none;
+        }
+
+        .toggle-btn:last-child {
+            border-radius: 0 4px 4px 0;
+            border-left: none;
+        }
+
+        .toggle-btn[aria-pressed="true"] {
+            background: var(--nvidia-green);
+            color: #000000;
+            border-color: var(--nvidia-green);
+        }
+
+        .toggle-btn:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .toggle-btn:hover:not([aria-pressed="true"]) {
+            background: rgba(255,255,255,0.05);
+            color: #FFF;
+        }
+
+        /* Tree Visualization Styling - Adapted for Dark Mode */
+        .tree-wrapper {
+            width: 100%;
+            overflow-x: auto; /* Allow scrolling on small screens */
+            padding-bottom: 20px;
+            text-align: center;
+        }
+
+        .tree {
+            display: inline-block; /* Center within wrapper */
+            transform-origin: top center;
+        }
+
+        .tree ul {
+            position: relative;
+            padding-top: 14px;
+            white-space: nowrap;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding-left: 0;
+        }
+
+        .tree li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            list-style: none;
+            position: relative;
+            padding: 20px 5px 0 5px;
+            flex: 0 0 auto;
+        }
+
+        /* Connector Lines - Dark Mode Color */
+        .tree li::before, .tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+
+            right: 50%;
+            border-top: 1px solid var(--nvidia-gray);
+            width: 50%;
+            height: 14px;
+        }
+
+        .tree li::after {
+            right: auto;
+            left: 50%;
+            border-left: 1px solid var(--nvidia-gray);
+        }
+
+        .tree li:only-child::before, .tree li:only-child::after {
+            display: none;
+        }
+
+        .tree li:first-child::before, .tree li:last-child::after {
+            border: 0 none;
+        }
+
+        .tree li:last-child::before {
+            border-right: 1px solid var(--nvidia-gray);
+            border-radius: 0 5px 0 0;
+        }
+
+        .tree li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+
+        .tree ul ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 1px solid var(--nvidia-gray);
+            height: 14px;
+        }
+
+        /* Node Styling - Dark Mode */
+        .node {
+            border: 1px solid var(--nvidia-accent);
+            background: #333333;
+            padding: 4px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            transition: all 0.3s;
+            font-size: 11px;
+            color: var(--nvidia-light);
+            width: 88px;
+            box-sizing: border-box;
+            text-align: center;
+            z-index: 2;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .node small {
+            display: block;
+            margin-top: 2px;
+            font-size: 10px;
+            color: var(--nvidia-gray);
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Active Path Highlighting: no-error path = green */
+        .active > .node {
+            background: var(--nvidia-green);
+            border-color: var(--nvidia-green);
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .active > .node small {
+            color: #1a1a1a;
+        }
+
+        /* Active path through an error = reddish (error state) */
+        .active > .node.node-error {
+            background: var(--nvidia-error);
+            border-color: var(--nvidia-error);
+            color: #fff;
+        }
+
+        .active > .node.node-error small {
+            color: rgba(255,255,255,0.95);
+        }
+
+        /* 6.1 Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Rule 8.1: Skip Link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            transition: top 0.2s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* Section 25: Instructions */
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        .instructions-section .kbd {
+            background: var(--nvidia-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+
+        /* Section 24: Standard Footer Navigation */
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" class="skip-link" tabindex="0">Skip to main content</a>
+
+    <div class="widget-container" id="main-content">
+        <!-- 23.2 Standard Header -->
+        <header>
+            <h1>Trajectory Noise Demo</h1>
+            <p class="summary-text">Visualize a simple trajectory-based error model.</p>
+        </header>
+
+        <!-- Section 25: Instructions (REQUIRED) -->
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Set <strong>Error Probability P(error)</strong> with the slider (0–0.20). This is the probability of error on each qubit in the trajectory.</li>
+                <li>For each of <strong>Qubit 1, 2, and 3</strong>, choose <strong>No Error (0)</strong> or <strong>Error (1)</strong> to fix the trajectory. The tree highlights the path that matches your choices.</li>
+                <li>The tree shows all 2³ outcomes; each leaf shows the bit string (e.g. 111) and <strong>P(outcome)</strong>, e.g. P(|111⟩) = probability of that outcome. Green = no-error path; red = path with at least one error.</li>
+                <li>Press <span class="kbd">ESC</span> to reset to default (P = 0.10, all qubits No Error).</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between slider and buttons. <span class="kbd">ESC</span> — reset. <span class="kbd">Enter</span> or <span class="kbd">Space</span> — activate focused button. <span class="kbd">←</span>/<span class="kbd">→</span> to move between No Error / Error buttons. Arrow keys adjust the slider when it is focused.</p>
+        </section>
+
+        <!-- ARIA Live Region for Screen Readers -->
+        <div id="status-announce" role="status" aria-live="polite" class="sr-only"></div>
+
+        <!-- Visualization first -->
+        <main role="main" aria-label="Error Tree Visualization">
+            <div id="tree-container" class="tree-wrapper">
+                <!-- Tree will be injected here via JS -->
+            </div>
+
+            <!-- Error probability slider directly under tree -->
+            <div class="tree-controls" aria-label="Error probability for tree">
+                <div class="control-group">
+                    <label for="p-slider">Error probability P(error): <span id="p-val">0.10</span></label>
+                    <input type="range" id="p-slider" min="0" max="0.20" step="0.01" value="0.10" tabindex="0" aria-valuemin="0" aria-valuemax="20" aria-valuenow="10" aria-valuetext="0.10">
+                </div>
+            </div>
+
+            <!-- Qubit toggles in one row -->
+            <section class="qubit-row" aria-label="Qubit error state (choose trajectory)">
+                <div class="control-group">
+                    <label id="q1-label">Qubit 1</label>
+                    <div class="toggle-group" role="group" aria-labelledby="q1-label" data-arrow-nav="horizontal">
+                        <button type="button" class="toggle-btn" id="q1-no" aria-pressed="true" tabindex="0">No Error (0)</button>
+                        <button type="button" class="toggle-btn" id="q1-err" aria-pressed="false" tabindex="0">Error (1)</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label id="q2-label">Qubit 2</label>
+                    <div class="toggle-group" role="group" aria-labelledby="q2-label" data-arrow-nav="horizontal">
+                        <button type="button" class="toggle-btn" id="q2-no" aria-pressed="true" tabindex="0">No Error (0)</button>
+                        <button type="button" class="toggle-btn" id="q2-err" aria-pressed="false" tabindex="0">Error (1)</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label id="q3-label">Qubit 3</label>
+                    <div class="toggle-group" role="group" aria-labelledby="q3-label" data-arrow-nav="horizontal">
+                        <button type="button" class="toggle-btn" id="q3-no" aria-pressed="true" tabindex="0">No Error (0)</button>
+                        <button type="button" class="toggle-btn" id="q3-err" aria-pressed="false" tabindex="0">Error (1)</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Lesson context (Lab 3 - Simulating Quantum Noise) -->
+        <div class="lesson-footer" style="margin-top: 24px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
+            This widget supports the CUDA-Q Academic lesson <strong>Lab 3 – Simulating Quantum Noise</strong>, which covers noise channels, density matrices, Kraus operators, and trajectory-based simulation. You can run the full notebook <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb" target="_blank" rel="noopener noreferrer" tabindex="0" style="color: var(--nvidia-green); text-decoration: none; font-weight: bold;">here</a>.
+        </div>
+
+        <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer" tabindex="0">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer" tabindex="0">CUDA-Q Academic</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        let pError = 0.10;
+        let q1State = 0;
+        let q2State = 0;
+        let q3State = 0;
+
+        // DOM Elements
+        const slider = document.getElementById('p-slider');
+        const pValDisplay = document.getElementById('p-val');
+        const treeContainer = document.getElementById('tree-container');
+        const announcer = document.getElementById('status-announce');
+
+        // Initialization
+        function init() {
+            // Slider listener and ARIA
+            function updateSliderAria() {
+                slider.setAttribute('aria-valuenow', Math.round(pError * 100));
+                slider.setAttribute('aria-valuetext', pError.toFixed(2));
+            }
+            slider.addEventListener('input', (e) => {
+                pError = parseFloat(e.target.value);
+                pValDisplay.textContent = pError.toFixed(2);
+                updateSliderAria();
+                updateProbabilities();
+            });
+            slider.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    pError = Math.max(0, pError - 0.01);
+                    pError = Math.round(pError * 100) / 100;
+                    slider.value = pError;
+                    pValDisplay.textContent = pError.toFixed(2);
+                    updateSliderAria();
+                    updateProbabilities();
+                } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    pError = Math.min(0.20, pError + 0.01);
+                    pError = Math.round(pError * 100) / 100;
+                    slider.value = pError;
+                    pValDisplay.textContent = pError.toFixed(2);
+                    updateSliderAria();
+                    updateProbabilities();
+                }
+            });
+            updateSliderAria();
+
+            // Button click and keyboard: wire qubit toggles (no inline onclick)
+            [1, 2, 3].forEach((idx) => {
+                const btnNo = document.getElementById('q' + idx + '-no');
+                const btnErr = document.getElementById('q' + idx + '-err');
+                function setState(s) { setQubit(idx, s); }
+                btnNo.addEventListener('click', () => setState(0));
+                btnErr.addEventListener('click', () => setState(1));
+            });
+
+            // Global keyboard: ESC reset; Enter/Space on buttons activate; Arrow Left/Right between error-setting buttons
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    resetSimulation();
+                }
+                if (event.target && event.target.classList && event.target.classList.contains('toggle-btn')) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        event.target.click();
+                    }
+                }
+                // Arrow Left/Right: move between No Error / Error buttons in the same qubit group
+                const group = document.activeElement && document.activeElement.closest('[data-arrow-nav="horizontal"]');
+                if (group && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                    const focusable = [...group.querySelectorAll('button:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+                    const i = focusable.indexOf(document.activeElement);
+                    if (i !== -1) {
+                        if (event.key === 'ArrowLeft' && i > 0) {
+                            event.preventDefault();
+                            focusable[i - 1].focus();
+                        } else if (event.key === 'ArrowRight' && i < focusable.length - 1) {
+                            event.preventDefault();
+                            focusable[i + 1].focus();
+                        }
+                    }
+                }
+            });
+
+            renderTree();
+        }
+
+        // Qubit Toggle Logic
+        window.setQubit = function(qubitIdx, state) {
+            if (qubitIdx === 1) q1State = state;
+            if (qubitIdx === 2) q2State = state;
+            if (qubitIdx === 3) q3State = state;
+            
+            updateToggleUI(qubitIdx, state);
+            renderTree();
+            
+            // Announce change to screen readers
+            announce(`Qubit ${qubitIdx} set to ${state === 0 ? 'No Error' : 'Error'}`);
+        }
+
+        function updateToggleUI(idx, state) {
+            const btnNo = document.getElementById(`q${idx}-no`);
+            const btnErr = document.getElementById(`q${idx}-err`);
+            
+            if (state === 0) {
+                btnNo.setAttribute('aria-pressed', 'true');
+                btnErr.setAttribute('aria-pressed', 'false');
+            } else {
+                btnNo.setAttribute('aria-pressed', 'false');
+                btnErr.setAttribute('aria-pressed', 'true');
+            }
+        }
+
+        function resetSimulation() {
+            pError = 0.10;
+            q1State = 0;
+            q2State = 0;
+            q3State = 0;
+            slider.value = 0.10;
+            pValDisplay.textContent = "0.10";
+            if (slider.getAttribute) {
+                slider.setAttribute('aria-valuenow', 10);
+                slider.setAttribute('aria-valuetext', '0.10');
+            }
+            updateToggleUI(1, 0);
+            updateToggleUI(2, 0);
+            updateToggleUI(3, 0);
+            renderTree();
+            announce("Simulation reset to default values.");
+        }
+
+        function announce(text) {
+            announcer.textContent = text;
+        }
+
+        // Tree Rendering Logic (Recursive HTML Construction)
+        function renderTree() {
+            let html = "<div class='tree'><ul>";
+
+            // Level 1 (Qubit 1)
+            for (let b1 of [0, 1]) {
+                const a1 = (b1 === q1State);
+                const err1 = b1 === 1;
+                html += `<li class='${a1 ? 'active' : ''}'>`;
+                html += `<div class='node${err1 ? ' node-error' : ''}'>Q1=${b1}</div><ul>`;
+
+                // Level 2 (Qubit 2)
+                for (let b2 of [0, 1]) {
+                    const a2 = a1 && (b2 === q2State);
+                    const err2 = b2 === 1;
+                    html += `<li class='${a2 ? 'active' : ''}'>`;
+                    html += `<div class='node${err2 ? ' node-error' : ''}'>Q2=${b2}</div><ul>`;
+
+                    // Level 3 (Qubit 3) & Leaves
+                    for (let b3 of [0, 1]) {
+                        const a3 = a2 && (b3 === q3State);
+                        const err3 = b3 === 1;
+                        const n = b1 + b2 + b3;
+                        const k = 3 - n;
+                        const prob = Math.pow(pError, n) * Math.pow((1 - pError), k);
+                        const leafHtml = `
+                            ${b1}${b2}${b3}
+                            <small data-errors="${n}">p = ${prob.toFixed(3)}</small>
+                        `;
+
+                        html += `<li class='${a3 ? 'active' : ''}'>`;
+                        html += `<div class='node${err3 ? ' node-error' : ''}'>${leafHtml}</div></li>`;
+                    }
+                    html += "</ul></li>";
+                }
+                html += "</ul></li>";
+            }
+            html += "</ul></div>";
+
+            treeContainer.innerHTML = html;
+        }
+
+        function updateProbabilities() {
+            const leaves = treeContainer.querySelectorAll('small[data-errors]');
+            leaves.forEach(el => {
+                const n = parseInt(el.dataset.errors);
+                const k = 3 - n;
+                const prob = Math.pow(pError, n) * Math.pow((1 - pError), k);
+                el.textContent = `p = ${prob.toFixed(3)}`;
+            });
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

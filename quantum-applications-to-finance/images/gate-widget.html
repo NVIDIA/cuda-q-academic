@@ -7,32 +7,113 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1A1A1A;
-            color: #E0E0E0;
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
         }
-        .nvidia-green { color: #76B900; }
+        :focus { outline: 3px solid #76b900; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+        }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        .nvidia-green { color: #76b900; }
         .info-box {
-            background-color: #2A2A2A;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            border: 1px solid #444;
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 16px 24px;
         }
         canvas {
             display: block;
             width: 100% !important;
             height: 100% !important;
         }
+        #bloch-sphere-container {
+            background-color: #000000;
+        }
+        #bloch-sphere-container:focus {
+            outline: 4px solid var(--nvidia-green);
+            outline-offset: 4px;
+        }
     </style>
 </head>
 <body class="antialiased">
-
-    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl lg:text-4xl font-bold nvidia-green">Quantum Gate Visualization</h1>
-            <p class="text-lg text-gray-400 mt-2">Click the gates to build a circuit and see the state evolve on the Bloch Sphere.</p>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Quantum Gate Visualization</h1>
+            <p class="summary-text">Click the gates to build a circuit and see the state evolve on the Bloch Sphere.</p>
         </header>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Click a gate (X, Y, Z, H, S, T) to add it to the circuit, or <strong>Tab</strong> to a gate and press <strong>Enter</strong>/<strong>Space</strong>. Use <strong>Arrow Left</strong>/<strong>Right</strong> to move between gate buttons.</li>
+                <li>Use <b>Backstep</b> to remove the last gate, or <b>Reset</b> to clear the circuit.</li>
+                <li><strong>Bloch sphere:</strong> Click or <strong>Tab</strong> to focus it; then drag to rotate, or use <strong>Arrow keys</strong> to rotate the view. A green outline shows when the sphere has focus.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between gate buttons and the Bloch sphere. <span class="kbd">Arrow Left</span>/<span class="kbd">Right</span> move between gates when a gate is focused; <span class="kbd">Arrow</span> keys rotate the sphere when it is focused. <span class="kbd">Enter</span>/<span class="kbd">Space</span> activate the focused button. <span class="kbd">ESC</span> to reset.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
         <div class="mb-8">
             <div class="info-box">
@@ -64,15 +145,22 @@
             </div>
 
             <div class="lg:col-span-3">
-                 <div class="flex flex-col items-center space-y-2">
+                 <div class="info-box flex flex-col items-center space-y-2">
                     <h2 class="text-2xl font-semibold">Bloch Sphere</h2>
-                    <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden info-box p-0"></div>
+                    <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden p-0" tabindex="0" role="img" aria-label="Bloch sphere: 3D view of the qubit state. Use arrow keys to rotate when focused."></div>
                 </div>
             </div>
 
         </div>
+
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
-    
+
     <script type="importmap">
     {
       "imports": {
@@ -147,27 +235,43 @@
             const sphereMat = new THREE.MeshBasicMaterial({ color: 0xAAAAAA, transparent: true, opacity: 0.15, wireframe: true });
             group.add(new THREE.Mesh(sphereGeom, sphereMat));
 
-            const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
+            const shaftRadius = 0.035, headRadius = 0.11, length = 1.0;
+            const headHeight = length * 0.22;
+            const shaftLength = length - headHeight;
+            const vectorMat = new THREE.MeshBasicMaterial({ color: 0x76B900 });
+            const vectorGeom = new THREE.Group();
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(shaftRadius, shaftRadius, shaftLength, 16), vectorMat);
+            shaft.rotation.x = Math.PI / 2;
+            shaft.position.z = shaftLength / 2;
+            const head = new THREE.Mesh(new THREE.ConeGeometry(headRadius, headHeight, 16), vectorMat);
+            head.rotation.x = Math.PI / 2;
+            head.position.z = shaftLength + headHeight / 2;
+            vectorGeom.add(shaft);
+            vectorGeom.add(head);
             group.add(vectorGeom);
-            
+
             const createAxis = (dir, color) => new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.2, color, 0.05, 0.03);
             group.add(createAxis(new THREE.Vector3(1,0,0), 0xCCCCCC)); // X
             group.add(createAxis(new THREE.Vector3(0,1,0), 0xCCCCCC)); // Y
             group.add(createAxis(new THREE.Vector3(0,0,1), 0xCCCCCC)); // Z
 
+            const scale = Math.max(2, window.devicePixelRatio || 1);
             const createLabel = (text, position) => {
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                context.font = `Bold 20px Inter`;
+                const fontSize = 20;
+                context.font = `Bold ${fontSize}px Inter`;
                 const textWidth = context.measureText(text).width;
-                canvas.width = textWidth + 20;
-                canvas.height = 20 * 1.5;
-                context.font = `Bold 20px Inter`;
+                canvas.width = (textWidth + 20) * scale;
+                canvas.height = (fontSize * 1.5) * scale;
+                context.scale(scale, scale);
+                context.font = `Bold ${fontSize}px Inter`;
                 context.fillStyle = "rgba(224, 224, 224, 0.95)";
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
-                context.fillText(text, canvas.width / 2, canvas.height / 2);
+                context.fillText(text, (textWidth + 20) / 2, (fontSize * 1.5) / 2);
                 const texture = new THREE.CanvasTexture(canvas);
+                texture.minFilter = THREE.LinearFilter;
                 const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
                 const sprite = new THREE.Sprite(spriteMat);
                 sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
@@ -195,7 +299,9 @@
             const x = Math.sin(theta) * Math.cos(phi);
             const y = Math.sin(theta) * Math.sin(phi);
             const z = Math.cos(theta);
-            vector.setDirection(new THREE.Vector3(x, y, z).normalize());
+            const dir = new THREE.Vector3(x, y, z).normalize();
+            const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+            vector.quaternion.copy(q);
         }
         
         // --- Circuit Diagram SVG ---
@@ -205,7 +311,8 @@
             svg.innerHTML = ''; 
             
             const svgNS = "http://www.w3.org/2000/svg";
-            const GATE_WIDTH = 40;
+            const GATE_WIDTH = 44;
+            const GATE_HEIGHT = 36;
             const GATE_SPACING = 15;
             // Updated start position for gates
             const START_X = 60;
@@ -220,7 +327,7 @@
             line.setAttribute('x2', String(totalWidth - 10));
             line.setAttribute('y2', '30');
             line.setAttribute('stroke', '#E0E0E0');
-            line.setAttribute('stroke-width', '1.5');
+            line.setAttribute('stroke-width', '2');
             svg.appendChild(line);
             
             const initialText = document.createElementNS(svgNS, 'text');
@@ -241,9 +348,9 @@
                 
                 const rect = document.createElementNS(svgNS, 'rect');
                 rect.setAttribute('x', String(x));
-                rect.setAttribute('y', '15');
+                rect.setAttribute('y', '12');
                 rect.setAttribute('width', String(GATE_WIDTH));
-                rect.setAttribute('height', '30');
+                rect.setAttribute('height', String(GATE_HEIGHT));
                 rect.setAttribute('fill', '#2A2A2A');
                 rect.setAttribute('stroke', '#76B900');
                 rect.setAttribute('stroke-width', '2');
@@ -252,7 +359,7 @@
                 
                 const text = document.createElementNS(svgNS, 'text');
                 text.setAttribute('x', String(x + GATE_WIDTH / 2));
-                text.setAttribute('y', '35');
+                text.setAttribute('y', '32');
                 text.setAttribute('fill', '#E0E0E0');
                 text.setAttribute('font-family', 'Inter, sans-serif');
                 text.setAttribute('font-size', '16');
@@ -311,6 +418,60 @@
         document.getElementById('reset-btn').addEventListener('click', () => {
             circuitSequence = [];
             updateAllVisuals();
+        });
+
+        const GATE_BUTTON_IDS = ['gate-x', 'gate-y', 'gate-z', 'gate-h', 'gate-s', 'gate-t'];
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                circuitSequence = [];
+                updateAllVisuals();
+                return;
+            }
+            const focused = document.activeElement;
+            const gateIndex = GATE_BUTTON_IDS.indexOf(focused && focused.id);
+            if (gateIndex !== -1) {
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const next = (gateIndex + 1) % GATE_BUTTON_IDS.length;
+                    document.getElementById(GATE_BUTTON_IDS[next]).focus();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const prev = (gateIndex - 1 + GATE_BUTTON_IDS.length) % GATE_BUTTON_IDS.length;
+                    document.getElementById(GATE_BUTTON_IDS[prev]).focus();
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const next = (gateIndex + 3) % GATE_BUTTON_IDS.length;
+                    document.getElementById(GATE_BUTTON_IDS[next]).focus();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prev = (gateIndex - 3 + GATE_BUTTON_IDS.length) % GATE_BUTTON_IDS.length;
+                    document.getElementById(GATE_BUTTON_IDS[prev]).focus();
+                }
+                return;
+            }
+            if (focused && focused.id === 'bloch-sphere-container') {
+                const cam = blochSphereViz.camera;
+                const target = blochSphereViz.controls.target;
+                const pos = cam.position.clone();
+                const dir = pos.clone().sub(target);
+                const radius = dir.length();
+                const theta = Math.atan2(dir.x, dir.z);
+                const phi = Math.acos(Math.max(-1, Math.min(1, dir.y / radius)));
+                const ROTATE_STEP = 0.08;
+                let newTheta = theta, newPhi = phi;
+                switch (e.key) {
+                    case 'ArrowLeft':  newTheta = theta - ROTATE_STEP; break;
+                    case 'ArrowRight': newTheta = theta + ROTATE_STEP; break;
+                    case 'ArrowUp':    newPhi = Math.max(0.05, phi - ROTATE_STEP); break;
+                    case 'ArrowDown':  newPhi = Math.min(Math.PI - 0.05, phi + ROTATE_STEP); break;
+                    default: return;
+                }
+                e.preventDefault();
+                cam.position.x = target.x + radius * Math.sin(newPhi) * Math.sin(newTheta);
+                cam.position.y = target.y + radius * Math.cos(newPhi);
+                cam.position.z = target.z + radius * Math.sin(newPhi) * Math.cos(newTheta);
+                cam.lookAt(target);
+            }
         });
         
         // --- Initial Call ---

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Fraction Explorer</title>
+    <!-- Dependencies: React (MIT), Babel (MIT), Tailwind (MIT), Google Fonts. Permissive licenses only per widget creator policy. -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- NVIDIA/CUDA-Q Style Guide CSS Overrides -->
+    <style>
+        /* 2.1 Primary Font Stack */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            /* 1.3 Standard Color Palette */
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;     /* Page background */
+            --nvidia-mid: #2A2A2A;      /* Container background */
+            --nvidia-accent: #444444;   /* Borders */
+            --nvidia-light: #E0E0E0;    /* Primary text */
+            --nvidia-gray: #AAAAAA;     /* Secondary text */
+        }
+
+        /* 1.0 Dark Background Default */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--nvidia-dark);
+            color: var(--nvidia-light);
+            margin: 0;
+            overflow-x: hidden;
+            /* 2.2 Text Spacing */
+            line-height: 1.5;
+            letter-spacing: 0.01em;
+            word-spacing: 0.16em;
+            
+            /* Center alignment for the main container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 4.1 Focus Indicators (Required) */
+        :focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+        :focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        /* 6.1 Reduced Motion (Required) */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+
+        /* 7.2 Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* 8.1 Skip Link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.2s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* =========================================
+           Rule 23.1: STANDARD WIDGET CONTAINER 
+           Exact CSS implementation from style guide
+           ========================================= */
+        .widget-container {
+            background-color: var(--nvidia-mid); /* #2A2A2A */
+            border: 1px solid var(--nvidia-accent); /* #444444 */
+            border-top: 4px solid var(--nvidia-green); /* #76B900 */
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        
+        @media (min-width: 768px) {
+            .widget-container { padding: 32px; }
+        }
+
+        /* =========================================
+           Rule 23.2: STANDARD HEADER TYPOGRAPHY
+           Using higher specificity to override Tailwind
+           ========================================= */
+        
+        /* Ensure the header container aligns center by default */
+        .widget-container header {
+            text-align: center;
+            margin-bottom: 32px;
+            width: 100%;
+        }
+
+        /* h1 { color: var(--nvidia-green); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; } */
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700; /* Enforce bold against Tailwind reset */
+            line-height: 1.2;
+        }
+        
+        /* .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; font-size: 1rem; } */
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Utility Classes based on Guide */
+        .bg-nvidia-mid { background-color: var(--nvidia-mid); }
+        .border-nvidia-accent { border-color: var(--nvidia-accent); }
+        .text-nvidia-green { color: var(--nvidia-green); }
+        .bg-nvidia-green { background-color: var(--nvidia-green); }
+        
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .info-box { background: var(--nvidia-mid); border: 1px solid var(--nvidia-accent); border-radius: 8px; padding: 16px 24px; }
+        .btn-nvidia-secondary { background: transparent; color: var(--nvidia-gray); border: 1px solid transparent; min-height: 44px; min-width: 44px; }
+        .btn-nvidia-secondary:hover { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--nvidia-accent); }
+
+        .bit-switch {
+            transition: transform 0.1s ease, background-color 0.2s;
+            touch-action: manipulation;
+        }
+        .bit-switch:active {
+            transform: scale(0.95);
+        }
+        
+        .bit-btn {
+            background-color: var(--nvidia-mid);
+            color: #FFFFFF;
+            border: 1px solid var(--nvidia-accent);
+            border-bottom: 3px solid var(--nvidia-green);
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .bit-btn:hover, .bit-btn.active {
+            background-color: var(--nvidia-green);
+            color: #000000;
+            border-color: var(--nvidia-green);
+        }
+
+        .fraction-line {
+            height: 2px;
+            background-color: var(--nvidia-accent);
+            width: 100%;
+            margin: 4px 0;
+        }
+        
+        .active-fraction .fraction-line {
+            background-color: var(--nvidia-green);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Section 24: Standard Footer Navigation */
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+
+        /* Fix 1: Explicit select focus for Safari (Tailwind ring may not render) */
+        select:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+
+        /* Section 25: Instructions */
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            width: 100%;
+            text-align: left;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        .instructions-section .kbd {
+            background: var(--nvidia-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div id="root" style="width: 100%; display: flex; justify-content: center;"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const ToggleBit = ({ val, onChange, power, onKeyDown, buttonRef }) => (
+            <div className="flex flex-col items-center group">
+                <button 
+                    type="button"
+                    tabIndex={0}
+                    ref={buttonRef}
+                    onClick={onChange}
+                    onKeyDown={onKeyDown}
+                    aria-label={`Toggle bit 2⁻${power}. Current value ${val}. Press Space or Enter to toggle.`}
+                    aria-pressed={val === 1}
+                    className={`
+                        w-12 h-16 sm:w-20 sm:h-24 rounded-lg font-mono text-2xl sm:text-5xl font-bold flex items-center justify-center bit-switch bit-btn
+                        ${val ? 'active' : ''}
+                    `}
+                >
+                    {val}
+                </button>
+                <span className="text-sm sm:text-base font-mono text-[#AAAAAA] mt-2" aria-hidden="true">2⁻{power}</span>
+            </div>
+        );
+
+        const VerticalFraction = ({ val, power, isLast }) => (
+            <div className="flex items-center" aria-hidden="true">
+                <div className={`flex flex-col items-center justify-center font-mono text-base sm:text-2xl mx-1 sm:mx-2 ${val ? 'active-fraction' : 'opacity-30'}`}>
+                    <span className={`font-bold ${val ? 'text-nvidia-green' : 'text-[#AAAAAA]'}`}>{val}</span>
+                    <div className="fraction-line"></div>
+                    <span className="text-[#AAAAAA] text-base sm:text-2xl">{Math.pow(2, power)}</span>
+                </div>
+                {!isLast && (
+                    <span className="text-[#AAAAAA] text-sm sm:text-2xl mx-1 font-bold">+</span>
+                )}
+            </div>
+        );
+
+        const NUM_BITS = 5;
+        const NUM_STEPS = Math.pow(2, NUM_BITS); // 32
+
+        function closestRepresentable(target, steps = NUM_STEPS) {
+            const clamped = Math.max(0, Math.min(1 - 1 / steps, target));
+            return Math.round(clamped * steps) / steps;
+        }
+
+        const ProgressBar = ({ current, target }) => {
+            const cPercent = Math.min(100, Math.max(0, current * 100));
+            const tPercent = Math.min(100, Math.max(0, target * 100));
+            const diff = Math.abs(current - target);
+            const bestPossible = closestRepresentable(target);
+            const isClosestPossible = Math.abs(current - bestPossible) < 0.00001;
+            const isMatch = isClosestPossible;
+            
+            return (
+                <section aria-label="Result Visualization" className="w-full mt-4 sm:mt-8 p-4 sm:p-6 info-box rounded-2xl">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex flex-col">
+                             <div className="text-[10px] text-[#AAAAAA] uppercase tracking-widest mb-1" id="target-label">Target Value</div>
+                             <div className="text-lg sm:text-2xl font-mono text-white font-bold" aria-labelledby="target-label">{target.toFixed(5)}</div>
+                        </div>
+                        
+                        <div className="flex flex-col items-end">
+                            <div className="text-[10px] text-[#AAAAAA] uppercase tracking-widest mb-1" id="current-label">Current Sum</div>
+                             <div aria-labelledby="current-label" className="text-lg sm:text-2xl font-mono font-bold" style={{ color: 'var(--nvidia-green)' }}>
+                                {current.toFixed(5)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative h-8 sm:h-12 bg-[#111] rounded-lg border border-nvidia-accent overflow-hidden" role="img" aria-label={`Progress bar showing current value ${current.toFixed(5)} against target ${target.toFixed(5)}`}>
+                        {/* Target Marker */}
+                        <div 
+                            className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-white z-30 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                            style={{ left: `${tPercent}%` }}
+                        ></div>
+                        
+                        {/* Current Bar */}
+                        <div 
+                            className="absolute top-0 bottom-0 left-0 bg-nvidia-green z-20 transition-all duration-300 opacity-90"
+                            style={{ width: `${cPercent}%` }}
+                        ></div>
+
+                        {/* Background Grid */}
+                        {[0, 25, 50, 75, 100].map(p => (
+                            <div key={p} className="absolute top-0 bottom-0 w-px bg-nvidia-accent z-10" style={{ left: `${p}%` }}></div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-between mt-2 text-[10px] font-mono text-[#AAAAAA]">
+                        <span>0.0</span>
+                        <span>0.5</span>
+                        <span>1.0</span>
+                    </div>
+
+                     <div className="h-10 sm:h-12 mt-2 flex items-center justify-center" aria-live="polite" role="status">
+                        {isMatch ? (
+                            <div className="text-nvidia-green font-mono text-sm sm:text-base uppercase font-bold tracking-widest flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+                                <span className="animate-pulse">🎯 Best possible!</span>
+                                <span className="text-nvidia-green-dark">/// Closest match with {NUM_BITS} bits ///</span>
+                            </div>
+                        ) : (
+                            <div className="text-[#AAAAAA] font-mono text-sm sm:text-base">
+                                Difference: {diff.toFixed(5)}
+                            </div>
+                        )}
+                    </div>
+                </section>
+            );
+        };
+
+        const PRESET_TARGETS = [
+            { label: '0.25 (exact)', value: 0.25 },
+            { label: '0.3 (approx)', value: 0.3 },
+            { label: '0.333… (1/3, approx)', value: 1 / 3 },
+            { label: '0.5 (exact)', value: 0.5 },
+            { label: '0.625 (exact)', value: 0.625 },
+            { label: '0.7 (approx)', value: 0.7 },
+            { label: '0.1 (approx)', value: 0.1 },
+            { label: 'Random', value: null }
+        ];
+
+        const App = () => {
+            const [bits, setBits] = useState([0, 0, 0, 0, 0]);
+            const [targetPhase, setTargetPhase] = useState(0.3);
+            const bitRefs = useRef([]);
+            
+            const decimalValue = bits.reduce((acc, bit, idx) => acc + (bit * Math.pow(2, -(idx + 1))), 0);
+
+            const toggleBit = (idx) => {
+                const newBits = [...bits];
+                newBits[idx] = newBits[idx] ? 0 : 1;
+                setBits(newBits);
+            };
+
+            const handleBitNavigation = (e, idx) => {
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const nextIdx = (idx + 1) % bits.length;
+                    bitRefs.current[nextIdx]?.focus();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const prevIdx = (idx - 1 + bits.length) % bits.length;
+                    bitRefs.current[prevIdx]?.focus();
+                }
+            };
+
+            const generateNewTarget = () => {
+                const rand = Math.floor(Math.random() * 32) / 32;
+                setTargetPhase(rand === 0 ? 0.03125 : rand);
+            };
+
+            const setTargetFromPreset = (val) => {
+                if (val == null) generateNewTarget();
+                else setTargetPhase(Number(val));
+            };
+
+            // 3.2 Global Keyboard Shortcuts (REQUIRED)
+            useEffect(() => {
+                const handleKeyDown = (event) => {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        generateNewTarget();
+                    }
+                    // Enter/Space on any button activates it (toggle bit or reset)
+                    if (event.target && event.target.matches && event.target.matches('button') && (event.key === 'Enter' || event.key === ' ')) {
+                        event.preventDefault();
+                        event.target.click();
+                    }
+                };
+
+                document.addEventListener('keydown', handleKeyDown);
+                return () => document.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            return (
+                <main id="main-content" className="widget-container">
+                
+                    <header>
+                        <h1>Binary Fraction Explorer</h1>
+                        <p className="summary-text">Toggle bits to accumulate fractions and match the target value.</p>
+                    </header>
+
+                    <section className="instructions-section" aria-labelledby="instructions-heading">
+                        <h2 id="instructions-heading">Instructions</h2>
+                        <ol>
+                            <li>Toggle the bit buttons (0 or 1) to build a binary fraction. Each bit is 2⁻¹, 2⁻², … so the sum appears as a decimal.</li>
+                            <li>Try to match the <strong>Target Value</strong> shown in the result area. The progress bar and current sum update as you change bits.</li>
+                            <li>Click <strong>Reset Target</strong> to get a new random target, or press <span className="kbd">ESC</span>.</li>
+                        </ol>
+                        <p><strong>Keyboard shortcuts:</strong> <span className="kbd">ESC</span> — new target. <span className="kbd">Enter</span> or <span className="kbd">Space</span> — toggle focused bit. <span className="kbd">Arrow Left</span> / <span className="kbd">Arrow Right</span> — move between bits.</p>
+                    </section>
+                    <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" className="sr-only"></div>
+                    <div className="w-full flex flex-col items-center gap-6 sm:gap-12">
+                        
+                        {/* Controls Panel */}
+                        <div className="flex flex-col items-center gap-4 w-full">
+                            {/* 1. Interactive Bits Row (Controls) */}
+                            <section aria-label="Controls" className="flex items-center justify-center gap-1.5 sm:gap-4 w-full">
+                                <span className="font-mono text-3xl sm:text-6xl text-[#AAAAAA] font-bold -mt-4 sm:-mt-8" aria-hidden="true">0.</span>
+                                {bits.map((b, i) => (
+                                    <ToggleBit 
+                                        key={i} 
+                                        val={b} 
+                                        power={i+1} 
+                                        onChange={() => toggleBit(i)} 
+                                        onKeyDown={(e) => handleBitNavigation(e, i)}
+                                        buttonRef={el => bitRefs.current[i] = el}
+                                    />
+                                ))}
+                            </section>
+                            
+                            {/* Target selection: presets + random */}
+                            <div className="mt-4 flex flex-col sm:flex-row items-center gap-3 flex-wrap justify-center">
+                                <label htmlFor="target-select" className="text-[#AAAAAA] font-mono text-sm">Target:</label>
+                                <select
+                                    id="target-select"
+                                    value={PRESET_TARGETS.some(t => t.value === targetPhase) ? targetPhase : 'random'}
+                                    onChange={(e) => setTargetFromPreset(e.target.value === 'random' ? null : Number(e.target.value))}
+                                    tabIndex={0}
+                                    className="bg-nvidia-mid border border-nvidia-accent text-white font-mono px-3 py-2 rounded min-h-[44px] focus:ring-2 focus:ring-nvidia-green"
+                                    aria-label="Choose target value"
+                                >
+                                    {PRESET_TARGETS.map(t => (
+                                        <option key={t.label} value={t.value ?? 'random'}>{t.label}</option>
+                                    ))}
+                                </select>
+                                <button 
+                                    type="button"
+                                    tabIndex={0}
+                                    onClick={generateNewTarget}
+                                    className="btn-nvidia-secondary px-4 py-2 rounded text-sm font-mono uppercase min-h-[44px] min-w-[44px]"
+                                    aria-label="Reset Target to random"
+                                >
+                                    Reset Target
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 2. Mathematical Sum Display */}
+                        <section aria-label="Calculation Details" className="w-full flex flex-col items-center p-4 sm:p-8 rounded-2xl info-box">
+                            <div className="flex flex-wrap justify-center items-center gap-y-4">
+                                {bits.map((b, i) => (
+                                    <VerticalFraction 
+                                        key={i} 
+                                        val={b} 
+                                        power={i+1} 
+                                        isLast={i === bits.length - 1} 
+                                    />
+                                ))}
+                            </div>
+                            
+                            <div className="flex items-center justify-center mt-6 pt-6 border-t border-nvidia-accent w-full">
+                                <span className="text-[#AAAAAA] text-xl sm:text-3xl mr-4 font-mono">=</span>
+                                <span className="font-mono text-3xl sm:text-5xl font-bold tracking-tight" style={{ color: 'var(--nvidia-green)' }}>
+                                    {decimalValue.toFixed(5)}
+                                </span>
+                            </div>
+                        </section>
+
+                        {/* 3. Visual Comparison Bar */}
+                        <ProgressBar current={decimalValue} target={targetPhase} />
+
+                        <footer className="widget-footer" aria-label="Widget and CUDA-Q navigation">
+                            <div className="widget-footer-links">
+                                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+                            </div>
+                        </footer>
+                    </div>
+                </main>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

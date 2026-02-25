@@ -37,19 +37,70 @@
 
     <style>
         :root {
-            --nvidia-green: #76B900;
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
             --nvidia-dark-bg: #1A1A1A;
             --nvidia-card-bg: #2A2A2A;
-            
-            /* UPDATED: Lighter grey for WCAG AA Compliance (4.5:1+ against dark bg) */
-            --nvidia-grey: #767676; 
-            
-            /* UPDATED: Brighter text for better legibility */
+            --nvidia-grey: #767676;
             --nvidia-light-text: #F5F5F5;
-            
-            --node-size-px: 56px; 
+            --node-size-px: 56px;
             --node-gap-px: 12px;
         }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
 
         /* WCAG 2.2.2 Reduced Motion */
         @media (prefers-reduced-motion: reduce) {
@@ -156,7 +207,7 @@
             border-color: #6B7280;
         }
 
-        .text-calc-plus { color: #E5E7EB; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+        .text-calc-plus { color: #FFFFFF; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
         .text-calc-minus { color: #A3A3A3; /* Lightened from 9CA3AF */ }
         
         #shifted-sequence-row, #product-row {
@@ -232,84 +283,89 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
-
-    <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-5xl font-black mb-2 tracking-tight text-[--nvidia-green]">Low Autocorrelation Binary Sequence (LABS) Optimization</h1>
-            <p class="text-gray-200 text-sm md:text-lg tracking-tight">Toggle the sequence bits below to find the minimum Total Energy</p>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Low Autocorrelation Binary Sequence (LABS) Optimization</h1>
+            <p class="summary-text">Toggle the sequence bits below to find the minimum Total Energy.</p>
         </header>
-
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li><b>Sequence <span class="font-serif italic">S</span>:</b> Tap bits to toggle 0/1 and change the binary sequence.</li>
+                <li><b>Shift <span class="font-serif italic">k</span>:</b> Use the slider to view the overlap and product for different shift amounts. Lower Total Energy indicates better autocorrelation.</li>
+                <li>Try to reach the target minimum energy (e.g. E = 3 for N = 7).</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between sections. In the Sequence box, <span class="kbd">Left</span>/<span class="kbd">Right</span> move between the 7 bits; <span class="kbd">Enter</span>/<span class="kbd">Space</span> toggle the focused bit. <span class="kbd">ESC</span> to reset if applicable.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
         <div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <div class="lg:col-span-8 space-y-6">
+
+            <section class="lg:col-span-8 bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
+                    <h2 class="text-xl font-bold flex items-center gap-3">
+                        <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">1</span>
+                        Sequence <span class="font-serif italic">S</span>
+                    </h2>
+                    <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Tap to toggle bits</span>
+                </div>
+                <div id="input-container" class="flex justify-center flex-wrap md:flex-nowrap py-2 relative z-10"></div>
+            </section>
+
+            <section class="lg:col-span-8 bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-2">
+                    <h2 class="text-xl font-bold flex items-center gap-3">
+                        <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">2</span>
+                        Shift Window <span class="font-serif italic">k</span> = <span id="k-display" class="text-[--nvidia-green]">1</span>
+                    </h2>
+                    <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Use the scroll bar to view different shifts</span>
+                </div>
+
+                <div class="relative py-8 md:py-12 px-1 md:px-6 bg-black/40 rounded-2xl overflow-x-hidden" aria-hidden="true">
+                    <div class="flex mb-4 relative z-10 items-center">
+                        <div class="label-col">Original<br><span class="font-serif lowercase italic">s<sub>i+k</sub></span></div>
+                        <div id="static-row" class="flex"></div>
+                    </div>
+                    
+                    <div class="flex mb-4 relative z-10 items-center">
+                        <div class="label-col">Shifted<br><span class="font-serif lowercase italic">s<sub>i</sub></span></div>
+                        <div class="flex-grow overflow-visible">
+                            <div id="shifted-sequence-row" class="flex"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex relative z-10 items-center border-t border-white/10 pt-4 mt-4">
+                        <div class="label-col text-white">Product<br><span class="font-serif lowercase italic">s<sub>i+k</sub> · s<sub>i</sub></span></div>
+                        <div class="flex-grow overflow-visible">
+                            <div id="product-row" class="flex"></div>
+                        </div>
+                    </div>
+                </div>
                 
-                <section class="bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
-                        <h2 class="text-xl font-bold flex items-center gap-3">
-                            <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">1</span>
-                            Sequence <span class="font-serif italic">S</span>
-                        </h2>
-                        <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Tap to toggle bits</span>
+                <div class="mt-8 px-4">
+                    <label for="shift-slider" class="sr-only">Shift amount k</label>
+                    <input type="range" id="shift-slider" min="1" max="6" value="1" aria-valuetext="Shift 1" tabindex="0">
+                    <div class="flex justify-between text-[11px] text-gray-400 mt-2 font-black tracking-widest" aria-hidden="true">
+                        <span>k=1</span>
+                        <span class="hidden md:inline">Slide to observe overlap</span>
+                        <span>k=6</span>
                     </div>
-                    
-                    <div id="input-container" class="flex justify-center flex-wrap md:flex-nowrap py-2 relative z-10"></div>
-                </section>
+                </div>
+            </section>
 
-                <section class="bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl relative overflow-hidden">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-2">
-                        <h2 class="text-xl font-bold flex items-center gap-3">
-                            <span class="bg-white text-black rounded-lg w-7 h-7 flex items-center justify-center text-sm font-black" aria-hidden="true">2</span>
-                            Shift Window <span class="font-serif italic">k</span> = <span id="k-display" class="text-[--nvidia-green]">1</span>
-                        </h2>
-                        <span class="text-[11px] text-gray-200 uppercase font-black tracking-widest" aria-hidden="true">Use the scroll bar to view different shifts</span>
-                    </div>
+            <section class="lg:col-span-4 lg:self-start math-card p-4 md:p-6 rounded-2xl shadow-xl min-h-[300px] flex flex-col">
+                <h2 class="text-xl font-bold mb-4 md:mb-6 text-[--nvidia-green]">Calculation for <span class="font-serif italic">C<sub>k</sub><sup>2</sup></span></h2>
+                <div id="math-display" class="space-y-4 md:space-y-6 flex-grow w-full overflow-x-hidden"></div>
+            </section>
 
-                    <div class="relative py-8 md:py-12 px-1 md:px-6 bg-black/40 rounded-2xl overflow-x-hidden" aria-hidden="true">
-                        <div class="flex mb-4 relative z-10 items-center">
-                            <div class="label-col">Original<br><span class="font-serif lowercase italic">s<sub>i+k</sub></span></div>
-                            <div id="static-row" class="flex"></div>
-                        </div>
-                        
-                        <div class="flex mb-4 relative z-10 items-center">
-                            <div class="label-col">Shifted<br><span class="font-serif lowercase italic">s<sub>i</sub></span></div>
-                            <div class="flex-grow overflow-visible">
-                                <div id="shifted-sequence-row" class="flex"></div>
-                            </div>
-                        </div>
+            <section class="lg:col-span-8 bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <h2 class="text-xl font-bold mb-6 text-gray-200">Squared Sidelobe Plot (<span class="font-serif italic">C<sub>k</sub><sup>2</sup></span>)</h2>
+                <div id="plot-container" class="h-40 flex items-end justify-around border-b-2 border-gray-700/50 pb-2 px-1 md:px-4" aria-hidden="true"></div>
+            </section>
 
-                        <div class="flex relative z-10 items-center border-t border-white/10 pt-4 mt-4">
-                            <div class="label-col text-white">Product<br><span class="font-serif lowercase italic">s<sub>i+k</sub> · s<sub>i</sub></span></div>
-                            <div class="flex-grow overflow-visible">
-                                <div id="product-row" class="flex"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 px-4">
-                        <label for="shift-slider" class="sr-only">Shift amount k</label>
-                        <input type="range" id="shift-slider" min="1" max="6" value="1" aria-valuetext="Shift 1" tabindex="0">
-                        <div class="flex justify-between text-[11px] text-gray-400 mt-2 font-black tracking-widest" aria-hidden="true">
-                            <span>k=1</span>
-                            <span class="hidden md:inline">Slide to observe overlap</span>
-                            <span>k=6</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="bg-[var(--nvidia-card-bg)] p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl">
-                    <h2 class="text-xl font-bold mb-6 text-gray-200">Squared Sidelobe Plot (<span class="font-serif italic">C<sub>k</sub><sup>2</sup></span>)</h2>
-                    <div id="plot-container" class="h-40 flex items-end justify-around border-b-2 border-gray-700/50 pb-2 px-1 md:px-4" aria-hidden="true"></div>
-                </section>
-            </div>
-
-            <div class="lg:col-span-4 space-y-6">
-                <section class="math-card p-4 md:p-6 rounded-2xl shadow-xl min-h-[300px] flex flex-col">
-                    <h2 class="text-xl font-bold mb-4 md:mb-6 text-[--nvidia-green]">Calculation for <span class="font-serif italic">C<sub>k</sub><sup>2</sup></span></h2>
-                    <div id="math-display" class="space-y-4 md:space-y-6 flex-grow w-full overflow-x-hidden"></div>
-                </section>
-
+            <div class="lg:col-span-4 lg:self-start space-y-6">
                 <section class="bg-[--nvidia-green] p-4 md:p-6 rounded-2xl text-black shadow-xl">
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="text-xs font-black uppercase tracking-wider opacity-80">Total Energy</h3>
@@ -330,6 +386,16 @@
                 </div>
             </div>
         </div>
+        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "Quantum Enhanced Optimization for Radar and Communications (LABS)".
+            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;" tabindex="0">here</a>.
+        </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer" tabindex="0">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer" tabindex="0">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -353,6 +419,19 @@
 
             function init() {
                 renderInputButtons();
+
+                // Arrow Left/Right: navigate between sequence bit buttons in first box
+                document.addEventListener('keydown', (e) => {
+                    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                    const btns = Array.from(els.input.querySelectorAll('button'));
+                    const idx = btns.indexOf(e.target);
+                    if (idx === -1) return;
+                    e.preventDefault();
+                    const next = e.key === 'ArrowRight'
+                        ? (idx + 1) % btns.length
+                        : (idx - 1 + btns.length) % btns.length;
+                    btns[next].focus();
+                });
                 
                 els.slider.addEventListener('input', (e) => {
                     currentShift = parseInt(e.target.value);
@@ -555,16 +634,16 @@
                                     <span class="text-gray-500">)</span><sup class="text-gray-500">2</sup>
                                 </div>
 
-                                <div class="pt-4 border-t border-white/10 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 text-2xl md:text-3xl font-black">
-                                    <div class="text-white flex items-center gap-2">
-                                        <span class="text-gray-400 font-serif italic text-xl md:text-2xl whitespace-nowrap">C<sub class="not-italic font-sans text-xs">${currentShift}</sub><sup class="not-italic font-sans text-xs">2</sup></span>
+                                <div class="pt-4 border-t border-white/10 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 text-2xl md:text-3xl font-black text-[--nvidia-green]">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-serif italic text-xl md:text-2xl whitespace-nowrap">C<sub class="not-italic font-sans text-xs">${currentShift}</sub><sup class="not-italic font-sans text-xs">2</sup></span>
                                         <span>=</span>
                                     </div>
-                                    <div class="text-[--nvidia-green] flex items-center gap-2 whitespace-nowrap">
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
                                         <span>(${ck})<sup class="text-lg">2</sup></span>
-                                        <span class="text-white">=</span>
+                                        <span>=</span>
                                     </div>
-                                    <div class="text-white">
+                                    <div>
                                         ${ck * ck}
                                     </div>
                                 </div>
