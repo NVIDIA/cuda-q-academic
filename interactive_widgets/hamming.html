@@ -4,28 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NVIDIA Hamming [7,4,3] Matrix Demo</title>
-    <!-- Dependencies: Google Fonts (Inter). Permissive licenses only per widget creator policy (MIT/BSD/Apache 2.0/ISC/zlib). -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Rule 1.3: Standard Color Palette */
         :root {
             --nvidia-green: #76b900;
             --nvidia-green-dark: #5e9400;
-            --nvidia-dark: #1A1A1A;     /* Page background */
-            --nvidia-mid: #2A2A2A;      /* Container background */
-            --nvidia-accent: #444444;   /* Borders */
-            --nvidia-light: #E0E0E0;    /* Primary text */
-            --nvidia-gray: #AAAAAA;     /* Secondary text */
-            /* Error/indicator: muted red for dark backgrounds (WCAG-friendly, not harsh) */
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
             --nvidia-error: #c45c5c;
             --nvidia-error-rgba: rgba(196, 92, 92, 0.2);
-            /* Parity check colors (matching Steane widget) */
             --parity-p1: #ef9100;
             --parity-p2: #3399FF;
-            --parity-p3: #E0E0E0;
+            --parity-p3: #b366ff;
         }
 
-        /* Rule 1.0 & 2.1 & 2.2: Body Defaults, Typography, Spacing */
         body {
             background-color: var(--nvidia-dark);
             color: var(--nvidia-light);
@@ -40,7 +35,6 @@
             word-spacing: 0.16em;
         }
 
-        /* Rule 6.1: Reduced Motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -49,14 +43,12 @@
             }
         }
 
-        /* Rule 4.1: Focus Indicators */
         :focus {
             outline: 3px solid var(--nvidia-green);
             outline-offset: 2px;
             border-color: CanvasText;
         }
 
-        /* Rule 8.1: Skip Link */
         .skip-link {
             position: absolute;
             top: -40px;
@@ -69,9 +61,7 @@
             text-decoration: none;
             font-weight: bold;
         }
-        .skip-link:focus {
-            top: 0;
-        }
+        .skip-link:focus { top: 0; }
 
         .widget-container {
             background-color: var(--nvidia-mid);
@@ -87,7 +77,6 @@
         }
         @media (min-width: 768px) { .widget-container { padding: 32px; } }
 
-        /* Rule 21.1: Header Styling */
         header {
             text-align: center;
             margin-bottom: 32px;
@@ -100,8 +89,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
-        /* Summary text per Rule 21.1 */
+
         .summary-text {
             color: var(--nvidia-gray);
             margin-bottom: 8px;
@@ -110,7 +98,6 @@
             margin-right: auto;
         }
 
-        /* Rule 3.3: Keyboard Help */
         .keyboard-help {
             font-size: 0.85rem;
             color: var(--nvidia-gray);
@@ -127,7 +114,6 @@
         @media (min-width: 768px) {
             .controls { grid-template-columns: 1fr 1fr; }
             h1 { font-size: 1.8rem; letter-spacing: 2px; }
-            .container { padding: 32px; }
         }
 
         .panel {
@@ -154,9 +140,7 @@
             flex-wrap: wrap;
         }
 
-        /* Rule 16.1: Button Styling Standards (Primary Interactive) */
         .bit-btn {
-            /* Rule 5.1: Minimum Size 44x44 */
             min-width: 48px;
             min-height: 58px;
             background: var(--nvidia-mid);
@@ -178,7 +162,7 @@
 
         .bit-btn:hover {
             background: var(--nvidia-green);
-            color: #000000; /* High Contrast Rule 16.1 */
+            color: #000000;
             border-color: var(--nvidia-green);
         }
 
@@ -188,12 +172,10 @@
             border-color: var(--nvidia-green);
         }
 
-        /* Differentiate Parity/Error visually while maintaining contrast */
         .bit-btn.parity {
-             /* Secondary style indicator */
-             border-top: 3px solid transparent; 
+             border-top: 3px solid transparent;
         }
-        
+
         .bit-btn.parity-1:not(:hover):not(.active) { color: var(--parity-p1); }
         .bit-btn.parity-2:not(:hover):not(.active) { color: var(--parity-p2); }
         .bit-btn.parity-3:not(:hover):not(.active) { color: var(--parity-p3); }
@@ -226,14 +208,24 @@
             background: rgba(51, 153, 255, 0.15) !important;
         }
         .bit-btn.highlight-p3 {
-            box-shadow: 0 0 12px rgba(224, 224, 224, 0.4);
+            box-shadow: 0 0 12px rgba(179, 102, 255, 0.6);
             border-top: 3px solid var(--parity-p3) !important;
-            background: rgba(224, 224, 224, 0.1) !important;
+            background: rgba(179, 102, 255, 0.15) !important;
         }
         .bit-btn.highlight-self {
             box-shadow: 0 0 14px rgba(118, 185, 0, 0.7);
             border-top: 3px solid var(--nvidia-green) !important;
             background: rgba(118, 185, 0, 0.2) !important;
+        }
+
+        .bit-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .bit-btn:disabled:hover {
+            background: var(--nvidia-mid);
+            color: #FFFFFF;
+            border-color: var(--nvidia-accent);
         }
 
         .mapping-note {
@@ -263,10 +255,18 @@
             width: 100%;
         }
 
-        .canvas-wrapper {
-            width: 100%;
+        /* Venn + Syndrome table side by side */
+        .venn-and-table {
             display: flex;
+            gap: 24px;
+            width: 100%;
+            align-items: flex-start;
             justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .canvas-wrapper {
+            flex: 0 1 auto;
         }
 
         canvas {
@@ -276,6 +276,90 @@
             max-width: 100%;
             height: auto;
             touch-action: none;
+        }
+
+        /* Syndrome discovery table */
+        .syndrome-discovery {
+            flex: 0 0 auto;
+            min-width: 240px;
+            background: var(--nvidia-dark);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .syndrome-discovery h3 {
+            color: var(--nvidia-green);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 12px 0;
+            text-align: center;
+        }
+        .syndrome-discovery table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .syndrome-discovery th {
+            color: var(--nvidia-green);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 8px;
+            border-bottom: 2px solid var(--nvidia-accent);
+            text-align: center;
+        }
+        .syndrome-discovery td {
+            padding: 6px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+        .syndrome-discovery .bit-label {
+            text-align: left;
+            font-weight: 700;
+        }
+        .syndrome-discovery .undiscovered {
+            color: var(--nvidia-accent);
+        }
+        .syndrome-discovery .discovered {
+            color: var(--nvidia-green);
+        }
+        .syndrome-discovery tr.conflict-highlight {
+            background: rgba(196, 92, 92, 0.2);
+        }
+        .syndrome-discovery tr.conflict-highlight td {
+            color: var(--nvidia-error);
+            font-weight: 700;
+        }
+        .syndrome-discovery .progress-text {
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--nvidia-gray);
+            text-align: center;
+        }
+        .syndrome-discovery .progress-text .count {
+            color: var(--nvidia-green);
+            font-weight: 700;
+        }
+        .syndrome-discovery .complete-badge {
+            display: inline-block;
+            background: var(--nvidia-green);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        .syndrome-discovery .unlock-note {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--nvidia-green);
+            text-align: center;
+            font-weight: 600;
         }
 
         .status-box {
@@ -288,16 +372,16 @@
             box-sizing: border-box;
         }
 
-        .status-text { 
-            font-size: 1.3rem; 
-            margin-bottom: 8px; 
-            font-weight: bold; 
+        .status-text {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
 
-        .logical-alert { 
-            color: var(--nvidia-error); 
-            font-weight: bold; 
-            margin-top: 12px; 
+        .logical-alert {
+            color: var(--nvidia-error);
+            font-weight: bold;
+            margin-top: 12px;
             font-size: 1.1rem;
             text-transform: uppercase;
         }
@@ -316,7 +400,7 @@
             justify-content: center;
             gap: 16px;
             padding: 16px 0;
-            font-family: 'Inter', monospace; /* Rule 18.1 */
+            font-family: 'Inter', monospace;
         }
 
         .matrix-block {
@@ -350,7 +434,6 @@
             padding: 0 12px;
         }
 
-        /* Brackets */
         .bracket::before, .bracket::after {
             content: '';
             position: absolute;
@@ -371,12 +454,12 @@
             font-size: 1rem;
             color: var(--nvidia-gray);
         }
-        
+
         .cell.one { color: var(--nvidia-light); }
-        
-        .cell.err-bit { 
-            background: var(--nvidia-error); 
-            color: white; 
+
+        .cell.err-bit {
+            background: var(--nvidia-error);
+            color: white;
             border-radius: 2px;
         }
 
@@ -394,7 +477,7 @@
             font-weight: bold;
             margin: 0 8px;
         }
-        
+
         .matrix-legend {
             font-size: 0.75rem;
             color: var(--nvidia-gray);
@@ -402,7 +485,6 @@
             text-align: center;
         }
 
-        /* Section 24: Standard Footer Navigation */
         .widget-footer {
             margin-top: 32px;
             border-top: 1px solid var(--nvidia-accent);
@@ -462,7 +544,6 @@
             font-size: 0.9em;
         }
 
-        /* Rule 7.2: Screen Reader Only */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -485,13 +566,11 @@
 </head>
 <body>
 
-<!-- Rule 8.1: Skip Link (REQUIRED for accessibility) -->
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="widget-container" id="main-content" role="main">
     <header>
         <h1>Hamming [7, 4, 3] Visualizer</h1>
-        <!-- Rule 21.1: Summary -->
         <p class="summary-text">A visualization of error correction using parity bits and matrix multiplication to detect and correct single-bit errors.</p>
     </header>
 
@@ -499,34 +578,47 @@
         <h2 id="instructions-heading">Instructions</h2>
         <ol>
             <li><strong>1. Original Message</strong> — Toggle data bits D1–D4 (0 or 1) to set the 4-bit message. The codeword (7 bits: D1,D2,D3,D4,P1,P2,P3) updates automatically.</li>
-            <li><strong>2. Codeword</strong> — Click any of the 7 bits in the codeword strip to inject an error (bit is highlighted in the error color). Click again to remove it. Add one error to see correction; add two or more to see undetected logical errors.</li>
-            <li>Watch the Venn diagram and the <strong>Parity Check (H × r = s)</strong> to see how the syndrome identifies the flipped bit. Status shows HEALTHY or ERROR DETECTED.</li>
+            <li><strong>2. Discover Syndromes</strong> — Click exactly one bit in the codeword to inject a single-bit error. The syndrome table on the right fills in as you discover each syndrome. Remove the error and try the next bit until all 7 syndromes are found.</li>
+            <li><strong>3. Test Two-Bit Errors</strong> — Once all 7 syndromes are discovered, multi-bit errors are unlocked. Add two errors to see the syndrome match a <em>different</em> single-bit entry — demonstrating that the decoder would apply the wrong correction.</li>
         </ol>
-        <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> — move between sections. <span class="kbd">Left</span> / <span class="kbd">Right</span> — move between the 11 bit buttons (4 message bits, then 7 codeword bits). <span class="kbd">Enter</span> or <span class="kbd">Space</span> — toggle the focused bit. <span class="kbd">ESC</span> — reset simulation.</p>
+        <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> — move between sections. <span class="kbd">Left</span> / <span class="kbd">Right</span> — move between bit buttons. <span class="kbd">Enter</span> or <span class="kbd">Space</span> — toggle. <span class="kbd">ESC</span> — reset.</p>
     </section>
 
     <div class="controls">
         <section class="panel" aria-labelledby="label-original">
             <span class="label" id="label-original">1. Original Message</span>
-            <div class="bit-row" id="data-inputs">
-                <!-- D1-D4 buttons filled by JS -->
-            </div>
+            <div class="bit-row" id="data-inputs"></div>
         </section>
         <section class="panel" aria-labelledby="label-codeword">
             <span class="label" id="label-codeword">2. Codeword (Click to add errors)</span>
-            <div class="bit-row" id="message-strip">
-                <!-- 7 bits strip filled by JS -->
-            </div>
-            <p class="mapping-note" aria-hidden="true">Hover a data bit to highlight its codeword position. Order: <span>D1</span> <span>D2</span> <span>D3</span> <span>D4</span> <span style="color:var(--parity-p1)">P1</span> <span style="color:var(--parity-p2)">P2</span> <span style="color:var(--parity-p3)">P3</span></p>
+            <div class="bit-row" id="message-strip"></div>
+            <p class="mapping-note" aria-hidden="true">Order: <span>D1</span> <span>D2</span> <span>D3</span> <span>D4</span> <span style="color:var(--parity-p1)">P1</span> <span style="color:var(--parity-p2)">P2</span> <span style="color:var(--parity-p3)">P3</span></p>
             <p class="mapping-note" aria-hidden="true" style="margin-top:4px;">Parity checks: <span style="color:var(--parity-p1);">&#9632; Parity 1 (P1)</span> &nbsp; <span style="color:var(--parity-p2);">&#9632; Parity 2 (P2)</span> &nbsp; <span style="color:var(--parity-p3);">&#9632; Parity 3 (P3)</span></p>
         </section>
     </div>
 
     <div class="main-viz">
-        <div class="canvas-wrapper" aria-hidden="true">
-            <canvas id="hammingCanvas"></canvas>
+        <div class="venn-and-table">
+            <div class="canvas-wrapper" aria-hidden="true">
+                <canvas id="hammingCanvas"></canvas>
+            </div>
+            <div class="syndrome-discovery" id="syndrome-discovery">
+                <h3>Syndrome Discovery</h3>
+                <table>
+                    <thead>
+                        <tr><th>Error Bit</th><th>S1</th><th>S2</th><th>S3</th></tr>
+                    </thead>
+                    <tbody id="syndrome-table-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+                <div class="progress-text" id="discovery-progress">
+                    Discovered: <span class="count" id="discovery-count">0</span> / 7
+                </div>
+                <div id="discovery-status"></div>
+            </div>
         </div>
-        
+
         <div class="status-box" role="status" aria-live="polite">
             <div class="status-text" id="status-summary">Status: <span style="color:var(--nvidia-green)">Healthy</span></div>
             <div id="logical-status"></div>
@@ -535,41 +627,33 @@
         <section class="matrix-section">
             <div class="label">Parity Check Operation (H &times; r = s)</div>
             <div class="matrix-scroll-wrapper">
-                
+
                 <div class="matrix-block">
-                    <div class="matrix-container bracket" id="matrix-H" aria-label="Parity Check Matrix H">
-                        <!-- Filled by JS -->
-                    </div>
+                    <div class="matrix-container bracket" id="matrix-H" aria-label="Parity Check Matrix H"></div>
                     <div class="matrix-legend">Matrix (H)</div>
                 </div>
 
                 <div class="operator" aria-hidden="true">&times;</div>
 
                 <div class="matrix-block">
-                    <div class="vector-container bracket" id="vector-r" aria-label="Received Vector r">
-                        <!-- Filled by JS -->
-                    </div>
+                    <div class="vector-container bracket" id="vector-r" aria-label="Received Vector r"></div>
                     <div class="matrix-legend">Received (r)</div>
                 </div>
 
                 <div class="operator" aria-hidden="true">=</div>
 
                 <div class="matrix-block">
-                    <div class="syndrome-container bracket" id="vector-s" aria-label="Syndrome Vector s">
-                        <!-- Filled by JS -->
-                    </div>
+                    <div class="syndrome-container bracket" id="vector-s" aria-label="Syndrome Vector s"></div>
                     <div class="matrix-legend">Syndrome (s)</div>
                 </div>
             </div>
         </section>
 
-        <!-- Educational Context Footer -->
         <div style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
-            Note: This widget is part of the CUDA-Q Academic lesson entitled "The Basics of Classical and Quantum Error Correction". 
+            Note: This widget is part of the CUDA-Q Academic lesson entitled "The Basics of Classical and Quantum Error Correction".
             You can learn more about its context by visiting the link <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb" target="_blank" rel="noopener noreferrer" style="color: var(--nvidia-green); text-decoration: none; font-weight: bold;">here</a>.
         </div>
 
-        <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
         <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
@@ -597,20 +681,38 @@
     }
 
     // App State
-    let data = [1, 0, 1, 1]; 
-    let errorMask = [0, 0, 0, 0, 0, 0, 0]; 
+    let data = [1, 0, 1, 1];
+    let errorMask = [0, 0, 0, 0, 0, 0, 0];
     let hoveredBitIdx = -1;
     let lastReceived = null;
     let lastSyndrome = [0, 0, 0];
 
-    // Rule 3.2: Global Keyboard Shortcuts
+    // Syndrome discovery state
+    // Each entry: null (undiscovered) or [s1, s2, s3]
+    const BIT_LABELS = ['D1', 'D2', 'D3', 'D4', 'P1', 'P2', 'P3'];
+    const BIT_LABEL_COLORS = [null, null, null, null, '--parity-p1', '--parity-p2', '--parity-p3'];
+    let discoveredSyndromes = [null, null, null, null, null, null, null];
+    let allDiscovered = false;
+    let conflictIdx = -1; // index of conflicting single-bit row when 2-bit error applied
+
+    // True syndromes for each single-bit error (columns of H transposed)
+    // H = [[1,1,0,1,1,0,0], [1,0,1,1,0,1,0], [0,1,1,1,0,0,1]]
+    // Column i of H^T = row of syndromes for error on bit i
+    const TRUE_SYNDROMES = [
+        [1, 1, 0], // D1
+        [1, 0, 1], // D2
+        [0, 1, 1], // D3
+        [1, 1, 1], // D4
+        [1, 0, 0], // P1
+        [0, 1, 0], // P2
+        [0, 0, 1], // P3
+    ];
+
     document.addEventListener('keydown', function(event) {
-        // ESC key - Reset
         if (event.key === 'Escape') {
             event.preventDefault();
             resetSimulation();
         }
-        // Arrow Left/Right: navigate between the 11 bit buttons (4 data + 7 codeword)
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             const dataBtns = Array.from(document.querySelectorAll('#data-inputs .bit-btn'));
             const stripBtns = Array.from(document.querySelectorAll('#message-strip .bit-btn'));
@@ -625,7 +727,6 @@
                 return;
             }
         }
-        // Enter/Space on focused button
         if (event.target.matches('button')) {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
@@ -637,33 +738,42 @@
     function resetSimulation() {
         data = [1, 0, 1, 1];
         errorMask = [0, 0, 0, 0, 0, 0, 0];
+        discoveredSyndromes = [null, null, null, null, null, null, null];
+        allDiscovered = false;
+        conflictIdx = -1;
         initUI();
     }
 
     const H_MATRIX = [
-        [1, 1, 0, 1, 1, 0, 0], 
-        [1, 0, 1, 1, 0, 1, 0], 
-        [0, 1, 1, 1, 0, 0, 1]  
+        [1, 1, 0, 1, 1, 0, 0],
+        [1, 0, 1, 1, 0, 1, 0],
+        [0, 1, 1, 1, 0, 0, 1]
     ];
 
     function getParity(d) {
         return [
-            d[0] ^ d[1] ^ d[3], 
-            d[0] ^ d[2] ^ d[3], 
-            d[1] ^ d[2] ^ d[3]  
+            d[0] ^ d[1] ^ d[3],
+            d[0] ^ d[2] ^ d[3],
+            d[1] ^ d[2] ^ d[3]
         ];
     }
 
+    function getErrorCount() {
+        return errorMask.reduce((a, b) => a + b, 0);
+    }
+
     function initUI() {
+        const errorCount = getErrorCount();
+
         // Render Input Data Bits
         const dataInputs = document.getElementById('data-inputs');
         dataInputs.innerHTML = data.map((bit, i) => {
             const label = `Data Bit D${i+1}`;
             return `
-                <button type="button" class="bit-btn ${bit ? 'active' : ''}" 
+                <button type="button" class="bit-btn ${bit ? 'active' : ''}"
                         tabindex="0"
                         data-bit-index="${i}"
-                        onclick="toggleData(${i})" 
+                        onclick="toggleData(${i})"
                         aria-pressed="${bit === 1}"
                         aria-label="${label}: currently ${bit}. Press Space or Enter to toggle.">
                     ${bit}
@@ -673,7 +783,7 @@
         }).join('');
 
         const parity = getParity(data);
-        const fullMsg = [...data, ...parity]; 
+        const fullMsg = [...data, ...parity];
         const received = fullMsg.map((bit, i) => bit ^ errorMask[i]);
 
         // Render Received Strip Bits
@@ -685,13 +795,21 @@
             const bitNum = isParity ? i-3 : i+1;
             const label = `${bitType} Bit ${isParity ? 'P' : 'D'}${bitNum}`;
             const errorStatus = isError ? "Error added" : "Correct";
-            
+
             const parityClass = isParity ? `parity parity-${bitNum}` : '';
+
+            // Disable if: not all discovered AND already have 1 error AND this bit is not the current error
+            let disabled = false;
+            if (!allDiscovered && errorCount >= 1 && !isError) {
+                disabled = true;
+            }
+
             return `
-                <button type="button" class="bit-btn ${parityClass} ${isError ? 'error' : ''}" 
+                <button type="button" class="bit-btn ${parityClass} ${isError ? 'error' : ''}"
                         tabindex="0"
                         data-codeword-index="${i}"
                         onclick="toggleError(${i})"
+                        ${disabled ? 'disabled' : ''}
                         aria-pressed="${isError === 1}"
                         aria-label="${label}: value ${bit}, ${errorStatus}. Press Space or Enter to toggle error.">
                     ${bit}
@@ -701,12 +819,12 @@
         }).join('');
 
         updateLogic(received);
+        renderSyndromeTable();
     }
 
     function toggleData(i) {
         data[i] = data[i] ? 0 : 1;
         initUI();
-        // Restore focus to the same bit button so keyboard nav is not lost
         requestAnimationFrame(() => {
             const btn = document.querySelector('#data-inputs button[data-bit-index="' + i + '"]');
             if (btn) btn.focus();
@@ -715,6 +833,19 @@
 
     function toggleError(i) {
         errorMask[i] = errorMask[i] ? 0 : 1;
+
+        // Check if this is a single-bit error and record it
+        const errorCount = getErrorCount();
+        if (errorCount === 1) {
+            const errIdx = errorMask.indexOf(1);
+            const syndrome = TRUE_SYNDROMES[errIdx];
+            if (discoveredSyndromes[errIdx] === null) {
+                discoveredSyndromes[errIdx] = [...syndrome];
+                // Check if all discovered
+                allDiscovered = discoveredSyndromes.every(s => s !== null);
+            }
+        }
+
         initUI();
         requestAnimationFrame(() => {
             const btn = document.querySelector('#message-strip button[data-codeword-index="' + i + '"]');
@@ -723,13 +854,15 @@
     }
 
     function updateLogic(received) {
-        const c1_fail = received[0] ^ received[1] ^ received[3] ^ received[4]; 
-        const c2_fail = received[0] ^ received[2] ^ received[3] ^ received[5]; 
-        const c3_fail = received[1] ^ received[2] ^ received[3] ^ received[6]; 
+        const c1_fail = received[0] ^ received[1] ^ received[3] ^ received[4];
+        const c2_fail = received[0] ^ received[2] ^ received[3] ^ received[5];
+        const c3_fail = received[1] ^ received[2] ^ received[3] ^ received[6];
 
-        const actualErrorCount = errorMask.reduce((a, b) => a + b, 0);
+        const actualErrorCount = getErrorCount();
         const statusEl = document.getElementById('status-summary');
         const logicalEl = document.getElementById('logical-status');
+
+        conflictIdx = -1;
 
         if (!c1_fail && !c2_fail && !c3_fail) {
             statusEl.innerHTML = `Status: <span style="color:var(--nvidia-green)">HEALTHY</span>`;
@@ -741,7 +874,26 @@
         } else {
             if (actualErrorCount > 1) {
                 statusEl.innerHTML = `Status: <span style="color:var(--nvidia-error)">ERROR DETECTED</span>`;
-                logicalEl.innerHTML = `<div class="logical-alert">LOGICAL ERROR: Multiple Bits Flipped!</div>`;
+
+                // Find which single-bit syndrome this matches
+                const currentSyn = [c1_fail, c2_fail, c3_fail];
+                for (let i = 0; i < TRUE_SYNDROMES.length; i++) {
+                    if (TRUE_SYNDROMES[i][0] === currentSyn[0] &&
+                        TRUE_SYNDROMES[i][1] === currentSyn[1] &&
+                        TRUE_SYNDROMES[i][2] === currentSyn[2]) {
+                        conflictIdx = i;
+                        break;
+                    }
+                }
+
+                const synMap = { 1: "P1", 2: "P2", 3: "D1", 4: "P3", 5: "D2", 6: "D3", 7: "D4" };
+                const synVal = (c3_fail << 2) | (c2_fail << 1) | c1_fail;
+                const wrongLabel = synMap[synVal] || "Unknown";
+
+                logicalEl.innerHTML = `<div class="logical-alert">LOGICAL ERROR: Multiple Bits Flipped!</div>
+                    <div style="color:var(--nvidia-error); margin-top: 8px; font-size: 0.9rem;">
+                        Syndrome [${c1_fail}, ${c2_fail}, ${c3_fail}] matches single-bit error on <strong>${wrongLabel}</strong> — decoder would apply the <em>wrong</em> correction!
+                    </div>`;
             } else {
                 statusEl.innerHTML = `Status: <span style="color:var(--nvidia-error)">ERROR DETECTED BUT CORRECTABLE</span>`;
                 const synVal = (c3_fail << 2) | (c2_fail << 1) | c1_fail;
@@ -760,12 +912,53 @@
         renderMatrixMath(received, lastSyndrome);
     }
 
+    function renderSyndromeTable() {
+        const tbody = document.getElementById('syndrome-table-body');
+        const discoveredCount = discoveredSyndromes.filter(s => s !== null).length;
+
+        tbody.innerHTML = BIT_LABELS.map((label, i) => {
+            const syn = discoveredSyndromes[i];
+            const isConflict = conflictIdx === i;
+            const rowClass = isConflict ? 'conflict-highlight' : '';
+            const isParity = i >= 4;
+            const labelColor = isParity ? `var(${BIT_LABEL_COLORS[i]})` : 'var(--nvidia-light)';
+
+            if (syn === null) {
+                return `<tr class="${rowClass}">
+                    <td class="bit-label" style="color:${labelColor}">${label}</td>
+                    <td class="undiscovered">—</td>
+                    <td class="undiscovered">—</td>
+                    <td class="undiscovered">—</td>
+                </tr>`;
+            } else {
+                const cellClass = isConflict ? '' : 'discovered';
+                return `<tr class="${rowClass}">
+                    <td class="bit-label" style="color:${labelColor}">${label}</td>
+                    <td class="${cellClass}">${syn[0]}</td>
+                    <td class="${cellClass}">${syn[1]}</td>
+                    <td class="${cellClass}">${syn[2]}</td>
+                </tr>`;
+            }
+        }).join('');
+
+        const progressEl = document.getElementById('discovery-count');
+        progressEl.textContent = discoveredCount;
+
+        const statusEl = document.getElementById('discovery-status');
+        if (allDiscovered) {
+            statusEl.innerHTML = `<span class="complete-badge">Complete!</span>
+                <div class="unlock-note">Multi-bit errors unlocked — try adding two errors to see what happens.</div>`;
+        } else {
+            statusEl.innerHTML = `<div style="font-size:0.75rem; color:var(--nvidia-gray); text-align:center; margin-top:6px;">Flip one bit at a time to discover each syndrome.</div>`;
+        }
+    }
+
     const PARITY_COLORS = ['var(--parity-p1)', 'var(--parity-p2)', 'var(--parity-p3)'];
-    const PARITY_HEX = ['#ef9100', '#3399FF', '#E0E0E0'];
+    const PARITY_HEX = ['#ef9100', '#3399FF', '#b366ff'];
 
     function renderMatrixMath(receivedSystematic, syndrome) {
         const labels = ["D1", "D2", "D3", "D4", "P1", "P2", "P3"];
-        
+
         const hContainer = document.getElementById('matrix-H');
         hContainer.innerHTML = '';
         H_MATRIX.forEach((row, rowIdx) => {
@@ -803,34 +996,27 @@
 
     function drawVenn(f1, f2, f3, received, highlightIdx) {
         if (highlightIdx === undefined) highlightIdx = -1;
-        // Rule 15.1: High-DPI Canvas Rendering
-        const cssWidth = 800;
-        const cssHeight = 600;
-        
-        // Ensure scale is at least 2 for sharpness
+        const cssWidth = 500;
+        const cssHeight = 420;
+
         const scale = Math.max(2, window.devicePixelRatio || 1);
-        
-        // Update display size
+
         canvas.style.width = cssWidth + "px";
         canvas.style.height = cssHeight + "px";
-        
-        // Update actual size
         canvas.width = cssWidth * scale;
         canvas.height = cssHeight * scale;
-        
-        // Normalize context
         ctx.scale(scale, scale);
 
         ctx.clearRect(0, 0, cssWidth, cssHeight);
 
         const centerX = cssWidth / 2;
         const centerY = cssHeight / 2;
-        const radius = Math.min(cssWidth, cssHeight) * 0.25; 
+        const radius = Math.min(cssWidth, cssHeight) * 0.25;
         const offset = radius * 0.6;
 
         const circles = [
-            { x: centerX, y: centerY - offset, failed: f1, label: 'Parity 1', color: PARITY_HEX[0] }, 
-            { x: centerX - offset, y: centerY + offset * 0.5, failed: f2, label: 'Parity 2', color: PARITY_HEX[1] }, 
+            { x: centerX, y: centerY - offset, failed: f1, label: 'Parity 1', color: PARITY_HEX[0] },
+            { x: centerX - offset, y: centerY + offset * 0.5, failed: f2, label: 'Parity 2', color: PARITY_HEX[1] },
             { x: centerX + offset, y: centerY + offset * 0.5, failed: f3, label: 'Parity 3', color: PARITY_HEX[2] }
         ];
 
@@ -849,20 +1035,20 @@
             ctx.fill();
 
             ctx.fillStyle = c.failed ? errColor : baseColor;
-            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.font = 'bold 14px Inter, sans-serif';
             ctx.textAlign = 'center';
-            let ly = (c.label.includes('1')) ? c.y - radius - 10 : c.y + radius + 20;
+            let ly = (c.label.includes('1')) ? c.y - radius - 10 : c.y + radius + 18;
             ctx.fillText(c.label, c.x, ly);
         });
 
         const bitPositions = [
-            { id: 'D1', x: centerX - offset/1.8, y: centerY - offset/4, val: received[0], idx: 0 }, 
-            { id: 'D2', x: centerX + offset/1.8, y: centerY - offset/4, val: received[1], idx: 1 }, 
-            { id: 'D3', x: centerX, y: centerY + offset*0.6, val: received[2], idx: 2 },            
-            { id: 'D4', x: centerX, y: centerY + offset*0.1, val: received[3], idx: 3 },            
-            { id: 'P1', x: centerX, y: centerY - offset - 40, val: received[4], idx: 4 },           
-            { id: 'P2', x: centerX - offset - 40, y: centerY + offset, val: received[5], idx: 5 },
-            { id: 'P3', x: centerX + offset + 40, y: centerY + offset, val: received[6], idx: 6 } 
+            { id: 'D1', x: centerX - offset/1.8, y: centerY - offset/4, val: received[0], idx: 0 },
+            { id: 'D2', x: centerX + offset/1.8, y: centerY - offset/4, val: received[1], idx: 1 },
+            { id: 'D3', x: centerX, y: centerY + offset*0.6, val: received[2], idx: 2 },
+            { id: 'D4', x: centerX, y: centerY + offset*0.1, val: received[3], idx: 3 },
+            { id: 'P1', x: centerX, y: centerY - offset - 36, val: received[4], idx: 4 },
+            { id: 'P2', x: centerX - offset - 36, y: centerY + offset, val: received[5], idx: 5 },
+            { id: 'P3', x: centerX + offset + 36, y: centerY + offset, val: received[6], idx: 6 }
         ];
 
         const parityBitColors = { 4: PARITY_HEX[0], 5: PARITY_HEX[1], 6: PARITY_HEX[2] };
@@ -875,7 +1061,7 @@
             if (isHovered) {
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(b.x, b.y, 32, 0, Math.PI * 2);
+                ctx.arc(b.x, b.y, 28, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(118, 185, 0, 0.25)';
                 ctx.fill();
                 ctx.strokeStyle = '#76b900';
@@ -885,7 +1071,7 @@
             }
 
             ctx.beginPath();
-            ctx.arc(b.x, b.y, 24, 0, Math.PI * 2);
+            ctx.arc(b.x, b.y, 20, 0, Math.PI * 2);
             ctx.fillStyle = isError ? getErrorColor() : (isHovered ? '#2a2a2a' : '#1a1a1a');
             ctx.fill();
             ctx.strokeStyle = isHovered ? '#76b900' : bitColor;
@@ -893,20 +1079,17 @@
             ctx.stroke();
 
             ctx.fillStyle = 'white';
-            ctx.font = 'bold 22px Inter, monospace';
+            ctx.font = 'bold 18px Inter, monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(b.val, b.x, b.y - 2);
 
-            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.font = 'bold 9px Inter, sans-serif';
             ctx.fillStyle = isHovered ? '#76b900' : bitColor;
-            ctx.fillText(b.id, b.x, b.y + 16);
+            ctx.fillText(b.id, b.x, b.y + 14);
         });
     }
 
-    // Parity-aware highlighting: show which parity checks each bit participates in.
-    // H_MATRIX rows: [P1 checks, P2 checks, P3 checks]
-    // Codeword order: [D1, D2, D3, D4, P1, P2, P3] (indices 0-6)
     const HIGHLIGHT_CLASSES = ['highlight-p1', 'highlight-p2', 'highlight-p3', 'highlight-self'];
 
     function clearAllHighlights() {
@@ -999,7 +1182,6 @@
         cwBox.addEventListener('focusout', clearAllHighlights);
     })();
 
-    // Handle initial sizing and resize
     window.addEventListener('resize', () => {
         initUI();
     });
