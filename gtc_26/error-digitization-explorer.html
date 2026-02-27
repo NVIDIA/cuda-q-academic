@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Error Digitization Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root {
+    --accent: #76b900;
+    --accent-dark: #5e9400;
+    --bg: #1A1A1A;
+    --surface: #2A2A2A;
+    --border: #444444;
+    --fg: #E0E0E0;
+    --muted: #AAAAAA;
+    --error-red: #e05555;
+    --success-green: #76b900;
+    --path-a: #4a9eff;
+    --path-b: #e8a030;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 32px 16px;
+    line-height: 1.6;
+  }
+  .skip-link {
+    position: absolute; top: -40px; left: 0;
+    background: var(--accent); color: #000;
+    padding: 8px 16px; z-index: 100;
+    text-decoration: none; font-weight: bold;
+  }
+  .skip-link:focus { top: 0; }
+  .widget-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 960px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin: 0 auto;
+  }
+  @media (min-width: 768px) { .widget-container { padding: 32px; } }
+  .widget-container h1 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .summary-text {
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-size: 1rem;
+  }
+  .section {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .section h2 {
+    color: var(--accent);
+    font-size: 1.05rem;
+    margin: 0 0 14px 0;
+    font-weight: 700;
+  }
+  .instructions-section ol {
+    padding-left: 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .instructions-section li { margin-bottom: 6px; }
+  .kb-note {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .control-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .sublabel {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    padding: 10px 14px;
+    width: 140px;
+    min-height: 44px;
+  }
+  input[type="number"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent);
+  }
+  .radio-group { display: flex; gap: 8px; }
+  .radio-group input[type="radio"] { display: none; }
+  .radio-group label {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 44px; min-height: 44px; padding: 8px 16px;
+    background: var(--bg); border: 2px solid var(--border); border-radius: 6px;
+    cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--muted);
+    transition: all 0.15s ease;
+  }
+  .radio-group input[type="radio"]:checked + label {
+    border-color: var(--accent); color: var(--accent); background: rgba(118,185,0,0.1);
+  }
+  .radio-group label:hover { border-color: var(--accent); }
+  .radio-group input[type="radio"]:focus + label {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px; padding: 10px 24px;
+    background: var(--accent); color: #000; border: none; border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s ease;
+    border-bottom: 3px solid var(--accent-dark);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+  .btn-primary:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 44px; padding: 10px 24px;
+    background: var(--bg); color: var(--fg); border: 2px solid var(--border); border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .btn-secondary:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .state-display {
+    text-align: center; padding: 20px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .state-label {
+    font-size: 0.8rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .state-math {
+    font-size: 1.3rem; min-height: 36px;
+    display: flex; align-items: center;
+  }
+  .fidelity-section {
+    display: none; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .fidelity-label {
+    font-size: 0.8rem; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px; min-width: 180px;
+  }
+  .fidelity-bar-wrap {
+    flex: 1; min-width: 200px; height: 24px;
+    background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .fidelity-bar-fill {
+    height: 100%; background: linear-gradient(to right, var(--accent-dark), var(--accent));
+    border-radius: 12px; transition: width 0.3s ease;
+  }
+  .fidelity-number {
+    font-size: 1.1rem; font-weight: 700; color: var(--accent);
+    min-width: 70px; text-align: right;
+  }
+  .fidelity-note {
+    width: 100%; font-size: 0.8rem; color: var(--muted); margin-top: 4px; font-style: italic;
+  }
+  .flow-area { display: none; }
+  .flow-area.visible { display: block; }
+  .step-button-row {
+    text-align: center;
+    margin: 20px 0;
+  }
+  .trunk-node {
+    text-align: center;
+    padding: 16px 24px;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    margin: 0 auto;
+    max-width: 700px;
+  }
+  .trunk-node .trunk-bold {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--fg);
+    line-height: 1.5;
+  }
+  .arrow-down {
+    text-align: center;
+    color: var(--muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 6px 0;
+  }
+  .branch-fork {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    position: relative;
+  }
+  .branch-fork::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: var(--border);
+  }
+  .fork-arm {
+    flex: 1;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fork-arm .arm-line {
+    width: 2px;
+    height: 20px;
+    background: var(--border);
+  }
+  .fork-arm-a .arm-line { background: var(--path-a); }
+  .fork-arm-b .arm-line { background: var(--path-b); }
+  .branch-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    border: 2px solid;
+    width: calc(100% - 24px);
+    margin: 0 12px;
+  }
+  .branch-card-a {
+    border-color: var(--path-a);
+    background: rgba(74,158,255,0.05);
+  }
+  .branch-card-b {
+    border-color: var(--path-b);
+    background: rgba(232,160,48,0.05);
+  }
+  .branch-badge {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 700; padding: 2px 8px;
+    border-radius: 3px; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .branch-card-a .branch-badge { background: var(--path-a); color: #000; }
+  .branch-card-b .branch-badge { background: var(--path-b); color: #000; }
+  .branch-prob {
+    font-size: 0.9rem; font-weight: 700; margin-bottom: 8px;
+  }
+  .branch-card-a .branch-prob { color: var(--path-a); }
+  .branch-card-b .branch-prob { color: var(--path-b); }
+  .branch-text {
+    font-size: 0.85rem; color: var(--muted); margin-bottom: 6px;
+  }
+  .branch-math {
+    min-height: 26px;
+    display: flex; align-items: center;
+    margin: 4px 0;
+  }
+  .eigenvalue-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 40px; padding: 2px 8px; border-radius: 4px;
+    font-weight: 700; font-size: 0.8rem;
+  }
+  .eigenvalue-badge.plus {
+    background: rgba(118,185,0,0.15); color: var(--success-green); border: 1px solid var(--success-green);
+  }
+  .eigenvalue-badge.minus {
+    background: rgba(224,85,85,0.15); color: var(--error-red); border: 1px solid var(--error-red);
+  }
+  .ev-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 0.8rem;
+  }
+  .ev-label { color: var(--muted); min-width: 46px; }
+  .step3-content { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .step3-content.visible { display: block; }
+  .correction-label {
+    font-size: 0.75rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .no-correction-note {
+    font-size: 0.85rem; color: var(--path-a); font-weight: 600; margin: 6px 0;
+  }
+  .correction-applied {
+    font-size: 0.85rem; margin: 6px 0;
+  }
+  .global-phase-note {
+    margin-top: 10px; padding: 10px 14px;
+    background: rgba(232,160,48,0.08); border: 1px solid rgba(232,160,48,0.3);
+    border-radius: 6px; font-size: 0.8rem; color: var(--fg); line-height: 1.5;
+  }
+  .global-phase-note strong { color: var(--path-b); }
+  .recovered-state { margin-top: 8px; }
+  .recovered-state .correction-label { margin-bottom: 2px; }
+
+  /* Converging node */
+  .converge-section { display: none; }
+  .converge-section.visible { display: block; }
+  .converge-fork {
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+  .converge-fork::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: var(--accent);
+  }
+  .converge-arm {
+    flex: 1;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .converge-arm .arm-line {
+    width: 2px;
+    height: 20px;
+  }
+  .converge-arm-a .arm-line { background: var(--path-a); }
+  .converge-arm-b .arm-line { background: var(--path-b); }
+  .arrow-down-accent {
+    text-align: center;
+    color: var(--accent);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 6px 0;
+  }
+  .converge-node {
+    text-align: center;
+    padding: 18px 24px;
+    background: rgba(118,185,0,0.08);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    margin: 0 auto;
+    max-width: 500px;
+  }
+  .converge-node .converge-label {
+    font-size: 0.8rem; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .converge-node .converge-math {
+    font-size: 1.3rem;
+    min-height: 36px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Syndrome table */
+  .syndrome-section { display: none; }
+  .syndrome-section.visible { display: block; }
+  .syndrome-table {
+    width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  }
+  .syndrome-table th {
+    text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border);
+    color: var(--accent); font-weight: 700; font-size: 0.8rem;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .syndrome-table td {
+    padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .syndrome-table tr.highlighted-b {
+    background: rgba(232,160,48,0.12);
+  }
+  .syndrome-table tr.highlighted-b td { color: #fff; font-weight: 600; }
+  .insight-banner {
+    display: none;
+    text-align: center; margin-top: 20px; padding: 16px;
+    background: rgba(118,185,0,0.06); border: 1px solid rgba(118,185,0,0.2); border-radius: 8px;
+  }
+  .insight-banner.visible { display: block; }
+  .insight-banner p {
+    font-size: 0.95rem; color: var(--fg); margin: 0;
+  }
+  .insight-banner strong { color: var(--accent); }
+  .widget-footer {
+    margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.875rem;
+  }
+  .widget-footer a {
+    color: var(--accent); text-decoration: none; margin-right: 16px;
+  }
+  .widget-footer a:hover { text-decoration: underline; }
+  .widget-footer a:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+  <header>
+    <h1>Error Digitization Explorer</h1>
+    <p class="summary-text">Investigate how measuring stabilizers digitizes a continuous R<sub>x</sub>(θ) error into a correctable syndrome in the 3-qubit bit-flip code.</p>
+  </header>
+
+  <!-- Instructions -->
+  <section class="section instructions-section" aria-labelledby="instr-heading">
+    <h2 id="instr-heading">Instructions</h2>
+    <ol>
+      <li>Enter a rotation angle θ and select which qubit receives the error, then click <strong>Apply Error</strong></li>
+      <li>Observe how fidelity degrades continuously with θ — the error is analog</li>
+      <li>Step through the stabilizer checks to see how measurement <em>digitizes</em> the error into two branches</li>
+      <li>Apply correction — both branches recover the original state, regardless of θ</li>
+    </ol>
+    <p class="kb-note">Keyboard: Tab navigates; Enter activates buttons; arrow keys switch qubit selection.</p>
+  </section>
+
+  <!-- Controls -->
+  <section class="section" aria-labelledby="ctrl-heading">
+    <h2 id="ctrl-heading">Error Configuration</h2>
+    <div class="controls-row">
+      <div class="control-group">
+        <label for="angle-input">Error angle θ (degrees)</label>
+        <input type="number" id="angle-input" value="30" step="any" aria-label="Error angle theta in degrees">
+        <span class="sublabel" id="radian-display">= 0.524 rad</span>
+        <span class="sublabel" style="margin-top:4px; line-height:1.4;">Errors arise from an infinite number of possible X, Y, or Z rotations. We consider X rotations only for this simplified example.</span>
+      </div>
+      <div class="control-group">
+        <label id="qubit-label">Apply error to qubit</label>
+        <div class="radio-group" role="radiogroup" aria-labelledby="qubit-label">
+          <input type="radio" name="qubit" id="q1" value="1" checked><label for="q1">Q1</label>
+          <input type="radio" name="qubit" id="q2" value="2"><label for="q2">Q2</label>
+          <input type="radio" name="qubit" id="q3" value="3"><label for="q3">Q3</label>
+        </div>
+      </div>
+      <div class="control-group" style="justify-content: flex-end;">
+        <button class="btn-primary" id="btn-apply">Apply Error</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Corrupted State + Fidelity -->
+  <section class="section" id="state-section" aria-labelledby="state-heading">
+    <h2 id="state-heading">Quantum State</h2>
+    <div class="state-display" aria-live="polite" aria-atomic="true">
+      <span class="state-label" id="state-phase-label">Encoded logical state</span>
+      <div class="state-math" id="state-math"></div>
+    </div>
+    <div class="fidelity-section" id="fidelity-section" aria-live="polite">
+      <span class="fidelity-label">Fidelity vs |000⟩</span>
+      <div class="fidelity-bar-wrap"><div class="fidelity-bar-fill" id="fidelity-bar" style="width:100%;"></div></div>
+      <span class="fidelity-number" id="fidelity-number">1.000</span>
+      <span class="fidelity-note" id="fidelity-note"></span>
+    </div>
+  </section>
+
+  <!-- === FLOW AREA === -->
+  <div class="flow-area" id="flow-area">
+
+    <!-- Step 1 button -->
+    <div class="step-button-row" id="step1-btn-row">
+      <button class="btn-primary" id="btn-step1">Step 1: Measure Z₁Z₂</button>
+    </div>
+
+    <!-- Step 1 result -->
+    <div id="step1-result" style="display:none;">
+      <div class="arrow-down">↓</div>
+      <div class="trunk-node">
+        <div class="trunk-bold">The superposition is projected into one of two possible states, with probability determined by θ.</div>
+      </div>
+      <div class="arrow-down">↓</div>
+
+      <div class="branch-fork">
+        <div class="fork-arm fork-arm-a">
+          <div class="arm-line"></div>
+          <div class="branch-card branch-card-a" id="card-a-step1">
+            <span class="branch-badge">No Error</span>
+            <div class="branch-prob" id="prob-a"></div>
+            <div class="branch-text">Projected to codespace:</div>
+            <div class="branch-math" id="branch-a-state1"></div>
+            <div class="ev-row" style="margin-top:6px;">
+              <span class="ev-label">Z₁Z₂:</span>
+              <span class="eigenvalue-badge plus">+1</span>
+            </div>
+            <!-- Step 2 -->
+            <div class="step3-content" id="card-a-step2">
+              <div class="ev-row">
+                <span class="ev-label">Z₂Z₃:</span>
+                <span class="eigenvalue-badge plus">+1</span>
+              </div>
+              <div class="branch-text" style="margin-top:6px;">Confirms: no error occurred.</div>
+            </div>
+            <!-- Step 3 -->
+            <div class="step3-content" id="card-a-step3">
+              <div class="no-correction-note">No correction needed.</div>
+            </div>
+          </div>
+        </div>
+        <div class="fork-arm fork-arm-b">
+          <div class="arm-line"></div>
+          <div class="branch-card branch-card-b" id="card-b-step1">
+            <span class="branch-badge">Error Detected</span>
+            <div class="branch-prob" id="prob-b"></div>
+            <div class="branch-text">Projected to error subspace:</div>
+            <div class="branch-math" id="branch-b-state1"></div>
+            <div id="branch-b-ev1"></div>
+            <!-- Step 2 -->
+            <div class="step3-content" id="card-b-step2">
+              <div id="branch-b-ev2"></div>
+              <div class="branch-text" id="branch-b-confirm" style="margin-top:6px;"></div>
+            </div>
+            <!-- Step 3 -->
+            <div class="step3-content" id="card-b-step3">
+              <div class="correction-label">Correction applied</div>
+              <div class="correction-applied" id="branch-b-correction-text"></div>
+              <div class="global-phase-note">
+                <strong>Global phase:</strong> The factor <em>i</em> is a global phase. It has no observable effect on any measurement outcome — this state is physically identical to |000⟩.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 button -->
+      <div class="step-button-row" id="step2-btn-row" style="display:none;">
+        <button class="btn-primary" id="btn-step2">Step 2: Measure Z₂Z₃</button>
+      </div>
+
+      <!-- Syndrome table -->
+      <section class="section syndrome-section" id="syndrome-section" aria-labelledby="syn-heading">
+        <h2 id="syn-heading">Syndrome Lookup Table</h2>
+        <table class="syndrome-table" aria-label="Syndrome to correction mapping">
+          <thead>
+            <tr><th>Z₁Z₂</th><th>Z₂Z₃</th><th>Error Location</th><th>Correction</th></tr>
+          </thead>
+          <tbody>
+            <tr id="sr-00"><td>+1</td><td>+1</td><td>None</td><td>I (no correction)</td></tr>
+            <tr id="sr-10"><td>−1</td><td>+1</td><td>Qubit 1</td><td>X₁</td></tr>
+            <tr id="sr-11"><td>−1</td><td>−1</td><td>Qubit 2</td><td>X₂</td></tr>
+            <tr id="sr-01"><td>+1</td><td>−1</td><td>Qubit 3</td><td>X₃</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Step 3 button -->
+      <div class="step-button-row" id="step3-btn-row" style="display:none;">
+        <button class="btn-primary" id="btn-step3">Step 3: Apply Correction</button>
+      </div>
+
+      <!-- Converging arrows -->
+      <div class="converge-section" id="converge-section">
+        <div class="converge-fork">
+          <div class="converge-arm converge-arm-a"><div class="arm-line"></div></div>
+          <div class="converge-arm converge-arm-b"><div class="arm-line"></div></div>
+        </div>
+        <div class="arrow-down-accent">↓</div>
+        <div class="converge-node">
+          <div class="converge-label">Error Corrected</div>
+          <div class="converge-math" id="converge-math"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insight -->
+    <div class="insight-banner" id="insight-banner">
+      <p><strong>Key insight:</strong> The fidelity of the corrupted state changes continuously with θ, but the correction process does not. Regardless of the error angle, syndrome measurement digitizes the error — and both paths recover the original state.</p>
+    </div>
+  </div>
+
+  <!-- Reset -->
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn-secondary" id="btn-reset">Reset</button>
+  </div>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+
+<script>
+(function() {
+  let theta = 0, targetQubit = 1, cosHalf = 1, sinHalf = 0;
+
+  const $ = id => document.getElementById(id);
+  const angleInput = $('angle-input');
+  const radianDisplay = $('radian-display');
+
+  function rk(el, latex) {
+    katex.render(latex, el, { throwOnError: false, displayMode: false });
+  }
+  function fmt(v) {
+    let s = v.toFixed(4);
+    s = s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    return s;
+  }
+  function pct(v) { return (v * 100).toFixed(1) + '%'; }
+  function ek() {
+    return targetQubit === 1 ? '100' : targetQubit === 2 ? '010' : '001';
+  }
+  function synFor(q) {
+    if (q === 1) return [-1, 1];
+    if (q === 2) return [-1, -1];
+    return [1, -1];
+  }
+  function synKey(z12, z23) {
+    return (z12 === -1 ? '1' : '0') + (z23 === -1 ? '1' : '0');
+  }
+  function corrTex(q) {
+    return q === 1 ? 'X_1' : q === 2 ? 'X_2' : 'X_3';
+  }
+
+  // Init
+  rk($('state-math'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+
+  // Radian display
+  angleInput.addEventListener('input', function() {
+    let deg = parseFloat(angleInput.value) || 0;
+    radianDisplay.textContent = '= ' + fmt(deg * Math.PI / 180) + ' rad';
+  });
+
+  // Apply Error
+  $('btn-apply').addEventListener('click', function() {
+    let deg = parseFloat(angleInput.value) || 0;
+    theta = deg * Math.PI / 180;
+    targetQubit = parseInt(document.querySelector('input[name="qubit"]:checked').value);
+    cosHalf = Math.cos(theta / 2);
+    sinHalf = Math.sin(theta / 2);
+
+    // State display with psi_superposition label
+    $('state-phase-label').textContent = 'After Rx(' + fmt(deg) + '\u00B0) on qubit ' + targetQubit;
+    let e = ek();
+    let cStr = fmt(Math.abs(cosHalf)), sStr = fmt(Math.abs(sinHalf));
+    let latex;
+    if (Math.abs(sinHalf) < 1e-10) {
+      latex = '|\\psi_{\\text{sup}}\\rangle = |000\\rangle';
+    } else if (Math.abs(cosHalf) < 1e-10) {
+      latex = '|\\psi_{\\text{sup}}\\rangle = ' + (sinHalf > 0 ? 'i' : '-i') + '|' + e + '\\rangle';
+    } else {
+      let cSgn = cosHalf >= 0 ? '' : '-';
+      let sSgn = sinHalf >= 0 ? '+' : '-';
+      latex = '|\\psi_{\\text{sup}}\\rangle = ' + cSgn + cStr + '|000\\rangle ' + sSgn + ' ' + sStr + 'i|' + e + '\\rangle';
+    }
+    rk($('state-math'), latex);
+
+    // Fidelity
+    let fid = cosHalf * cosHalf;
+    $('fidelity-section').style.display = 'flex';
+    $('fidelity-bar').style.width = (fid * 100) + '%';
+    $('fidelity-number').textContent = fid.toFixed(3);
+    if (fid > 0.999)      $('fidelity-note').textContent = 'Negligible error \u2014 state is nearly unchanged.';
+    else if (fid > 0.5)   $('fidelity-note').textContent = 'Fidelity has degraded continuously with \u03B8. Yet the same correction will recover it.';
+    else                   $('fidelity-note').textContent = 'Severe fidelity loss \u2014 closer to the error ket than the codeword. Yet the same correction still works.';
+
+    // Show flow, reset steps
+    $('flow-area').classList.add('visible');
+    $('step1-btn-row').style.display = 'block';
+    $('step1-result').style.display = 'none';
+    $('step2-btn-row').style.display = 'none';
+    $('step3-btn-row').style.display = 'none';
+    $('syndrome-section').classList.remove('visible');
+    $('insight-banner').classList.remove('visible');
+    $('converge-section').classList.remove('visible');
+    $('card-a-step2').classList.remove('visible');
+    $('card-b-step2').classList.remove('visible');
+    $('card-a-step3').classList.remove('visible');
+    $('card-b-step3').classList.remove('visible');
+    ['sr-00','sr-10','sr-11','sr-01'].forEach(id => $(id).classList.remove('highlighted-b'));
+  });
+
+  // Step 1: Measure Z1Z2
+  $('btn-step1').addEventListener('click', function() {
+    $('step1-btn-row').style.display = 'none';
+    $('step1-result').style.display = 'block';
+
+    let pA = cosHalf * cosHalf;
+    let pB = sinHalf * sinHalf;
+    let e = ek();
+    let syn = synFor(targetQubit);
+
+    $('prob-a').textContent = 'Probability: ' + pct(pA);
+    $('prob-b').textContent = 'Probability: ' + pct(pB);
+
+    // Branch A: error-free
+    rk($('branch-a-state1'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+
+    // Branch B: bitflip error
+    rk($('branch-b-state1'), '|\\psi_{\\text{bitflip}}\\rangle = i\\,|' + e + '\\rangle');
+    let z12c = syn[0] === 1 ? 'plus' : 'minus';
+    let z12l = syn[0] === 1 ? '+1' : '\u22121';
+    $('branch-b-ev1').innerHTML = '<div class="ev-row"><span class="ev-label">Z\u2081Z\u2082:</span><span class="eigenvalue-badge ' + z12c + '">' + z12l + '</span></div>';
+
+    $('step2-btn-row').style.display = 'block';
+  });
+
+  // Step 2: Measure Z2Z3
+  $('btn-step2').addEventListener('click', function() {
+    $('step2-btn-row').style.display = 'none';
+    let syn = synFor(targetQubit);
+
+    // Branch A
+    $('card-a-step2').classList.add('visible');
+
+    // Branch B
+    let z23c = syn[1] === 1 ? 'plus' : 'minus';
+    let z23l = syn[1] === 1 ? '+1' : '\u22121';
+    $('branch-b-ev2').innerHTML = '<div class="ev-row"><span class="ev-label">Z\u2082Z\u2083:</span><span class="eigenvalue-badge ' + z23c + '">' + z23l + '</span></div>';
+    $('branch-b-confirm').textContent = 'Confirms: error on qubit ' + targetQubit + '.';
+    $('card-b-step2').classList.add('visible');
+
+    // Show syndrome table
+    $('syndrome-section').classList.add('visible');
+    let key = synKey(syn[0], syn[1]);
+    ['sr-00','sr-10','sr-11','sr-01'].forEach(id => $(id).classList.remove('highlighted-b'));
+    $('sr-' + key).classList.add('highlighted-b');
+
+    $('step3-btn-row').style.display = 'block';
+  });
+
+  // Step 3: Apply Correction
+  $('btn-step3').addEventListener('click', function() {
+    $('step3-btn-row').style.display = 'none';
+
+    // Branch A
+    $('card-a-step3').classList.add('visible');
+
+    // Branch B
+    let ct = corrTex(targetQubit);
+    $('branch-b-correction-text').innerHTML = '';
+    rk($('branch-b-correction-text'), ct + '\\cdot i\\,|' + ek() + '\\rangle = i\\,|000\\rangle');
+    $('card-b-step3').classList.add('visible');
+
+    // Converging arrows
+    rk($('converge-math'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+    $('converge-section').classList.add('visible');
+
+    // Insight
+    $('insight-banner').classList.add('visible');
+  });
+
+  // Reset
+  $('btn-reset').addEventListener('click', function() {
+    angleInput.value = '30';
+    radianDisplay.textContent = '= 0.524 rad';
+    document.getElementById('q1').checked = true;
+    $('fidelity-section').style.display = 'none';
+    $('flow-area').classList.remove('visible');
+    $('state-phase-label').textContent = 'Encoded logical state';
+    rk($('state-math'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+    $('syndrome-section').classList.remove('visible');
+    $('insight-banner').classList.remove('visible');
+    $('converge-section').classList.remove('visible');
+  });
+})();
+</script>
+</body>
+</html>

@@ -250,7 +250,7 @@ body {
       <div class="metric-value" id="metric-weight">&mdash;</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">Optimal Weight</div>
+      <div class="metric-label">Minimum Weight</div>
       <div class="metric-value" id="metric-optimal">&mdash;</div>
     </div>
   </div>
@@ -342,9 +342,30 @@ const state = {
   optimalWeight: null, optimalPairs: [], numMatchings: 0
 };
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// MWPM (Minimum Weight Perfect Matching) — Code organization & verification
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1. DISTANCE (weight metric): toricDist1D, toricManhattan
+//    → Defines "edge length" between two lattice cells on a torus (wrap-around).
+//    → Sum of these over all pairs in a matching = total weight of that matching.
+// 2. PATH GEOMETRY: bfsShortestPath
+//    → Shortest path (same topology as distance) for drawing paths on the lattice.
+// 3. ENUMERATE MATCHINGS: allPerfectMatchings
+//    → Lists every way to pair defect indices so each appears in exactly one pair.
+// 4. OPTIMAL MWPM: computeOptimalMWPM
+//    → For each perfect matching, sum toric Manhattan distances; return min sum + pairs.
+// 5. USER SOLUTION: getUserWeight, allDefectsPaired
+//    → User's total weight = sum of (path length − 1) for each pair; allDefectsPaired = all paired.
+// 6. PUZZLE LOAD & DISPLAY: loadPuzzle calls computeOptimalMWPM; updateMetrics shows weights.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** 1a. Toric distance along one axis: min(forward, wrap-around). VERIFY: d(a,b) = d(b,a), 0 ≤ d ≤ size/2. */
 function toricDist1D(a, b, size) { const d = Math.abs(a - b); return Math.min(d, size - d); }
+
+/** 1b. Weight between two cells (r1,c1) and (r2,c2) = toric Manhattan distance. VERIFY: used as edge weight in MWPM. */
 function toricManhattan(r1, c1, r2, c2) { return toricDist1D(r1, r2, state.gridSize) + toricDist1D(c1, c2, state.gridSize); }
 
+/** 2. Shortest path on toric grid (BFS, 4-neighbor). VERIFY: path length in steps = toricManhattan(r1,c1,r2,c2); used only for drawing. */
 function bfsShortestPath(r1, c1, r2, c2) {
   const G = state.gridSize;
   if (r1 === r2 && c1 === c2) return [{ r: r1, c: c1 }];
@@ -370,6 +391,7 @@ function bfsShortestPath(r1, c1, r2, c2) {
   return [{ r: r1, c: c1 }, { r: r2, c: c2 }];
 }
 
+/** 3. All perfect matchings of ids (each id in exactly one pair). VERIFY: count = (n-1)!! for n even; e.g. 4 defects → 3 matchings. */
 function allPerfectMatchings(ids) {
   if (ids.length === 0) return [[]];
   if (ids.length === 2) return [[[ids[0], ids[1]]]];
@@ -381,20 +403,25 @@ function allPerfectMatchings(ids) {
   return result;
 }
 
+/** 4. Minimum-weight perfect matching. VERIFY: weight = sum over pairs of toricManhattan; bestW = min such sum; pairs = that matching + paths for drawing. */
 function computeOptimalMWPM(defects) {
-  const matchings = allPerfectMatchings(defects.map((_, i) => i));
+  const matchings = allPerfectMatchings(defects.map((_, i) => i));  // all ways to pair defect indices 0..n-1
   let bestW = Infinity, bestM = null;
   for (const m of matchings) {
     let w = 0;
-    for (const [a, b] of m) w += toricManhattan(defects[a].r, defects[a].c, defects[b].r, defects[b].c);
+    for (const [a, b] of m) w += toricManhattan(defects[a].r, defects[a].c, defects[b].r, defects[b].c);  // total weight of this matching
     if (w < bestW) { bestW = w; bestM = m; }
   }
   return { weight: bestW, pairs: bestM.map(([a, b]) => ({ a, b, path: bfsShortestPath(defects[a].r, defects[a].c, defects[b].r, defects[b].c), color: SOLUTION_COLOR })) };
 }
 
+/** 5a. User's total weight = sum of (path length − 1) for each pair. VERIFY: path has (toricManhattan + 1) cells, so steps = path.length - 1. */
 function getUserWeight() { let t = 0; for (const p of state.pairs) t += p.path.length - 1; return t; }
+
+/** 5b. True iff every defect index appears in exactly one of state.pairs. */
 function allDefectsPaired() { const s = new Set(); for (const p of state.pairs) { s.add(p.a); s.add(p.b); } return s.size === state.defects.length; }
 
+/** 6a. Load puzzle and compute optimal MWPM once; store optimalWeight (min total distance) and optimalPairs (for "Show Solution"). */
 function loadPuzzle(dist, pattern) {
   const key = `${dist}-${pattern}`;
   const puzzle = PUZZLES[key];
@@ -408,9 +435,9 @@ function loadPuzzle(dist, pattern) {
   state.checked = false;
   state.solutionShown = false;
   state.numMatchings = doubleFactorial(state.defects.length - 1);
-  const optimal = computeOptimalMWPM(state.defects);
-  state.optimalWeight = optimal.weight;
-  state.optimalPairs = optimal.pairs;
+  const optimal = computeOptimalMWPM(state.defects);   // MWPM computed here
+  state.optimalWeight = optimal.weight;               // displayed as "Minimum Weight"
+  state.optimalPairs = optimal.pairs;                 // drawn when "Show Solution" is used
 }
 
 // ─── SVG Rendering ───
@@ -513,6 +540,7 @@ function renderLattice() {
   if (fid !== undefined && fid !== null) { const f = document.querySelector(`#student-lattice .hit-area[data-defect-id="${fid}"]`); if (f) f.focus(); }
 }
 
+/** 6b. Display "Your Weight" (getUserWeight) and "Minimum Weight" (state.optimalWeight) when check/solution shown. */
 function updateMetrics() {
   const wEl = document.getElementById('metric-weight'), oEl = document.getElementById('metric-optimal');
   wEl.textContent = state.pairs.length > 0 ? getUserWeight() : '\u2014';
@@ -558,6 +586,7 @@ function switchConfig(dist, pattern) {
   for (const b of document.querySelectorAll('[data-dist]')) b.setAttribute('aria-pressed', b.dataset.dist == dist ? 'true' : 'false');
   for (const b of document.querySelectorAll('[data-pattern]')) b.setAttribute('aria-pressed', b.dataset.pattern === pattern ? 'true' : 'false');
   loadPuzzle(dist, pattern);
+  document.getElementById('btn-solution').textContent = 'Show Solution';
   renderLattice(); updateMetrics(); updateButtons(); updateCodeInfo();
   announce(`Loaded d=${dist} ${pattern} puzzle.`);
 }
@@ -568,6 +597,7 @@ function init() {
   document.getElementById('btn-undo').addEventListener('click', () => {
     if (state.pairs.length === 0) return;
     state.pairs.pop(); state.selected = null; state.checked = false; state.solutionShown = false;
+    document.getElementById('btn-solution').textContent = 'Show Solution';
     renderLattice(); updateMetrics(); updateButtons(); announce('Undid last pairing.');
   });
   document.getElementById('btn-check').addEventListener('click', () => {
@@ -579,8 +609,10 @@ function init() {
   });
   document.getElementById('btn-solution').addEventListener('click', () => {
     if (!allDefectsPaired()) return;
-    state.solutionShown = true; if (!state.checked) state.checked = true;
-    renderLattice(); updateMetrics(); announce(`Optimal overlaid. Weight: ${state.optimalWeight}.`);
+    state.solutionShown = !state.solutionShown;
+    if (state.solutionShown) { if (!state.checked) state.checked = true; }
+    document.getElementById('btn-solution').textContent = state.solutionShown ? 'Hide Solution' : 'Show Solution';
+    renderLattice(); updateMetrics(); announce(state.solutionShown ? `Optimal overlaid. Weight: ${state.optimalWeight}.` : 'Solution hidden.');
   });
   document.getElementById('student-lattice').addEventListener('click', (e) => {
     const n = e.target.closest('.defect');
