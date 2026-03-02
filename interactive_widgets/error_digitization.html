@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Error Digitization Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --nvidia-green: #76b900;
+    --nvidia-green-dark: #5e9400;
+    --nvidia-dark: #1A1A1A;
+    --nvidia-mid: #2A2A2A;
+    --nvidia-accent: #444444;
+    --nvidia-light: #E0E0E0;
+    --nvidia-gray: #AAAAAA;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--nvidia-dark);
+    color: var(--nvidia-light);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 32px 16px;
+    line-height: 1.5;
+}
+.skip-link {
+    position: absolute; top: -40px; left: 0;
+    background: var(--nvidia-green); color: #000;
+    padding: 8px 16px; z-index: 100;
+    text-decoration: none; font-weight: bold;
+}
+.skip-link:focus { top: 0; outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+.widget-container {
+    background: var(--nvidia-mid);
+    border: 1px solid var(--nvidia-accent);
+    border-top: 4px solid var(--nvidia-green);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 1100px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin: 0 auto;
+}
+@media (min-width: 768px) { .widget-container { padding: 32px; } }
+.widget-container h1 {
+    color: var(--nvidia-green);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    margin-top: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.widget-container .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; font-size: 1rem; line-height: 1.5; }
+.widget-container .keyboard-help { color: var(--nvidia-gray); font-size: 0.85rem; margin-top: 8px; }
+.section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--nvidia-accent);
+    border-radius: 8px;
+}
+.section h2 { color: var(--nvidia-green); font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 700; }
+.control-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.control-row label {
+    font-size: 0.9rem;
+    color: var(--nvidia-light);
+    min-width: 120px;
+}
+.control-row input[type="range"] {
+    flex: 1;
+    min-width: 120px;
+    max-width: 280px;
+    height: 8px;
+    accent-color: var(--nvidia-green);
+}
+.control-row .value-readout {
+    font-weight: 700;
+    color: var(--nvidia-green);
+    min-width: 2.5rem;
+}
+.bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.bar-row .label {
+    width: 140px;
+    font-size: 0.9rem;
+    color: var(--nvidia-gray);
+}
+.bar-row .bar-wrap {
+    flex: 1;
+    height: 32px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+.bar-row .bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.2s ease;
+}
+.bar-row .bar.ideal { background: linear-gradient(to top, #5e9400, var(--nvidia-green)); }
+.bar-row .bar.noisy { background: linear-gradient(to top, #444, #666); }
+.bar-row .bar-value {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 2px #000;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+.widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-green); padding-top: 16px; text-align: center; }
+.widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+.widget-footer-links a { color: var(--nvidia-green); text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+.widget-footer-links a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; } }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="widget-container" id="main-content">
+
+  <header>
+    <h1>Error Digitization Explorer</h1>
+    <p class="summary-text">See how small coherent rotation errors accumulate over many gate applications. A gate intended to rotate by &pi;/16 &approx; 0.196 rad may actually apply 0.17 rad; the slider shows how the total rotation drifts as n increases.</p>
+    <p class="keyboard-help">Press <strong>ESC</strong> to reset. Use <strong>Tab</strong> to move between controls.</p>
+  </header>
+
+  <section class="section" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+    <div class="control-row">
+      <label for="n-slider">Number of rotations (n):</label>
+      <input type="range" id="n-slider" min="1" max="20" value="1" aria-valuemin="1" aria-valuemax="20" aria-valuenow="1" aria-label="Number of rotation gates applied">
+      <span class="value-readout" id="n-value" aria-live="polite">1</span>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="viz-heading">
+    <h2 id="viz-heading">Accumulated rotation (radians)</h2>
+    <p style="font-size:0.9rem; color:var(--nvidia-gray); margin-bottom:12px;">Ideal angle = &pi;/16 &approx; 0.196 per gate. Noisy angle = 0.17 per gate. Maximum shown = 2&pi; (one full rotation).</p>
+    <div class="bar-chart">
+      <div class="bar-row">
+        <span class="label">Ideal (n &times; &pi;/16)</span>
+        <div class="bar-wrap">
+          <div class="bar ideal" id="bar-ideal" role="img" aria-label="Ideal accumulated angle"></div>
+          <span class="bar-value" id="val-ideal">0.20</span>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="label">Noisy (n &times; 0.17)</span>
+        <div class="bar-wrap">
+          <div class="bar noisy" id="bar-noisy" role="img" aria-label="Noisy accumulated angle"></div>
+          <span class="bar-value" id="val-noisy">0.17</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <div class="widget-footer-links">
+      <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+      <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+const IDEAL_ANGLE = Math.PI / 16;
+const NOISY_ANGLE = 0.17;
+const MAX_ANGLE = 2 * Math.PI;
+
+function update() {
+  const n = parseInt(document.getElementById('n-slider').value, 10);
+  const idealTotal = n * IDEAL_ANGLE;
+  const noisyTotal = n * NOISY_ANGLE;
+
+  document.getElementById('n-value').textContent = n;
+
+  const idealPct = Math.min(100, (idealTotal / MAX_ANGLE) * 100);
+  const noisyPct = Math.min(100, (noisyTotal / MAX_ANGLE) * 100);
+
+  document.getElementById('bar-ideal').style.width = idealPct + '%';
+  document.getElementById('bar-noisy').style.width = noisyPct + '%';
+
+  document.getElementById('val-ideal').textContent = idealTotal.toFixed(3);
+  document.getElementById('val-noisy').textContent = noisyTotal.toFixed(3);
+
+  document.getElementById('bar-ideal').setAttribute('aria-label', 'Ideal accumulated angle ' + idealTotal.toFixed(3) + ' radians');
+  document.getElementById('bar-noisy').setAttribute('aria-label', 'Noisy accumulated angle ' + noisyTotal.toFixed(3) + ' radians');
+
+  document.getElementById('status-announce').textContent = 'n = ' + n + '. Ideal total ' + idealTotal.toFixed(3) + ', noisy total ' + noisyTotal.toFixed(3);
+}
+
+document.getElementById('n-slider').addEventListener('input', function() {
+  this.setAttribute('aria-valuenow', this.value);
+  update();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('n-slider').value = 1;
+    document.getElementById('n-slider').setAttribute('aria-valuenow', '1');
+    update();
+  }
+});
+
+update();
+</script>
+
+</body>
+</html>

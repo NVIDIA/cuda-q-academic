@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MWPM Decoding Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --accent: #76b900;
+    --accent-dark: #5e9400;
+    --bg: #1A1A1A;
+    --surface: #2A2A2A;
+    --border: #444444;
+    --fg: #E0E0E0;
+    --muted: #AAAAAA;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 32px 16px;
+    line-height: 1.5;
+}
+.skip-link {
+    position: absolute; top: -40px; left: 0;
+    background: var(--accent); color: #000;
+    padding: 8px 16px; z-index: 100;
+    text-decoration: none; font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 1100px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin: 0 auto;
+}
+@media (min-width: 768px) { .widget-container { padding: 32px; } }
+.widget-container h1 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    margin-top: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.widget-container .summary-text {
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+.instructions-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.instructions-section h2 {
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin: 0 0 12px 0;
+    font-weight: 700;
+}
+.instructions-section ol { padding-left: 20px; margin-bottom: 12px; }
+.instructions-section li { margin-bottom: 6px; font-size: 0.9rem; color: var(--fg); }
+.instructions-section .kbd { background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+.info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 24px;
+}
+.controls-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.control-group-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: -4px;
+}
+.level-group { display: flex; gap: 0; }
+.level-btn {
+    background: var(--surface); color: #fff;
+    border: 1px solid var(--border); border-bottom: 3px solid var(--accent);
+    padding: 8px 18px; font-family: inherit; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; min-height: 44px; min-width: 44px;
+    transition: background 0.15s, color 0.15s;
+}
+.level-btn:first-child { border-radius: 6px 0 0 6px; }
+.level-btn:last-child { border-radius: 0 6px 6px 0; }
+.level-btn:not(:first-child) { border-left: none; }
+.level-btn[aria-pressed="true"] { background: var(--accent); color: #000; border-color: var(--accent); }
+.level-btn:hover:not([aria-pressed="true"]) { background: rgba(255,255,255,0.05); }
+.level-btn:focus { outline: 3px solid var(--accent); outline-offset: 2px; z-index: 1; position: relative; }
+.btn-primary {
+    background: var(--surface); color: #fff;
+    border: 1px solid var(--border); border-bottom: 3px solid var(--accent);
+    padding: 8px 18px; font-family: inherit; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; border-radius: 6px; min-height: 44px; min-width: 44px;
+    transition: background 0.15s, color 0.15s;
+}
+.btn-primary:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+.btn-primary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary:disabled:hover { background: var(--surface); color: #fff; border-color: var(--border); border-bottom-color: var(--accent); }
+.actions-separator { width: 1px; height: 28px; background: var(--border); }
+.game-area { margin-bottom: 16px; }
+.game-layout { display: flex; gap: 20px; align-items: flex-start; }
+.code-sidebar {
+    flex: 0 0 200px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+}
+.code-sidebar .sidebar-nkd {
+    font-size: 1.3rem; font-weight: 700; color: var(--accent);
+    margin-bottom: 16px; text-align: center; letter-spacing: 0.5px;
+}
+.code-sidebar .sidebar-item {
+    margin-bottom: 14px;
+}
+.code-sidebar .sidebar-label {
+    font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 2px;
+}
+.code-sidebar .sidebar-value {
+    font-size: 1.1rem; font-weight: 700; color: var(--fg);
+}
+.code-sidebar .sidebar-value.accent { color: var(--accent); }
+.lattice-col { flex: 1; min-width: 0; }
+@media (max-width: 700px) {
+    .game-layout { flex-direction: column; }
+    .code-sidebar { flex: none; width: 100%; display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+    .code-sidebar .sidebar-item { margin-bottom: 0; }
+}
+.lattice-panel { padding: 16px; text-align: center; }
+.lattice-panel h3 {
+    color: var(--accent); font-size: 0.95rem; margin-bottom: 12px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.objective-banner {
+    background: rgba(118,185,0,0.1); border: 1px solid var(--accent);
+    border-radius: 6px; padding: 10px 16px; margin-bottom: 12px;
+    font-size: 0.9rem; color: var(--fg); text-align: center;
+}
+.objective-banner strong { color: var(--accent); }
+.lattice-svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.lattice-svg .lattice-edge { stroke: #555; stroke-width: 2; }
+.lattice-svg .lattice-edge.wrap-edge { stroke: #666; stroke-width: 2.5; stroke-dasharray: 8 5; }
+.lattice-svg .lattice-node { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; cursor: default; }
+.lattice-svg .hit-area { fill: transparent; stroke: none; cursor: pointer; }
+.lattice-svg .lattice-node.defect { fill: #e52020; stroke: #ff6b6b; stroke-width: 2; cursor: pointer; }
+.lattice-svg .lattice-node.defect:hover { stroke: #fff; stroke-width: 2.5; }
+.lattice-svg .lattice-node.defect.selected { stroke: #f9c500; stroke-width: 3; }
+.lattice-svg .lattice-node.defect.paired { fill: #952fc6; stroke: #b366d9; stroke-width: 2; opacity: 0.7; cursor: default; }
+.lattice-svg .matched-path { stroke-width: 3; fill: none; stroke-linecap: round; }
+.lattice-svg .solution-path { stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-dasharray: 6 3; }
+.results-panel { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+.metric-card {
+    flex: 1; min-width: 120px; background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; text-align: center;
+}
+.metric-card .metric-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.metric-card .metric-value { font-size: 1.4rem; font-weight: 700; color: var(--fg); }
+.metric-card .metric-value.optimal { color: var(--accent); }
+.legend-row { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 12px; font-size: 0.8rem; color: var(--muted); }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 2px solid; }
+.legend-line { width: 24px; height: 3px; border-radius: 2px; display: inline-block; }
+.legend-line.dashed { background: repeating-linear-gradient(to right, #0074df 0, #0074df 6px, transparent 6px, transparent 9px); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+.widget-footer { margin-top: 32px; border-top: 1px solid var(--accent); padding-top: 16px; text-align: center; }
+.widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+.widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+.widget-footer-links a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.widget-footer-links a:focus { outline: 3px solid #76b900; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+@media (max-width: 600px) {
+    .controls-panel { flex-direction: column; align-items: stretch; }
+    .level-group { width: 100%; }
+    .level-btn { flex: 1; }
+    .actions-separator { display: none; }
+    .results-panel { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="widget-container" id="main-content">
+
+  <header>
+    <h1>MWPM Decoding Challenge</h1>
+    <p class="summary-text">Explore how matching syndrome defects becomes harder as code distance and error complexity increase. Select a code distance and syndrome pattern, then try to find the minimum-weight perfect matching.</p>
+    <p class="keyboard-help" style="font-size:0.85rem; color:var(--muted); margin-top:8px;">Press <strong>ESC</strong> to deselect. <strong>Enter</strong>/<strong>Space</strong> to select or pair.</p>
+  </header>
+
+  <section class="instructions-section" aria-labelledby="instructions-heading">
+    <h2 id="instructions-heading">Instructions</h2>
+    <ol>
+      <li>Select a <strong>code distance</strong> (d=7 or d=11) and a <strong>syndrome pattern</strong> (Easy or Hard).</li>
+      <li>The lattice has <strong>toric (periodic) boundary conditions</strong> &mdash; the top edge connects to the bottom, and the left edge connects to the right. Dashed edges indicate wrap-around connections.</li>
+      <li>Click any highlighted <strong style="color:#e52020;">red defect node</strong> to select it, then click a second defect to pair them &mdash; <strong>a shortest path</strong> is automatically drawn.</li>
+      <li>Continue pairing until all defects are matched.</li>
+      <li>Click <strong>Check</strong> to evaluate your matching, or <strong>Show Solution</strong> to overlay the optimal MWPM (dashed blue).</li>
+    </ol>
+    <p style="font-size:0.85rem; color:var(--muted);"><strong>Keyboard:</strong> <span class="kbd">Tab</span> to navigate. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to select/pair. <span class="kbd">Esc</span> to deselect.</p>
+  </section>
+
+  <!-- Controls panel -->
+  <div class="controls-panel info-box" role="toolbar" aria-label="Game controls">
+    <span class="control-group-label">Distance:</span>
+    <div class="level-group" role="group" aria-label="Code distance">
+      <button class="level-btn" id="btn-d7" aria-pressed="true" data-dist="7">d = 7</button>
+      <button class="level-btn" id="btn-d11" aria-pressed="false" data-dist="11">d = 11</button>
+    </div>
+    <span class="control-group-label">Pattern:</span>
+    <div class="level-group" role="group" aria-label="Syndrome pattern">
+      <button class="level-btn" id="btn-easy" aria-pressed="true" data-pattern="easy">Easy</button>
+      <button class="level-btn" id="btn-hard" aria-pressed="false" data-pattern="hard">Hard</button>
+    </div>
+    <div class="actions-separator" aria-hidden="true"></div>
+    <button class="btn-primary" id="btn-undo" disabled aria-label="Undo last pairing">Undo</button>
+    <button class="btn-primary" id="btn-check" disabled aria-label="Check your matching">Check</button>
+    <button class="btn-primary" id="btn-solution" disabled aria-label="Show optimal solution">Show Solution</button>
+  </div>
+
+  <!-- Results panel -->
+  <div class="results-panel info-box" aria-label="Results">
+    <div class="metric-card">
+      <div class="metric-label">Your Weight</div>
+      <div class="metric-value" id="metric-weight">&mdash;</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Optimal Weight</div>
+      <div class="metric-value" id="metric-optimal">&mdash;</div>
+    </div>
+  </div>
+
+  <!-- Main game area -->
+  <div class="game-area">
+    <div class="game-layout">
+      <div class="code-sidebar" id="code-sidebar">
+        <div class="sidebar-nkd" id="sidebar-nkd">[[98, 2, 7]]</div>
+        <div class="sidebar-item">
+          <div class="sidebar-label">Code</div>
+          <div class="sidebar-value">Toric Code</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-label">Parity Check Matrix</div>
+          <div class="sidebar-value" id="sidebar-hsize">49 &times; 98</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-label">Stabilizers</div>
+          <div class="sidebar-value" id="sidebar-stabs">49</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-label">Physical Qubits</div>
+          <div class="sidebar-value" id="sidebar-qubits">98</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-label">Possible Matchings</div>
+          <div class="sidebar-value accent" id="sidebar-matchings">3</div>
+        </div>
+      </div>
+      <div class="lattice-col">
+    <div class="lattice-panel info-box">
+      <div class="objective-banner">
+        <strong>Objective:</strong> Pair all defects to minimize the total path weight (sum of all edge lengths).
+      </div>
+      <h3 id="lattice-title">Your Matching</h3>
+      <svg id="student-lattice" class="lattice-svg" role="img" aria-label="Toric code lattice. Click defect nodes to pair them." tabindex="0"></svg>
+      <div class="legend-row" aria-label="Legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:#e52020; border-color:#ff6b6b;"></span> Defect</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#e52020; border-color:#f9c500;"></span> Selected</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#952fc6; border-color:#b366d9;"></span> Paired</span>
+        <span class="legend-item"><span class="legend-line" style="background:#76b900;"></span> Your path</span>
+        <span class="legend-item" id="legend-solution" style="display:none;"><span class="legend-line dashed"></span> Optimal (MWPM)</span>
+      </div>
+    </div>
+      </div><!-- /lattice-col -->
+    </div><!-- /game-layout -->
+  </div>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <div class="widget-footer-links">
+      <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+      <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+const MATCH_COLOR = '#76b900';
+const SOLUTION_COLOR = '#0074df';
+const SVG_PAD = 40;
+
+// Code parameters for toric code: n = 2*d^2, k = 2
+// X-type parity check: d^2 stabilizers acting on 2*d^2 qubits => H_x is d^2 x 2d^2
+const CODE_PARAMS = {
+  7:  { n: 98,  k: 2, d: 7,  hRows: 49,  hCols: 98,  spacing: 60, nodeR: 8,  defectR: 10 },
+  11: { n: 242, k: 2, d: 11, hRows: 121, hCols: 242, spacing: 50, nodeR: 6,  defectR: 8  }
+};
+
+// Puzzles: keyed by "d-pattern"
+const PUZZLES = {
+  '7-easy':  { defects: [[1,1],[1,2],[4,4],[4,5]], desc: '4 clustered defects' },
+  '7-hard':  { defects: [[0,2],[1,5],[3,0],[3,6],[5,3],[6,5]], desc: '6 spread defects' },
+  '11-easy': { defects: [[1,1],[2,2],[5,7],[5,9],[9,3],[10,4]], desc: '6 clustered defects' },
+  '11-hard': { defects: [[0,5],[2,1],[2,9],[4,4],[4,8],[6,1],[7,6],[8,10],[9,3],[10,7]], desc: '10 spread defects' }
+};
+
+function doubleFactorial(n) { return n <= 1 ? 1 : n * doubleFactorial(n - 2); }
+
+const state = {
+  dist: 7, pattern: 'easy',
+  gridSize: 7, defects: [], selected: null, pairs: [],
+  checked: false, solutionShown: false,
+  optimalWeight: null, optimalPairs: [], numMatchings: 0
+};
+
+function toricDist1D(a, b, size) { const d = Math.abs(a - b); return Math.min(d, size - d); }
+function toricManhattan(r1, c1, r2, c2) { return toricDist1D(r1, r2, state.gridSize) + toricDist1D(c1, c2, state.gridSize); }
+
+function bfsShortestPath(r1, c1, r2, c2) {
+  const G = state.gridSize;
+  if (r1 === r2 && c1 === c2) return [{ r: r1, c: c1 }];
+  const key = (r, c) => r * G + c;
+  const start = key(r1, c1), end = key(r2, c2);
+  const visited = new Set([start]), parent = new Map(), queue = [{ r: r1, c: c1 }];
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  while (queue.length > 0) {
+    const { r, c } = queue.shift();
+    for (const [dr, dc] of dirs) {
+      const nr = ((r + dr) % G + G) % G, nc = ((c + dc) % G + G) % G, nk = key(nr, nc);
+      if (!visited.has(nk)) {
+        visited.add(nk); parent.set(nk, key(r, c));
+        if (nk === end) {
+          const path = [{ r: nr, c: nc }]; let cur = nk;
+          while (cur !== start) { cur = parent.get(cur); path.unshift({ r: Math.floor(cur / G), c: cur % G }); }
+          return path;
+        }
+        queue.push({ r: nr, c: nc });
+      }
+    }
+  }
+  return [{ r: r1, c: c1 }, { r: r2, c: c2 }];
+}
+
+function allPerfectMatchings(ids) {
+  if (ids.length === 0) return [[]];
+  if (ids.length === 2) return [[[ids[0], ids[1]]]];
+  const result = [], first = ids[0], rest = ids.slice(1);
+  for (let i = 0; i < rest.length; i++) {
+    const remaining = rest.filter((_, j) => j !== i);
+    for (const sub of allPerfectMatchings(remaining)) result.push([[first, rest[i]], ...sub]);
+  }
+  return result;
+}
+
+function computeOptimalMWPM(defects) {
+  const matchings = allPerfectMatchings(defects.map((_, i) => i));
+  let bestW = Infinity, bestM = null;
+  for (const m of matchings) {
+    let w = 0;
+    for (const [a, b] of m) w += toricManhattan(defects[a].r, defects[a].c, defects[b].r, defects[b].c);
+    if (w < bestW) { bestW = w; bestM = m; }
+  }
+  return { weight: bestW, pairs: bestM.map(([a, b]) => ({ a, b, path: bfsShortestPath(defects[a].r, defects[a].c, defects[b].r, defects[b].c), color: SOLUTION_COLOR })) };
+}
+
+function getUserWeight() { let t = 0; for (const p of state.pairs) t += p.path.length - 1; return t; }
+function allDefectsPaired() { const s = new Set(); for (const p of state.pairs) { s.add(p.a); s.add(p.b); } return s.size === state.defects.length; }
+
+function loadPuzzle(dist, pattern) {
+  const key = `${dist}-${pattern}`;
+  const puzzle = PUZZLES[key];
+  const cp = CODE_PARAMS[dist];
+  state.dist = dist;
+  state.pattern = pattern;
+  state.gridSize = cp.d;
+  state.defects = puzzle.defects.map(([r, c], i) => ({ r, c, id: i }));
+  state.selected = null;
+  state.pairs = [];
+  state.checked = false;
+  state.solutionShown = false;
+  state.numMatchings = doubleFactorial(state.defects.length - 1);
+  const optimal = computeOptimalMWPM(state.defects);
+  state.optimalWeight = optimal.weight;
+  state.optimalPairs = optimal.pairs;
+}
+
+// ─── SVG Rendering ───
+
+function nodePos(r, c) {
+  const sp = CODE_PARAMS[state.dist].spacing;
+  return { x: SVG_PAD + c * sp, y: SVG_PAD + r * sp };
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function drawLattice(svgId, defects, userPairs, solutionPairs, options = {}) {
+  const svg = document.getElementById(svgId);
+  svg.innerHTML = '';
+  const G = state.gridSize, sp = CODE_PARAMS[state.dist].spacing;
+  const W = SVG_PAD * 2 + (G - 1) * sp;
+  svg.setAttribute('width', W); svg.setAttribute('height', W);
+  svg.setAttribute('viewBox', `0 0 ${W} ${W}`);
+  const { showSelected = false, selectedId = null, interactive = false } = options;
+  const EDGE_END = SVG_PAD + (G-1)*sp + sp*0.65, EDGE_START = SVG_PAD - sp*0.65;
+
+  for (let r = 0; r < G; r++) {
+    for (let c = 0; c < G; c++) {
+      const p = nodePos(r, c);
+      const nc2 = (c+1)%G;
+      if (nc2 === 0) {
+        const re = nodePos(r, G-1), le = nodePos(r, 0);
+        svg.appendChild(svgEl('line', { x1: re.x, y1: re.y, x2: EDGE_END, y2: re.y, class: 'lattice-edge wrap-edge' }));
+        svg.appendChild(svgEl('line', { x1: EDGE_START, y1: le.y, x2: le.x, y2: le.y, class: 'lattice-edge wrap-edge' }));
+      } else {
+        const pr = nodePos(r, nc2);
+        svg.appendChild(svgEl('line', { x1: p.x, y1: p.y, x2: pr.x, y2: pr.y, class: 'lattice-edge' }));
+      }
+      const nr2 = (r+1)%G;
+      if (nr2 === 0) {
+        const be = nodePos(G-1, c), te = nodePos(0, c);
+        svg.appendChild(svgEl('line', { x1: be.x, y1: be.y, x2: be.x, y2: EDGE_END, class: 'lattice-edge wrap-edge' }));
+        svg.appendChild(svgEl('line', { x1: te.x, y1: EDGE_START, x2: te.x, y2: te.y, class: 'lattice-edge wrap-edge' }));
+      } else {
+        const pd = nodePos(nr2, c);
+        svg.appendChild(svgEl('line', { x1: p.x, y1: p.y, x2: pd.x, y2: pd.y, class: 'lattice-edge' }));
+      }
+    }
+  }
+
+  for (const pair of userPairs) drawPath(svg, pair.path, MATCH_COLOR, 'matched-path');
+  for (const pair of solutionPairs) drawPath(svg, pair.path, SOLUTION_COLOR, 'solution-path');
+
+  const pairedIds = new Set();
+  for (const pair of userPairs) { pairedIds.add(pair.a); pairedIds.add(pair.b); }
+
+  const cp = CODE_PARAMS[state.dist];
+  for (let r = 0; r < G; r++) {
+    for (let c = 0; c < G; c++) {
+      const p = nodePos(r, c);
+      const dIdx = defects.findIndex(d => d.r === r && d.c === c);
+      const isD = dIdx >= 0, isP = isD && pairedIds.has(dIdx), isS = isD && showSelected && selectedId === dIdx;
+      let cls = 'lattice-node';
+      if (isD) { cls += ' defect'; if (isP) cls += ' paired'; if (isS) cls += ' selected'; }
+      if (isD && interactive && !isP) {
+        const hit = svgEl('circle', { cx: p.x, cy: p.y, r: 22, class: 'hit-area', tabindex: '0', role: 'button', 'aria-label': `Defect at row ${r+1}, column ${c+1}${isS ? ' (selected)' : ''}` });
+        hit.dataset.defectId = dIdx; hit.classList.add('defect'); svg.appendChild(hit);
+      }
+      svg.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: isD ? cp.defectR : cp.nodeR, class: cls, 'pointer-events': (isD && interactive && !isP) ? 'none' : 'auto' }));
+    }
+  }
+}
+
+function drawPath(svg, path, color, className) {
+  if (path.length < 2) return;
+  const G = state.gridSize, sp = CODE_PARAMS[state.dist].spacing;
+  const EDGE_END = SVG_PAD + (G-1)*sp + sp*0.65, EDGE_START = SVG_PAD - sp*0.65;
+  for (let i = 0; i < path.length - 1; i++) {
+    const from = path[i], to = path[i+1];
+    const p1 = nodePos(from.r, from.c), p2 = nodePos(to.r, to.c);
+    const dR = Math.abs(from.r - to.r), dC = Math.abs(from.c - to.c);
+    if (dR > 1) {
+      const down = (to.r - from.r + G) % G === 1;
+      if (down) { svg.appendChild(svgEl('line', { x1: p1.x, y1: p1.y, x2: p1.x, y2: EDGE_END, class: className, stroke: color })); svg.appendChild(svgEl('line', { x1: p2.x, y1: EDGE_START, x2: p2.x, y2: p2.y, class: className, stroke: color })); }
+      else { svg.appendChild(svgEl('line', { x1: p1.x, y1: p1.y, x2: p1.x, y2: EDGE_START, class: className, stroke: color })); svg.appendChild(svgEl('line', { x1: p2.x, y1: EDGE_END, x2: p2.x, y2: p2.y, class: className, stroke: color })); }
+    } else if (dC > 1) {
+      const right = (to.c - from.c + G) % G === 1;
+      if (right) { svg.appendChild(svgEl('line', { x1: p1.x, y1: p1.y, x2: EDGE_END, y2: p1.y, class: className, stroke: color })); svg.appendChild(svgEl('line', { x1: EDGE_START, y1: p2.y, x2: p2.x, y2: p2.y, class: className, stroke: color })); }
+      else { svg.appendChild(svgEl('line', { x1: p1.x, y1: p1.y, x2: EDGE_START, y2: p1.y, class: className, stroke: color })); svg.appendChild(svgEl('line', { x1: EDGE_END, y1: p2.y, x2: p2.x, y2: p2.y, class: className, stroke: color })); }
+    } else {
+      svg.appendChild(svgEl('line', { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, class: className, stroke: color }));
+    }
+  }
+}
+
+function renderLattice() {
+  const ae = document.activeElement, fid = ae && ae.dataset && ae.dataset.defectId;
+  drawLattice('student-lattice', state.defects, state.pairs, state.solutionShown ? state.optimalPairs : [], { showSelected: state.selected !== null, selectedId: state.selected, interactive: true });
+  document.getElementById('lattice-title').textContent = state.solutionShown ? 'Your Matching + Optimal Solution' : 'Your Matching';
+  document.getElementById('legend-solution').style.display = state.solutionShown ? '' : 'none';
+  if (fid !== undefined && fid !== null) { const f = document.querySelector(`#student-lattice .hit-area[data-defect-id="${fid}"]`); if (f) f.focus(); }
+}
+
+function updateMetrics() {
+  const wEl = document.getElementById('metric-weight'), oEl = document.getElementById('metric-optimal');
+  wEl.textContent = state.pairs.length > 0 ? getUserWeight() : '\u2014';
+  if (state.checked || state.solutionShown) { oEl.textContent = state.optimalWeight; oEl.className = 'metric-value optimal'; }
+  else { oEl.textContent = '\u2014'; oEl.className = 'metric-value'; }
+}
+
+function updateButtons() {
+  document.getElementById('btn-undo').disabled = state.pairs.length === 0;
+  document.getElementById('btn-check').disabled = !allDefectsPaired();
+  document.getElementById('btn-solution').disabled = !allDefectsPaired();
+}
+
+function updateCodeInfo() {
+  const cp = CODE_PARAMS[state.dist];
+  document.getElementById('sidebar-nkd').textContent = `[[${cp.n}, ${cp.k}, ${cp.d}]]`;
+  document.getElementById('sidebar-hsize').innerHTML = `${cp.hRows} &times; ${cp.hCols}`;
+  document.getElementById('sidebar-stabs').textContent = cp.hRows;
+  document.getElementById('sidebar-qubits').textContent = cp.hCols;
+  document.getElementById('sidebar-matchings').textContent = state.numMatchings.toLocaleString();
+}
+
+function announce(msg) { document.getElementById('status-announce').textContent = msg; }
+
+function handleDefectClick(defectId) {
+  if (state.selected === null) {
+    if (state.pairs.some(p => p.a === defectId || p.b === defectId)) return;
+    state.selected = defectId;
+    announce(`Selected defect at row ${state.defects[defectId].r+1}, column ${state.defects[defectId].c+1}.`);
+  } else if (state.selected === defectId) {
+    state.selected = null; announce('Deselected.');
+  } else {
+    if (state.pairs.some(p => p.a === defectId || p.b === defectId)) return;
+    const a = state.selected, b = defectId, da = state.defects[a], db = state.defects[b];
+    state.pairs.push({ a, b, path: bfsShortestPath(da.r, da.c, db.r, db.c), color: MATCH_COLOR });
+    state.selected = null; state.checked = false; state.solutionShown = false;
+    announce(`Paired. Weight: ${state.pairs[state.pairs.length-1].path.length-1}. ${allDefectsPaired() ? 'All paired! Click Check.' : ''}`);
+  }
+  renderLattice(); updateMetrics(); updateButtons();
+}
+
+function switchConfig(dist, pattern) {
+  for (const b of document.querySelectorAll('[data-dist]')) b.setAttribute('aria-pressed', b.dataset.dist == dist ? 'true' : 'false');
+  for (const b of document.querySelectorAll('[data-pattern]')) b.setAttribute('aria-pressed', b.dataset.pattern === pattern ? 'true' : 'false');
+  loadPuzzle(dist, pattern);
+  renderLattice(); updateMetrics(); updateButtons(); updateCodeInfo();
+  announce(`Loaded d=${dist} ${pattern} puzzle.`);
+}
+
+function init() {
+  document.querySelectorAll('[data-dist]').forEach(btn => btn.addEventListener('click', () => switchConfig(parseInt(btn.dataset.dist), state.pattern)));
+  document.querySelectorAll('[data-pattern]').forEach(btn => btn.addEventListener('click', () => switchConfig(state.dist, btn.dataset.pattern)));
+  document.getElementById('btn-undo').addEventListener('click', () => {
+    if (state.pairs.length === 0) return;
+    state.pairs.pop(); state.selected = null; state.checked = false; state.solutionShown = false;
+    renderLattice(); updateMetrics(); updateButtons(); announce('Undid last pairing.');
+  });
+  document.getElementById('btn-check').addEventListener('click', () => {
+    if (!allDefectsPaired()) return;
+    state.checked = true;
+    const diff = getUserWeight() - state.optimalWeight;
+    announce(diff === 0 ? `Weight ${getUserWeight()}. Optimal!` : `Weight ${getUserWeight()}. Optimal is ${state.optimalWeight} (+${diff}).`);
+    updateMetrics();
+  });
+  document.getElementById('btn-solution').addEventListener('click', () => {
+    if (!allDefectsPaired()) return;
+    state.solutionShown = true; if (!state.checked) state.checked = true;
+    renderLattice(); updateMetrics(); announce(`Optimal overlaid. Weight: ${state.optimalWeight}.`);
+  });
+  document.getElementById('student-lattice').addEventListener('click', (e) => {
+    const n = e.target.closest('.defect');
+    if (n && n.dataset.defectId !== undefined) handleDefectClick(parseInt(n.dataset.defectId));
+  });
+  document.getElementById('student-lattice').addEventListener('keydown', (e) => {
+    if (e.target.classList.contains('defect') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleDefectClick(parseInt(e.target.dataset.defectId)); }
+    if (e.key === 'Escape' && state.selected !== null) { state.selected = null; renderLattice(); announce('Deselected.'); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.selected !== null) { state.selected = null; renderLattice(); announce('Deselected.'); } });
+  loadPuzzle(7, 'easy');
+  renderLattice(); updateMetrics(); updateButtons(); updateCodeInfo();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
