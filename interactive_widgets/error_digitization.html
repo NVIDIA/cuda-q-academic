@@ -494,13 +494,16 @@
 
     <!-- Step 1 result -->
     <div id="step1-result" style="display:none;">
-      <div class="arrow-down">↓</div>
-      <div class="trunk-node">
-        <div class="trunk-bold">The superposition is projected into one of two possible states, with probability determined by θ.</div>
-      </div>
-      <div class="arrow-down">↓</div>
 
-      <div class="branch-fork">
+      <!-- Qubits 1,2: branching happens at Step 1 -->
+      <div id="step1-branching">
+        <div class="arrow-down">↓</div>
+        <div class="trunk-node">
+          <div class="trunk-bold">The superposition is projected into one of two possible states, with probability determined by θ.</div>
+        </div>
+        <div class="arrow-down">↓</div>
+
+        <div class="branch-fork">
         <div class="fork-arm fork-arm-a">
           <div class="arm-line"></div>
           <div class="branch-card branch-card-a" id="card-a-step1">
@@ -550,10 +553,85 @@
           </div>
         </div>
       </div>
+      </div><!-- end step1-branching -->
+
+      <!-- Qubit 3: pass-through at Step 1 (Z₁Z₂ doesn't distinguish |000⟩ from |001⟩) -->
+      <div id="step1-passthrough" style="display:none;">
+        <div class="arrow-down">↓</div>
+        <div class="trunk-node">
+          <div class="trunk-bold">Z₁Z₂ checks parity of qubits 1 and 2. No error on either — both |000⟩ and |001⟩ are in the +1 eigenspace. Measurement returns +1 with certainty and the superposition is unchanged.</div>
+          <div class="ev-row" style="margin-top:10px; justify-content:center;">
+            <span class="ev-label">Z₁Z₂:</span>
+            <span class="eigenvalue-badge plus">+1</span>
+            <span style="font-size:0.8rem; color:var(--muted); margin-left:8px;">Probability: 100.0%</span>
+          </div>
+          <div class="branch-math" id="passthrough-state" style="margin-top:8px; justify-content:center;"></div>
+        </div>
+      </div>
 
       <!-- Step 2 button -->
       <div class="step-button-row" id="step2-btn-row" style="display:none;">
         <button class="btn-primary" id="btn-step2">Step 2: Measure Z₂Z₃</button>
+      </div>
+
+      <!-- Qubit 3: Step 2 branch fork (branching happens here, not at Step 1) -->
+      <div id="step2-fork-q3" style="display:none;">
+        <div class="arrow-down">↓</div>
+        <div class="trunk-node">
+          <div class="trunk-bold">Z₂Z₃ distinguishes |000⟩ (+1) from |001⟩ (−1). Now the superposition is projected into one of two states, with probability determined by θ.</div>
+        </div>
+        <div class="arrow-down">↓</div>
+
+        <div class="branch-fork">
+          <div class="fork-arm fork-arm-a">
+            <div class="arm-line"></div>
+            <div class="branch-card branch-card-a" id="q3-card-a">
+              <span class="branch-badge">No Error</span>
+              <div class="branch-prob" id="q3-prob-a"></div>
+              <div class="branch-text">Projected to codespace:</div>
+              <div class="branch-math" id="q3-branch-a-state"></div>
+              <div class="ev-row" style="margin-top:6px;">
+                <span class="ev-label">Z₁Z₂:</span>
+                <span class="eigenvalue-badge plus">+1</span>
+              </div>
+              <div class="ev-row">
+                <span class="ev-label">Z₂Z₃:</span>
+                <span class="eigenvalue-badge plus">+1</span>
+              </div>
+              <div class="branch-text" style="margin-top:6px;">Confirms: no error occurred.</div>
+              <!-- Step 3 -->
+              <div class="step3-content" id="q3-card-a-step3">
+                <div class="no-correction-note">No correction needed.</div>
+              </div>
+            </div>
+          </div>
+          <div class="fork-arm fork-arm-b">
+            <div class="arm-line"></div>
+            <div class="branch-card branch-card-b" id="q3-card-b">
+              <span class="branch-badge">Error Detected</span>
+              <div class="branch-prob" id="q3-prob-b"></div>
+              <div class="branch-text">Projected to error subspace:</div>
+              <div class="branch-math" id="q3-branch-b-state"></div>
+              <div class="ev-row" style="margin-top:6px;">
+                <span class="ev-label">Z₁Z₂:</span>
+                <span class="eigenvalue-badge plus">+1</span>
+              </div>
+              <div class="ev-row">
+                <span class="ev-label">Z₂Z₃:</span>
+                <span class="eigenvalue-badge minus">−1</span>
+              </div>
+              <div class="branch-text" style="margin-top:6px;">Confirms: error on qubit 3.</div>
+              <!-- Step 3 -->
+              <div class="step3-content" id="q3-card-b-step3">
+                <div class="correction-label">Correction applied</div>
+                <div class="correction-applied" id="q3-correction-text"></div>
+                <div class="global-phase-note">
+                  <strong>Global phase:</strong> The factor <em>i</em> is a global phase. It has no observable effect on any measurement outcome — this state is physically identical to |000⟩.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Syndrome table -->
@@ -696,6 +774,12 @@
     $('card-b-step2').classList.remove('visible');
     $('card-a-step3').classList.remove('visible');
     $('card-b-step3').classList.remove('visible');
+    // Reset qubit-3 specific elements
+    $('step1-branching').style.display = 'block';
+    $('step1-passthrough').style.display = 'none';
+    $('step2-fork-q3').style.display = 'none';
+    $('q3-card-a-step3').classList.remove('visible');
+    $('q3-card-b-step3').classList.remove('visible');
     ['sr-00','sr-10','sr-11','sr-01'].forEach(id => $(id).classList.remove('highlighted-b'));
   });
 
@@ -704,22 +788,47 @@
     $('step1-btn-row').style.display = 'none';
     $('step1-result').style.display = 'block';
 
-    let pA = cosHalf * cosHalf;
-    let pB = sinHalf * sinHalf;
-    let e = ek();
-    let syn = synFor(targetQubit);
+    if (targetQubit === 3) {
+      // Qubit 3: Z₁Z₂ doesn't collapse — both |000⟩ and |001⟩ are in +1 eigenspace
+      $('step1-branching').style.display = 'none';
+      $('step1-passthrough').style.display = 'block';
 
-    $('prob-a').textContent = 'Probability: ' + pct(pA);
-    $('prob-b').textContent = 'Probability: ' + pct(pB);
+      // Show the unchanged superposition state
+      let e = ek();
+      let cStr = fmt(Math.abs(cosHalf)), sStr = fmt(Math.abs(sinHalf));
+      let latex;
+      if (Math.abs(sinHalf) < 1e-10) {
+        latex = '|\\psi\\rangle = |000\\rangle';
+      } else if (Math.abs(cosHalf) < 1e-10) {
+        latex = '|\\psi\\rangle = ' + (sinHalf > 0 ? 'i' : '-i') + '|' + e + '\\rangle';
+      } else {
+        let cSgn = cosHalf >= 0 ? '' : '-';
+        let sSgn = sinHalf >= 0 ? '+' : '-';
+        latex = '|\\psi\\rangle = ' + cSgn + cStr + '|000\\rangle ' + sSgn + ' ' + sStr + 'i|' + e + '\\rangle';
+      }
+      rk($('passthrough-state'), latex);
+    } else {
+      // Qubits 1,2: branching happens at Step 1
+      $('step1-branching').style.display = 'block';
+      $('step1-passthrough').style.display = 'none';
 
-    // Branch A: error-free
-    rk($('branch-a-state1'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+      let pA = cosHalf * cosHalf;
+      let pB = sinHalf * sinHalf;
+      let e = ek();
+      let syn = synFor(targetQubit);
 
-    // Branch B: bitflip error
-    rk($('branch-b-state1'), '|\\psi_{\\text{bitflip}}\\rangle = i\\,|' + e + '\\rangle');
-    let z12c = syn[0] === 1 ? 'plus' : 'minus';
-    let z12l = syn[0] === 1 ? '+1' : '\u22121';
-    $('branch-b-ev1').innerHTML = '<div class="ev-row"><span class="ev-label">Z\u2081Z\u2082:</span><span class="eigenvalue-badge ' + z12c + '">' + z12l + '</span></div>';
+      $('prob-a').textContent = 'Probability: ' + pct(pA);
+      $('prob-b').textContent = 'Probability: ' + pct(pB);
+
+      // Branch A: error-free
+      rk($('branch-a-state1'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+
+      // Branch B: bitflip error
+      rk($('branch-b-state1'), '|\\psi_{\\text{bitflip}}\\rangle = i\\,|' + e + '\\rangle');
+      let z12c = syn[0] === 1 ? 'plus' : 'minus';
+      let z12l = syn[0] === 1 ? '+1' : '\u22121';
+      $('branch-b-ev1').innerHTML = '<div class="ev-row"><span class="ev-label">Z\u2081Z\u2082:</span><span class="eigenvalue-badge ' + z12c + '">' + z12l + '</span></div>';
+    }
 
     $('step2-btn-row').style.display = 'block';
   });
@@ -729,15 +838,28 @@
     $('step2-btn-row').style.display = 'none';
     let syn = synFor(targetQubit);
 
-    // Branch A
-    $('card-a-step2').classList.add('visible');
+    if (targetQubit === 3) {
+      // Qubit 3: branching happens NOW at Step 2
+      $('step2-fork-q3').style.display = 'block';
 
-    // Branch B
-    let z23c = syn[1] === 1 ? 'plus' : 'minus';
-    let z23l = syn[1] === 1 ? '+1' : '\u22121';
-    $('branch-b-ev2').innerHTML = '<div class="ev-row"><span class="ev-label">Z\u2082Z\u2083:</span><span class="eigenvalue-badge ' + z23c + '">' + z23l + '</span></div>';
-    $('branch-b-confirm').textContent = 'Confirms: error on qubit ' + targetQubit + '.';
-    $('card-b-step2').classList.add('visible');
+      let pA = cosHalf * cosHalf;
+      let pB = sinHalf * sinHalf;
+
+      $('q3-prob-a').textContent = 'Probability: ' + pct(pA);
+      $('q3-prob-b').textContent = 'Probability: ' + pct(pB);
+
+      rk($('q3-branch-a-state'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
+      rk($('q3-branch-b-state'), '|\\psi_{\\text{bitflip}}\\rangle = i\\,|001\\rangle');
+    } else {
+      // Qubits 1,2: just add Z₂Z₃ eigenvalue to existing branches
+      $('card-a-step2').classList.add('visible');
+
+      let z23c = syn[1] === 1 ? 'plus' : 'minus';
+      let z23l = syn[1] === 1 ? '+1' : '\u22121';
+      $('branch-b-ev2').innerHTML = '<div class="ev-row"><span class="ev-label">Z\u2082Z\u2083:</span><span class="eigenvalue-badge ' + z23c + '">' + z23l + '</span></div>';
+      $('branch-b-confirm').textContent = 'Confirms: error on qubit ' + targetQubit + '.';
+      $('card-b-step2').classList.add('visible');
+    }
 
     // Show syndrome table
     $('syndrome-section').classList.add('visible');
@@ -752,14 +874,22 @@
   $('btn-step3').addEventListener('click', function() {
     $('step3-btn-row').style.display = 'none';
 
-    // Branch A
-    $('card-a-step3').classList.add('visible');
+    if (targetQubit === 3) {
+      // Qubit 3: show correction in qubit-3 branch cards
+      $('q3-card-a-step3').classList.add('visible');
 
-    // Branch B
-    let ct = corrTex(targetQubit);
-    $('branch-b-correction-text').innerHTML = '';
-    rk($('branch-b-correction-text'), ct + '\\cdot i\\,|' + ek() + '\\rangle = i\\,|000\\rangle');
-    $('card-b-step3').classList.add('visible');
+      $('q3-correction-text').innerHTML = '';
+      rk($('q3-correction-text'), 'X_3 \\cdot i\\,|001\\rangle = i\\,|000\\rangle');
+      $('q3-card-b-step3').classList.add('visible');
+    } else {
+      // Qubits 1,2: show correction in original branch cards
+      $('card-a-step3').classList.add('visible');
+
+      let ct = corrTex(targetQubit);
+      $('branch-b-correction-text').innerHTML = '';
+      rk($('branch-b-correction-text'), ct + '\\cdot i\\,|' + ek() + '\\rangle = i\\,|000\\rangle');
+      $('card-b-step3').classList.add('visible');
+    }
 
     // Converging arrows
     rk($('converge-math'), '|\\psi_{\\text{error-free}}\\rangle = |000\\rangle');
@@ -780,6 +910,12 @@
     $('syndrome-section').classList.remove('visible');
     $('insight-banner').classList.remove('visible');
     $('converge-section').classList.remove('visible');
+    // Reset qubit-3 specific elements
+    $('step1-branching').style.display = 'block';
+    $('step1-passthrough').style.display = 'none';
+    $('step2-fork-q3').style.display = 'none';
+    $('q3-card-a-step3').classList.remove('visible');
+    $('q3-card-b-step3').classList.remove('visible');
   });
 })();
 </script>
