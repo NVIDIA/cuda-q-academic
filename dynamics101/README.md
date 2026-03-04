@@ -18,7 +18,7 @@ Designed for advanced users with a solid background in quantum mechanics and fam
 * ***Model Time-Dependent Interactions:*** Learn to implement time-dependent Hamiltonian terms and custom operators to simulate dynamic quantum interactions.
 
 ## Notebooks
-The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also included in the main directory of the repository to help get you set up.
+The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).
 
 Otherwise, if you have set up an account in Google CoLab, 
 simply log in to the account, then click on the icons below to run the notebooks on the listed platform.   
