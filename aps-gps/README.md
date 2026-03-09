@@ -16,8 +16,7 @@ Who doesn’t love a good survey?! I hope none of you, because we have 4(-ish).
 The pre-workshop survey will help us better understand the audience. We’ll use it to tailor the pace of the presentation and the level of detail we spend on various topics throughout the workshop.
 
 * [Q&A Session](https://pe.app/response_links/f5700a5a-1a7d-4a6a-adaa-d88ee5aed4a2/start)  
-At the end of the workshop, we’ll have a Q&A / AMA session. We’ll take questions live from the audience, but if you’re feeling shy, you can use the link above to submit your question anonymously. Ask us anything: GPUs, quantum computing, life at NVIDIA, working in the quantum computing industry, and more. 
-Please note that this form is only intended for use during the Q&A portion of the event. If you have questions about the workshop content itself, please speak up during the presentation!
+At the end of the workshop, we’ll have a Q&A / AMA session. We’ll take questions live from the audience, but if you’re feeling shy, you can use the link above to submit your question anonymously. Ask us anything: GPUs, quantum computing, life at NVIDIA, working in the quantum computing industry, and more. This form is only intended for use during the Q&A portion of the event. If you have questions about the workshop content itself, please speak up during the presentation.
 
 * [Post-Workshop Survey](<TODO>)  
 If you’re only willing to fill out one survey, please let it be this one! Your feedback is invaluable to us and will be used to improve future events. All feedback is entirely anonymous.
