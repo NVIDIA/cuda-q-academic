@@ -1,12 +1,12 @@
 # APS 2026 Global Physics Summit Workshop
-## How to Graduate Before Your Advisor Retires: GPU-Accelerated Quantum Computing 
+**How to Graduate Before Your Advisor Retires: GPU-Accelerated Quantum Computing**
 
 <img align="right" width="150"
 src="https://developer.nvidia.com/sites/default/files/akamai/nvidia-cuquantum-icon.svg"
 />
 
-Welcome! The notebooks in this repository are adapted from the NVIDIA CUDA-Q Academic repository and are designed to give an introduction to CUDA-Q syntax while highlighting some of the functionality available in CUDA-Q. CUDA-Q Academic is a larger collection of interactive notebooks created for learning quantum computing and hybrid quantum-classical programming with CUDA-Q.
-
+Welcome to the workshop!
+We are excited to share our love of GPUs and accelerated quantum computing with you. 
 
 ## Surveys, Q&As, and Follow-ups (oh my!)
 
