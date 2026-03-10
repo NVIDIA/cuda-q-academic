@@ -5,7 +5,7 @@ src="https://developer.nvidia.com/sites/default/files/akamai/nvidia-cuquantum-ic
 />
 
 Welcome to the workshop!
-We are excited to share our love of GPUs and accelerated quantum computing with you. 
+We are excited to share our passion for GPUs and accelerated quantum computing with you! During the demo portion of this workshop, we will walk through the Notebooks located in the tutorials folder of this repository. You can follow along live on Brev or explore the materials at your own pace after the session.
 
 ## Surveys, Q&As, and Follow-ups (oh my!)
 
