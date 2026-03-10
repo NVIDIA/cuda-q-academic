@@ -18,13 +18,11 @@ The pre-workshop survey will help us better understand the audience. We’ll use
 * [Q&A Session](https://pe.app/response_links/f5700a5a-1a7d-4a6a-adaa-d88ee5aed4a2/start)  
 At the end of the workshop, we’ll have a Q&A / AMA session. We’ll take questions live from the audience, but if you’re feeling shy, you can use the link above to submit your question anonymously. Ask us anything: GPUs, quantum computing, life at NVIDIA, working in the quantum computing industry, and more. This form is only intended for use during the Q&A portion of the event. If you have questions about the workshop content itself, please speak up during the presentation.
 
-* [Post-Workshop Survey](<TODO>)  
+* [Post-Workshop Survey](https://forms.gle/5wUidqhHNdLSSp7o8)  
 If you’re only willing to fill out one survey, please let it be this one! Your feedback is invaluable to us and will be used to improve future events. All feedback is entirely anonymous.
 
-* [Follow-up Form](<TODO>)
+* [Follow-up Form](https://docs.google.com/forms/d/e/1FAIpQLSfZuJcg0D8QsnNo2R4CRDN6I7Mwe9h3bHSKFO9drM1rJgiYSw/viewform?usp=dialog)
 If you’d like to discuss your research one-on-one and explore how NVIDIA can help accelerate your work, please fill out the follow-up form. We're excited to meet with you!
-
-
 
 ## Redeeming Your Brev Coupon
 
@@ -36,11 +34,6 @@ Follow these steps to redeem your Brev coupon:
 4. Enter the coupon code you were provided.
 5. Click **Redeem**.
 
-## Getting Started on Brev
-
-Once your coupon has been redeemed, use your Brev environment to open this repository and work through the notebooks for the workshop.
-
-<TODO: finish Brev start up section>
 
 ## Learn More
 If you would like to continue learning after the workshop, we strongly recommend exploring the official CUDA-Q documentation and the CUDA-Q Academic repository. The documentation provides installation instructions, quick starts, and language references, while CUDA-Q Academic offers guided notebook-based modules across several topic areas.
