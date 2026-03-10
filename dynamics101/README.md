@@ -20,11 +20,4 @@ Designed for advanced users with a solid background in quantum mechanics and fam
 ## Notebooks
 The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).
 
-Otherwise, if you have set up an account in Google CoLab, 
-simply log in to the account, then click on the icons below to run the notebooks on the listed platform.   
-
-| Notebook      | Google Colab |
-| -----------  | ----------- |
-|Lab 1 - Jaynes-Cummings Hamiltonian  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb)|
-| Lab 2 - Time Dependent Hamiltonians  |[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb)  | |||
-
+Otherwise, explore our [Learning Pathways page](https://nvidia.github.io/cuda-q-academic/learningpath.html) for additional cloud-based options to run these notebooks.

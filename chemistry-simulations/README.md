@@ -6,14 +6,4 @@ This collection of notebooks explores techniques for calculating molecular groun
 ## Notebooks
 The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).
 
-Otherwise, if you have set up an account in Google CoLab, 
-simply log in to the account, then click on the icons below to run the notebooks on the listed platform.   
-
-| Notebook      | Google Colab |
-| -----------  | ----------- |
-|Lab 1 - Solving the Ground State Problem with VQE and AI (Generative Quantum Eigensolver)  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb)|
-|Lab 2 - ADAPT VQE  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb)|
-|Lab 3 - Krylov Quantum Subspace Diagonalization  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb)|
-|Lab 4 - QM/MM: Combining VQE with a Polarizeable Embedding Framework  | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb)|
-
-
+Otherwise, explore our [Learning Pathways page](https://nvidia.github.io/cuda-q-academic/learningpath.html) for additional cloud-based options to run these notebooks.
