@@ -1,6 +1,6 @@
 # APS 2026 Global Physics Summit Workshop
 **How to Graduate Before Your Advisor Retires: GPU-Accelerated Quantum Computing**
-<img align="right" width="1500"
+<img align="right" width="150"
 src="https://developer.nvidia.com/sites/default/files/akamai/nvidia-cuquantum-icon.svg"
 />
 
@@ -17,7 +17,7 @@ The pre-workshop survey will help us better understand the audience. We’ll use
 * [Q&A Session](https://pe.app/response_links/f5700a5a-1a7d-4a6a-adaa-d88ee5aed4a2/start)  
 At the end of the workshop, we’ll have a Q&A / AMA session. We’ll take questions live from the audience, but if you’re feeling shy, you can use the link above to submit your question anonymously. Ask us anything: GPUs, quantum computing, life at NVIDIA, working in the quantum computing industry, and more. This form is only intended for use during the Q&A portion of the event. If you have questions about the workshop content itself, please speak up during the presentation.
 
-* [Post-Workshop Survey](https://forms.gle/5wUidqhHNdLSSp7o8)  
+* [Post-Workshop Survey](https://forms.gle/5wUidqhHNdLSSp7o8)
 If you’re only willing to fill out one survey, please let it be this one! Your feedback is invaluable to us and will be used to improve future events. All feedback is entirely anonymous.
 
 * [Follow-up Form](https://docs.google.com/forms/d/e/1FAIpQLSfZuJcg0D8QsnNo2R4CRDN6I7Mwe9h3bHSKFO9drM1rJgiYSw/viewform?usp=dialog) 
