@@ -161,7 +161,7 @@ def run_decoder(filename, num_shots, run_as_batched, print_output=False, osd=0):
             obs_truth = j["trials"][i]["obs_truth"]
 
             t0 = time.time()
-            bp_converged, dec_result = nv_dec_gpu_and_cpu.decode(syndrome)
+            bp_converged, dec_result, *_ = nv_dec_gpu_and_cpu.decode(syndrome)
             t1 = time.time()
             trial_diff = t1 - t0
             decoding_time += trial_diff
