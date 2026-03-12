@@ -16,11 +16,6 @@ For example, the first notebook guides learners through using a pretrained diffu
 * ***Hands-on experience inserting AI models within quantum workflows:*** Learn how to prepare quantum data for input.
 
 ## Notebooks
-The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).  A Dockerfile and requirements.txt are also included in the main directory of the repository to help get you set up.
+The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).
 
-Otherwise, if you have set up an account in Google CoLab, 
-simply log in to the account, then click on the icons below to run the notebooks on the listed platform.   
-
-| Notebook      | Google Colab |
-| -----------  | ----------- |
-|Lab 1 - Compiling Unitaries with Diffusion Models | [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb)|
+Otherwise, explore our [Learning Pathways page](https://nvidia.github.io/cuda-q-academic/learningpath.html) for additional cloud-based options to run these notebooks.
