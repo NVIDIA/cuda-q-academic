@@ -9,7 +9,7 @@
     - Please ensure coupon code is all lower case.
     - Click **Redeem**
 
-        ![alt text](image-2.png)
+        ![alt text](images/image-2.png)
 
 - **If you do NOT have a coupon code:**
     - Input card information
