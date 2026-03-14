@@ -702,16 +702,19 @@ function updateApp() {
   for (let i = 0; i < NUM_STATES; i++) {
     const pct = (currentProbs[i] * 100).toFixed(1);
     document.getElementById(`bar-${i}`).style.height = `${pct}%`;
-    document.getElementById(`bar-val-${i}`).innerText = `${Math.round(pct)}%`;
-    
+    const roundedPct = Math.round(parseFloat(pct));
+    const barLabel = (roundedPct === 100 && currentProbs[i] < 1) ? 'approx 100%' : `${roundedPct}%`;
+    document.getElementById(`bar-val-${i}`).innerText = barLabel;
+
     // Accumulate probability if it is a "good cut" (cut value > 0 for this triangle)
     if (getCutValue(i) > 0) {
       totalGoodProb += currentProbs[i];
     }
   }
 
-  // Update the Probability Badge
-  totalGoodProbText.textContent = `${(totalGoodProb * 100).toFixed(1)}%`;
+  // Update the Probability Badge (show "approx 100%" when rounding would show 100% but value < 1)
+  const pctDisplay = (totalGoodProb * 100).toFixed(1);
+  totalGoodProbText.textContent = (pctDisplay === '100.0' && totalGoodProb < 1) ? 'approx 100%' : `${pctDisplay}%`;
 
   // Any change to parameters invalidates the previous sample (collapses state is lost)
   clearSample();
