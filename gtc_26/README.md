@@ -22,7 +22,7 @@
             margin-right: auto;
             width: 30%">
 
-| Workshop          | GPU      |
+| Workshop          | GPU/CPU Configuration      |
 | :---------------- | :------: |
 | gtc_26 Decoding Quantum Errors with AI            |   L4     |
 | gtc_26 Quick Start to Accelerated Quantum Supercomputing           |   CPU     |
