@@ -101,6 +101,10 @@
     outline: 3px solid var(--accent); 
     outline-offset: 2px; 
   }
+  .instructions-content details summary::-webkit-details-marker { display: none; }
+  .instructions-content details[open] .expval-arrow {
+    transform: rotate(90deg);
+  }
   .instructions-section h2 {
     color: var(--accent);
     font-size: 1.1rem;
@@ -229,11 +233,9 @@
     letter-spacing: 1px;
     color: var(--fg);
   }
-  .prob-badge {
+  .prob-badge, .exp-badge {
     font-size: 0.85rem;
     font-weight: 700;
-    background: rgba(0, 116, 223, 0.15);
-    border: 1px solid var(--good-cut);
     padding: 4px 10px;
     border-radius: 4px;
     color: #FFFFFF;
@@ -241,9 +243,21 @@
     align-items: center;
     gap: 6px;
   }
+  .prob-badge {
+    background: rgba(0, 116, 223, 0.15);
+    border: 1px solid var(--good-cut);
+  }
   .prob-badge strong {
     font-size: 1.1rem;
     color: var(--good-cut);
+  }
+  .exp-badge {
+    background: rgba(118, 185, 0, 0.15);
+    border: 1px solid var(--accent);
+  }
+  .exp-badge strong {
+    font-size: 1.1rem;
+    color: var(--accent);
   }
   
   /* Circuit CSS */
@@ -375,7 +389,7 @@
 <div class="widget-container" id="main-content">
   <header>
     <h1>QAOA Max Cut Explorer</h1>
-    <p class="summary-text">Explore the hybrid quantum-classical workflow of the Quantum Approximate Optimization Algorithm (QAOA). In this tool, you act as the classical optimizer, manually tuning the circuit's variational parameters (α and β) to find the optimal interference pattern that minimizes the cost and amplifies the probability of measuring a Maximum Cut.</p>
+    <p class="summary-text">See QAOA working on the simplest interesting graph: a <strong>triangle</strong> (3 nodes, 3 edges). Each node gets one qubit, so there are 2³ = 8 possible colorings. You play the role of the classical optimizer — two sliders control the quantum circuit's <strong>Cost angle (α)</strong>, which encodes the graph structure, and <strong>Mixer angle (β)</strong>, which creates quantum interference between different colorings.</p>
   </header>
 
   <section class="instructions-section" aria-labelledby="instructions-heading">
@@ -383,14 +397,25 @@
       <summary><h2 id="instructions-heading">Instructions</h2></summary>
       <div class="instructions-content">
         <ul>
-          <li>Set both parameters to <strong>0.00</strong>. The Statevector Distribution shows all 8 colorings are equally likely (random guessing).</li>
-          <li>Move the <strong>Cost Angle (α)</strong> and <strong>Mixer Angle (β)</strong> sliders. Watch the circuit amplify or suppress the probability of getting a "Good Cut" (blue bars). </li>
-          <li>Press the <strong>Sample (Measure)</strong> button. This simulates a quantum measurement, picking exactly one state based on the probabilities. The circuit output and graph coloring will lock into that measured state.</li>
-          <li>Hover over any bar in the histogram to preview what that specific state looks like on the graph and circuit.</li>
+          <li><strong>Start at α = 0, β = 0.</strong> All 8 colorings are equally likely (12.5% each) — the qubits are in a uniform superposition. This is akin to pure random guessing on a classical computer.</li>
+          <li><strong>Drag the sliders.</strong> Watch the histogram shift: blue bars (good cuts that cut 2 edges) grow while gray bars (bad cuts that cut 0 edges) shrink or vice versa. This is <strong>quantum interference</strong> at work.</li>
+          <li><strong>Press "Sample (Measure)."</strong> The superposition collapses to one definite coloring — just as it would on a quantum computer when measuring the qubits.</li>
+          <li><strong>Hover over any bar</strong> to preview that coloring on the triangle.</li>
         </ul>
         <p style="color: var(--muted); font-size: 0.85rem;">
           <strong>Keyboard:</strong> Use <span class="kbd">Tab</span> to move between controls. Use <span class="kbd">Arrow Keys</span> to adjust sliders. Press <span class="kbd">Enter</span> to Sample. Press <span class="kbd">ESC</span> to reset to 0.
         </p>
+        <details style="margin-top: 12px;">
+          <summary style="cursor: pointer; color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; list-style: none;">
+            <span style="color: var(--accent); transition: transform 0.15s; display: inline-block;" class="expval-arrow">▶</span>
+            <strong>What does the ⟨H⟩ badge mean?</strong>
+          </summary>
+          <div style="color: var(--muted); font-size: 0.85rem; margin-top: 8px; padding-left: 20px; line-height: 1.7;">
+            <p>The <strong>⟨H⟩</strong> badge shows the <em>expectation value</em> of the Max Cut Hamiltonian — a weighted average of the cut score across all possible measurement outcomes. Each cut edge contributes −1, so <strong>more negative = better cut</strong>.</p>
+            <p style="margin-top: 8px;">At α = β = 0 (uniform superposition), the two “all same color” states (000, 111) each score 0 and the six good-cut states each score −2, giving ⟨H⟩ = 2 × 0.125 × 0 + 6 × 0.125 × (−2) = <strong>−1.50</strong>.</p>
+            <p style="margin-top: 8px;"><strong>Challenge:</strong> Can you push ⟨H⟩ all the way to <strong>−2.00</strong>? That means the circuit is concentrating all probability onto maximum cuts.</p>
+          </div>
+        </details>
       </div>
     </details>
   </section>
@@ -428,8 +453,13 @@
     <div class="viz-panel info-box">
       <div class="viz-header">
         <span class="viz-title">Quantum Circuit & Statevector Distribution</span>
-        <div class="prob-badge" aria-live="polite">
-          P(Good Cut): <strong id="total-good-prob">75.0%</strong>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <div class="exp-badge" aria-live="polite">
+            ⟨H⟩ = <strong id="exp-value">−1.50</strong>
+          </div>
+          <div class="prob-badge" aria-live="polite">
+            P(Good Cut): <strong id="total-good-prob">75.0%</strong>
+          </div>
         </div>
       </div>
       
@@ -711,6 +741,13 @@ function updateApp() {
       totalGoodProb += currentProbs[i];
     }
   }
+
+  // Compute expectation value: ⟨H⟩ = Σ_i P(i) × (−cut_value(i))
+  let expVal = 0;
+  for (let i = 0; i < NUM_STATES; i++) {
+    expVal += currentProbs[i] * (-getCutValue(i));
+  }
+  document.getElementById('exp-value').textContent = expVal.toFixed(2);
 
   // Update the Probability Badge (show "approx 100%" when rounding would show 100% but value < 1)
   const pctDisplay = (totalGoodProb * 100).toFixed(1);
