@@ -14,9 +14,9 @@
 - **If you do NOT have a coupon code:**
     - Input card information
 
-**Step 4:** Click the **Deploy Now** Button or click [here]() to access the materials in the repository in a pre-configured GPU-environment
+**Step 4:** Click the **Deploy Now** Button or click [here](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3ArWtvLW8owzkxgR4Gcohy3qWip) to access the materials in the repository in a pre-configured GPU-environment
  
-- Select **View All Options** to change your GPU selection based on the workshop.
+- Select **View All Options** to change your GPU/CPU selection based on the workshop.
 
 <div style="margin-left: auto;
             margin-right: auto;
@@ -24,18 +24,19 @@
 
 | Workshop          | GPU      |
 | :---------------- | :------: |
-| gtc_26            |   L4     |
+| gtc_26 Decoding Quantum Errors with AI            |   L4     |
+| gtc_26 Quick Start to Accelerated Quantum Supercomputing           |   CPU     |
 | aps-gps           |   L4     |
 
 </div>
  
- **Step 5:** After selecting GPU configuration, click **Deploy Launchable**
+ **Step 5:** After selecting compute configuration, click **Deploy Launchable**
  - You can check the status of your deployment by clicking **Go to Instance Page** or from the **GPUs** tab.
 
 ![alt text](image-5.png)
 
  **Step 6:** Once deployment is complete (~7-10 minutes), you will see a GPU environment under the GPUs tab with both stages green. 
  
- **Step 7:** Select **Access Notebook** to pull up the environment and start running the workshop notebooks!
+ **Step 7:** Launch the workshop by selecting Access Notebook. If the status isn't green, refresh your browser or toggle to the GPU tab in the dashboard to verify the environment is ready.
 
 ![alt text](image-4.png)
