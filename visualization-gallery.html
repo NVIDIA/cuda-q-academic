@@ -495,7 +495,7 @@
             isCore: false,
             desc: "See QAOA working on the simplest interesting graph: a triangle (3 nodes, 3 edges). Play the role of the classical optimizer — two sliders control the cost angle (α) and mixer angle (β) — and watch quantum interference steer the probability distribution toward the max cut.",
             notebooks: [
-                { name: "QAOA for Max Cut", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa" }
+                { name: "GTC Accelerated Quantum Supercomputing Workshop", link: "https://github.com/NVIDIA/cuda-q-academic/tree/2026-workshops/gtc_26/quick-start-to-quantum-computing" }
             ],
             link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/triangle-qaoa.html",
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/triangle-qaoa.html"
@@ -505,7 +505,7 @@
             isCore: false,
             desc: "Explore the 3-D cost landscape of a 1-layer QAOA circuit, see how tuning parameters helps the optimizer find the optimal Max Cut, and discover why optimization gets harder at scale — the barren plateau problem.",
             notebooks: [
-                { name: "QAOA for Max Cut", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa" }
+                { name: "GTC Accelerated Quantum Supercomputing Workshop", link: "https://github.com/NVIDIA/cuda-q-academic/tree/2026-workshops/gtc_26/quick-start-to-quantum-computing" }
             ],
             link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/qaoa-landscape.html",
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/qaoa-landscape.html"
@@ -515,7 +515,7 @@
             isCore: false,
             desc: "One QAOA layer has already been applied to a triangle graph. Now choose which operator to add next. The gradient tells you — drag the θ slider to see how each candidate operator changes the cost and which one improves the circuit the most (the core idea behind Adapt-QAOA).",
             notebooks: [
-                { name: "QAOA for Max Cut", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa" }
+                { name: "GTC Accelerated Quantum Supercomputing Workshop", link: "https://github.com/NVIDIA/cuda-q-academic/tree/2026-workshops/gtc_26/quick-start-to-quantum-computing" }
             ],
             link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/operator-gradient.html",
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/operator-gradient.html"
@@ -525,7 +525,7 @@
             isCore: false,
             desc: "Run a full ADAPT-QAOA side-by-side with standard QAOA on a Max-Cut problem. Build the ansatz layer-by-layer from the mixer pool using gradient-based operator selection and compare convergence.",
             notebooks: [
-                { name: "QAOA for Max Cut", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa" }
+                { name: "GTC Accelerated Quantum Supercomputing Workshop", link: "https://github.com/NVIDIA/cuda-q-academic/tree/2026-workshops/gtc_26/quick-start-to-quantum-computing" }
             ],
             link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/adapt-qaoa.html",
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/adapt-qaoa.html"
@@ -550,19 +550,21 @@
                 `<li class="notebook-item"><i class="fas fa-book-open"></i> <a href="${nb.link}" target="_blank">${nb.name}</a></li>`
             ).join('');
 
+            const notebookSection = w.notebooks.length > 0 ? `
+                    <div class="notebook-section">
+                        <div class="notebook-label">Featured In:</div>
+                        <ul class="notebook-list">
+                            ${nbHtml}
+                        </ul>
+                    </div>` : '';
+
             card.innerHTML = `
                 <div class="card-content">
                     <div class="card-title">
                         <h3>${w.title}</h3>
                         <p>${w.desc}</p>
                     </div>
-                    
-                    <div class="notebook-section">
-                        <div class="notebook-label">Featured In:</div>
-                        <ul class="notebook-list">
-                            ${nbHtml}
-                        </ul>
-                    </div>
+                    ${notebookSection}
                 </div>
                 
                 <div class="launch-footer">
