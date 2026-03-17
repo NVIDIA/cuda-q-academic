@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QAOA Optimization Landscape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #76b900;
+    --accent-dark: #5e9400;
+    --bg: #1A1A1A;
+    --surface: #2A2A2A;
+    --border: #444444;
+    --fg: #E0E0E0;
+    --muted: #AAAAAA;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 32px 16px;
+    line-height: 1.5;
+  }
+
+  .skip-link {
+    position: absolute; top: -40px; left: 0;
+    background: var(--accent); color: #000;
+    padding: 8px 16px; z-index: 100;
+    text-decoration: none; font-weight: bold;
+  }
+  .skip-link:focus { top: 0; }
+
+  .widget-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 1100px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin: 0 auto;
+  }
+  @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+  .widget-container h1 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    margin-top: 0;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .summary-text { color: var(--muted); margin-bottom: 8px; font-size: 1rem; line-height: 1.5; }
+
+  .instructions-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .instructions-section h2 { color: var(--accent); font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 700; }
+  .instructions-section ol { padding-left: 20px; color: var(--fg); font-size: 0.9rem; line-height: 1.7; }
+  .kbd { background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 24px;
+  }
+
+  .main-panels {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 768px) { .main-panels { grid-template-columns: 1fr; } }
+
+  /* Canonical Sliders */
+  .control-group { margin-bottom: 20px; }
+  .control-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--fg); margin-bottom: 8px; }
+  .control-val { color: var(--accent); }
+  
+  .slider-wrap { width: 100%; padding: 4px 0; }
+  .slider-wrap:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  input[type=range] { appearance: none; -webkit-appearance: none; width: 100%; background: transparent; margin: 0; }
+  input[type=range]:focus { outline: none; }
+  input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px; }
+  input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A; }
+  input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+  input[type=range]::-moz-range-track { width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px; }
+  input[type=range]::-moz-range-thumb { height: 14px; width: 14px; border-radius: 50%; background: #76B900; cursor: pointer; border: 2px solid #1A1A1A; }
+  input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+
+  /* Visualization */
+  .viz-panel {
+    display: flex;
+    flex-direction: column;
+    background: #000000; /* Black for 3D background */
+    padding: 0; 
+    overflow: hidden;
+    position: relative;
+    min-height: 400px;
+  }
+  #canvas-container {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    outline: none;
+  }
+  #canvas-container:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+  }
+
+  /* Results */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .metric-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  .metric-value { font-size: 2rem; font-weight: 700; color: var(--fg); }
+  
+  .prob-track {
+    width: 100%;
+    height: 24px;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .prob-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to top, var(--accent-dark), var(--accent));
+    transition: width 0.1s linear;
+  }
+
+  .widget-footer {
+    margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.875rem;
+  }
+  .widget-footer a { color: var(--accent); text-decoration: none; margin-right: 16px; }
+  .widget-footer a:hover { text-decoration: underline; }
+  .widget-footer a:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="widget-container" id="main-content">
+  <header>
+    <h1>QAOA Optimization Landscape</h1>
+    <p class="summary-text">Explore the 3D cost landscape of a 1-layer QAOA circuit, see how tuning parameters helps the optimizer find the optimal Max Cut, and discover why optimization gets harder at scale—the barren plateau problem.</p>
+  </header>
+
+  <section class="instructions-section" aria-labelledby="instructions-heading">
+    <h2 id="instructions-heading">Instructions</h2>
+    <ol>
+      <li><strong>Rotate</strong> the 3D landscape using your mouse to view the peaks and valleys.</li>
+      <li>Use the <strong>Cost</strong> and <strong>Mixer</strong> sliders to move your current state across the landscape.</li>
+      <li>Observe how the <strong>Expectation Value</strong> changes. Your goal is to navigate to the lowest possible point (the darkest valley).</li>
+      <li>Watch the <strong>Probability</strong> bar to see how finding a lower expectation value increases your chances of measuring the optimal Max Cut.</li>
+      <li>Increase the <strong>Barren plateau</strong> slider to flatten the landscape and see why optimization becomes difficult in larger or deeper circuits.</li>
+    </ol>
+    <p style="color: var(--muted); font-size: 0.85rem; margin-top: 8px;">
+      <strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between controls, <span class="kbd">←</span> <span class="kbd">→</span> arrow keys to adjust sliders. Tab to the 3D view and use arrow keys to rotate.
+    </p>
+  </section>
+
+  <div class="main-panels">
+    <div class="info-box">
+      <div class="control-group">
+        <div class="control-label">
+          <label for="alpha-slider">Cost Parameter (α₁)</label>
+          <span class="control-val" id="alpha-val">0.00</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="alpha-slider" min="-3.14" max="3.14" step="0.05" value="0" aria-label="Cost Parameter Alpha">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <label for="beta-slider">Mixer Parameter (β₁)</label>
+          <span class="control-val" id="beta-val">0.00</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="beta-slider" min="-3.14" max="3.14" step="0.05" value="0" aria-label="Mixer Parameter Beta">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <label for="barren-slider">Barren plateau (flatten landscape)</label>
+          <span class="control-val" id="barren-val">0%</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="barren-slider" min="0" max="1" step="0.05" value="0" aria-label="Barren plateau simulation, 0 is varied landscape, 1 is flat">
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 16px; padding: 12px 16px;">
+        <p style="font-size: 0.85rem; color: var(--fg); line-height: 1.5; margin: 0;">
+          <strong style="color: var(--accent);">What is a barren plateau?</strong> In bigger or deeper circuits the cost landscape can become almost flat, so the optimizer has no clear direction to improve. The slider above simulates that effect.
+        </p>
+      </div>
+      
+      <p style="font-size: 0.8rem; color: var(--muted); margin-top: 24px;">
+        In code, the <code>cudaq_solvers.qaoa</code> function uses an optimizer like COBYLA to automatically adjust these sliders for you, searching for the lowest point on the graph to the right.
+      </p>
+    </div>
+
+    <div class="info-box viz-panel">
+      <div id="canvas-container" tabindex="0" role="img" aria-label="Interactive 3D surface plot of the QAOA cost landscape."></div>
+    </div>
+  </div>
+
+  <div class="info-box results-grid">
+    <div>
+      <div class="metric-label">Expectation Value</div>
+      <div class="metric-value" id="exp-val">-0.00</div>
+      <div style="font-size: 0.8rem; color: var(--muted);">Target: Find the lowest value</div>
+    </div>
+    <div>
+      <div class="metric-label">Probability of Optimal Cut</div>
+      <div class="metric-value" id="prob-val">0%</div>
+      <div class="prob-track">
+        <div class="prob-fill" id="prob-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Math / Simulation Function
+    // We construct a continuous mathematical function that strongly resembles 
+    // a 1-layer QAOA MaxCut landscape (periodic, multiple local minima, non-convex).
+    function calculateLandscape(alpha, beta) {
+        // A proxy landscape formula mirroring standard QAOA interference patterns
+        const term1 = Math.sin(2 * alpha) * Math.cos(2 * beta) * 2.5;
+        const term2 = Math.cos(alpha) * Math.sin(4 * beta) * 1.5;
+        const term3 = Math.cos(3 * alpha + beta);
+        return -(term1 + term2 + term3); // Negative because we want to minimize
+    }
+
+    // Convert expectation value to a rough probability percentage for visual feedback
+    function getProbability(expValue) {
+        // Map expectation value bounds roughly [-4, 4] to [0%, 100%]
+        let prob = ((4 - expValue) / 8) * 100;
+        return Math.max(0, Math.min(100, prob));
+    }
+
+    // 2. Three.js Scene Setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000); // Black background as required
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(8, 8, 8);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    // 3. Generate the Surface Geometry
+    const size = Math.PI * 2;
+    const segments = 60;
+    const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
+    
+    // Deform the plane based on our QAOA landscape math; store base Z for barren-plateau flattening
+    const positions = geometry.attributes.position.array;
+    const baseLandscapeZ = [];
+    const colors = [];
+    const color = new THREE.Color();
+    
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+
+    for (let i = 0; i < positions.length; i += 3) {
+        const x = positions[i];     // alpha
+        const y = positions[i + 1]; // beta
+        const z = calculateLandscape(x, y);
+        positions[i + 2] = z;
+        baseLandscapeZ.push(z);
+
+        if (z < minZ) minZ = z;
+        if (z > maxZ) maxZ = z;
+    }
+
+    const meanZ = (minZ + maxZ) / 2;
+
+    function applyBarrenPlateau(k) {
+        // Flatten landscape: z_display = baseZ * (1 - k) + meanZ * k
+        let currMin = Infinity;
+        let currMax = -Infinity;
+        for (let i = 0, j = 0; i < positions.length; i += 3, j += 1) {
+            const zNew = baseLandscapeZ[j] * (1 - k) + meanZ * k;
+            positions[i + 2] = zNew;
+            if (zNew < currMin) currMin = zNew;
+            if (zNew > currMax) currMax = zNew;
+        }
+        const range = currMax - currMin || 1;
+        const colorArr = geometry.attributes.color.array;
+        for (let i = 0; i < positions.length; i += 3) {
+            const z = positions[i + 2];
+            const normalizedZ = range > 0 ? (z - currMin) / range : 0.5;
+            color.setHex(0x76b900).lerp(new THREE.Color(0xE0E0E0), normalizedZ);
+            colorArr[i] = color.r;
+            colorArr[i + 1] = color.g;
+            colorArr[i + 2] = color.b;
+        }
+        geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.color.needsUpdate = true;
+        geometry.computeVertexNormals();
+    }
+
+    // Color mapping based on height (Valley = Dark Green, Peak = White/Gray)
+    for (let i = 0; i < positions.length; i += 3) {
+        const z = positions[i + 2];
+        const normalizedZ = (z - minZ) / (maxZ - minZ);
+        
+        // Interpolate between NVIDIA green (#76b900) and light gray (#E0E0E0)
+        color.setHex(0x76b900).lerp(new THREE.Color(0xE0E0E0), normalizedZ);
+        colors.push(color.r, color.g, color.b);
+    }
+
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    geometry.computeVertexNormals();
+
+    const material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        vertexColors: true,
+        side: THREE.DoubleSide,
+        shininess: 40,
+        wireframe: false
+    });
+
+    const surface = new THREE.Mesh(geometry, material);
+    // Rotate so Z is up
+    surface.rotation.x = -Math.PI / 2;
+    scene.add(surface);
+
+    // Grid helper for context
+    const grid = new THREE.GridHelper(size, 10, 0x444444, 0x222222);
+    grid.position.y = minZ - 0.5;
+    scene.add(grid);
+
+    // 4. State Marker (Current Parameter Point)
+    const markerGeo = new THREE.SphereGeometry(0.2, 16, 16);
+    const markerMat = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0x76b900 });
+    const marker = new THREE.Mesh(markerGeo, markerMat);
+    scene.add(marker);
+
+    // 5. Event Wiring & Updates
+    const alphaSlider = document.getElementById('alpha-slider');
+    const betaSlider = document.getElementById('beta-slider');
+    const barrenSlider = document.getElementById('barren-slider');
+    const alphaVal = document.getElementById('alpha-val');
+    const betaVal = document.getElementById('beta-val');
+    const barrenVal = document.getElementById('barren-val');
+    const expVal = document.getElementById('exp-val');
+    const probVal = document.getElementById('prob-val');
+    const probFill = document.getElementById('prob-fill');
+    const announcer = document.getElementById('status-announce');
+
+    function updateState() {
+        const a = parseFloat(alphaSlider.value);
+        const b = parseFloat(betaSlider.value);
+        const k = parseFloat(barrenSlider.value);
+        
+        // Update DOM text
+        alphaVal.textContent = a.toFixed(2);
+        betaVal.textContent = b.toFixed(2);
+        barrenVal.textContent = Math.round(k * 100) + "%";
+
+        // Apply barren plateau to full landscape; keep grid just below surface
+        applyBarrenPlateau(k);
+        const surfaceBottom = k < 1 ? minZ : meanZ;
+        grid.position.y = surfaceBottom - 0.5;
+
+        // Current point z (same flattening as surface)
+        const zBase = calculateLandscape(a, b);
+        const z = zBase * (1 - k) + meanZ * k;
+        
+        // Update 3D Marker (Note: Three.js coordinates vs Math coordinates)
+        marker.position.set(a, z, -b); // -b because plane is rotated
+
+        // Update Results
+        expVal.textContent = z.toFixed(3);
+        const prob = getProbability(z);
+        probVal.textContent = prob.toFixed(1) + "%";
+        probFill.style.width = prob + "%";
+    }
+
+    // Attach listeners
+    alphaSlider.addEventListener('input', updateState);
+    betaSlider.addEventListener('input', updateState);
+    barrenSlider.addEventListener('input', updateState);
+    
+    // Announce to screen readers periodically to avoid spam
+    alphaSlider.addEventListener('change', () => {
+        announcer.textContent = `Expectation value updated to ${expVal.textContent}`;
+    });
+    betaSlider.addEventListener('change', () => {
+        announcer.textContent = `Expectation value updated to ${expVal.textContent}`;
+    });
+    barrenSlider.addEventListener('change', () => {
+        announcer.textContent = barrenVal.textContent === "100%" ? "Landscape flattened; barren plateau simulated." : `Barren plateau ${barrenVal.textContent}.`;
+    });
+
+    // Keyboard rotation for 3D canvas
+    container.addEventListener('keydown', (e) => {
+        const step = 0.1;
+        if (e.key === 'ArrowLeft') { camera.position.x -= step; camera.lookAt(0,0,0); }
+        if (e.key === 'ArrowRight') { camera.position.x += step; camera.lookAt(0,0,0); }
+        if (e.key === 'ArrowUp') { camera.position.y += step; camera.lookAt(0,0,0); }
+        if (e.key === 'ArrowDown') { camera.position.y -= step; camera.lookAt(0,0,0); }
+    });
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // Animation Loop
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // Init
+    updateState();
+    animate();
+});
+</script>
+</body>
+</html>

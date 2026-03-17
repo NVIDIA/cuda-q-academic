@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive ADAPT-QAOA vs. Standard QAOA Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
+            --nvidia-purple: #7A00FF;
+            --nvidia-dark-gray: #333333;
+            --nvidia-light-gray: #F5F5F5;
+            --nvidia-bg: #2A2A2A;
+            --nvidia-text: #FFFFFF;
+            --nvidia-error: #FF4136;
+            --nvidia-highlight: #90EE90;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--nvidia-bg);
+            color: var(--nvidia-text);
+        }
+
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p {
+            color: var(--nvidia-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 8px 0;
+        }
+        .instructions-section .kbd {
+            background: var(--nvidia-accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9em;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--nvidia-green);
+            color: #000;
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .skip-link:focus { top: 0; }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        .info-box {
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 16px 24px;
+        }
+
+        .info-card {
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 24px;
+        }
+        .circuit-card {
+            background: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+            padding: 24px;
+        }
+        .adapt-border { border-left: 4px solid var(--nvidia-green); }
+        .qaoa-border { border-left: 4px solid var(--nvidia-purple); }
+
+        .btn-nvidia-primary, .nvidia-button {
+            background-color: var(--nvidia-mid);
+            color: #FFFFFF;
+            border: 1px solid var(--nvidia-accent);
+            border-bottom: 3px solid var(--nvidia-green);
+            min-width: 44px;
+            min-height: 44px;
+            transition: all 0.3s ease;
+        }
+        .btn-nvidia-primary:hover:not(:disabled), .nvidia-button:hover:not(:disabled) {
+            background-color: var(--nvidia-green);
+            color: #000000;
+            border-color: var(--nvidia-green);
+            font-weight: 600;
+        }
+        .nvidia-button:disabled {
+            background-color: #444;
+            border-color: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .qaoa-button {
+            background-color: var(--nvidia-purple);
+            border-color: var(--nvidia-purple);
+            color: var(--nvidia-text);
+            font-weight: 700;
+        }
+        .qaoa-button:hover:not(:disabled) {
+            background-color: var(--nvidia-text);
+            color: var(--nvidia-purple);
+        }
+        .minimize-button {
+            background-color: var(--nvidia-green);
+            color: var(--nvidia-dark);
+            font-weight: 700;
+            border-bottom: 3px solid var(--nvidia-green-dark);
+            animation: pulse 2s infinite;
+        }
+        .minimize-button:hover:not(:disabled) {
+            background-color: var(--nvidia-green-dark);
+            color: var(--nvidia-dark);
+        }
+
+        .gradient-bar {
+            background: linear-gradient(to right, var(--nvidia-green) var(--p), #555 var(--p));
+        }
+        .qubit-lane {
+            position: relative;
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        .qubit-label {
+            font-family: 'Inter', monospace;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            color: var(--nvidia-light-gray);
+        }
+        .qubit-wire {
+            width: 100%;
+            height: 2px;
+            background-color: #777;
+        }
+        .gate-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .gate-box {
+            background-color: var(--nvidia-green);
+            color: var(--nvidia-dark);
+            border: 2px solid var(--nvidia-green);
+            padding: 0.25rem 0.75rem;
+            font-family: 'Inter', monospace;
+            font-weight: 600;
+            z-index: 10;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+        }
+        .gate-box.qaoa-gate {
+            background-color: var(--nvidia-purple);
+            border-color: var(--nvidia-purple);
+            color: white;
+        }
+        .gate-box.unoptimized {
+            background-color: var(--nvidia-dark-gray);
+            color: var(--nvidia-highlight);
+            border-color: var(--nvidia-highlight);
+        }
+        .gate-box.h-cost {
+            background-color: #0a5f7a;
+            border-color: #0a7a9e;
+            color: white;
+        }
+        .gate-container.gate-single .gate-box {
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Max-Cut graph canvas */
+        .graph-canvas-wrap {
+            background: var(--nvidia-dark);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        #maxcut-graph {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .lesson-footer {
+            margin-top: 32px;
+            font-size: 0.85rem;
+            color: var(--nvidia-gray);
+            text-align: center;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+        }
+        .lesson-footer a {
+            color: #76b900;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .lesson-footer a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+
+        .widget-footer {
+            margin-top: 32px;
+            border-top: 1px solid var(--nvidia-accent);
+            padding-top: 16px;
+            text-align: center;
+        }
+        .widget-footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-footer-links a {
+            color: #76b900;
+            text-decoration: none;
+            min-height: 44px;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .widget-footer-links a:hover {
+            color: var(--nvidia-light);
+            background: rgba(255,255,255,0.05);
+        }
+        .widget-footer-links a:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>ADAPT-QAOA vs. Standard QAOA</h1>
+            <p class="summary-text">Interactive Max-Cut: build the ansatz layer-by-layer from the mixer pool (gradient-based selection).</p>
+        </header>
+
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li><strong>ADAPT-QAOA:</strong> Each layer adds one cost block e<sup>−i H<sub>C</sub> γ<sub>k</sub></sup> and one <em>mixer</em> from the pool. Click the mixer with the largest gradient (green) to add it, then click "Minimize (γ, β)" to optimize. Repeat until the gradient norm is below threshold.</li>
+                <li><strong>Standard QAOA:</strong> Uses a fixed number of layers with the same mixer (Σ X<sub>j</sub>) in every layer. Click "Run QAOA" to see an illustrative cost curve from initial ⟨H<sub>C</sub>⟩ (|+⟩^⊗n) to the optimal value (no real optimizer in this widget).</li>
+                <li>Use "Reset All" to start over. The graph shows the Max-Cut instance (5 nodes); the goal is to minimize ⟨H<sub>C</sub⟩ (maximize cut value).</li>
+            </ol>
+            <p>The <strong>mixer pool</strong> A<sub>j</sub> includes single-X, full QAOA mixer (Σ X), and two-qubit terms (XX, YY, YZ, ZY). ADAPT-QAOA selects the mixer with the largest gradient −i⟨ψ|[H<sub>C</sub>, A<sub>j</sub>]|ψ⟩ at each step. Reference: <a href="https://nvidia.github.io/cuda-quantum/latest/applications/python/adapt_qaoa.html" target="_blank" rel="noopener noreferrer">CUDA-Q ADAPT-QAOA</a>.</p>
+            <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span> or <span class="kbd">Space</span> to activate buttons.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="graph-canvas-wrap">
+                    <h3 class="text-lg font-bold text-white mb-2">Max-Cut Graph (5 nodes)</h3>
+                    <canvas id="maxcut-graph" width="280" height="200" aria-label="Max-Cut problem graph with 5 nodes and 6 edges"></canvas>
+                </div>
+                <div class="circuit-card adapt-border">
+                    <h2 class="text-2xl font-bold text-white mb-4">ADAPT-QAOA Circuit (Grows by Layer)</h2>
+                    <div id="adapt-circuit-container" class="bg-gray-800 p-4 rounded-md overflow-x-auto min-h-[200px]"></div>
+                </div>
+                <div class="circuit-card qaoa-border">
+                    <h2 class="text-2xl font-bold text-white mb-4">Standard QAOA Circuit (Fixed p Layers)</h2>
+                    <div id="qaoa-circuit-container" class="bg-gray-800 p-4 rounded-md overflow-x-auto min-h-[200px]"></div>
+                </div>
+            </div>
+
+            <div class="info-card flex flex-col">
+                <h2 class="text-2xl font-bold text-white mb-4">Controls</h2>
+                <div id="feedback-text" class="text-center font-semibold min-h-[4em] mb-4"></div>
+
+                <div id="adapt-controls" role="group" aria-label="ADAPT-QAOA controls">
+                    <div id="minimize-button-container" class="mb-4"></div>
+                    <h3 class="text-xl font-bold text-white mb-2 border-t border-gray-500 pt-4">Mixer Pool</h3>
+                    <p class="text-xs text-gray-400 mb-3">Select a mixer A<sub>j</sub> to add to the next layer. The number is the gradient magnitude |−i⟨[H<sub>C</sub>, A<sub>j</sub>]⟩| — pick the largest to proceed.</p>
+                    <div id="operator-pool" class="space-y-3 flex-grow"></div>
+                </div>
+
+                <div id="qaoa-controls" class="mt-auto">
+                    <h3 class="text-xl font-bold text-white mb-4 border-t border-gray-500 pt-4">Run Simulation</h3>
+                    <button id="qaoa-run-button" tabindex="0" class="nvidia-button qaoa-button w-full p-3 rounded-md text-lg">Run QAOA (p=4)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 info-card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">Cost ⟨H<sub>C</sub>⟩ (lower is better)</h2>
+                <button id="reset-all-button" tabindex="0" class="nvidia-button px-6 py-2 rounded-md font-semibold">Reset All</button>
+            </div>
+            <div class="h-64 md:h-80"><canvas id="energyChart"></canvas></div>
+        </div>
+
+        <div class="lesson-footer">
+            This widget illustrates ADAPT-QAOA for Max-Cut. See
+            <a href="https://nvidia.github.io/cuda-quantum/latest/applications/python/adapt_qaoa.html" target="_blank" rel="noopener noreferrer">CUDA-Q ADAPT-QAOA</a>
+            and
+            <a href="https://github.com/NVIDIA/cuda-quantum" target="_blank" rel="noopener noreferrer">CUDA-Q</a>.
+        </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-quantum/" target="_blank" rel="noopener noreferrer">CUDA-Q Docs</a>
+                <a href="https://github.com/NVIDIA/cuda-quantum" target="_blank" rel="noopener noreferrer">CUDA-Q GitHub</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const chartCanvas = document.getElementById('energyChart');
+    const resetAllButton = document.getElementById('reset-all-button');
+    const feedbackText = document.getElementById('feedback-text');
+    let energyChart;
+    const NUM_QUBITS = 5;
+    // Max-Cut: 5 nodes, 6 edges (pentagon + chord). Optimal cost ⟨H_C⟩ = -5 (cut value 5).
+    // Initial state |+⟩^⊗n has ⟨H_C⟩ = -½ * (number of edges) = -3 for this graph.
+    const STARTING_ENERGY = 0.0;   // ADAPT starts at 0 for demo visibility; could use -3 for consistency
+    const QAOA_INITIAL_ENERGY = -3.0;  // ⟨+|^{⊗n} | H_C | +^{⊗n}⟩ for 6 edges
+    const FINAL_ENERGY = -5.0;
+
+    const rootStyles = getComputedStyle(document.documentElement);
+    const nvidiaGreen = rootStyles.getPropertyValue('--nvidia-green').trim();
+    const nvidiaPurple = rootStyles.getPropertyValue('--nvidia-purple').trim();
+
+    const adaptState = {};
+    const operatorPoolDiv = document.getElementById('operator-pool');
+    const adaptCircuitContainer = document.getElementById('adapt-circuit-container');
+    const minimizeButtonContainer = document.getElementById('minimize-button-container');
+
+    // ADAPT-QAOA mixer pool: simplified subset for widget (single X, full mixer, and a few 2-qubit types).
+    // Labels match the idea of the CUDA-Q pool: X_i, sum X, XX_ij, YY_ij, etc.
+    const ADAPT_OPERATORS = [
+        { name: 'A₁', label: 'X₀', qubits: [0] },
+        { name: 'A₂', label: 'X₁', qubits: [1] },
+        { name: 'A₃', label: 'X₂', qubits: [2] },
+        { name: 'A₄', label: 'X₃', qubits: [3] },
+        { name: 'A₅', label: 'X₄', qubits: [4] },
+        { name: 'A₆', label: 'ΣX', qubits: [0, 1, 2, 3, 4] },
+        { name: 'A₇', label: 'X₀X₁', qubits: [0, 1] },
+        { name: 'A₈', label: 'Y₀Y₁', qubits: [0, 1] },
+        { name: 'A₉', label: 'X₁X₂', qubits: [1, 2] },
+        { name: 'A₁₀', label: 'Y₁Y₂', qubits: [1, 2] },
+    ];
+
+    const qaoaState = {};
+    const qaoaCircuitContainer = document.getElementById('qaoa-circuit-container');
+    const qaoaRunButton = document.getElementById('qaoa-run-button');
+    const QAOA_LAYERS = 4;
+
+    const adaptControlsEl = document.getElementById('adapt-controls');
+    adaptControlsEl.addEventListener('keydown', handleAdaptControlsKeydown);
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            initialize();
+        }
+    });
+
+    // ─── Max-Cut graph (5 nodes, 6 edges: 0-1, 1-2, 2-3, 3-0, 2-4, 3-4) ───
+    const MAXCUT_EDGES = [[0, 1], [1, 2], [2, 3], [3, 0], [2, 4], [3, 4]];
+    function drawMaxCutGraph() {
+        const canvas = document.getElementById('maxcut-graph');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+        const cx = w / 2;
+        const cy = h / 2;
+        const R = Math.min(w, h) * 0.38;
+        const nodeRadius = 14;
+        const positions = [];
+        for (let i = 0; i < 5; i++) {
+            const angle = (i / 5) * 2 * Math.PI - Math.PI / 2;
+            positions.push({ x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) });
+        }
+        ctx.fillStyle = '#1A1A1A';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 2;
+        MAXCUT_EDGES.forEach(([u, v]) => {
+            ctx.beginPath();
+            ctx.moveTo(positions[u].x, positions[u].y);
+            ctx.lineTo(positions[v].x, positions[v].y);
+            ctx.stroke();
+        });
+        ctx.fillStyle = '#76b900';
+        ctx.strokeStyle = '#E0E0E0';
+        ctx.lineWidth = 2;
+        positions.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, nodeRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(i, p.x, p.y);
+            ctx.fillStyle = '#76b900';
+        });
+    }
+    drawMaxCutGraph();
+
+    function initialize() {
+        initializeAdaptState();
+        initializeQaoaState();
+        renderChart();
+        renderAdaptQAOA();
+        renderStandardQAOA();
+    }
+
+    function initializeAdaptState() {
+        Object.assign(adaptState, {
+            iteration: 0,
+            energy: STARTING_ENERGY,
+            gradients: {},
+            availableOperators: [...ADAPT_OPERATORS],
+            circuit: [],
+            energyHistory: [STARTING_ENERGY],
+            labels: ['Start'],
+            isConverged: false,
+            awaitingOptimization: false,
+        });
+        calculateAdaptGradients();
+        setFeedback('Select a mixer from the pool to add the next ADAPT-QAOA layer.');
+    }
+
+    function initializeQaoaState() {
+        Object.assign(qaoaState, {
+            isRunning: false,
+            energyHistory: [],
+            labels: [],
+        });
+        qaoaRunButton.disabled = false;
+    }
+
+    function calculateAdaptGradients() {
+        if (adaptState.isConverged) {
+            adaptState.availableOperators.forEach(op => { adaptState.gradients[op.name] = 0.0; });
+            return;
+        }
+        const remainingSteps = Math.max(1, ADAPT_OPERATORS.length - adaptState.iteration);
+        const energyGap = adaptState.energy - FINAL_ENERGY;
+        const baseGradient = (Math.abs(energyGap) / remainingSteps) * 0.8;
+
+        adaptState.availableOperators.forEach((op, index) => {
+            let grad = (index === 0 || index === 5)
+                ? baseGradient * (Math.random() * 0.2 + 0.9)
+                : baseGradient * (Math.random() * 0.5 + 0.1);
+            adaptState.gradients[op.name] = grad;
+        });
+
+        if (Math.abs(energyGap) < 0.05 || adaptState.availableOperators.length === 0) {
+            adaptState.isConverged = true;
+            setFeedback('✅ ADAPT-QAOA converged (gradient norm below threshold).', 'var(--nvidia-green)');
+            adaptState.availableOperators.forEach(op => { adaptState.gradients[op.name] = 0.0; });
+        }
+    }
+
+    function handleOperatorSelection(selectedOpName) {
+        if (adaptState.isConverged || adaptState.awaitingOptimization) return;
+        const bestOpName = adaptState.availableOperators.reduce((a, b) =>
+            Math.abs(adaptState.gradients[a.name]) > Math.abs(adaptState.gradients[b.name]) ? a : b
+        ).name;
+
+        if (selectedOpName === bestOpName) {
+            const selectedOp = adaptState.availableOperators.find(op => op.name === selectedOpName);
+            adaptState.circuit.push({
+                ...selectedOp,
+                optimized: false,
+                gamma: 'γ_' + (adaptState.circuit.length + 1),
+                beta: 'β_' + (adaptState.circuit.length + 1),
+            });
+            adaptState.availableOperators = adaptState.availableOperators.filter(op => op.name !== selectedOpName);
+            adaptState.awaitingOptimization = true;
+            setFeedback('Layer added. Click "Minimize (γ, β)" to optimize parameters.', 'var(--nvidia-light-gray)');
+        } else {
+            setFeedback('Pick the mixer with the largest gradient.', 'var(--nvidia-error)');
+        }
+        renderAdaptQAOA();
+    }
+
+    function handleMinimize() {
+        if (!adaptState.awaitingOptimization) return;
+        const lastLayer = adaptState.circuit[adaptState.circuit.length - 1];
+        if (lastLayer) {
+            lastLayer.optimized = true;
+            adaptState.iteration++;
+
+            let energyDropMultiplier = adaptState.iteration < 4 ? 1.3 : 0.5;
+            const energyDrop = Math.abs(adaptState.gradients[lastLayer.name]) * (Math.random() * 0.3 + energyDropMultiplier);
+            adaptState.energy -= energyDrop;
+
+            if (adaptState.availableOperators.length === 0 || Math.abs(adaptState.energy - FINAL_ENERGY) < 0.05) {
+                adaptState.energy = FINAL_ENERGY;
+            }
+
+            adaptState.energyHistory.push(adaptState.energy);
+            adaptState.labels.push('Layer ' + adaptState.iteration);
+        }
+        adaptState.awaitingOptimization = false;
+        calculateAdaptGradients();
+        if (!adaptState.isConverged) {
+            setFeedback('Parameters minimized. Select the next mixer.', 'var(--nvidia-green)');
+        }
+        renderAdaptQAOA();
+        renderChart();
+    }
+
+    function runQAOA() {
+        if (qaoaState.isRunning) return;
+        qaoaState.isRunning = true;
+        qaoaRunButton.disabled = true;
+        setFeedback('QAOA optimizing γ, β for p=' + QAOA_LAYERS + ' layers...', 'var(--nvidia-purple)');
+
+        // Illustrative animation: smooth descent from initial ⟨H_C⟩ (|+⟩^⊗n) to optimal -5.
+        // Not a real optimizer—no Hamiltonian evaluation or parameter update.
+        qaoaState.energyHistory = [QAOA_INITIAL_ENERGY];
+        qaoaState.labels = ['Start'];
+
+        const totalSteps = 50;
+        const energyLevels = [];
+        for (let i = 0; i <= totalSteps; i++) {
+            const progress = i / totalSteps;
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            energyLevels.push(QAOA_INITIAL_ENERGY - (QAOA_INITIAL_ENERGY - FINAL_ENERGY) * easedProgress);
+        }
+
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step >= energyLevels.length) {
+                clearInterval(interval);
+                qaoaState.isRunning = false;
+                qaoaRunButton.disabled = false;
+                setFeedback('✅ QAOA optimization complete!', 'var(--nvidia-green)');
+                return;
+            }
+            qaoaState.energyHistory.push(energyLevels[step]);
+            qaoaState.labels.push('Step ' + step);
+            step++;
+            renderChart();
+        }, 60);
+    }
+
+    function renderAdaptQAOA() {
+        renderOperatorPool();
+        renderAdaptCircuit(adaptCircuitContainer, adaptState.circuit);
+        renderAdaptControls();
+    }
+
+    function renderStandardQAOA() {
+        const layers = [];
+        for (let p = 0; p < QAOA_LAYERS; p++) {
+            layers.push({ cost: true, gamma: 'γ' + (p + 1) });
+            layers.push({ mixer: 'ΣX', beta: 'β' + (p + 1), qubits: [0, 1, 2, 3, 4] });
+        }
+        renderQAOACircuit(qaoaCircuitContainer, layers);
+    }
+
+    function renderAdaptControls() {
+        minimizeButtonContainer.innerHTML = '';
+        if (adaptState.awaitingOptimization) {
+            const btn = document.createElement('button');
+            btn.id = 'minimize-theta-btn';
+            btn.className = 'nvidia-button minimize-button w-full p-3 rounded-md text-lg';
+            btn.setAttribute('tabindex', '0');
+            btn.textContent = 'Minimize (γ, β)';
+            btn.setAttribute('aria-label', 'Minimize current layer parameters gamma and beta');
+            btn.onclick = handleMinimize;
+            minimizeButtonContainer.appendChild(btn);
+            btn.focus({ focusVisible: true });
+        }
+    }
+
+    function getAdaptFocusables() {
+        const list = [];
+        const minBtn = document.getElementById('minimize-theta-btn');
+        if (minBtn) list.push(minBtn);
+        operatorPoolDiv.querySelectorAll('button').forEach(b => list.push(b));
+        return list;
+    }
+
+    function handleAdaptControlsKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        const focusables = getAdaptFocusables();
+        if (focusables.length === 0) return;
+        const i = focusables.indexOf(document.activeElement);
+        if (i === -1) return;
+        e.preventDefault();
+        if (e.key === 'ArrowDown' && i < focusables.length - 1) focusables[i + 1].focus();
+        else if (e.key === 'ArrowUp' && i > 0) focusables[i - 1].focus();
+    }
+
+    function renderOperatorPool() {
+        operatorPoolDiv.innerHTML = '';
+        const maxGradient = Math.max(...Object.values(adaptState.gradients).map(g => Math.abs(g)), 0.0001);
+        adaptState.availableOperators.forEach(op => {
+            const gradValue = adaptState.gradients[op.name] || 0.0;
+            const percentage = (Math.abs(gradValue) / maxGradient) * 100;
+            const button = document.createElement('button');
+            button.className = 'nvidia-button w-full p-3 rounded-md text-left';
+            button.setAttribute('tabindex', '0');
+            button.disabled = adaptState.isConverged || adaptState.awaitingOptimization;
+            button.setAttribute('aria-label', 'Add mixer ' + op.label + ', gradient ' + (adaptState.gradients[op.name] || 0).toFixed(4));
+            button.onclick = () => handleOperatorSelection(op.name);
+            const nameHtml = op.name.replace('₁', '<sub>1</sub>').replace('₂', '<sub>2</sub>').replace('₃', '<sub>3</sub>').replace('₄', '<sub>4</sub>').replace('₅', '<sub>5</sub>').replace('₆', '<sub>6</sub>').replace('₇', '<sub>7</sub>').replace('₈', '<sub>8</sub>').replace('₉', '<sub>9</sub>').replace('₀', '<sub>0</sub>');
+            button.innerHTML = '<div class="flex justify-between items-center"><span class="font-semibold">' + op.label + ' (' + nameHtml + ')</span><span class="text-sm font-mono">' + Math.abs(gradValue).toFixed(4) + '</span></div><div class="w-full h-2 rounded-full mt-2 bg-gray-700"><div class="h-full rounded-full gradient-bar" style="--p: ' + percentage + '%"></div></div>';
+            operatorPoolDiv.appendChild(button);
+        });
+    }
+
+    const LANE_HEIGHT = 50;
+
+    function renderAdaptCircuit(container, circuit) {
+        container.innerHTML = '';
+        container.style.position = 'relative';
+        const lanes = Array.from({ length: NUM_QUBITS }, (_, i) => {
+            const lane = document.createElement('div');
+            lane.className = 'qubit-lane';
+            lane.innerHTML = '<div class="qubit-label">q<sub>' + i + '</sub>⟩</div><div class="qubit-wire"></div>';
+            container.appendChild(lane);
+            return lane;
+        });
+
+        let gateOffset = 40;
+        circuit.forEach((layer, index) => {
+            const spacing = 100;
+            const costOffset = gateOffset;
+            const costBox = document.createElement('div');
+            costBox.className = 'gate-container gate-single';
+            costBox.style.left = costOffset + 'px';
+            costBox.style.top = '0';
+            costBox.style.height = (NUM_QUBITS * LANE_HEIGHT) + 'px';
+            const costInner = document.createElement('div');
+            costInner.className = 'gate-box h-cost';
+            costInner.innerHTML = 'e<sup>-i H<sub>C</sub> ' + layer.gamma + '</sup>';
+            costInner.style.position = 'absolute';
+            costInner.style.top = '50%';
+            costInner.style.transform = 'translateY(-50%)';
+            costBox.appendChild(costInner);
+            container.appendChild(costBox);
+
+            gateOffset += 70;
+            const mixOffset = gateOffset;
+            const qubits = layer.qubits || [];
+            const minQubit = qubits.length > 0 ? Math.min(...qubits) : 0;
+            const maxQubit = qubits.length > 0 ? Math.max(...qubits) : 0;
+            const isMulti = qubits.length > 1;
+            const spanHeight = isMulti ? (maxQubit - minQubit + 1) * LANE_HEIGHT : LANE_HEIGHT;
+            const gateContainer = document.createElement('div');
+            gateContainer.className = 'gate-container' + (qubits.length <= 1 ? ' gate-single' : '');
+            gateContainer.style.left = mixOffset + 'px';
+            gateContainer.style.top = (minQubit * LANE_HEIGHT) + 'px';
+            gateContainer.style.height = spanHeight + 'px';
+            if (isMulti) gateContainer.style.display = 'flex';
+            if (isMulti) gateContainer.style.alignItems = 'center';
+            const gateBox = document.createElement('div');
+            gateBox.className = 'gate-box ' + (!layer.optimized ? ' unoptimized' : '');
+            gateBox.innerHTML = 'e<sup>-i ' + (layer.label || layer.name) + ' ' + layer.beta + '</sup>';
+            if (isMulti) { gateBox.style.height = '100%'; gateBox.style.minHeight = '100%'; }
+            gateContainer.appendChild(gateBox);
+            container.appendChild(gateContainer);
+            gateOffset += spacing;
+        });
+    }
+
+    function renderQAOACircuit(container, layers) {
+        container.innerHTML = '';
+        container.style.position = 'relative';
+        Array.from({ length: NUM_QUBITS }, (_, i) => {
+            const lane = document.createElement('div');
+            lane.className = 'qubit-lane';
+            lane.innerHTML = '<div class="qubit-label">q<sub>' + i + '</sub>⟩</div><div class="qubit-wire"></div>';
+            container.appendChild(lane);
+        });
+        let gateOffset = 40;
+        layers.forEach((layer, idx) => {
+            if (layer.cost) {
+                const box = document.createElement('div');
+                box.className = 'gate-container gate-single';
+                box.style.left = gateOffset + 'px';
+                box.style.top = '0';
+                box.style.height = (NUM_QUBITS * LANE_HEIGHT) + 'px';
+                const inner = document.createElement('div');
+                inner.className = 'gate-box h-cost';
+                inner.innerHTML = 'e<sup>-i H<sub>C</sub> ' + layer.gamma + '</sup>';
+                inner.style.position = 'absolute';
+                inner.style.top = '50%';
+                inner.style.transform = 'translateY(-50%)';
+                box.appendChild(inner);
+                container.appendChild(box);
+                gateOffset += 70;
+            } else {
+                const qubits = layer.qubits || [0, 1, 2, 3, 4];
+                const minQ = Math.min(...qubits);
+                const maxQ = Math.max(...qubits);
+                const spanH = (maxQ - minQ + 1) * LANE_HEIGHT;
+                const gc = document.createElement('div');
+                gc.className = 'gate-container';
+                gc.style.left = gateOffset + 'px';
+                gc.style.top = (minQ * LANE_HEIGHT) + 'px';
+                gc.style.height = spanH + 'px';
+                gc.style.display = 'flex';
+                gc.style.alignItems = 'center';
+                const gb = document.createElement('div');
+                gb.className = 'gate-box qaoa-gate';
+                gb.innerHTML = 'e<sup>-i ' + layer.mixer + ' ' + layer.beta + '</sup>';
+                gb.style.height = '100%';
+                gb.style.minHeight = '100%';
+                gc.appendChild(gb);
+                container.appendChild(gc);
+                gateOffset += 90;
+            }
+        });
+    }
+
+    function renderChart() {
+        const allLabels = [...adaptState.labels];
+        const qaoaLen = qaoaState.labels.length;
+        for (let i = 0; i < Math.max(adaptState.energyHistory.length, qaoaState.energyHistory.length); i++) {
+            if (i >= allLabels.length) allLabels.push(i < qaoaLen ? qaoaState.labels[i] : '');
+        }
+        const chartConfig = {
+            type: 'line',
+            data: {
+                labels: allLabels,
+                datasets: [
+                    {
+                        label: 'ADAPT-QAOA ⟨H_C⟩',
+                        data: adaptState.energyHistory,
+                        borderColor: nvidiaGreen,
+                        backgroundColor: nvidiaGreen,
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 5,
+                        borderWidth: 3,
+                    },
+                    {
+                        label: 'Standard QAOA ⟨H_C⟩',
+                        data: qaoaState.energyHistory,
+                        borderColor: nvidiaPurple,
+                        backgroundColor: nvidiaPurple,
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 2,
+                        borderDash: [5, 5],
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: false, ticks: { color: 'var(--nvidia-light-gray)' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                    x: { ticks: { display: false }, grid: { display: false } },
+                },
+                plugins: { legend: { labels: { color: 'var(--nvidia-light-gray)', font: { size: 14 } } } },
+            },
+        };
+        if (energyChart) {
+            energyChart.data.datasets[0].data = adaptState.energyHistory;
+            energyChart.data.datasets[1].data = qaoaState.energyHistory;
+            energyChart.data.labels = allLabels;
+            energyChart.update();
+        } else {
+            energyChart = new Chart(chartCanvas.getContext('2d'), chartConfig);
+        }
+    }
+
+    function setFeedback(message, color) {
+        feedbackText.innerHTML = message;
+        if (color) feedbackText.style.color = color;
+    }
+
+    resetAllButton.addEventListener('click', initialize);
+    qaoaRunButton.addEventListener('click', runQAOA);
+
+    initialize();
+});
+    </script>
+</body>
+</html>
