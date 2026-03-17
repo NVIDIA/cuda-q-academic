@@ -1,1 +1,2 @@
-Notebooks for the Quick Start to Quantum Computing tutorial
+Notebook for the Quick Start to Accelerated Quantum Supercomputing tutorial
+GTC Mar 18, 2026
