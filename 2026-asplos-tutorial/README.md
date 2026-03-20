@@ -16,4 +16,10 @@ Artificial Intelligence is emerging as a powerful and essential tool for enablin
 ## Pre-requisites 
 Participants should be proficient in Python and familiar with fundamental machine learning concepts, such as the distinction between model training and inference. A foundational understanding of quantum computing (qubits, gates, and circuits) is also required; attendees unfamiliar with these basics should review [the Quick Start to Quantum Computing](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart) course beforehand.
 
+## Tutorial materials
+
+### Topic: Natural Language Abstraction for Quantum Compilers
+- [Notebook](https://github.com/vira2734/LLM-integrated-Quantum-compiler/blob/main/asplos-2026/tutorial-full-compiler-run.ipynb)
+- [Launch on NVIDIA Brev](https://brev.nvidia.com/launchable/deploy?launchableID=env-3AhMy6PJDwlfvNNYggGRa4E4qlY)
+
 Tutorial materials will be posted in this directory.
