@@ -23,7 +23,7 @@ Participants should be proficient in Python and familiar with fundamental machin
 - [Notebook: Introduction to AI for Quantum Computing through the QAOA for Max Cut Example](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/ASPLOS/01_QAOA-for-Max-Cut-and-GPT-QAOA.ipynb)
 - [Notebook: Unitary Synthesis with Diffusion Models](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/ASPLOS/02_compiling_unitaries_diffusion.ipynb)
 - [Instructions to run the notebooks with NVIDIA's Brev Launchables](https://github.com/NVIDIA/cuda-q-academic/blob/2026-workshops/ASPLOS/README.md)
-- [Launchable for the AI for Quanutm Computing with CUDA-Q notebooks]
+- [Launchable for the AI for Quanutm Computing with CUDA-Q notebooks](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3ArWtvLW8owzkxgR4Gcohy3qWip)
 
 ### Topic: Natural Language Abstraction for Quantum Compilers
 - [Notebook](https://github.com/vira2734/LLM-integrated-Quantum-compiler/blob/main/asplos-2026/tutorial-full-compiler-run.ipynb)
