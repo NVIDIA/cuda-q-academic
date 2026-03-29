@@ -18,6 +18,7 @@ import networkx as nx
 from networkx import algorithms
 from networkx.algorithms import community
 import cudaq
+import cudaq_solvers as solvers
 from cudaq import spin
 from cudaq.qis import *
 import numpy as np
@@ -255,19 +256,17 @@ def find_optimal_parameters(G, layer_count, seed):
     # Each layer of the QAOA kernel contains 2 parameters
     parameter_count : int = 2*layer_count
     
-    # Specify the optimizer and its initial parameters. 
-    optimizer = cudaq.optimizers.COBYLA()
+    # Specify the initial parameters. 
     np.random.seed(seed)
-    optimizer.initial_parameters = np.random.uniform(-np.pi, np.pi,
-                                                     parameter_count)   
+    initial_parameters = np.random.uniform(-np.pi, np.pi,
+                                           parameter_count).tolist()
 
-    # Pass the kernel, spin operator, and optimizer to `cudaq.vqe`.
-    optimal_expectation, optimal_parameters = cudaq.vqe(
-        kernel=kernel_qaoa,
-        spin_operator=hamiltonian_max_cut(qubit_src, qubit_tgt),
-        argument_mapper=lambda parameter_vector: (qubit_count, layer_count, qubit_src, qubit_tgt, parameter_vector),
-        optimizer=optimizer,
-        parameter_count=parameter_count)
+    # Pass the kernel, spin operator, and optimizer to `solvers.vqe`.
+    optimal_expectation, optimal_parameters, _ = solvers.vqe(
+        lambda thetas: kernel_qaoa(qubit_count, layer_count, qubit_src, qubit_tgt, thetas),
+        hamiltonian_max_cut(qubit_src, qubit_tgt),
+        initial_parameters,
+        optimizer='cobyla')
 
     return optimal_parameters
 def qaoa_for_graph(G, layer_count, shots, seed):
@@ -529,13 +528,11 @@ else:
     layer_count_merger = 1 # set arbitrarily
     parameter_count_merger: int = 2 * layer_count_merger
 
-    # Specify the optimizer and its initial parameters. Make it repeatable.
+    # Specify the initial parameters. Make it repeatable.
     cudaq.set_random_seed(101)
-    optimizer_merger = cudaq.optimizers.COBYLA()
     np.random.seed(101)
-    optimizer_merger.initial_parameters = np.random.uniform(-np.pi, np.pi,
-                                                         parameter_count_merger)  
-    optimizer_merger.max_iterations=150
+    initial_parameters_merger = np.random.uniform(-np.pi, np.pi,
+                                                  parameter_count_merger).tolist()
 
     merger_nodes = list(mergerGraph.nodes())
     qubit_count = len(merger_nodes)
@@ -546,14 +543,14 @@ else:
         merger_edge_src.append(merger_nodes.index(u))
         merger_edge_tgt.append(merger_nodes.index(v))
 
-    # Pass the kernel, spin operator, and optimizer to `cudaq.vqe`.
-    optimal_expectation, optimal_parameters = cudaq.vqe(
-        kernel=kernel_qaoa,
-        spin_operator=mHamiltonian(mergerGraph),
-        argument_mapper=lambda parameter_vector: (qubit_count, layer_count, merger_edge_src, merger_edge_tgt, parameter_vector),
-        optimizer=optimizer_merger,
-        parameter_count=parameter_count_merger, 
-        shots = 10000)
+    # Pass the kernel, spin operator, and optimizer to `solvers.vqe`.
+    optimal_expectation, optimal_parameters, _ = solvers.vqe(
+        lambda thetas: kernel_qaoa(qubit_count, layer_count, merger_edge_src, merger_edge_tgt, thetas),
+        mHamiltonian(mergerGraph),
+        initial_parameters_merger,
+        optimizer='cobyla',
+        max_iterations=150,
+        shots=10000)
 
     # Print the optimized value and its parameters
     print("Optimal value = ", optimal_expectation)

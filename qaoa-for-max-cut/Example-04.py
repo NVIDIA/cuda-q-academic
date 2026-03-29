@@ -17,6 +17,7 @@ import networkx as nx
 from networkx import algorithms
 from networkx.algorithms import community
 import cudaq
+import cudaq_solvers as solvers
 from cudaq import spin
 from cudaq.qis import *
 import numpy as np
@@ -169,20 +170,18 @@ def find_optimal_parameters(G, layer_count, seed):
     # Each layer of the QAOA kernel contains 2 parameters
     parameter_count : int = 2*layer_count
     
-    # Specify the optimizer and its initial parameters. 
-    optimizer = cudaq.optimizers.COBYLA()
+    # Specify the initial parameters. 
     np.random.seed(seed)
     cudaq.set_random_seed(seed)
-    optimizer.initial_parameters = np.random.uniform(-np.pi, np.pi,
-                                                     parameter_count)   
+    initial_parameters = np.random.uniform(-np.pi, np.pi,
+                                           parameter_count).tolist()
 
-    # Pass the kernel, spin operator, and optimizer to `cudaq.vqe`.
-    optimal_expectation, optimal_parameters = cudaq.vqe(
-        kernel=kernel_qaoa,
-        spin_operator=hamiltonian_max_cut(qubit_src, qubit_tgt, weights),
-        argument_mapper=lambda parameter_vector: (qubit_count, layer_count, qubit_src, qubit_tgt, parameter_vector),
-        optimizer=optimizer,
-        parameter_count=parameter_count)
+    # Pass the kernel, spin operator, and optimizer to `solvers.vqe`.
+    optimal_expectation, optimal_parameters, _ = solvers.vqe(
+        lambda thetas: kernel_qaoa(qubit_count, layer_count, qubit_src, qubit_tgt, thetas),
+        hamiltonian_max_cut(qubit_src, qubit_tgt, weights),
+        initial_parameters,
+        optimizer='cobyla')
 
     return optimal_parameters
 
@@ -504,21 +503,19 @@ def merging(G, graph_dictionary, merger_graph):
         # The number of qubits we'll need is the same as the number of vertices in our graph
         qubit_count_merger : int = len(nodes_merger)
 
-        # Specify the optimizer and its initial parameters. Make it repeatable.
+        # Specify the initial parameters. Make it repeatable.
         cudaq.set_random_seed(merger_seed)
-        optimizer_merger = cudaq.optimizers.COBYLA()
         np.random.seed(merger_seed)
-        optimizer_merger.initial_parameters = np.random.uniform(-np.pi, np.pi,
-                                                     parameter_count_merger)  
-        optimizer_merger.max_iterations=150
-        # Pass the kernel, spin operator, and optimizer to `cudaq.vqe`.
-        optimal_expectation, optimal_parameters = cudaq.vqe(
-            kernel=kernel_qaoa,
-            spin_operator=merger_Hamiltonian,
-            argument_mapper=lambda parameter_vector: (qubit_count_merger, layer_count_merger, merger_edge_src, merger_edge_tgt, parameter_vector),
-            optimizer=optimizer_merger,
-            parameter_count=parameter_count_merger, 
-            shots = 20000)
+        initial_parameters_merger = np.random.uniform(-np.pi, np.pi,
+                                                      parameter_count_merger).tolist()
+        # Pass the kernel, spin operator, and optimizer to `solvers.vqe`.
+        optimal_expectation, optimal_parameters, _ = solvers.vqe(
+            lambda thetas: kernel_qaoa(qubit_count_merger, layer_count_merger, merger_edge_src, merger_edge_tgt, thetas),
+            merger_Hamiltonian,
+            initial_parameters_merger,
+            optimizer='cobyla',
+            max_iterations=150,
+            shots=20000)
 
         # Sample the circuit using the optimized parameters
         # Sample enough times to distinguish the most_probable outcome for
