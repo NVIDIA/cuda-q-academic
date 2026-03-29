@@ -414,7 +414,7 @@ def merger_graph_penalties(mergerGraph, subgraph_dictionary, G):
    
    
    
-    # Edit the code below
+    # Edit the code above
     return mergerGraph
 
 
