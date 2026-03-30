@@ -18,6 +18,7 @@ import networkx as nx
 from networkx import algorithms
 from networkx.algorithms import community
 import cudaq
+import cudaq_solvers as solvers
 from cudaq import spin
 from cudaq.qis import *
 import numpy as np
@@ -253,19 +254,17 @@ def find_optimal_parameters(G, layer_count, seed):
     # Each layer of the QAOA kernel contains 2 parameters
     parameter_count : int = 2*layer_count
     
-    # Specify the optimizer and its initial parameters. 
-    optimizer = cudaq.optimizers.COBYLA()
+    # Specify the initial parameters. 
     np.random.seed(seed)
-    optimizer.initial_parameters = np.random.uniform(-np.pi, np.pi,
-                                                     parameter_count)   
+    initial_parameters = np.random.uniform(-np.pi, np.pi,
+                                           parameter_count).tolist()
 
-    # Pass the kernel, spin operator, and optimizer to `cudaq.vqe`.
-    optimal_expectation, optimal_parameters = cudaq.vqe(
-        kernel=kernel_qaoa,
-        spin_operator=hamiltonian_max_cut(qubit_src, qubit_tgt),
-        argument_mapper=lambda parameter_vector: (qubit_count, layer_count, qubit_src, qubit_tgt, parameter_vector),
-        optimizer=optimizer,
-        parameter_count=parameter_count)
+    # Pass the kernel, spin operator, and optimizer to `solvers.vqe`.
+    optimal_expectation, optimal_parameters, _ = solvers.vqe(
+        lambda thetas: kernel_qaoa(qubit_count, layer_count, qubit_src, qubit_tgt, thetas),
+        hamiltonian_max_cut(qubit_src, qubit_tgt),
+        initial_parameters,
+        optimizer='cobyla')
 
     return optimal_parameters
 def qaoa_for_graph(G, layer_count, shots, seed):
