@@ -89,11 +89,10 @@ jobs:
       - name: Install Jupyter and dependencies
         run: |
           pip install --quiet --upgrade \
-            torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --quiet --upgrade \
             jupyter \
             nbconvert \
             qutip \
+            torch \
             scikit-learn \
             matplotlib-venn
 
