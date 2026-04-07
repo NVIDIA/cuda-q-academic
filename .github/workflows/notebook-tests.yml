@@ -105,6 +105,7 @@ jobs:
             matplotlib-venn
 
       - name: Run solution notebooks — ${{ matrix.module }}
+        shell: bash
         run: |
           SOLUTIONS_PATH="${{ matrix.solutions_path }}"
           PATTERN="${{ matrix.pattern }}"
