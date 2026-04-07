@@ -86,21 +86,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Cache pip packages
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ matrix.image }}-pip-jupyter-nbconvert-qutip-torch-scikit-learn-matplotlib-venn
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install Jupyter and dependencies
         run: |
+          pip install --quiet --upgrade \
+            torch --index-url https://download.pytorch.org/whl/cpu
           pip install --quiet --upgrade \
             jupyter \
             nbconvert \
             qutip \
-            torch \
             scikit-learn \
             matplotlib-venn
 
