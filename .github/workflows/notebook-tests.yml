@@ -7,14 +7,14 @@ on:
       - '**/solutions/**/*.ipynb'
       - '**/Solutions/**/*.ipynb'
       - '**/*Solution*.ipynb'
-      - '.github/workflows/test-solution-notebooks.yml'
+      - '.github/workflows/notebook-tests.yml'
   pull_request:
     branches: [main]
     paths:
       - '**/solutions/**/*.ipynb'
       - '**/Solutions/**/*.ipynb'
       - '**/*Solution*.ipynb'
-      - '.github/workflows/test-solution-notebooks.yml'
+      - '.github/workflows/notebook-tests.yml'
   workflow_dispatch:
 
 concurrency:
