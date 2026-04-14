@@ -24,9 +24,8 @@
 
 | Workshop          | GPU/CPU Configuration      |
 | :---------------- | :------: |
-| gtc_26 Decoding Quantum Errors with AI            |   L4     |
-| gtc_26 QAOA for Max Cut          |   CPU or L4     |
-| aps-gps           |   L4     |
+| QAOA for Max Cut          |   CPU or L4     |
+
 
 </div>
  
