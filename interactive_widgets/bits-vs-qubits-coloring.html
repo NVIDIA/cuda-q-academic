@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bits vs Qubits: Vertex Coloring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --accent: #76b900;
+        --accent-dark: #5e9400;
+        --bg: #1A1A1A;
+        --surface: #2A2A2A;
+        --border: #444444;
+        --fg: #E0E0E0;
+        --muted: #AAAAAA;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        background-color: var(--bg);
+        color: var(--fg);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.5;
+        padding: 24px 16px;
+    }
+    .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+    .skip-link:focus { top: 0; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+
+    .widget-container {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-top: 4px solid var(--accent);
+        border-radius: 8px;
+        padding: 24px;
+        width: 100%;
+        max-width: 1100px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        margin: 0 auto;
+    }
+    @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+    .widget-container h1 {
+        color: var(--accent);
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        margin-top: 0;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .widget-container .summary-text {
+        color: var(--muted);
+        margin-bottom: 8px;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+    .instructions-section {
+        margin-bottom: 24px;
+        padding: 16px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .instructions-section summary {
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .instructions-section summary::-webkit-details-marker { display: none; }
+    .instructions-section summary::before {
+        content: '\25B6';
+        font-size: 0.7rem;
+        color: var(--accent);
+        transition: transform 0.15s;
+        flex-shrink: 0;
+    }
+    .instructions-section[open] > summary::before { transform: rotate(90deg); }
+    .instructions-section summary:focus { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+    .instructions-section summary h2 { display: inline; }
+    .instructions-section h2 { color: var(--accent); font-size: 1.1rem; margin: 0; font-weight: 700; }
+    .instructions-section:not([open]) { padding-bottom: 16px; }
+    .instructions-section ol { margin-top: 12px; padding-left: 20px; }
+    .instructions-section li { margin-bottom: 6px; }
+    .instructions-section .kbd { background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+
+    .panels-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 767px) {
+        .panels-container { flex-direction: column; }
+    }
+
+    .panel {
+        flex: 1;
+        min-width: 0;
+    }
+    .info-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px 24px;
+    }
+
+    .panel-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .panel-subtitle {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-bottom: 16px;
+    }
+    .classical-label { color: var(--fg); }
+    .quantum-label { color: var(--accent); }
+
+    .bit-toggles {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        justify-content: center;
+    }
+    .bit-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: var(--surface);
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+    .bit-btn:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .bit-btn .bit-label { font-size: 0.65rem; color: var(--muted); }
+    .bit-btn.color-0 {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+    }
+    .bit-btn.color-0 .bit-label { color: rgba(0,0,0,0.6); }
+    .bit-btn.color-1 {
+        background: #ffffff;
+        color: #000;
+        border-color: #ffffff;
+    }
+    .bit-btn.color-1 .bit-label { color: rgba(0,0,0,0.5); }
+
+    .counter-text {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-align: center;
+        margin-bottom: 12px;
+        min-height: 1.4em;
+    }
+    .counter-text strong { color: var(--fg); }
+
+    .graph-container {
+        display: flex;
+        justify-content: center;
+        padding: 8px 0;
+    }
+    .graph-container svg {
+        width: 100%;
+        max-width: 370px;
+        height: auto;
+    }
+
+    .bloch-row {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .bloch-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 62px;
+    }
+    .bloch-cell svg { width: 58px; height: 64px; }
+    .bloch-qubit-label {
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .btn-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+    .btn-primary {
+        background: var(--surface);
+        color: #FFFFFF;
+        border: 1px solid var(--border);
+        border-bottom: 3px solid var(--accent);
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border-radius: 6px;
+        cursor: pointer;
+        min-height: 44px;
+        min-width: 44px;
+        transition: all 0.15s;
+    }
+    .btn-primary:hover, .btn-primary:focus-visible {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+    }
+    .btn-primary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        min-height: 44px;
+        min-width: 44px;
+        transition: all 0.15s;
+    }
+    .btn-secondary:hover, .btn-secondary:focus-visible {
+        background: rgba(255,255,255,0.05);
+        color: white;
+    }
+    .btn-secondary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .superposition-vertex {
+        animation: pulse-super 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-super {
+        0% { opacity: 0.6; }
+        100% { opacity: 1; }
+    }
+
+    .bloch-arrow {
+        transition: all 0.4s ease-out;
+    }
+    .bloch-arrow-head {
+        transition: all 0.4s ease-out;
+    }
+
+    #comparison-section {
+        margin-bottom: 20px;
+    }
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    @media (max-width: 500px) { .comparison-grid { grid-template-columns: 1fr; } }
+    .comparison-item h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .comparison-item p {
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+    .comparison-item .highlight {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .widget-footer {
+        text-align: center;
+        padding-top: 16px;
+        margin-top: 8px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .widget-footer a {
+        color: #76b900;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .widget-footer a:hover { text-decoration: underline; }
+    .widget-footer a:focus { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+    .measured-flash {
+        animation: flash-measure 0.5s ease-out;
+    }
+    @keyframes flash-measure {
+        0% { filter: brightness(1.8); }
+        100% { filter: brightness(1); }
+    }
+
+    .history-panel {
+        margin-top: 4px;
+        max-height: 180px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+    .history-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .history-row:last-child { border-bottom: none; }
+    .history-num {
+        font-size: 0.65rem;
+        color: var(--muted);
+        min-width: 22px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+    .history-circles {
+        display: flex;
+        gap: 3px;
+    }
+    .history-circle {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.2);
+        flex-shrink: 0;
+    }
+    .history-circle.c0 { background: var(--accent); border-color: var(--accent-dark); }
+    .history-circle.c1 { background: #ffffff; border-color: #cccccc; }
+    .history-bitstring {
+        font-size: 0.65rem;
+        color: #666;
+        font-family: 'Inter', monospace;
+        margin-left: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Bits vs Qubits: Vertex Coloring</h1>
+            <p class="summary-text">Compare how classical bits and quantum qubits encode 2-colorings of a 7-vertex graph &mdash; one assignment at a time vs. all 128 simultaneously.</p>
+        </header>
+        <details class="instructions-section" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
+            <ol>
+                <li><strong>Classical side:</strong> Click the bit circles to toggle each vertex between color 0 (green) and color 1 (white). The graph updates to show your single chosen coloring.</li>
+                <li><strong>Quantum side:</strong> All 7 qubits start in superposition (Bloch sphere arrows on the equator). Press <span class="kbd">Measure</span> to collapse the superposition &mdash; each qubit randomly becomes |0&#10217; or |1&#10217;, producing one coloring on the graph.</li>
+                <li>Press <span class="kbd">Measure</span> repeatedly to sample different colorings. Notice how each measurement can produce a different result from the same superposition state.</li>
+                <li>Press <span class="kbd">Reset Qubits</span> to return all qubits to superposition.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to navigate controls. <span class="kbd">Enter</span> or <span class="kbd">Space</span> to toggle bits or press buttons. <span class="kbd">Esc</span> to reset qubits. <span class="kbd">&#8592;</span><span class="kbd">&#8594;</span> arrow keys to navigate between bit toggles.</p>
+        </details>
+        <div class="panels-container">
+            <div class="panel info-box" id="classical-panel" role="region" aria-label="Classical bits panel">
+                <div class="panel-title classical-label">Classical Bits</div>
+                <div class="panel-subtitle">2<sup>7</sup> = 128 bits needed for all colorings &mdash; but you can only store <strong>one at a time</strong></div>
+                <div class="bit-toggles" id="classical-bits" role="group" aria-label="Vertex bit toggles">
+                    <button class="bit-btn color-0" data-index="0" aria-pressed="false" aria-label="Vertex 0, currently color 0"><span class="bit-label">v0</span>0</button>
+                    <button class="bit-btn color-0" data-index="1" aria-pressed="false" aria-label="Vertex 1, currently color 0"><span class="bit-label">v1</span>0</button>
+                    <button class="bit-btn color-0" data-index="2" aria-pressed="false" aria-label="Vertex 2, currently color 0"><span class="bit-label">v2</span>0</button>
+                    <button class="bit-btn color-0" data-index="3" aria-pressed="false" aria-label="Vertex 3, currently color 0"><span class="bit-label">v3</span>0</button>
+                    <button class="bit-btn color-0" data-index="4" aria-pressed="false" aria-label="Vertex 4, currently color 0"><span class="bit-label">v4</span>0</button>
+                    <button class="bit-btn color-0" data-index="5" aria-pressed="false" aria-label="Vertex 5, currently color 0"><span class="bit-label">v5</span>0</button>
+                    <button class="bit-btn color-0" data-index="6" aria-pressed="false" aria-label="Vertex 6, currently color 0"><span class="bit-label">v6</span>0</button>
+                </div>
+                <div class="counter-text" id="classical-counter">Showing <strong>1</strong> of 128 possible colorings</div>
+                <div class="graph-container" id="classical-graph" role="img" aria-label="Classical graph showing current bit coloring">
+                </div>
+            </div>
+            <div class="panel info-box" id="quantum-panel" role="region" aria-label="Quantum qubits panel">
+                <div class="panel-title quantum-label">Quantum Qubits</div>
+                <div class="panel-subtitle">Only <strong>7 qubits</strong> in superposition encode <strong>all 128 colorings at once</strong></div>
+                <div class="bloch-row" id="bloch-spheres" role="img" aria-label="Seven qubit Bloch spheres showing quantum state">
+                </div>
+                <div class="btn-row">
+                    <button class="btn-primary" id="btn-measure" aria-label="Measure all qubits">Measure</button>
+                    <button class="btn-secondary" id="btn-reset" aria-label="Reset qubits to superposition">Reset Qubits</button>
+                </div>
+                <div class="counter-text" id="quantum-counter">Qubits in superposition &mdash; all 128 colorings coexist</div>
+                <div class="graph-container" id="quantum-graph" role="img" aria-label="Quantum graph showing measured coloring">
+                </div>
+                <div class="counter-text" id="history-label">Measurement history:</div>
+                <div class="history-panel" id="measurement-history" role="log" aria-label="Measurement history" aria-live="polite"></div>
+            </div>
+        </div>
+        <div class="info-box" id="comparison-section">
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <h3 class="classical-label">Classical Approach</h3>
+                    <p>A classical computer stores one coloring per bit string. To represent all <span class="highlight">2<sup>7</sup> = 128</span> possible 2-colorings, you need 128 separate 7-bit strings &mdash; or 896 bits total.</p>
+                </div>
+                <div class="comparison-item">
+                    <h3 class="quantum-label">Quantum Superposition</h3>
+                    <p>A quantum computer puts each qubit in superposition with a Hadamard gate. Just <span class="highlight">7 qubits</span> simultaneously encode all 128 colorings. Measurement collapses the superposition to a single coloring, each equally likely. Applying additional gates (as in QAOA) reshapes these probabilities so that colorings that solve the problem are sampled more often than others.</p>
+                </div>
+            </div>
+        </div>
+        <div class="widget-footer">
+            <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+            <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+        </div>
+    </div>
+    <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    <script>
+    const NUM_VERTICES = 7;
+    const COLOR_0 = '#76b900';
+    const COLOR_1 = '#ffffff';
+    const EDGE_DEFAULT = '#555555';
+    const EDGE_HIGHLIGHT = '#76b900';
+
+    const GRAPH = {
+        vertices: [
+            { x: 235, y: 80 },   // 0: center-upper, between 1 and 2
+            { x: 145, y: 18 },   // 1: top
+            { x: 320, y: 55 },   // 2: far right
+            { x: 75,  y: 240 },  // 3: bottom-left, part of 3-4-5 triangle
+            { x: 195, y: 175 },  // 4: center hub
+            { x: 270, y: 235 },  // 5: right, part of 3-4-5 triangle
+            { x: 60,  y: 310 },  // 6: bottom, hangs off 3
+        ],
+        edges: [
+            [0, 1], [0, 2], [0, 4],
+            [1, 2],
+            [3, 4], [3, 5], [3, 6],
+            [4, 5],
+        ]
+    };
+
+    const state = {
+        classical: [0, 0, 0, 0, 0, 0, 0],
+        quantum: [null, null, null, null, null, null, null],
+        measureCount: 0,
+        history: [],
+        maxHistory: 20,
+    };
+
+    function toggleBit(index) {
+        state.classical[index] = state.classical[index] === 0 ? 1 : 0;
+        renderClassical();
+        announce('Vertex ' + index + ' set to color ' + state.classical[index]);
+    }
+
+    function measureAll() {
+        for (let i = 0; i < NUM_VERTICES; i++) {
+            state.quantum[i] = Math.random() < 0.5 ? 0 : 1;
+        }
+        state.measureCount++;
+        const sample = [...state.quantum];
+        state.history.push(sample);
+        if (state.history.length > state.maxHistory) state.history.shift();
+        const bitString = sample.join('');
+        if (!state.uniqueSet) state.uniqueSet = new Set();
+        state.uniqueSet.add(bitString);
+        renderQuantum();
+
+        const graphEl = document.getElementById('quantum-graph');
+        graphEl.classList.remove('measured-flash');
+        void graphEl.offsetWidth;
+        graphEl.classList.add('measured-flash');
+
+        announce('Measured coloring: ' + bitString + '. ' + state.uniqueSet.size + ' unique of 128 seen after ' + state.measureCount + ' samples.');
+    }
+
+    function resetQubits() {
+        for (let i = 0; i < NUM_VERTICES; i++) {
+            state.quantum[i] = null;
+        }
+        state.measureCount = 0;
+        state.history = [];
+        state.uniqueSet = new Set();
+        renderQuantum();
+        announce('Qubits reset to superposition. All 128 colorings coexist.');
+    }
+
+    function isInSuperposition() {
+        return state.quantum[0] === null;
+    }
+
+    function announce(msg) {
+        const el = document.getElementById('status-announce');
+        el.textContent = '';
+        requestAnimationFrame(() => { el.textContent = msg; });
+    }
+
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const GRAPH_W = 370;
+    const GRAPH_H = 340;
+    const VERTEX_R = 18;
+
+    function createSVGElement(tag, attrs) {
+        const el = document.createElementNS(SVG_NS, tag);
+        for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+        return el;
+    }
+
+    function buildGraphSVG(containerId, colors, isSuperposition) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        const svg = createSVGElement('svg', {
+            viewBox: '0 0 ' + GRAPH_W + ' ' + GRAPH_H,
+            'aria-hidden': 'true',
+        });
+
+        const defs = createSVGElement('defs', {});
+        const grad = createSVGElement('linearGradient', { id: containerId + '-superGrad', x1: '0', y1: '0', x2: '0', y2: '1' });
+        const stop1 = createSVGElement('stop', { offset: '0%', 'stop-color': COLOR_0 });
+        const stop2 = createSVGElement('stop', { offset: '50%', 'stop-color': COLOR_0 });
+        const stop3 = createSVGElement('stop', { offset: '50%', 'stop-color': COLOR_1 });
+        const stop4 = createSVGElement('stop', { offset: '100%', 'stop-color': COLOR_1 });
+        grad.appendChild(stop1); grad.appendChild(stop2);
+        grad.appendChild(stop3); grad.appendChild(stop4);
+        defs.appendChild(grad);
+        svg.appendChild(defs);
+
+        for (const [a, b] of GRAPH.edges) {
+            const va = GRAPH.vertices[a];
+            const vb = GRAPH.vertices[b];
+            let edgeColor = EDGE_DEFAULT;
+            if (!isSuperposition && colors[a] !== colors[b]) {
+                edgeColor = EDGE_HIGHLIGHT;
+            }
+            const line = createSVGElement('line', {
+                x1: va.x, y1: va.y, x2: vb.x, y2: vb.y,
+                stroke: edgeColor, 'stroke-width': isSuperposition ? 1.5 : 2.5,
+                'stroke-opacity': isSuperposition ? 0.3 : 0.8,
+            });
+            svg.appendChild(line);
+        }
+
+        for (let i = 0; i < NUM_VERTICES; i++) {
+            const v = GRAPH.vertices[i];
+            const g = createSVGElement('g', {});
+
+            if (isSuperposition) {
+                const c1 = createSVGElement('circle', {
+                    cx: v.x, cy: v.y, r: VERTEX_R,
+                    fill: 'url(#' + containerId + '-superGrad)',
+                    stroke: '#888', 'stroke-width': 1.5,
+                    class: 'superposition-vertex',
+                });
+                g.appendChild(c1);
+            } else {
+                const fillColor = colors[i] === 0 ? COLOR_0 : COLOR_1;
+                const strokeColor = colors[i] === 0 ? '#5e9400' : '#cccccc';
+                const c = createSVGElement('circle', {
+                    cx: v.x, cy: v.y, r: VERTEX_R,
+                    fill: fillColor, stroke: strokeColor, 'stroke-width': 2,
+                });
+                g.appendChild(c);
+            }
+
+            const label = createSVGElement('text', {
+                x: v.x, y: v.y + 1,
+                'text-anchor': 'middle', 'dominant-baseline': 'middle',
+                fill: isSuperposition ? '#333' : (colors[i] === 0 ? '#000' : '#333'),
+                'font-size': '13', 'font-weight': '700',
+                'font-family': 'Inter, sans-serif',
+            });
+            label.textContent = i;
+            g.appendChild(label);
+
+            svg.appendChild(g);
+        }
+
+        container.appendChild(svg);
+    }
+
+    function buildBlochSpheres() {
+        const container = document.getElementById('bloch-spheres');
+        container.innerHTML = '';
+        for (let i = 0; i < NUM_VERTICES; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'bloch-cell';
+
+            const svg = createSVGElement('svg', {
+                viewBox: '0 0 58 64',
+                'aria-hidden': 'true',
+            });
+
+            const cx = 29, cy = 30, r = 22;
+
+            svg.appendChild(createSVGElement('circle', {
+                cx: cx, cy: cy, r: r,
+                fill: 'none', stroke: '#555', 'stroke-width': '1',
+            }));
+
+            svg.appendChild(createSVGElement('ellipse', {
+                cx: cx, cy: cy, rx: r, ry: 7,
+                fill: 'none', stroke: '#444', 'stroke-width': '0.7',
+                'stroke-dasharray': '3,2',
+            }));
+
+            svg.appendChild(createSVGElement('line', {
+                x1: cx, y1: cy - r - 3, x2: cx, y2: cy + r + 3,
+                stroke: '#444', 'stroke-width': '0.7',
+            }));
+
+            const ket0 = createSVGElement('text', {
+                x: cx, y: 5, 'text-anchor': 'middle',
+                fill: '#888', 'font-size': '8', 'font-family': 'Inter, sans-serif',
+            });
+            ket0.textContent = '|0\u27E9';
+            svg.appendChild(ket0);
+
+            const ket1 = createSVGElement('text', {
+                x: cx, y: 62, 'text-anchor': 'middle',
+                fill: '#888', 'font-size': '8', 'font-family': 'Inter, sans-serif',
+            });
+            ket1.textContent = '|1\u27E9';
+            svg.appendChild(ket1);
+
+            let arrowEndX, arrowEndY, dotColor;
+            const qval = state.quantum[i];
+            if (qval === null) {
+                arrowEndX = cx + r - 4;
+                arrowEndY = cy;
+                dotColor = '#76b900';
+            } else if (qval === 0) {
+                arrowEndX = cx;
+                arrowEndY = cy - r + 4;
+                dotColor = COLOR_0;
+            } else {
+                arrowEndX = cx;
+                arrowEndY = cy + r - 4;
+                dotColor = COLOR_1;
+            }
+
+            const arrow = createSVGElement('line', {
+                x1: cx, y1: cy, x2: arrowEndX, y2: arrowEndY,
+                stroke: dotColor, 'stroke-width': '2.5',
+                'stroke-linecap': 'round',
+                class: 'bloch-arrow',
+                id: 'bloch-arrow-' + i,
+            });
+            svg.appendChild(arrow);
+
+            const dot = createSVGElement('circle', {
+                cx: arrowEndX, cy: arrowEndY, r: 4,
+                fill: dotColor,
+                class: 'bloch-arrow-head',
+                id: 'bloch-dot-' + i,
+            });
+            svg.appendChild(dot);
+
+            if (qval === null) {
+                const pulse = createSVGElement('circle', {
+                    cx: arrowEndX, cy: arrowEndY, r: 6,
+                    fill: 'none', stroke: '#76b900', 'stroke-width': '1',
+                    class: 'superposition-vertex',
+                    opacity: '0.6',
+                });
+                svg.appendChild(pulse);
+            }
+
+            cell.appendChild(svg);
+            const lbl = document.createElement('span');
+            lbl.className = 'bloch-qubit-label';
+            lbl.textContent = 'q' + i;
+            cell.appendChild(lbl);
+            container.appendChild(cell);
+        }
+    }
+
+    function renderClassical() {
+        const bits = document.querySelectorAll('#classical-bits .bit-btn');
+        bits.forEach((btn, i) => {
+            const val = state.classical[i];
+            btn.className = 'bit-btn color-' + val;
+            btn.setAttribute('aria-pressed', val === 1 ? 'true' : 'false');
+            btn.setAttribute('aria-label', 'Vertex ' + i + ', currently color ' + val);
+            btn.innerHTML = '<span class="bit-label">v' + i + '</span>' + val;
+        });
+        buildGraphSVG('classical-graph', state.classical, false);
+        document.getElementById('classical-counter').innerHTML =
+            'Coloring: <strong>' + state.classical.join('') + '</strong> &mdash; showing 1 of 128 possible';
+    }
+
+    function renderQuantum() {
+        const sup = isInSuperposition();
+        buildBlochSpheres();
+        if (sup) {
+            buildGraphSVG('quantum-graph', state.quantum, true);
+            document.getElementById('quantum-counter').innerHTML =
+                'Qubits in superposition &mdash; all 128 colorings coexist';
+        } else {
+            buildGraphSVG('quantum-graph', state.quantum, false);
+            const uniqueCount = state.uniqueSet ? state.uniqueSet.size : 0;
+            document.getElementById('quantum-counter').innerHTML =
+                'Sample <strong>' + state.measureCount + '</strong> &mdash; coloring: ' + state.quantum.join('') +
+                ' &nbsp;|&nbsp; <strong>' + uniqueCount + '</strong> / 128 unique seen';
+        }
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('measurement-history');
+        container.innerHTML = '';
+        if (state.history.length === 0) return;
+
+        for (let s = state.history.length - 1; s >= 0; s--) {
+            const sample = state.history[s];
+            const sampleNum = state.measureCount - (state.history.length - 1 - s);
+
+            const row = document.createElement('div');
+            row.className = 'history-row';
+
+            const num = document.createElement('span');
+            num.className = 'history-num';
+            num.textContent = '#' + sampleNum;
+            row.appendChild(num);
+
+            const circles = document.createElement('span');
+            circles.className = 'history-circles';
+            for (let v = 0; v < NUM_VERTICES; v++) {
+                const c = document.createElement('span');
+                c.className = 'history-circle c' + sample[v];
+                c.title = 'v' + v + ' = ' + sample[v];
+                circles.appendChild(c);
+            }
+            row.appendChild(circles);
+
+            const bs = document.createElement('span');
+            bs.className = 'history-bitstring';
+            bs.textContent = sample.join('');
+            row.appendChild(bs);
+
+            container.appendChild(row);
+        }
+    }
+
+    function init() {
+        const bitBtns = document.querySelectorAll('#classical-bits .bit-btn');
+        bitBtns.forEach((btn, i) => {
+            btn.addEventListener('click', () => toggleBit(i));
+        });
+
+        const bitsGroup = document.getElementById('classical-bits');
+        bitsGroup.addEventListener('keydown', (e) => {
+            const btns = Array.from(bitsGroup.querySelectorAll('.bit-btn'));
+            const idx = btns.indexOf(document.activeElement);
+            if (idx === -1) return;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                btns[(idx + 1) % btns.length].focus();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                btns[(idx - 1 + btns.length) % btns.length].focus();
+            }
+        });
+
+        document.getElementById('btn-measure').addEventListener('click', measureAll);
+        document.getElementById('btn-reset').addEventListener('click', resetQubits);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                resetQubits();
+                document.getElementById('btn-reset').focus();
+            }
+        });
+
+        renderClassical();
+        renderQuantum();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
