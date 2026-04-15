@@ -3,8 +3,7 @@ name: Test Solution Notebooks
 on:
   push:
     branches:
-      - main
-      - "pull-request/[0-9]+"
+      - "**"
     paths:
       - '**/solutions/**/*.ipynb'
       - '**/Solutions/**/*.ipynb'
