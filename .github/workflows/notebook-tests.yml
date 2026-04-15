@@ -2,14 +2,8 @@ name: Test Solution Notebooks
 
 on:
   push:
-    branches: [main]
-    paths:
-      - '**/solutions/**/*.ipynb'
-      - '**/Solutions/**/*.ipynb'
-      - '**/*Solution*.ipynb'
-      - '.github/workflows/notebook-tests.yml'
-  pull_request:
-    branches: [main]
+    branches:
+      - "pull-request/[0-9]+"
     paths:
       - '**/solutions/**/*.ipynb'
       - '**/Solutions/**/*.ipynb'
