@@ -138,14 +138,16 @@ jobs:
 
           while IFS= read -r nb; do
             BASENAME=$(basename "$nb")
+            # Get path relative to the module root
+            NB_REL="${nb#$MODULE/}"
             echo "::group::▶ $nb"
-            if jupyter nbconvert \
+            if (cd "$MODULE" && jupyter nbconvert \
                 --to notebook \
                 --execute \
                 --inplace \
                 --ExecutePreprocessor.timeout=600 \
                 --ExecutePreprocessor.kernel_name=python3 \
-                "$nb"; then
+                "$NB_REL"); then
               echo "✅ Passed: $nb"
               PASSED=$((PASSED + 1))
               echo "| \`$BASENAME\` | ✅ Passed |" >> "$GITHUB_STEP_SUMMARY"
