@@ -24,7 +24,7 @@ concurrency:
 jobs:
   test-notebooks:
     name: "${{ matrix.module }} (${{ matrix.image }})"
-    runs-on: ubuntu-latest
+    runs-on: linux-amd64-gpu-rtxpro6000-latest-2
     container:
       image: ${{ matrix.image }}
       options: --user root
