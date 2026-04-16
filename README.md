@@ -1,4 +1,4 @@
-# CUDA-Q Academic 
+# CUDA-Q Academic
 
 
 > **🚀 Start Your Journey Here**
@@ -6,71 +6,65 @@
 > * Visit the **[CUDA-Q Academic Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html)** to launch the modules and build a custom curriculum.
 > * Browse the **[CUDA-Q Academic Visualization Gallery](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html)** to experiment with the interactive tools featured in the lessons.
 
-NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantum-education-with-ai-supercomputing-and-nvidia-cuda-q-academic/) is a freely available collection of interactive Jupyter notebooks designed to prepare the next generation of quantum computing professionals by combining high-performance computing with quantum computing skills, developed in collaboration with universities and tested in real classroom settings. This repository contains Jupyter notebooks and supporting files for [quantum computing](https://www.nvidia.com/en-us/solutions/quantum-computing/) training using CUDA-Q.  These training materials are provided free of charge. Please see [LICENSE](LICENSE) for license details. This project will download and install additional third-party open source software projects. Review the license terms of these open source projects before use.
 
-Instructions to install CUDA-Q can be found in the [instructions.md](instructions.md) file. If you do not have a local installation of CUDA-Q running on a GPU, the notebooks can be opened in [qBraid](https://www.qbraid.com/), [Brev](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-39dN1v7RucHHgj97LILUlnXjnk5), or [Google Colab](https://colab.research.google.com/).  Directions for this are found in the README.md files in the main folder for each set of notebooks.
+## About
 
-
-# Educational Resources and Modules
-
-* The [Guide to CUDA-Q Backends](Guide-to-cuda-q-backends.ipynb) is a one-stop resource for code snippets and descriptions of the CUDA-Q backend simulator and hardware options for executing CUDA-Q kernels.
-
-* This repository contents are detailed below. To get started, we recommend beginning with [Quick Start to Quantum Computing with CUDA-Q](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart) to grasp the fundamentals of CUDA-Q and quantum computing. Once you have the basics, you can proceed with the remaining modules in any order. This repository is actively being developed, so be sure to check back regularly for new modules and notebooks.
-
----
-## Quick Start to Quantum Computing with CUDA-Q
-The Quick Start to Quantum Computing with CUDA-Q module aims to take a learner from no knowledge of quantum computation to programming a variational algorithm in CUDA-Q. This material, which includes Jupyter notebooks, is organized into labs that build upon one another. 
-
-**Pre-requisites:** Learners should have familiarity with Jupyter notebooks and programming in Python.  Additionally, pre-requisite knowledge includes complex numbers, linear algebra, and statistics. In particular, we assume experience computing and understanding of arithmetic of complex numbers, probabilities, expectation values, vectors, dot products, and matrix multiplication. Knowledge of eigenvalues and eigenvectors will be helpful, but not necessarily a requirement.   
-
----
-## Quantum Information Science Examples
-[The qis-examples folder](qis-examples) contains example code and explanations of foundational quantum algorithms often appearing in Quantum Information Science courses.  It is intended to complement quantum information science textbooks and courses, rather than being self-contained.
-
-**Pre-requisites:** 
-* Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
-* Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)
-
----
-## QAOA for Max Cut Module
-The Divide-and-Conquer QAOA for Max Cut module takes a learner from the implementation of QAOA to solve a small max problem
-to an application of a divide-and-conquer QAOA algorithm to a large max cut problem using parallel computation. This visual introduction to QAOA and circuit cutting provides the learner the background to understand more advanced topics such as [ADAPT-QAOA](https://nvidia.github.io/cuda-quantum/latest/applications/python/adapt_qaoa.html), [Adaptive Circuit Knitting](https://arxiv.org/pdf/2411.10406), and [QAOA-GPT](https://arxiv.org/pdf/2504.16350).
-
-**Prerequisites:**
-* Familiarity with Python with enough comfort to refer to Python package documentation, specifically [NetworkX](https://networkx.org/documentation/stable/tutorial.html), as needed
-* Completion of the [Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum) course or equivalent familiarity with variational quantum algorithms (e.g. VQE or QAOA). 
-
----
-## Quantum Applications for Finance
-[This collection of tutorials](https://github.com/NVIDIA/cuda-q-academic/tree/main/quantum-applications-to-finance)  provides practical examples of quantum algorithms applied to key challenges in finance. You will explore the use of quantum walks for modeling financial data and see how they compare to classical methods. The collection also offers a deep dive into investment portfolio optimization, demonstrating solutions built with the Quantum Approximate Optimization Algorithm (QAOA), quantum annealing, and the novel QChop algorithm from Infleqtion
-
-**Pre-requisites:** Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q. It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The CUDA-Q Academic course entitled "[Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)" provide a walkthrough of this prerequisite knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
-
----
-## Quantum Error Correction (QEC) 101 
-Whether you're a beginner or looking to deepen your understanding, [this series](https://github.com/NVIDIA/cuda-q-academic/tree/main/qec101) will provide you with the skills and motivation to explore the cutting-edge field of quantum error correction.
-
-**Pre-requisites:** 
-Learners should have familiarity with Jupyter notebooks and programming in Python and CUDA-Q.  It is assumed the reader has some familiarity already with quantum computation and is comfortable with braket notation and the concepts of qubits, quantum circuits, measurement, and circuit sampling. The  CUDA-Q Academic course entitled "[Quick Start to Quantum Computing with CUDA-Q](https://github.com/NVIDIA/cuda-q-academic/tree/main/quick-start-to-quantum)" provide a walkthrough of this prerequisite knowledge if the reader is new to quantum computing and CUDA-Q or needs refreshing.
-
----
-## Dynamics 101
-[This advanced series of tutorials](https://github.com/NVIDIA/cuda-q-academic/tree/main/dynamics101) demonstrates GPU-accelerated time evolution of Schrodinger and Lindblad master equations for quantum systems. Prerequisite knowledge of open and closed quantum systems is assumed.
-
---- 
-## AI for Quantum
-AI is a powerful tool for enabling quantum computing and can help [tackle challenges related to calibration, compilation, error correction, and more](https://arxiv.org/abs/2411.09131). [These notebooks](https://github.com/NVIDIA/cuda-q-academic/tree/main/ai-for-quantum) explore AI for quantum use cases with hands-on coding exercises that teach users how to prepare data for and use output from AI models. The first notebook demonstrates how diffusion models can help compile unitaries to gate sets most suited for particular hardware modalities.
-
-**Pre-requisites:**
-This series requires minimal knowledge of AI, treating the AI models as black boxes for the most part. Learners are expected to have a basic knowledge of quantum circuits, unitary matrices, and how noise impacts the results of quantum algorithms.
+NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantum-education-with-ai-supercomputing-and-nvidia-cuda-q-academic/) is a freely available, open-source collection of interactive Jupyter notebooks that prepare the next generation of quantum computing professionals by combining high-performance computing with quantum computing. Developed by NVIDIA in collaboration with universities and tested in real classroom settings, CUDA-Q Academic is organized as a modular curriculum of topic areas ranging from a Quick Start to Quantum Computing through Quantum Error Correction, Dynamics 101, AI for Quantum, Chemistry Simulations, and more.  Each is built using [CUDA-Q](https://developer.nvidia.com/cuda-q), NVIDIA's open-source platform for hybrid classical–quantum computing. Materials are free to use for educational purposes under Apache-2.0 and CC-BY-NC-4.0; see [LICENSE](LICENSE).
 
 
----
-## Chemistry Simulations 
-This collection of notebooks explores a variety of techniques for simulating the electronic structure of molecules.  This includes techniques like QM/MM, ADAPT-VQE, and Krylov subspace diagonalization.
+## Quick Links
+
+| Resource | Link |
+|---|---|
+| Learning Paths (launch modules, build a curriculum) | https://nvidia.github.io/cuda-q-academic/learningpath.html |
+| Visualization Gallery (interactive widgets) | https://nvidia.github.io/cuda-q-academic/visualization-gallery.html |
+| Guide to CUDA-Q Backends | [Guide-to-cuda-q-backends.ipynb](Guide-to-cuda-q-backends.ipynb) |
+| Sample Syllabus | [Sample-Syllabus.md](Sample-Syllabus.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Install CUDA-Q | https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html |
 
 
+## Repository Contents
+
+The repository is organized with the following learning paths modules. For module overviews, prerequisites, and a curriculum builder, visit the [Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html) page — that page is the authoritative description of each track.
+
+| Module | Folder | Topic |
+|---|---|---|
+| Quick Start to Quantum Computing | [quick-start-to-quantum/](quick-start-to-quantum/) | From zero to a variational algorithm in CUDA-Q |
+| Quantum Information Science Examples | [qis-examples/](qis-examples/) | Foundational quantum algorithms to complement QIS courses |
+| QAOA for Max Cut | [qaoa-for-max-cut/](qaoa-for-max-cut/) | Divide-and-conquer QAOA with circuit cutting |
+| Quantum Applications for Finance | [quantum-applications-to-finance/](quantum-applications-to-finance/) | Quantum walks, portfolio optimization, QChop |
+| Quantum Error Correction 101 | [qec101/](qec101/) | Classical and quantum codes, decoders, magic-state distillation |
+| Dynamics 101 | [dynamics101/](dynamics101/) | GPU-accelerated Schrödinger and Lindblad time evolution |
+| AI for Quantum | [ai-for-quantum/](ai-for-quantum/) | Using AI models to enable quantum computing |
+| Chemistry Simulations | [chemistry-simulations/](chemistry-simulations/) | VQE, ADAPT-VQE, QM/MM, Krylov methods, and more.
+| Hybrid Workflows | [hybrid-workflows/](hybrid-workflows/) | Hybrid classical–quantum workflow examples |
+
+Each module folder contains numbered Jupyter notebooks, a module-local `README.md`, a `solutions/` subfolder, and an `images/` subfolder with figures.
 
 
+## How to Run
+
+> **Recommended: launch on NVIDIA Brev.** Brev provisions a pre-built CPU or GPU instance with CUDA-Q and all notebook prerequisites already installed. 
+>
+> **Launch: https://brev.nvidia.com/launchable/deploy/now?launchableID=env-39dN1v7RucHHgj97LILUlnXjnk5**
+>
+> See [brev-instructions.pdf](brev-instructions.pdf) for a step-by-step walkthrough.
+
+Other entry points:
+
+- **qBraid** — hosted Jupyter environment with CUDA-Q support. Visit [qbraid.com](https://www.qbraid.com/).
+- **Google Colab** — each notebook includes a commented-out install cell. Uncomment it, run it to install CUDA-Q and download supporting assets, restart the kernel, and run the notebook.
+- **Local** — install CUDA-Q directly following the [CUDA-Q install guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q). Recommended for the largest GPU-accelerated examples.
+
+Each module's `README.md` contains module-specific run notes.
 
 
+## Contributing
+
+New notebook content follows the schema defined by [notebook_template.ipynb](notebook_template.ipynb): the first markdown cell contains the title plus labeled sections for **What You Will Do**, **Prerequisites**, **Key Terminology**, **CUDA-Q Syntax**, and a **Solutions** link. Agents and tooling can rely on this schema to programmatically discover what each notebook covers. AI coding agents working in this repository should read [AGENTS.md](AGENTS.md) first.
+
+
+## License & Attribution
+
+CUDA-Q Academic is released under [Apache-2.0 and CC-BY-NC-4.0](LICENSE). Developed by NVIDIA in collaboration with university partners; freely available for educational use. This project downloads and installs additional third-party open-source software; review the licenses of those projects before use.
