@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Drone Delivery Optimizer — CUDA-Q Academic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --accent: #76b900;
+        --accent-dark: #5e9400;
+        --bg: #1A1A1A;
+        --surface: #2A2A2A;
+        --border: #444444;
+        --fg: #E0E0E0;
+        --muted: #AAAAAA;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        background-color: var(--bg);
+        color: var(--fg);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.5;
+        padding: 24px 16px;
+    }
+
+    .skip-link {
+        position: absolute; top: -40px; left: 0;
+        background: var(--accent); color: #000;
+        padding: 8px 16px; z-index: 100;
+        text-decoration: none; font-weight: bold;
+    }
+    .skip-link:focus { top: 0; }
+
+    .widget-container {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-top: 4px solid var(--accent);
+        border-radius: 8px;
+        padding: 24px;
+        width: 100%;
+        max-width: 1100px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        margin: 0 auto;
+    }
+    @media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+    .widget-container h1 {
+        color: var(--accent);
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        margin-top: 0;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .widget-container .summary-text {
+        color: var(--muted);
+        margin-bottom: 8px;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .instructions-section {
+        margin-bottom: 24px;
+        padding: 16px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .instructions-section summary {
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .instructions-section summary::-webkit-details-marker { display: none; }
+    .instructions-section summary::before {
+        content: '▶';
+        font-size: 0.7rem;
+        color: var(--accent);
+        transition: transform 0.15s;
+        flex-shrink: 0;
+    }
+    .instructions-section[open] > summary::before { transform: rotate(90deg); }
+    .instructions-section summary:focus {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+    .instructions-section summary h2 { display: inline; }
+    .instructions-section h2 {
+        color: var(--accent);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 700;
+    }
+    .instructions-section:not([open]) { padding-bottom: 16px; }
+    .instructions-section ol { margin-top: 12px; padding-left: 1.5em; margin-bottom: 12px; }
+    .instructions-section li { margin-bottom: 6px; }
+    .instructions-section .kbd {
+        background: var(--border); padding: 2px 6px;
+        border-radius: 4px; font-family: inherit; font-size: 0.9em;
+    }
+
+    .stage-tabs {
+        display: flex; gap: 4px; margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .stage-tab {
+        background: var(--bg); color: var(--muted);
+        border: 1px solid var(--border); border-bottom: 3px solid transparent;
+        border-radius: 8px 8px 0 0;
+        padding: 10px 12px; cursor: pointer;
+        font-family: inherit; font-size: 0.9rem; font-weight: 600;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+        min-height: 44px; min-width: 44px;
+    }
+    .stage-tab:hover:not(:disabled) { background: var(--surface); color: var(--fg); }
+    .stage-tab[aria-selected="true"] {
+        background: var(--surface); color: #fff;
+        border-bottom-color: var(--accent);
+    }
+    .stage-tab:disabled { opacity: 0.4; cursor: not-allowed; }
+    .stage-tab:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .stage-info {
+        background: rgba(118,185,0,0.06);
+        border: 1px solid rgba(118,185,0,0.2);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        font-size: 0.95rem;
+        min-height: 48px;
+    }
+
+    .main-area {
+        display: flex; gap: 16px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .controls-panel {
+        flex: 0 0 280px; min-width: 240px;
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .viz-panel {
+        flex: 1 1 400px; height: 520px;
+        position: relative; overflow: hidden;
+        padding: 0;
+    }
+    @media (max-width: 700px) {
+        .main-area { flex-direction: column; }
+        .controls-panel { flex: 1 1 auto; }
+    }
+
+    .info-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px 24px;
+    }
+
+    .btn-primary {
+        background: var(--surface); color: #fff;
+        border: 1px solid var(--border);
+        border-bottom: 3px solid var(--accent);
+        border-radius: 6px;
+        padding: 10px 18px;
+        font-family: inherit; font-size: 0.9rem; font-weight: 600;
+        cursor: pointer; min-height: 44px; min-width: 44px;
+        transition: background 0.15s, color 0.15s;
+    }
+    .btn-primary:hover:not(:disabled) {
+        background: var(--accent); color: #000;
+        border-color: var(--accent);
+    }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .btn-secondary {
+        background: transparent; color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-family: inherit; font-size: 0.85rem; font-weight: 600;
+        cursor: pointer; min-height: 44px; min-width: 44px;
+        transition: background 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.05); color: #fff; }
+    .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-secondary:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .slider-wrap { margin-bottom: 4px; }
+    .slider-wrap:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+    .slider-label {
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 0.85rem; color: var(--fg); margin-bottom: 4px;
+    }
+    .slider-value { color: var(--accent); font-weight: 700; }
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]:focus { outline: none; }
+    input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+    input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A; }
+    input[type=range]::-moz-range-track { width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px; }
+    input[type=range]::-moz-range-thumb { height: 14px; width: 14px; border-radius: 50%; background: #76B900; cursor: pointer; border: 2px solid #1A1A1A; }
+
+    #map-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; border-radius: 4px; }
+
+    .control-group-label {
+        font-size: 0.8rem; font-weight: 700; color: var(--accent);
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .interaction-hint {
+        font-size: 0.85rem; color: var(--muted);
+        text-align: center; padding: 8px;
+    }
+
+    .gen-overlay {
+        position: absolute; top: 8px; right: 12px;
+        font-size: 0.8rem; color: var(--muted);
+        background: rgba(26,26,26,0.85);
+        padding: 4px 10px; border-radius: 4px;
+        pointer-events: none;
+    }
+
+    .evo-insight { display: none; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .evo-insight.active { display: flex; }
+    .evo-chart-wrap {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+        padding: 8px 10px 4px 10px;
+    }
+    .evo-chart-label {
+        font-size: 0.7rem; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    #evo-chart { display: block; width: 100%; height: 80px; border-radius: 3px; }
+    .evo-log {
+        background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+        padding: 8px 10px; max-height: 110px; overflow-y: auto;
+        font-size: 0.75rem; line-height: 1.6; color: var(--muted);
+        scroll-behavior: smooth;
+    }
+    .evo-log-entry { padding: 1px 0; }
+    .evo-log-entry .gen-num { color: var(--accent); font-weight: 700; }
+    .evo-log-entry .improvement { color: var(--accent); }
+    .evo-log-entry .action { color: var(--fg); }
+
+    .comparison-cards { margin-bottom: 16px; }
+    .comparison-cards-title {
+        font-size: 0.85rem; font-weight: 700; color: var(--accent);
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+    .cards-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .compare-card {
+        flex: 1; min-width: 140px;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+        padding: 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .compare-card.winner { border-color: var(--accent); }
+    .compare-card-label {
+        font-size: 0.8rem; font-weight: 700; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .compare-card.winner .compare-card-label { color: var(--accent); }
+    .compare-card-value { font-size: 1.4rem; font-weight: 700; color: #fff; }
+    .compare-card.winner .compare-card-value { color: var(--accent); }
+    .compare-card-top { display: flex; justify-content: space-between; align-items: center; }
+    .compare-card-badge {
+        font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; padding: 2px 6px; border-radius: 3px;
+        background: rgba(118,185,0,0.2); color: var(--accent);
+        transition: all 0.3s ease;
+    }
+    .compare-card-badge.first-done {
+        background: rgba(118,185,0,0.35); color: #76b900;
+        box-shadow: 0 0 6px rgba(118,185,0,0.3);
+    }
+    .compare-card-detail { font-size: 0.8rem; color: var(--muted); }
+    .compare-card-delta {
+        font-size: 0.85rem; font-weight: 700;
+        padding: 4px 10px; border-radius: 4px; text-align: center;
+        margin-top: 4px;
+    }
+    .compare-card-delta.positive { background: rgba(118,185,0,0.15); color: var(--accent); }
+    .compare-card-delta.negative { background: rgba(229,32,32,0.15); color: #e52020; }
+
+    .comparison-explainer {
+        margin-top: 10px; padding: 12px 14px; border-radius: 6px;
+        background: rgba(118,185,0,0.08); border-left: 3px solid var(--accent);
+        font-size: 0.82rem; line-height: 1.55; color: var(--muted);
+    }
+    .comparison-explainer strong { color: #fff; font-weight: 600; }
+    .comparison-explainer .cite {
+        display: block; margin-top: 8px; font-size: 0.75rem;
+        color: var(--muted); font-style: italic;
+    }
+    .comparison-explainer .cite a { color: var(--accent); text-decoration: underline; }
+
+    .reading-panel { margin-bottom: 16px; }
+    .reading-panel h3 {
+        color: var(--accent); font-size: 1rem; font-weight: 700;
+        margin-bottom: 8px; margin-top: 0;
+    }
+    .theme-callout {
+        background: var(--bg); border: 1px solid var(--border);
+        border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+        padding: 16px 20px; margin-bottom: 16px;
+    }
+    .theme-callout h4 {
+        color: var(--accent); font-size: 0.95rem; font-weight: 700;
+        margin-bottom: 8px; margin-top: 0;
+    }
+    .theme-callout p { color: var(--fg); font-size: 0.9rem; line-height: 1.6; margin: 0; }
+    .closing-text {
+        font-size: 0.95rem; line-height: 1.6; color: var(--fg);
+        margin-bottom: 20px; padding: 0 4px;
+    }
+    .cta-link {
+        display: inline-block;
+        background: var(--accent); color: #000;
+        padding: 12px 24px; border-radius: 6px;
+        text-decoration: none; font-weight: 700; font-size: 0.95rem;
+        transition: background 0.15s;
+    }
+    .cta-link:hover { background: var(--accent-dark); }
+    .cta-link:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .reflection-box {
+        background: var(--bg); border: 1px solid var(--border);
+        border-radius: 8px; padding: 20px 24px; margin: 20px 0;
+    }
+    .reflection-box h4 {
+        color: var(--accent); font-size: 0.95rem; font-weight: 700;
+        margin-bottom: 12px; margin-top: 0;
+    }
+    .reflection-box p {
+        color: var(--fg); font-size: 0.9rem; line-height: 1.6; margin: 0 0 12px 0;
+    }
+    .reflection-examples {
+        display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    }
+    .reflection-chip {
+        background: rgba(118,185,0,0.1); border: 1px solid rgba(118,185,0,0.3);
+        border-radius: 20px; padding: 8px 16px;
+        font-size: 0.85rem; color: var(--fg);
+    }
+
+    .map-legend {
+        position: absolute; bottom: 8px; left: 12px;
+        display: flex; gap: 14px;
+        font-size: 0.75rem; color: var(--muted);
+        background: rgba(26,26,26,0.88);
+        padding: 5px 12px; border-radius: 4px;
+        pointer-events: none;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-swatch { width: 20px; height: 4px; border-radius: 2px; }
+    .legend-swatch.crossing { background: #f9c500; }
+
+    .stage-controls { display: none; }
+    .stage-controls.active { display: flex; flex-direction: column; gap: 14px; }
+
+    .split-label {
+        position: absolute; top: 6px; z-index: 2;
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(26,26,26,0.85); padding: 3px 10px; border-radius: 4px;
+    }
+    .split-label.left { left: 12px; color: #ef9100; }
+    .split-label.right { right: 12px; color: var(--accent); }
+    .split-divider {
+        position: absolute; top: 0; bottom: 0; left: 50%;
+        width: 2px; background: var(--border); z-index: 1;
+        pointer-events: none;
+    }
+
+    .quad-label {
+        position: absolute; z-index: 2;
+        font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(26,26,26,0.85); padding: 2px 8px; border-radius: 4px;
+        pointer-events: none;
+    }
+    .quad-divider {
+        position: absolute; background: var(--border); z-index: 1;
+        pointer-events: none;
+    }
+    .quad-divider.vertical { top: 0; bottom: 0; width: 2px; left: 50%; }
+    .quad-divider.horizontal { left: 0; right: 0; height: 2px; top: 50%; }
+
+    .widget-footer {
+        margin-top: 24px; padding-top: 16px;
+        border-top: 1px solid var(--border);
+        display: flex; gap: 24px; flex-wrap: wrap;
+        font-size: 0.85rem;
+    }
+    .widget-footer a { color: #76b900; text-decoration: none; }
+    .widget-footer a:hover { text-decoration: underline; }
+    .widget-footer a:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0;
+        margin: -1px; overflow: hidden;
+        clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
+    }
+
+    .stage-history { display: flex; gap: 8px; flex-wrap: wrap; }
+    .stage-result {
+        padding: 6px 12px;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+        font-size: 0.8rem; color: var(--muted);
+        display: flex; align-items: center; gap: 6px;
+    }
+    .stage-result.completed { border-color: var(--accent); color: var(--fg); }
+    .stage-result .result-dist { font-weight: 700; }
+    .result-dist.good { color: var(--accent); }
+    .result-dist.bad { color: #e52020; }
+    .result-dist.ok { color: #fff; }
+
+    .drone-stats {
+        display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+        margin-top: 8px;
+    }
+    .drone-stat {
+        display: flex; flex-direction: column; align-items: center;
+        min-width: 80px; padding: 6px 10px;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    }
+    .drone-stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .drone-stat-value { font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .drone-stat-value.good { color: var(--accent); }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="widget-container" id="main-content">
+
+        <header>
+            <h1>Drone Delivery Optimizer</h1>
+            <p class="summary-text">Your drone has 30 packages to deliver. Can you find a short route — and discover why it's so hard?</p>
+        </header>
+
+        <details class="instructions-section" aria-labelledby="instructions-heading">
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
+            <ol>
+                <li>In <strong>The Goal</strong>, see what a random route looks like, watch a greedy algorithm build a smarter one, then watch the drone fly it. This sets the stage for everything that follows.</li>
+                <li>In <strong>Untangle</strong>, start from a scrambled route and click crossings to uncross them. See how tedious manual optimization is.</li>
+                <li>In <strong>Smart Start</strong>, compare how a random starting route vs. a Greedy-constructed route affects 2-opt optimization. Does the starting point matter?</li>
+                <li>In <strong>Parallel Starts</strong>, launch 4 random starts in parallel. Can sheer volume of exploration compensate for a bad starting point?</li>
+                <li>In <strong>Explore More</strong>, reflect on what you discovered and how it connects to quantum computing research.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to navigate. <span class="kbd">Enter</span> / <span class="kbd">Space</span> to activate. <span class="kbd">←</span> <span class="kbd">→</span> to switch tabs.</p>
+        </details>
+
+        <div class="stage-tabs" role="tablist" aria-label="Optimization stages">
+            <button class="stage-tab" role="tab" id="tab-0" aria-selected="true" aria-controls="stage-panel" data-stage="0">The Goal</button>
+            <button class="stage-tab" role="tab" id="tab-1" aria-selected="false" aria-controls="stage-panel" data-stage="1" disabled>1. Untangle</button>
+            <button class="stage-tab" role="tab" id="tab-2" aria-selected="false" aria-controls="stage-panel" data-stage="2" disabled>2. Smart Start</button>
+            <button class="stage-tab" role="tab" id="tab-3" aria-selected="false" aria-controls="stage-panel" data-stage="3" disabled>3. Parallel Starts</button>
+            <button class="stage-tab" role="tab" id="tab-4" aria-selected="false" aria-controls="stage-panel" data-stage="4" disabled>4. Explore More</button>
+        </div>
+
+        <div class="stage-info" id="stage-panel" role="tabpanel" aria-labelledby="tab-0">
+            <span id="stage-desc"></span>
+        </div>
+
+        <div class="main-area" id="main-area">
+
+            <div class="controls-panel info-box" id="controls-panel" aria-label="Controls">
+
+                <div class="stage-controls active" id="controls-0">
+                    <div class="control-group-label">The Goal</div>
+                    <p class="interaction-hint" id="goal-narrative">Your drone has 30 packages to deliver. If you just visit stops in a random order, this is what you get &mdash; a tangled mess.</p>
+                    <div class="drone-stats" id="goal-stats">
+                        <div class="drone-stat">
+                            <span class="drone-stat-label" id="goal-dist-label">Random Distance</span>
+                            <span class="drone-stat-value" id="goal-random-dist" style="color:#e52020;">&mdash;</span>
+                        </div>
+                        <div class="drone-stat">
+                            <span class="drone-stat-label">Greedy Distance</span>
+                            <span class="drone-stat-value good" id="goal-greedy-dist">&mdash;</span>
+                        </div>
+                    </div>
+                    <div id="goal-phase-0">
+                        <button class="btn-primary" id="btn-goal-next-1" aria-label="See how a greedy algorithm builds a better route" style="width:100%;">What if we're smarter? &rarr;</button>
+                    </div>
+                    <div id="goal-phase-1" style="display:none;">
+                        <div class="slider-wrap">
+                            <label class="slider-label" for="speed-goal"><span>Build Speed</span><span class="slider-value" id="speed-goal-val">Medium</span></label>
+                            <input type="range" id="speed-goal" min="1" max="3" value="2" step="1" aria-label="Greedy build speed">
+                        </div>
+                        <button class="btn-primary" id="btn-build-greedy" aria-label="Watch greedy algorithm build a route" style="width:100%;">Build Greedy Route</button>
+                    </div>
+                    <div id="goal-phase-2" style="display:none;">
+                        <button class="btn-primary" id="btn-play-goal" aria-label="Play drone flight animation" style="width:100%;">&#9654; Fly the Greedy Route</button>
+                        <button class="btn-secondary" id="btn-pause-goal" disabled aria-label="Pause drone flight" style="width:100%;">&#9208; Pause</button>
+                    </div>
+                    <div id="goal-phase-3" style="display:none;">
+                        <p class="interaction-hint" style="font-style:italic; margin-bottom:8px;">The greedy route is <strong id="goal-pct-better"></strong> shorter. But is it the <em>best</em> route? With more than 10<sup>30</sup> possibilities, there's no way to know without trying. Let's see if you can do better.</p>
+                        <button class="btn-primary" id="btn-start-challenge" aria-label="Begin the challenge" style="width:100%;">Start the Challenge &rarr;</button>
+                    </div>
+                </div>
+
+                <div class="stage-controls" id="controls-1">
+                    <div class="control-group-label">Untangle the Route</div>
+                    <p class="interaction-hint" id="crossing-hint">This is the random route from The Goal. Gold edges are tangled. Hover over the map to find crossings, then click the dot where two edges intersect to uncross them.</p>
+                    <div class="drone-stats" id="untangle-stats">
+                        <div class="drone-stat">
+                            <span class="drone-stat-label">Started At</span>
+                            <span class="drone-stat-value" id="untangle-start-dist" style="color:#e52020;">&mdash;</span>
+                        </div>
+                        <div class="drone-stat">
+                            <span class="drone-stat-label">Current</span>
+                            <span class="drone-stat-value good" id="untangle-current-dist">&mdash;</span>
+                        </div>
+                    </div>
+                    <div class="slider-wrap">
+                        <div class="slider-label"><span>Uncrossings Made</span><span class="slider-value" id="uncross-count">0</span></div>
+                    </div>
+                    <button class="btn-primary" id="btn-submit" aria-label="Submit your best route and move to Stage 2">Submit Route</button>
+                </div>
+
+                <div class="stage-controls" id="controls-2">
+                    <div class="control-group-label">Smart Start: 2-opt</div>
+                    <p class="interaction-hint">Watch 2-opt run from two different starting points side by side. Does the starting route matter?</p>
+                    <div class="slider-wrap">
+                        <label class="slider-label" for="speed-2"><span>Speed</span><span class="slider-value" id="speed-2-val">Medium</span></label>
+                        <input type="range" id="speed-2" min="1" max="3" value="2" step="1" aria-label="Animation speed for 2-opt">
+                    </div>
+                    <button class="btn-primary" id="btn-run-2opt" aria-label="Run side-by-side 2-opt comparison">Run Comparison</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-secondary" id="btn-stop-2" disabled aria-label="Stop optimization">Stop</button>
+                        <button class="btn-secondary" id="btn-reset-2" aria-label="Reset Stage 2 and try again">Reset Stage</button>
+                    </div>
+                    <button class="btn-primary" id="btn-next-3" style="display:none; width:100%; margin-top:8px;" aria-label="Continue to Parallel Starts">Continue to Parallel Starts &rarr;</button>
+                </div>
+
+                <div class="stage-controls" id="controls-3">
+                    <div class="control-group-label">Parallel Starts</div>
+                    <p class="interaction-hint">Launch 4 random starts in parallel. Each begins from a completely different scrambled route &mdash; can parallel exploration make up for a bad starting point?</p>
+                    <div class="slider-wrap">
+                        <label class="slider-label" for="speed-3"><span>Speed</span><span class="slider-value" id="speed-3-val">Medium</span></label>
+                        <input type="range" id="speed-3" min="1" max="3" value="2" step="1" aria-label="Animation speed for parallel starts">
+                    </div>
+                    <button class="btn-primary" id="btn-run-parallel" aria-label="Run parallel random starts">Run Parallel</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-secondary" id="btn-stop-3" disabled aria-label="Stop optimization">Stop</button>
+                        <button class="btn-secondary" id="btn-reset-3" aria-label="Reset Stage 3 and try again">Reset Stage</button>
+                    </div>
+                    <button class="btn-primary" id="btn-next-4" style="display:none; width:100%; margin-top:8px;" aria-label="Continue to Explore More">Continue to Explore More &rarr;</button>
+                </div>
+
+            </div>
+
+            <div class="viz-panel info-box" id="viz-panel" aria-label="Drone delivery map">
+                <canvas id="map-canvas" aria-label="City grid map showing delivery stops and the current drone route"></canvas>
+                <div class="gen-overlay" id="gen-overlay" aria-hidden="true"></div>
+                <div class="map-legend" id="map-legend" aria-label="Route legend">
+                    <div class="legend-item" id="legend-crossing" style="display:none;"><span class="legend-swatch crossing"></span><span>Crossing</span></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="comparison-cards info-box" id="parallel-cards" style="display:none;" aria-label="Parallel starts comparison">
+            <div class="comparison-cards-title">Parallel Starts</div>
+            <div class="cards-row" id="parallel-cards-row"></div>
+            <div class="compare-card-delta" id="parallel-delta" style="display:none;"></div>
+            <div class="comparison-explainer" id="parallel-explainer" style="display:none;"></div>
+        </div>
+
+        <div class="comparison-cards info-box" id="comparison-cards" style="display:none;" aria-label="Starting route comparison">
+            <div class="comparison-cards-title">Starting Route Comparison</div>
+            <div class="cards-row">
+                <div class="compare-card" id="card-random">
+                    <div class="compare-card-top">
+                        <div class="compare-card-label">Random Start</div>
+                        <div class="compare-card-badge" id="card-random-badge" style="display:none;">DONE</div>
+                    </div>
+                    <div class="compare-card-value" id="card-random-dist">&mdash;</div>
+                    <div class="compare-card-detail" id="card-random-steps">&mdash; steps</div>
+                </div>
+                <div class="compare-card" id="card-greedy">
+                    <div class="compare-card-top">
+                        <div class="compare-card-label">Greedy Start</div>
+                        <div class="compare-card-badge" id="card-greedy-badge" style="display:none;">DONE</div>
+                    </div>
+                    <div class="compare-card-value" id="card-greedy-dist">&mdash;</div>
+                    <div class="compare-card-detail" id="card-greedy-steps">&mdash; steps</div>
+                </div>
+            </div>
+            <div class="compare-card-delta" id="comparison-delta" style="display:none;"></div>
+            <div class="comparison-explainer" id="comparison-explainer" style="display:none;"></div>
+        </div>
+
+        <div class="evo-insight info-box" id="evo-insight" aria-label="Optimization progress">
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <div class="evo-chart-wrap" style="flex:1; min-width:200px;">
+                    <div class="evo-chart-label">Best Distance Over Steps</div>
+                    <canvas id="evo-chart" aria-label="Convergence chart showing best route distance decreasing over optimization steps"></canvas>
+                </div>
+                <div class="evo-log" id="evo-log" style="flex:1; min-width:200px;" aria-label="Optimization play-by-play log" role="log">
+                    <div class="evo-chart-label" style="margin-bottom:4px;">Play-by-Play</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box" id="stage-history-box" aria-label="Stage history" aria-live="polite" style="padding:12px 16px;">
+            <div style="font-size:0.75rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Best Route Distance</div>
+            <div class="stage-history" id="stage-history">
+                <div class="stage-result" id="hist-1">Untangle: &mdash;</div>
+                <div class="stage-result" id="hist-2">Smart Start: &mdash;</div>
+                <div class="stage-result" id="hist-3">Parallel: &mdash;</div>
+            </div>
+        </div>
+
+        <div class="reading-panel info-box" id="reading-panel" style="display:none;" aria-label="Explore more about quantum optimization">
+            <h3>What You Discovered</h3>
+            <div class="theme-callout">
+                <h4>Smart Initialization</h4>
+                <p>2-opt tends to find a shorter route when it starts from a Greedy-constructed tour instead of a random one. It won't always win, but the Greedy heuristic builds a good-enough tour while leaving structural "defects" that local search can exploit, giving it a consistent edge over many trials. In quantum computing, "warm-starting" follows the same principle: give a quantum algorithm a classically pre-computed starting point so it can converge faster. Researchers are actively studying how to seed quantum algorithms like QAOA with classical solutions.</p>
+            </div>
+            <div class="theme-callout">
+                <h4>Parallelization</h4>
+                <p>By running multiple random starts in parallel and keeping the best, you improved your odds of landing near a good solution, but at the cost of proportionally more total compute. Each random route landed in a completely different region of the solution landscape, and 2-opt pulled each toward a different local minimum. The tradeoff between exploration and compute cost is central to optimization. A classical computer must evaluate parallel paths individually. A quantum computer, by contrast, uses <strong>superposition</strong> to represent a vast landscape of possibilities within a single quantum state. Through <strong>quantum interference</strong>, it then amplifies the probability of good routes while canceling out bad ones, navigating the problem space in a fundamentally different way.</p>
+            </div>
+            <div class="theme-callout">
+                <h4>Why This Is Hard</h4>
+                <p>With just 30 stops, there are more than 10<sup>30</sup> possible routes, a number with 31 digits. No computer can try them all. Every strategy you used (manual untangling, smart starting points, parallel exploration) is a way to search <em>smarter</em>, not harder. Quantum optimization algorithms like QAOA apply the same philosophy: explore the solution landscape more efficiently by exploiting quantum effects like superposition and interference.</p>
+            </div>
+            <p class="closing-text">These are open research questions. No person, no classical computer, and no quantum computer has found the best way to solve these problems yet. This is a frontier with room for new ideas, and yours could be one of them.</p>
+
+            <div class="reflection-box">
+                <h4>&#129300; Where Else Does This Show Up?</h4>
+                <p>The problem you just explored, finding the best order to visit a set of locations, is called the <strong>Traveling Salesperson Problem</strong>. The same kind of combinatorial explosion appears in many places. Can you think of situations in your own life or work where you face a similar challenge?</p>
+                <div class="reflection-examples">
+                    <span class="reflection-chip">&#128230; Warehouse picking order</span>
+                    <span class="reflection-chip">&#127973; Scheduling surgeries in an OR</span>
+                    <span class="reflection-chip">&#128652; Planning school bus routes</span>
+                    <span class="reflection-chip">&#128225; Routing data through a network</span>
+                    <span class="reflection-chip">&#129516; DNA sequencing assembly</span>
+                    <span class="reflection-chip">&#127981; Job scheduling on machines</span>
+                    <span class="reflection-chip">&#128197; Planning your errands on Saturday</span>
+                </div>
+            </div>
+
+            <a class="cta-link" href="https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa">Explore QAOA for Max Cut &rarr;</a>
+
+            <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border);">
+                <button class="btn-secondary" id="btn-new-layout" aria-label="Generate a new random delivery layout" style="width:100%;">Try Again with a New Layout of Drone Stops</button>
+            </div>
+        </div>
+
+        <footer class="widget-footer">
+            <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+            <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+        </footer>
+
+    </div>
+
+    <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+    <script>
+    var NUM_STOPS = 30;
+    var DEFAULT_SEED = 2026;
+    var MAX_STEPS = 500;
+    var STAGNATION_LIMIT = 30;
+    var TWO_OPT_BATCH = 50;
+    var PARALLEL_COLORS = ['#76b900', '#0074df', '#952fc6', '#ef9100', '#d2308e', '#00b4d8'];
+
+    function mulberry32(seed) {
+        var s = seed | 0;
+        return function() {
+            s = (s + 0x6D2B79F5) | 0;
+            var t = Math.imul(s ^ (s >>> 15), 1 | s);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    var seededRng = null;
+    function rng() { return seededRng ? seededRng() : Math.random(); }
+
+    var stageDescriptions = {
+        0: "Your drone has 30 packages to deliver. There are more than 10<sup>30</sup> possible routes through these stops \u2014 a number with 31 digits. Let's see what happens when we pick a route at random vs. building one with a simple strategy.",
+        1: "You saw how messy a random route looks. Now <em>you're</em> the optimizer. This is that same random route \u2014 your job is to untangle it. Look for places where edges cross and click them to uncross. Can you beat the greedy algorithm?",
+        2: "Your best effort has been saved. Remember the random vs. greedy comparison from The Goal? Now let's see how each one responds to optimization. On the left is a random route; on the right, a greedy route. Click <strong>Run Comparison</strong> to watch 2-opt optimize both side by side.",
+        3: "Greedy start won \u2014 but what if you threw enough random starts at the problem? Each random route lands in a completely different part of the solution landscape. Launch 4 in parallel, optimize each with 2-opt, and keep the best. Can quantity of exploration compensate for quality of starting point?",
+        4: "The strategies you just used \u2014 smart initialization and parallel exploration \u2014 are the same ideas driving quantum optimization research. Read on to see how they connect to QAOA, and reflect on where else these problems appear."
+    };
+
+    var state = {
+        stage: 0, stops: [], route: [], goalRoute: [], badRoute: [],
+        bestRoutes: { 1: null, 2: null, 3: null },
+        bestDistances: { 1: Infinity, 2: Infinity, 3: Infinity },
+        efforts: { 1: 0, 2: 0, 3: 0 },
+        initialDistance: 0, running: false, animFrame: null, generation: 0,
+        crossings: [], hoveredCrossing: null,
+        s2SplitActive: false, s2StartRoutes: null, s2Results: { random: null, greedy: null },
+        s3Starts: null, s3BestIdx: null,
+        droneFlying: false, droneProgress: 0, droneAnimFrame: null,
+        goalPhase: 0, greedyBuildProgress: 0, greedyBuildRoute: [], greedyBuilding: false, greedyBuildFrame: null
+    };
+
+    function dist(a, b) { var dx = a.x - b.x, dy = a.y - b.y; return Math.sqrt(dx * dx + dy * dy); }
+
+    function routeDistance(stops, route) {
+        var d = 0;
+        for (var i = 0; i < route.length - 1; i++) d += dist(stops[route[i]], stops[route[i + 1]]);
+        d += dist(stops[route[route.length - 1]], stops[route[0]]);
+        return d;
+    }
+
+    function shuffleArray(arr, useSeed) {
+        var a = arr.slice(), rand = useSeed ? rng : Math.random;
+        for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+        return a;
+    }
+
+    function generateStops(n) {
+        var padding = 0.08, bottomPad = 0.14, stops = [];
+        for (var i = 0; i < n; i++) stops.push({ x: padding + rng() * (1 - 2 * padding), y: padding + rng() * (1 - padding - bottomPad), id: i });
+        return stops;
+    }
+
+    function generateBadRoute(n, useSeed) {
+        var rest = shuffleArray(Array.from({ length: n - 1 }, function(_, i) { return i + 1; }), useSeed);
+        return [0].concat(rest);
+    }
+
+    function nearestNeighborRoute(stops) {
+        var n = stops.length, visited = new Array(n).fill(false), route = [0]; visited[0] = true;
+        for (var step = 1; step < n; step++) {
+            var last = route[route.length - 1], bestIdx = -1, bestDist = Infinity;
+            for (var j = 0; j < n; j++) { if (!visited[j]) { var d = dist(stops[last], stops[j]); if (d < bestDist) { bestDist = d; bestIdx = j; } } }
+            visited[bestIdx] = true; route.push(bestIdx);
+        }
+        return route;
+    }
+
+    function greedyRoute(stops) {
+        var n = stops.length, edges = [];
+        for (var i = 0; i < n; i++) for (var j = i + 1; j < n; j++) edges.push({ u: i, v: j, d: dist(stops[i], stops[j]) });
+        edges.sort(function(a, b) { return a.d - b.d; });
+        var degree = new Array(n).fill(0), adj = Array.from({ length: n }, function() { return []; });
+        var uf = Array.from({ length: n }, function(_, i) { return i; }), rank = new Array(n).fill(0);
+        function find(x) { while (uf[x] !== x) x = uf[x] = uf[uf[x]]; return x; }
+        function union(a, b) { a = find(a); b = find(b); if (a === b) return; if (rank[a] < rank[b]) { var t = a; a = b; b = t; } uf[b] = a; if (rank[a] === rank[b]) rank[a]++; }
+        var added = 0, ei = 0;
+        while (added < n && ei < edges.length) {
+            var pick = ei;
+            if (ei + 1 < edges.length && Math.random() > 2 / 3) pick = ei + 1;
+            var e = edges[pick]; if (pick !== ei) { edges[pick] = edges[ei]; edges[ei] = e; } ei++;
+            if (degree[e.u] >= 2 || degree[e.v] >= 2) continue;
+            if (added < n - 1 && find(e.u) === find(e.v)) continue;
+            adj[e.u].push(e.v); adj[e.v].push(e.u); degree[e.u]++; degree[e.v]++; union(e.u, e.v); added++;
+        }
+        var route = [0], visited = new Array(n).fill(false); visited[0] = true; var cur = 0;
+        for (var step = 1; step < n; step++) {
+            var next = adj[cur].find(function(nb) { return !visited[nb]; });
+            if (next !== undefined) { visited[next] = true; route.push(next); cur = next; }
+            else { for (var jj = 0; jj < n; jj++) { if (!visited[jj]) { visited[jj] = true; route.push(jj); cur = jj; break; } } }
+        }
+        return route;
+    }
+
+    function twoOptStep(stops, route) {
+        var n = route.length, i = Math.floor(Math.random() * (n - 1));
+        var j = i + 2 + Math.floor(Math.random() * (n - i - 2));
+        if (j >= n) j = n - 1; if (j <= i + 1) return { route: route, improved: false, delta: 0 };
+        var A = route[i], B = route[i + 1], C = route[j], D = route[(j + 1) % n];
+        var oldCost = dist(stops[A], stops[B]) + dist(stops[C], stops[D]);
+        var newCost = dist(stops[A], stops[C]) + dist(stops[B], stops[D]);
+        if (newCost < oldCost) {
+            var r = route.slice(), left = i + 1, right = j;
+            while (left < right) { var t = r[left]; r[left] = r[right]; r[right] = t; left++; right--; }
+            return { route: r, improved: true, delta: oldCost - newCost };
+        }
+        return { route: route, improved: false, delta: 0 };
+    }
+
+    function twoOptBatch(stops, route, batchSize) {
+        var current = route, improvements = 0, totalDelta = 0;
+        for (var k = 0; k < batchSize; k++) {
+            var result = twoOptStep(stops, current);
+            if (result.improved) { current = result.route; improvements++; totalDelta += result.delta; }
+        }
+        return { route: current, improvements: improvements, totalDelta: totalDelta };
+    }
+
+    function computeGoodRoute(stops) {
+        var best = nearestNeighborRoute(stops), bestDist = routeDistance(stops, best);
+        for (var iter = 0; iter < 800; iter++) {
+            var result = twoOptBatch(stops, best, 80);
+            best = result.route; var d = routeDistance(stops, best);
+            if (d < bestDist) bestDist = d;
+        }
+        return best;
+    }
+
+    function segmentsIntersect(p1, p2, p3, p4) {
+        var d1x = p2.x - p1.x, d1y = p2.y - p1.y, d2x = p4.x - p3.x, d2y = p4.y - p3.y;
+        var denom = d1x * d2y - d1y * d2x;
+        if (Math.abs(denom) < 1e-10) return null;
+        var t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / denom;
+        var u = ((p3.x - p1.x) * d1y - (p3.y - p1.y) * d1x) / denom;
+        if (t > 0.01 && t < 0.99 && u > 0.01 && u < 0.99) return { x: p1.x + t * d1x, y: p1.y + t * d1y, t: t, u: u };
+        return null;
+    }
+
+    function findCrossings(stops, route) {
+        var crossings = [], n = route.length;
+        for (var i = 0; i < n; i++) {
+            var a1 = stops[route[i]], a2 = stops[route[(i + 1) % n]];
+            for (var j = i + 2; j < n; j++) {
+                if (i === 0 && j === n - 1) continue;
+                var b1 = stops[route[j]], b2 = stops[route[(j + 1) % n]];
+                var ix = segmentsIntersect(a1, a2, b1, b2);
+                if (ix) crossings.push({ ix: ix.x, iy: ix.y, edgeA: i, edgeB: j });
+            }
+        }
+        return crossings;
+    }
+
+    function uncross(route, edgeA, edgeB) {
+        var i = Math.min(edgeA, edgeB), j = Math.max(edgeA, edgeB), r = route.slice();
+        var left = i + 1, right = j;
+        while (left < right) { var t = r[left]; r[left] = r[right]; r[right] = t; left++; right--; }
+        return r;
+    }
+
+
+    function announce(msg) { document.getElementById('status-announce').textContent = msg; }
+
+    var evoHistory = [];
+    var canvas = document.getElementById('map-canvas');
+    var ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        var container = canvas.parentElement, dpr = window.devicePixelRatio || 1, rect = container.getBoundingClientRect();
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+        canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function toCanvasCoords(stop) { return { x: stop.x * canvas.clientWidth, y: stop.y * canvas.clientHeight }; }
+
+    function drawGrid() {
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+        for (var x = 0; x < w; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+        for (var y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    }
+
+    function drawRoute(stops, route, color, lineWidth, alpha) {
+        if (!route || route.length < 2) return;
+        ctx.save(); ctx.globalAlpha = alpha || 1; ctx.lineWidth = lineWidth || 2; ctx.lineJoin = 'round';
+        ctx.strokeStyle = color; ctx.setLineDash([]);
+        for (var i = 0; i < route.length; i++) {
+            var fromP = toCanvasCoords(stops[route[i]]), toP = toCanvasCoords(stops[route[(i + 1) % route.length]]);
+            ctx.beginPath(); ctx.moveTo(fromP.x, fromP.y); ctx.lineTo(toP.x, toP.y); ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function drawRouteClean(stops, route, color, lineWidth, alpha) {
+        if (!route || route.length < 2) return;
+        ctx.save(); ctx.globalAlpha = alpha || 1; ctx.lineWidth = lineWidth || 2; ctx.lineJoin = 'round';
+        ctx.strokeStyle = color; ctx.setLineDash([]);
+        for (var i = 0; i < route.length; i++) {
+            var fromP = toCanvasCoords(stops[route[i]]), toP = toCanvasCoords(stops[route[(i + 1) % route.length]]);
+            ctx.beginPath(); ctx.moveTo(fromP.x, fromP.y); ctx.lineTo(toP.x, toP.y); ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function drawStops(stops, route) {
+        var homeIdx = (route && route.length > 0) ? route[0] : -1;
+        for (var i = 0; i < stops.length; i++) {
+            if (i === homeIdx) continue;
+            var p = toCanvasCoords(stops[i]);
+            ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+            ctx.fillStyle = '#E0E0E0'; ctx.fill();
+            ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#1A1A1A';
+            ctx.font = 'bold 9px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(i + 1, p.x, p.y);
+        }
+        if (homeIdx >= 0 && homeIdx < stops.length) {
+            var p = toCanvasCoords(stops[homeIdx]);
+            ctx.save(); ctx.shadowColor = '#76b900'; ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+            ctx.fillStyle = '#76b900'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.shadowBlur = 0; ctx.restore();
+            ctx.font = 'bold 11px Inter, sans-serif'; ctx.fillStyle = '#000';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('H', p.x, p.y);
+        }
+    }
+
+    function drawStopsClean(stops, route) {
+        var homeIdx = (route && route.length > 0) ? route[0] : -1;
+        for (var i = 0; i < stops.length; i++) {
+            if (i === homeIdx) continue;
+            var p = toCanvasCoords(stops[i]);
+            ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+            ctx.fillStyle = '#E0E0E0'; ctx.fill(); ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#1A1A1A'; ctx.font = 'bold 9px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(i + 1, p.x, p.y);
+        }
+        if (homeIdx >= 0 && homeIdx < stops.length) {
+            var p = toCanvasCoords(stops[homeIdx]);
+            ctx.save(); ctx.shadowColor = '#76b900'; ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+            ctx.fillStyle = '#76b900'; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.shadowBlur = 0; ctx.restore();
+            ctx.font = 'bold 11px Inter, sans-serif'; ctx.fillStyle = '#000';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('H', p.x, p.y);
+        }
+    }
+
+    function drawDrone(x, y, angle) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+        ctx.fillStyle = '#76b900'; ctx.shadowColor = '#76b900'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.ellipse(0, 0, 14, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.ellipse(0, 0, 14, 8, 0, 0, Math.PI * 2); ctx.stroke();
+        var armLen = 16; ctx.strokeStyle = '#aaa'; ctx.lineWidth = 2;
+        var arms = [-0.6, 0.6, Math.PI - 0.6, Math.PI + 0.6];
+        for (var ai = 0; ai < arms.length; ai++) {
+            var a = arms[ai]; ctx.beginPath();
+            ctx.moveTo(Math.cos(a) * 10, Math.sin(a) * 5);
+            ctx.lineTo(Math.cos(a) * (10 + armLen), Math.sin(a) * (5 + armLen * 0.5)); ctx.stroke();
+        }
+        var t = Date.now() / 60; ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        for (var ai = 0; ai < arms.length; ai++) {
+            var a = arms[ai], px = Math.cos(a) * (10 + armLen), py = Math.sin(a) * (5 + armLen * 0.5);
+            ctx.beginPath(); ctx.ellipse(px, py, 8, 3, t + a, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 8px Inter, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\uD83D\uDCE6', 0, 0);
+        ctx.restore();
+    }
+
+    function getDronePosition(stops, route, progress) {
+        var n = route.length, totalSegs = n, segProgress = progress * totalSegs;
+        var segIdx = Math.min(Math.floor(segProgress), n - 1), t = segProgress - segIdx;
+        var from = stops[route[segIdx]], to = stops[route[(segIdx + 1) % n]];
+        return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t, angle: Math.atan2(to.y - from.y, to.x - from.x), segIdx: segIdx };
+    }
+
+    function getCrossingEdgeSet(crossings) { var edges = new Set(); for (var i = 0; i < crossings.length; i++) { edges.add(crossings[i].edgeA); edges.add(crossings[i].edgeB); } return edges; }
+
+    function rankCrossingBySaving(stops, route, crossings) {
+        if (crossings.length === 0) return null;
+        var best = null, bestSaving = -Infinity;
+        for (var ci = 0; ci < crossings.length; ci++) {
+            var c = crossings[ci], i = Math.min(c.edgeA, c.edgeB), j = Math.max(c.edgeA, c.edgeB), n = route.length;
+            var A = route[i], B = route[(i + 1) % n], C = route[j], D = route[(j + 1) % n];
+            var saving = (dist(stops[A], stops[B]) + dist(stops[C], stops[D])) - (dist(stops[A], stops[C]) + dist(stops[B], stops[D]));
+            if (saving > bestSaving) { bestSaving = saving; best = c; }
+        }
+        return best;
+    }
+
+    function drawRouteWithCrossings(stops, route, crossings, color, lineWidth, alpha) {
+        if (!route || route.length < 2) return;
+        var crossingEdges = getCrossingEdgeSet(crossings), hovEdges = new Set();
+        if (state.hoveredCrossing) { hovEdges.add(state.hoveredCrossing.edgeA); hovEdges.add(state.hoveredCrossing.edgeB); }
+        var n = route.length; ctx.save(); ctx.lineJoin = 'round';
+        for (var i = 0; i < n; i++) {
+            var fromP = toCanvasCoords(stops[route[i]]), toP = toCanvasCoords(stops[route[(i + 1) % n]]);
+            if (hovEdges.has(i)) { ctx.strokeStyle = '#fff'; ctx.lineWidth = lineWidth + 2.5; ctx.globalAlpha = 1; }
+            else if (crossingEdges.has(i)) { ctx.strokeStyle = '#f9c500'; ctx.lineWidth = lineWidth + 1; ctx.globalAlpha = 0.75; }
+            else { ctx.strokeStyle = color; ctx.lineWidth = lineWidth; ctx.globalAlpha = alpha || 0.7; }
+            ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(fromP.x, fromP.y); ctx.lineTo(toP.x, toP.y); ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function drawCrossingTarget(stops, crossing, isBest) {
+        if (!crossing) return;
+        var p = toCanvasCoords({ x: crossing.ix, y: crossing.iy }), t = Date.now() / 500, pulse = 0.5 + 0.5 * Math.sin(t);
+        var isHovered = (state.hoveredCrossing === crossing);
+        var baseRadius = isHovered ? 22 : (isBest ? 18 : 13), radius = baseRadius + (isBest ? 4 * pulse : 0);
+        ctx.save(); ctx.globalAlpha = isHovered ? 0.6 : (0.2 + 0.2 * pulse);
+        ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = isHovered ? 'rgba(255,255,255,0.15)' : 'rgba(249,197,0,0.15)'; ctx.fill();
+        ctx.strokeStyle = isHovered ? '#fff' : '#f9c500'; ctx.lineWidth = isHovered ? 3 : 2; ctx.stroke();
+        ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = isHovered ? '#fff' : '#f9c500'; ctx.fill();
+        if (isBest || isHovered) { ctx.font = 'bold 10px Inter, sans-serif'; ctx.fillStyle = isHovered ? '#fff' : '#f9c500'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('click', p.x, p.y - radius - 3); }
+        ctx.restore();
+    }
+
+    function findNearestCrossing(mx, my, maxDist) {
+        var best = null, bestD = Infinity;
+        for (var i = 0; i < state.crossings.length; i++) {
+            var c = state.crossings[i], dx = c.ix - mx, dy = c.iy - my, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < bestD && d < maxDist) { bestD = d; best = c; }
+        }
+        return best;
+    }
+
+    function handleCanvasMouseMove(e) {
+        if (state.stage !== 1 || state.crossings.length === 0) {
+            if (state.hoveredCrossing) { state.hoveredCrossing = null; canvas.style.cursor = 'crosshair'; } return;
+        }
+        var rect = canvas.getBoundingClientRect(), mx = (e.clientX - rect.left) / rect.width, my = (e.clientY - rect.top) / rect.height;
+        var near = findNearestCrossing(mx, my, 0.07);
+        if (near !== state.hoveredCrossing) { state.hoveredCrossing = near; canvas.style.cursor = near ? 'pointer' : 'crosshair'; }
+    }
+
+    var evoChartCanvas = document.getElementById('evo-chart');
+    var evoChartCtx = evoChartCanvas.getContext('2d');
+
+    function resetEvoInsight() {
+        evoHistory.length = 0;
+        document.getElementById('evo-log').innerHTML = '<div class="evo-chart-label" style="margin-bottom:4px;">Play-by-Play</div>';
+    }
+
+    function showEvoInsight(visible) { document.getElementById('evo-insight').classList.toggle('active', visible); }
+
+    function renderGoalTab() {
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        var phase = state.goalPhase;
+
+        if (phase === 0) {
+            // Phase 0: show the random route (full canvas)
+            drawRouteClean(state.stops, state.badRoute, '#e52020', 2, 0.5);
+            drawStopsClean(state.stops, state.badRoute);
+            // Label
+            ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillStyle = '#e52020'; ctx.fillText('Random Route: ' + routeDistance(state.stops, state.badRoute).toFixed(1), w / 2, h - 12);
+        } else if (phase === 1) {
+            // Phase 1: split screen — random left, greedy building right
+            var halfW = Math.floor(w / 2);
+            drawHalfRoute(state.stops, state.badRoute, 0, halfW, h, '#e52020', 2);
+            // Draw partial greedy route on right side
+            var partialRoute = state.greedyBuildRoute;
+            if (partialRoute.length >= 2) {
+                ctx.save(); ctx.beginPath(); ctx.rect(halfW, 0, halfW, h); ctx.clip();
+                ctx.strokeStyle = '#76b900'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.8;
+                for (var i = 0; i < partialRoute.length - 1; i++) {
+                    var from = state.stops[partialRoute[i]], to = state.stops[partialRoute[i + 1]];
+                    ctx.beginPath(); ctx.moveTo(halfW + from.x * halfW, from.y * h);
+                    ctx.lineTo(halfW + to.x * halfW, to.y * h); ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+                var homeIdx = partialRoute[0];
+                for (var i = 0; i < state.stops.length; i++) {
+                    var s = state.stops[i], p = { x: halfW + s.x * halfW, y: s.y * h };
+                    var inRoute = partialRoute.indexOf(i) >= 0;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, i === homeIdx ? 8 : 5, 0, Math.PI * 2);
+                    ctx.fillStyle = i === homeIdx ? '#76b900' : inRoute ? '#E0E0E0' : 'rgba(224,224,224,0.3)';
+                    ctx.fill(); ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1.5; ctx.stroke();
+                }
+                // Highlight the "current" stop being added
+                if (state.greedyBuilding && partialRoute.length > 1) {
+                    var lastIdx = partialRoute[partialRoute.length - 1];
+                    var lp = { x: halfW + state.stops[lastIdx].x * halfW, y: state.stops[lastIdx].y * h };
+                    ctx.save(); ctx.strokeStyle = '#76b900'; ctx.lineWidth = 3; ctx.shadowColor = '#76b900'; ctx.shadowBlur = 12;
+                    ctx.beginPath(); ctx.arc(lp.x, lp.y, 10, 0, Math.PI * 2); ctx.stroke();
+                    ctx.restore();
+                }
+                ctx.restore();
+            } else {
+                // Just draw stops on the right
+                ctx.save(); ctx.beginPath(); ctx.rect(halfW, 0, halfW, h); ctx.clip();
+                for (var i = 0; i < state.stops.length; i++) {
+                    var s = state.stops[i], p = { x: halfW + s.x * halfW, y: s.y * h };
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(224,224,224,0.3)'; ctx.fill();
+                    ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1.5; ctx.stroke();
+                }
+                ctx.restore();
+            }
+            // Divider
+            ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(halfW, 0); ctx.lineTo(halfW, h); ctx.stroke();
+            // Labels
+            ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillStyle = '#e52020'; ctx.fillText('Random: ' + routeDistance(state.stops, state.badRoute).toFixed(1), halfW / 2, h - 12);
+            if (partialRoute.length >= 2) {
+                var partialDist = routeDistance(state.stops, partialRoute);
+                ctx.fillStyle = '#76b900'; ctx.fillText('Greedy: ' + partialDist.toFixed(1), halfW + halfW / 2, h - 12);
+            }
+            // Top labels
+            ctx.font = 'bold 11px Inter, sans-serif'; ctx.textBaseline = 'top';
+            ctx.fillStyle = '#e52020'; ctx.fillText('RANDOM', halfW / 2, 8);
+            ctx.fillStyle = '#76b900'; ctx.fillText('GREEDY (nearest neighbor)', halfW + halfW / 2, 8);
+        } else if (phase === 2 || phase === 3) {
+            // Phase 2/3: split screen — random left, completed greedy right (+ drone on right)
+            var halfW = Math.floor(w / 2);
+            drawHalfRoute(state.stops, state.badRoute, 0, halfW, h, '#e52020', 2);
+            drawHalfRoute(state.stops, state.goalRoute, halfW, halfW, h, '#76b900', 2);
+            // Divider
+            ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(halfW, 0); ctx.lineTo(halfW, h); ctx.stroke();
+            // Labels
+            ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = '#e52020'; ctx.fillText('RANDOM', halfW / 2, 8);
+            ctx.fillStyle = '#76b900'; ctx.fillText('GREEDY', halfW + halfW / 2, 8);
+            ctx.textBaseline = 'bottom';
+            ctx.fillStyle = '#e52020'; ctx.fillText(routeDistance(state.stops, state.badRoute).toFixed(1), halfW / 2, h - 12);
+            ctx.fillStyle = '#76b900'; ctx.fillText(routeDistance(state.stops, state.goalRoute).toFixed(1), halfW + halfW / 2, h - 12);
+            // Drone on the greedy side
+            if (state.droneFlying && state.droneProgress >= 0) {
+                var pos = getDronePosition(state.stops, state.goalRoute, state.droneProgress);
+                var dp = { x: halfW + pos.x * halfW, y: pos.y * h };
+                drawDrone(dp.x, dp.y, pos.angle);
+                // Delivered stop highlights
+                for (var i = 0; i <= pos.segIdx && i < state.goalRoute.length; i++) {
+                    var s = state.stops[state.goalRoute[i]];
+                    var sp = { x: halfW + s.x * halfW, y: s.y * h };
+                    ctx.beginPath(); ctx.arc(sp.x, sp.y, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(118,185,0,0.25)'; ctx.fill();
+                }
+            }
+        }
+    }
+
+    function startGreedyBuild() {
+        var nnRoute = nearestNeighborRoute(state.stops);
+        state.greedyBuildRoute = [nnRoute[0]];
+        state.greedyBuilding = true;
+        state.goalPhase = 1;
+
+        // Show split labels
+        showGoalSplit(true);
+        updateGoalNarrative('The greedy algorithm starts at home, then always flies to the <strong>nearest unvisited stop</strong>. Watch it build the route one stop at a time.');
+
+        var step = 1;
+        function addNext() {
+            if (!state.greedyBuilding || step >= nnRoute.length) {
+                state.greedyBuilding = false;
+                state.greedyBuildRoute = nnRoute.slice();
+                state.goalRoute = nnRoute.slice();
+                finishGreedyBuild();
+                return;
+            }
+            state.greedyBuildRoute.push(nnRoute[step]);
+            step++;
+            var speedEl = document.getElementById('speed-goal');
+            var v = parseInt(speedEl.value);
+            var delay = v === 1 ? 300 : v === 2 ? 120 : 30;
+            render();
+            // Update greedy distance display
+            if (state.greedyBuildRoute.length >= 2) {
+                document.getElementById('goal-greedy-dist').textContent = routeDistance(state.stops, state.greedyBuildRoute).toFixed(1);
+            }
+            state.greedyBuildFrame = setTimeout(addNext, delay);
+        }
+        addNext();
+    }
+
+    function stopGreedyBuild() {
+        state.greedyBuilding = false;
+        if (state.greedyBuildFrame) { clearTimeout(state.greedyBuildFrame); state.greedyBuildFrame = null; }
+    }
+
+    function finishGreedyBuild() {
+        stopGreedyBuild();
+        state.goalPhase = 2;
+        var greedyDist = routeDistance(state.stops, state.goalRoute);
+        var randomDist = routeDistance(state.stops, state.badRoute);
+        document.getElementById('goal-greedy-dist').textContent = greedyDist.toFixed(1);
+
+        updateGoalNarrative('Done! The greedy route is <strong>' + ((1 - greedyDist / randomDist) * 100).toFixed(0) + '% shorter</strong> than random. Now let\u2019s see what it looks like in action.');
+
+        document.getElementById('goal-phase-1').style.display = 'none';
+        document.getElementById('goal-phase-2').style.display = '';
+        render();
+    }
+
+    function finishDroneFlightGoal() {
+        state.goalPhase = 3;
+        var greedyDist = routeDistance(state.stops, state.goalRoute);
+        var randomDist = routeDistance(state.stops, state.badRoute);
+        var pctBetter = ((1 - greedyDist / randomDist) * 100).toFixed(0);
+        document.getElementById('goal-pct-better').textContent = pctBetter + '%';
+
+        updateGoalNarrative('A simple "nearest neighbor" strategy cut the distance by <strong>' + pctBetter + '%</strong>. But is this the best possible route? With 10<sup>30</sup> possibilities, there\u2019s no way to know. Let\u2019s see if you can improve it.');
+
+        document.getElementById('goal-phase-2').style.display = 'none';
+        document.getElementById('goal-phase-3').style.display = '';
+        render();
+    }
+
+    function updateGoalNarrative(html) {
+        document.getElementById('goal-narrative').innerHTML = html;
+    }
+
+    function showGoalSplit(show) {
+        // no-op: labels are drawn on canvas in renderGoalTab
+    }
+
+    var crossingAnimFrame = null;
+
+    function render() {
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#1A1A1A'; ctx.fillRect(0, 0, w, h);
+        if (state.stops.length === 0) { ctx.fillStyle = '#AAAAAA'; ctx.font = '16px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Loading...', w / 2, h / 2); return; }
+        drawGrid();
+        if (state.stage === 0) {
+            renderGoalTab();
+            return;
+        }
+        if (state.stage === 2 && state.s2SplitActive) {
+            if (state.s2Results.random && state.s2Results.greedy) renderSplitScreen(state.stops, state.s2Results.random.route, state.s2Results.greedy.route, state.s2Results.random.distance, state.s2Results.greedy.distance);
+            else if (state.s2StartRoutes) renderSplitScreen(state.stops, state.s2StartRoutes.random, state.s2StartRoutes.greedy, routeDistance(state.stops, state.s2StartRoutes.random), routeDistance(state.stops, state.s2StartRoutes.greedy));
+            return;
+        }
+        if (state.stage === 3 && state.s3Starts) { renderQuadScreen(state.stops, state.s3Starts); return; }
+        if (state.stage === 1 && state.crossings.length > 0) {
+            drawRouteWithCrossings(state.stops, state.route, state.crossings, '#76b900', 2.5, 0.7);
+            drawStops(state.stops, state.route);
+            var best = rankCrossingBySaving(state.stops, state.route, state.crossings);
+            for (var ci = 0; ci < state.crossings.length; ci++) { var c = state.crossings[ci]; if (c !== best && c !== state.hoveredCrossing) drawCrossingTarget(state.stops, c, false); }
+            if (best && best !== state.hoveredCrossing) drawCrossingTarget(state.stops, best, true);
+            if (state.hoveredCrossing) drawCrossingTarget(state.stops, state.hoveredCrossing, state.hoveredCrossing === best);
+        } else { drawRoute(state.stops, state.route, '#76b900', 2.5, 0.7); drawStops(state.stops, state.route); }
+    }
+
+    function startCrossingAnimation() {
+        if (crossingAnimFrame) return;
+        function loop() { if (state.stage !== 1 || state.crossings.length === 0) { crossingAnimFrame = null; return; } render(); crossingAnimFrame = requestAnimationFrame(loop); }
+        crossingAnimFrame = requestAnimationFrame(loop);
+    }
+    function stopCrossingAnimation() { if (crossingAnimFrame) { cancelAnimationFrame(crossingAnimFrame); crossingAnimFrame = null; } }
+
+    function updateStageHistory(stageNum, distance, detail) {
+        var el = document.getElementById('hist-' + stageNum); if (!el) return;
+        el.classList.add('completed');
+        var labels = { 1: 'Untangle', 2: 'Smart Start', 3: 'Parallel' };
+        var html = (labels[stageNum] || 'Stage ' + stageNum) + ': <span class="result-dist good">' + distance.toFixed(1) + '</span>';
+        if (detail != null) html += ' <span style="color:var(--muted);font-size:0.75rem;">' + detail + '</span>';
+        el.innerHTML = html;
+    }
+
+    function updateGenOverlay(text) { document.getElementById('gen-overlay').textContent = text; }
+
+    function updateComparisonCards() {
+        var r = state.s2Results.random, g = state.s2Results.greedy;
+        var cardEl = document.getElementById('comparison-cards'), explainerEl = document.getElementById('comparison-explainer');
+        if (!r && !g) { cardEl.style.display = 'none'; explainerEl.style.display = 'none'; return; }
+        cardEl.style.display = 'block';
+        if (r && g) updateLiveCards(r.distance, r.steps, true, g.distance, g.steps, true);
+        var deltaEl = document.getElementById('comparison-delta');
+        var rCard = document.getElementById('card-random'), gCard = document.getElementById('card-greedy');
+        rCard.classList.remove('winner'); gCard.classList.remove('winner');
+        var cite = '<span class="cite">Johnson, D.S. &amp; McGeoch, L.A. "The Traveling Salesman Problem: A Case Study in Local Optimization," in <em>Local Search in Combinatorial Optimization</em>, Wiley, 1997. <a href="https://www.cs.ubc.ca/~hutter/previous-earg/EmpAlgReadingGroup/TSP-JohMcg97.pdf" target="_blank" rel="noopener">[PDF]</a></span>';
+        if (r && g) {
+            var diff = r.distance - g.distance, pct = (Math.abs(diff) / Math.max(r.distance, g.distance) * 100).toFixed(1);
+            var absDiff = Math.abs(diff).toFixed(1), detail = absDiff === '0.0' ? '' : ' (' + absDiff + ' units shorter)';
+            if (g.distance < r.distance) {
+                gCard.classList.add('winner'); deltaEl.textContent = 'Greedy start wins by ' + pct + '%' + detail;
+                deltaEl.className = 'compare-card-delta positive';
+                explainerEl.innerHTML = '<strong>Warm start wins.</strong> The Greedy heuristic builds a tour by iteratively adding the shortest available edges. This gives 2-opt a structurally diverse starting point with enough "exploitable defects" for local search to improve efficiently. This is the same principle behind warm-starting quantum algorithms like QAOA: a good classical seed lets the optimizer converge faster.' + cite;
+            } else if (r.distance < g.distance) {
+                rCard.classList.add('winner'); deltaEl.textContent = 'Random start wins by ' + pct + '%' + detail;
+                deltaEl.className = 'compare-card-delta negative';
+                explainerEl.innerHTML = '<strong>Surprise \u2014 random start won this round.</strong> This can happen because 2-opt is a <em>local</em> search: it only accepts swaps that immediately shorten the route. Over many trials, the Greedy warm start still wins the majority of the time. Try clicking <strong>Run Comparison</strong> again to see.' + cite;
+            } else {
+                deltaEl.textContent = 'Both strategies produced the same result'; deltaEl.className = 'compare-card-delta';
+                explainerEl.innerHTML = '<strong>A tie!</strong> Both starting points converged to the same local optimum.' + cite;
+            }
+            deltaEl.style.display = 'block'; explainerEl.style.display = 'block';
+        } else { deltaEl.style.display = 'none'; explainerEl.style.display = 'none'; }
+    }
+
+    function switchStage(n) {
+        state.stage = n; stopRunning(); stopCrossingAnimation(); stopDroneFlight();
+        document.querySelectorAll('.stage-tab').forEach(function(t) { t.setAttribute('aria-selected', parseInt(t.dataset.stage) === n ? 'true' : 'false'); });
+        document.getElementById('stage-panel').setAttribute('aria-labelledby', 'tab-' + n);
+        document.getElementById('stage-desc').innerHTML = stageDescriptions[n];
+        document.querySelectorAll('.stage-controls').forEach(function(c) { c.classList.remove('active'); });
+        var ctrl = document.getElementById('controls-' + (n <= 3 ? n : '')); if (ctrl) ctrl.classList.add('active');
+        var controlsPanel = document.getElementById('controls-panel'), vizPanel = document.getElementById('viz-panel');
+        var mainArea = document.getElementById('main-area'), readingPanel = document.getElementById('reading-panel');
+        controlsPanel.style.display = n === 4 ? 'none' : '';
+        vizPanel.style.display = n === 4 ? 'none' : '';
+        mainArea.style.display = n === 4 ? 'none' : '';
+        readingPanel.style.display = n === 4 ? 'block' : 'none';
+        document.getElementById('comparison-cards').style.display = (n === 2 && (state.s2Results.random || state.s2Results.greedy)) ? 'block' : 'none';
+        document.getElementById('parallel-cards').style.display = (n === 3 && state.s3Starts) ? 'block' : 'none';
+        document.getElementById('legend-crossing').style.display = (n === 1) ? '' : 'none';
+        if (n !== 0) showGoalSplit(false);
+        if (n !== 2) { hideSplitScreen(); state.s2SplitActive = false; }
+        else {
+            if (!state.s2StartRoutes && state.stops.length > 0) state.s2StartRoutes = { random: generateBadRoute(NUM_STOPS), greedy: greedyRoute(state.stops) };
+            setupSplitScreen(); state.s2SplitActive = true;
+        }
+        if (n === 3 && state.s3Starts) setupQuadScreen(); else hideQuadScreen();
+        showEvoInsight(false);
+        if (state.bestRoutes[n]) state.route = state.bestRoutes[n].slice();
+        else if (n > 1 && n <= 3) { var prev = n - 1; if (state.bestRoutes[prev]) state.route = state.bestRoutes[prev].slice(); }
+        if (n === 1 && state.stops.length > 0) {
+            document.getElementById('untangle-start-dist').textContent = state.initialDistance.toFixed(1);
+            document.getElementById('untangle-current-dist').textContent = routeDistance(state.stops, state.route).toFixed(1);
+            state.crossings = findCrossings(state.stops, state.route);
+            document.getElementById('crossing-hint').textContent = state.crossings.length > 0
+                ? state.crossings.length + ' crossing' + (state.crossings.length !== 1 ? 's' : '') + ' found. Click one to uncross it.'
+                : 'No crossings found \u2014 your route is untangled!';
+            if (state.crossings.length > 0) startCrossingAnimation();
+        }
+        state.generation = 0; updateGenOverlay(''); render();
+        announce('Switched to ' + (n === 0 ? 'The Goal' : 'Stage ' + n));
+    }
+
+    function unlockStage(n) { var tab = document.getElementById('tab-' + n); if (tab) tab.disabled = false; }
+    function stopRunning() { state.running = false; if (state.animFrame) { clearTimeout(state.animFrame); state.animFrame = null; } document.querySelectorAll('[id^="btn-stop"]').forEach(function(b) { b.disabled = true; }); }
+    function getSpeed(stageNum) { var el = document.getElementById('speed-' + stageNum); if (!el) return 50; var v = parseInt(el.value); return v === 1 ? 150 : v === 2 ? 50 : 10; }
+    function speedLabel(val) { return val == 1 ? 'Slow' : val == 2 ? 'Medium' : 'Fast'; }
+
+    function startDroneFlight() {
+        if (state.droneFlying) return; state.droneFlying = true; state.droneProgress = 0;
+        document.getElementById('btn-play-goal').disabled = true; document.getElementById('btn-pause-goal').disabled = false;
+        var speedEl = document.getElementById('speed-goal');
+        function getFlightSpeed() { var v = parseInt(speedEl.value); return v === 1 ? 0.002 : v === 2 ? 0.005 : 0.012; }
+        function frame() {
+            if (!state.droneFlying) return;
+            state.droneProgress += getFlightSpeed();
+            if (state.droneProgress >= 1) {
+                state.droneProgress = 1; state.droneFlying = false;
+                document.getElementById('btn-play-goal').disabled = false; document.getElementById('btn-pause-goal').disabled = true;
+                finishDroneFlightGoal();
+                return;
+            }
+            render(); state.droneAnimFrame = requestAnimationFrame(frame);
+        }
+        state.droneAnimFrame = requestAnimationFrame(frame);
+    }
+    function stopDroneFlight() {
+        state.droneFlying = false; if (state.droneAnimFrame) { cancelAnimationFrame(state.droneAnimFrame); state.droneAnimFrame = null; }
+        document.getElementById('btn-play-goal').disabled = false; document.getElementById('btn-pause-goal').disabled = true;
+    }
+
+    var currentSeed = DEFAULT_SEED;
+
+    function newLayout(useNewSeed) {
+        stopRunning(); stopCrossingAnimation(); stopDroneFlight(); stopGreedyBuild(); resizeCanvas();
+        if (useNewSeed) currentSeed = Math.floor(Math.random() * 1000000);
+        seededRng = mulberry32(currentSeed);
+        state.stops = generateStops(NUM_STOPS);
+        state.badRoute = generateBadRoute(NUM_STOPS, true);
+        seededRng = null;
+        state.route = state.badRoute.slice();
+        state.initialDistance = routeDistance(state.stops, state.route);
+        var nnRoute = nearestNeighborRoute(state.stops);
+        state.goalRoute = [];
+        state.crossings = []; state.hoveredCrossing = null; state.s2SplitActive = false; state.s2StartRoutes = null;
+        state.s2Results = { random: null, greedy: null }; state.s3Starts = null; state.s3BestIdx = null;
+        state.generation = 0; state.droneProgress = 0;
+        state.goalPhase = 0; state.greedyBuildProgress = 0; state.greedyBuildRoute = []; state.greedyBuilding = false;
+        for (var i = 1; i <= 3; i++) {
+            state.bestRoutes[i] = null; state.bestDistances[i] = Infinity; state.efforts[i] = 0;
+            var h = document.getElementById('hist-' + i);
+            if (h) { h.classList.remove('completed'); h.innerHTML = ['', 'Untangle', 'Smart Start', 'Parallel'][i] + ': \u2014'; }
+        }
+        state.bestRoutes[1] = state.route.slice(); state.bestDistances[1] = state.initialDistance;
+        document.getElementById('uncross-count').textContent = '0';
+        document.getElementById('comparison-cards').style.display = 'none';
+        document.getElementById('parallel-cards').style.display = 'none';
+        document.getElementById('btn-next-3').style.display = 'none';
+        document.getElementById('btn-next-4').style.display = 'none';
+        hideSplitScreen(); showGoalSplit(false); resetEvoInsight(); showEvoInsight(false);
+        [1, 2, 3, 4].forEach(function(n) { document.getElementById('tab-' + n).disabled = true; });
+        document.getElementById('goal-random-dist').textContent = routeDistance(state.stops, state.badRoute).toFixed(1);
+        document.getElementById('goal-greedy-dist').textContent = '\u2014';
+        document.getElementById('btn-play-goal').textContent = '\u25B6 Fly the Greedy Route';
+        document.getElementById('goal-phase-0').style.display = '';
+        document.getElementById('goal-phase-1').style.display = 'none';
+        document.getElementById('goal-phase-2').style.display = 'none';
+        document.getElementById('goal-phase-3').style.display = 'none';
+        updateGoalNarrative('Your drone has 30 packages to deliver. If you just visit stops in a random order, this is what you get \u2014 a tangled mess.');
+        switchStage(0); announce('New layout generated with ' + NUM_STOPS + ' delivery stops.');
+    }
+
+    function handleCanvasClick(e) {
+        if (state.stage !== 1 || state.stops.length === 0) return;
+        var rect = canvas.getBoundingClientRect(), mx = (e.clientX - rect.left) / rect.width, my = (e.clientY - rect.top) / rect.height;
+        var closestCrossing = null, closestDist = Infinity;
+        for (var i = 0; i < state.crossings.length; i++) { var c = state.crossings[i], dx = c.ix - mx, dy = c.iy - my, d = Math.sqrt(dx * dx + dy * dy); if (d < closestDist && d < 0.06) { closestDist = d; closestCrossing = c; } }
+        if (!closestCrossing) return;
+        state.route = uncross(state.route, closestCrossing.edgeA, closestCrossing.edgeB);
+        state.efforts[1]++; document.getElementById('uncross-count').textContent = state.efforts[1];
+        var d = routeDistance(state.stops, state.route);
+        document.getElementById('untangle-current-dist').textContent = d.toFixed(1);
+        if (d < state.bestDistances[1]) { state.bestDistances[1] = d; state.bestRoutes[1] = state.route.slice(); }
+        state.crossings = findCrossings(state.stops, state.route);
+        document.getElementById('crossing-hint').textContent = state.crossings.length > 0
+            ? state.crossings.length + ' crossing' + (state.crossings.length !== 1 ? 's' : '') + ' remaining. Keep going!'
+            : 'No crossings left \u2014 great work! Submit your route.';
+        if (state.crossings.length === 0) stopCrossingAnimation();
+        render(); announce('Uncrossed! Distance: ' + d.toFixed(1));
+    }
+
+    function submitRoute() {
+        var d = routeDistance(state.stops, state.route);
+        state.bestDistances[1] = d; state.bestRoutes[1] = state.route.slice();
+        updateStageHistory(1, d);
+        unlockStage(2); announce('Route submitted! Stage 2 unlocked.'); switchStage(2);
+    }
+
+    function setupSplitScreen() {
+        var vizPanel = document.getElementById('viz-panel');
+        if (!document.getElementById('split-label-left')) {
+            var ll = document.createElement('div'); ll.className = 'split-label left'; ll.id = 'split-label-left'; ll.textContent = 'Random Start'; vizPanel.appendChild(ll);
+            var lr = document.createElement('div'); lr.className = 'split-label right'; lr.id = 'split-label-right'; lr.textContent = 'Greedy Start'; vizPanel.appendChild(lr);
+            var div = document.createElement('div'); div.className = 'split-divider'; div.id = 'split-divider'; vizPanel.appendChild(div);
+        }
+        document.getElementById('split-label-left').style.display = '';
+        document.getElementById('split-label-right').style.display = '';
+        document.getElementById('split-divider').style.display = '';
+    }
+    function hideSplitScreen() {
+        var ll = document.getElementById('split-label-left'), lr = document.getElementById('split-label-right'), dv = document.getElementById('split-divider');
+        if (ll) ll.style.display = 'none'; if (lr) lr.style.display = 'none'; if (dv) dv.style.display = 'none';
+    }
+
+    function drawHalfRoute(stops, route, xOffset, halfW, fullH, color, lineWidth) {
+        if (!route || route.length < 2) return;
+        ctx.save(); ctx.beginPath(); ctx.rect(xOffset, 0, halfW, fullH); ctx.clip();
+        ctx.strokeStyle = color; ctx.lineWidth = lineWidth; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.7;
+        for (var i = 0; i < route.length; i++) {
+            var from = stops[route[i]], to = stops[route[(i + 1) % route.length]];
+            ctx.beginPath(); ctx.moveTo(xOffset + from.x * halfW, from.y * fullH); ctx.lineTo(xOffset + to.x * halfW, to.y * fullH); ctx.stroke();
+        }
+        ctx.globalAlpha = 1; var homeIdx = route[0];
+        for (var i = 0; i < stops.length; i++) {
+            var s = stops[i], p = { x: xOffset + s.x * halfW, y: s.y * fullH };
+            ctx.beginPath(); ctx.arc(p.x, p.y, i === homeIdx ? 8 : 5, 0, Math.PI * 2);
+            ctx.fillStyle = i === homeIdx ? '#76b900' : '#E0E0E0'; ctx.fill();
+            ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function renderSplitScreen(stops, randomRoute, greedyRt, rDist, gDist) {
+        var w = canvas.clientWidth, h = canvas.clientHeight; ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#1A1A1A'; ctx.fillRect(0, 0, w, h);
+        var halfW = Math.floor(w / 2);
+        drawHalfRoute(stops, randomRoute, 0, halfW, h, '#ef9100', 2);
+        drawHalfRoute(stops, greedyRt, halfW, halfW, h, '#76b900', 2);
+        ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        if (rDist != null) { ctx.fillStyle = '#ef9100'; ctx.fillText(rDist.toFixed(1), halfW / 2, h - 40); }
+        if (gDist != null) { ctx.fillStyle = '#76b900'; ctx.fillText(gDist.toFixed(1), halfW + halfW / 2, h - 40); }
+    }
+
+    function updateLiveCards(rDist, rSteps, rDone, gDist, gSteps, gDone) {
+        document.getElementById('card-random-dist').textContent = rDist.toFixed(1);
+        document.getElementById('card-random-steps').textContent = rDone ? 'Converged in ' + rSteps + ' steps' : rSteps + ' steps';
+        document.getElementById('card-greedy-dist').textContent = gDist.toFixed(1);
+        document.getElementById('card-greedy-steps').textContent = gDone ? 'Converged in ' + gSteps + ' steps' : gSteps + ' steps';
+        var rBadge = document.getElementById('card-random-badge'), gBadge = document.getElementById('card-greedy-badge');
+        rBadge.style.display = rDone ? '' : 'none'; rBadge.textContent = (rDone && !gDone) ? 'DONE FIRST' : 'DONE';
+        rBadge.className = 'compare-card-badge' + ((rDone && !gDone) ? ' first-done' : '');
+        gBadge.style.display = gDone ? '' : 'none'; gBadge.textContent = (gDone && !rDone) ? 'DONE FIRST' : 'DONE';
+        gBadge.className = 'compare-card-badge' + ((gDone && !rDone) ? ' first-done' : '');
+    }
+
+    function runTwoOptStage2() {
+        var delay = getSpeed(2);
+        state.s2StartRoutes = { random: generateBadRoute(NUM_STOPS), greedy: greedyRoute(state.stops) };
+        var randomRoute = state.s2StartRoutes.random.slice(), greedyRt = state.s2StartRoutes.greedy.slice();
+        var rDist = routeDistance(state.stops, randomRoute), gDist = routeDistance(state.stops, greedyRt);
+        state.generation = 0; state.running = true; state.s2SplitActive = true;
+        document.getElementById('btn-stop-2').disabled = false; document.getElementById('btn-run-2opt').disabled = true;
+        setupSplitScreen(); showEvoInsight(false);
+        document.getElementById('comparison-cards').style.display = 'block';
+        document.getElementById('comparison-delta').style.display = 'none'; document.getElementById('comparison-explainer').style.display = 'none';
+        document.getElementById('card-random').classList.remove('winner'); document.getElementById('card-greedy').classList.remove('winner');
+        var rBest = rDist, gBest = gDist, rBestRoute = randomRoute.slice(), gBestRoute = greedyRt.slice();
+        var rStag = 0, gStag = 0, rDone = false, gDone = false, rFinalStep = 0, gFinalStep = 0;
+        updateLiveCards(rDist, 0, false, gDist, 0, false);
+        function step() {
+            if (!state.running || (rDone && gDone) || state.generation >= MAX_STEPS) {
+                if (!rDone) rFinalStep = state.generation; if (!gDone) gFinalStep = state.generation;
+                finishStage2(rBestRoute, rBest, rFinalStep, gBestRoute, gBest, gFinalStep); return;
+            }
+            state.generation++;
+            if (!rDone) { var rResult = twoOptBatch(state.stops, randomRoute, TWO_OPT_BATCH); randomRoute = rResult.route; rDist = routeDistance(state.stops, randomRoute); if (rDist < rBest) { rBest = rDist; rBestRoute = randomRoute.slice(); rStag = 0; } else rStag++; if (rStag >= STAGNATION_LIMIT) { rDone = true; rFinalStep = state.generation; } }
+            if (!gDone) { var gResult = twoOptBatch(state.stops, greedyRt, TWO_OPT_BATCH); greedyRt = gResult.route; gDist = routeDistance(state.stops, greedyRt); if (gDist < gBest) { gBest = gDist; gBestRoute = greedyRt.slice(); gStag = 0; } else gStag++; if (gStag >= STAGNATION_LIMIT) { gDone = true; gFinalStep = state.generation; } }
+            state.efforts[2] = state.generation;
+            updateLiveCards(rBest, rDone ? rFinalStep : state.generation, rDone, gBest, gDone ? gFinalStep : state.generation, gDone);
+            updateGenOverlay('Step ' + state.generation);
+            renderSplitScreen(state.stops, randomRoute, greedyRt, rDist, gDist);
+            state.animFrame = setTimeout(function() { requestAnimationFrame(step); }, delay);
+        }
+        step();
+    }
+
+    function finishStage2(rBestRoute, rBest, rSteps, gBestRoute, gBest, gSteps) {
+        stopRunning(); document.getElementById('btn-run-2opt').disabled = false;
+        state.s2Results.random = { distance: rBest, steps: rSteps, route: rBestRoute.slice() };
+        state.s2Results.greedy = { distance: gBest, steps: gSteps, route: gBestRoute.slice() };
+        var best = gBest <= rBest ? state.s2Results.greedy : state.s2Results.random;
+        state.bestDistances[2] = best.distance; state.bestRoutes[2] = best.route.slice(); state.route = best.route.slice();
+        updateComparisonCards(); updateStageHistory(2, best.distance);
+        unlockStage(3);
+        document.getElementById('btn-next-3').style.display = '';
+        announce('Comparison complete. Stage 3 unlocked.');
+    }
+
+    function setupQuadScreen() {
+        var vizPanel = document.getElementById('viz-panel');
+        if (!document.getElementById('quad-div-v')) {
+            var dv = document.createElement('div'); dv.className = 'quad-divider vertical'; dv.id = 'quad-div-v'; vizPanel.appendChild(dv);
+            var dh = document.createElement('div'); dh.className = 'quad-divider horizontal'; dh.id = 'quad-div-h'; vizPanel.appendChild(dh);
+            for (var i = 0; i < 4; i++) {
+                var lbl = document.createElement('div'); lbl.className = 'quad-label'; lbl.id = 'quad-label-' + i;
+                lbl.style.color = PARALLEL_COLORS[i]; lbl.textContent = 'Start ' + (i + 1);
+                var col = i % 2, row = Math.floor(i / 2);
+                lbl.style.left = col === 0 ? '8px' : ''; lbl.style.right = col === 1 ? '8px' : '';
+                lbl.style.top = row === 0 ? '6px' : '50%'; if (row === 1) lbl.style.marginTop = '6px';
+                vizPanel.appendChild(lbl);
+            }
+        }
+        document.getElementById('quad-div-v').style.display = ''; document.getElementById('quad-div-h').style.display = '';
+        for (var i = 0; i < 4; i++) document.getElementById('quad-label-' + i).style.display = '';
+        document.getElementById('map-legend').style.display = 'none';
+    }
+    function hideQuadScreen() {
+        var dv = document.getElementById('quad-div-v'), dh = document.getElementById('quad-div-h');
+        if (dv) dv.style.display = 'none'; if (dh) dh.style.display = 'none';
+        for (var i = 0; i < 4; i++) { var lbl = document.getElementById('quad-label-' + i); if (lbl) lbl.style.display = 'none'; }
+        document.getElementById('map-legend').style.display = '';
+    }
+
+    function drawQuadRoute(stops, route, qx, qy, qw, qh, color, lineWidth) {
+        if (!route || route.length < 2) return;
+        ctx.save(); ctx.beginPath(); ctx.rect(qx, qy, qw, qh); ctx.clip();
+        ctx.strokeStyle = color; ctx.lineWidth = lineWidth; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.7;
+        for (var i = 0; i < route.length; i++) {
+            var from = stops[route[i]], to = stops[route[(i + 1) % route.length]];
+            ctx.beginPath(); ctx.moveTo(qx + from.x * qw, qy + from.y * qh); ctx.lineTo(qx + to.x * qw, qy + to.y * qh); ctx.stroke();
+        }
+        ctx.globalAlpha = 1; var homeIdx = route[0];
+        for (var i = 0; i < stops.length; i++) {
+            var s = stops[i], p = { x: qx + s.x * qw, y: qy + s.y * qh };
+            ctx.beginPath(); ctx.arc(p.x, p.y, i === homeIdx ? 6 : 4, 0, Math.PI * 2);
+            ctx.fillStyle = i === homeIdx ? '#76b900' : '#E0E0E0'; ctx.fill();
+            ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1; ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function renderQuadScreen(stops, starts) {
+        var w = canvas.clientWidth, h = canvas.clientHeight; ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#1A1A1A'; ctx.fillRect(0, 0, w, h);
+        var halfW = Math.floor(w / 2), halfH = Math.floor(h / 2);
+        for (var i = 0; i < 4; i++) {
+            var col = i % 2, row = Math.floor(i / 2);
+            drawQuadRoute(stops, starts[i].route, col * halfW, row * halfH, halfW, halfH, PARALLEL_COLORS[i], 2);
+            ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillStyle = PARALLEL_COLORS[i]; ctx.fillText(starts[i].best.toFixed(1), col * halfW + halfW / 2, row * halfH + halfH - 8);
+        }
+    }
+
+    function buildParallelCards(numStarts) {
+        var row = document.getElementById('parallel-cards-row'); row.innerHTML = '';
+        for (var i = 0; i < numStarts; i++) {
+            var color = PARALLEL_COLORS[i % PARALLEL_COLORS.length], card = document.createElement('div');
+            card.className = 'compare-card'; card.id = 'pcard-' + i;
+            card.innerHTML = '<div class="compare-card-top"><div class="compare-card-label" style="color:' + color + '">Start ' + (i + 1) + '</div><div class="compare-card-badge" id="pbadge-' + i + '" style="display:none;">DONE</div></div><div class="compare-card-value" id="pdist-' + i + '">\u2014</div><div class="compare-card-detail" id="psteps-' + i + '">\u2014 steps</div>';
+            row.appendChild(card);
+        }
+    }
+
+    function updateParallelCard(i, dist, steps, done) {
+        var distEl = document.getElementById('pdist-' + i), stepsEl = document.getElementById('psteps-' + i);
+        var badge = document.getElementById('pbadge-' + i);
+        if (!distEl) return;
+        distEl.textContent = dist.toFixed(1); stepsEl.textContent = done ? 'Converged in ' + steps + ' steps' : steps + ' steps';
+        badge.style.display = done ? '' : 'none';
+    }
+
+    function runParallelStage3() {
+        var numStarts = 4, delay = getSpeed(3);
+        buildParallelCards(numStarts);
+        document.getElementById('parallel-cards').style.display = 'block';
+        document.getElementById('parallel-delta').style.display = 'none'; document.getElementById('parallel-explainer').style.display = 'none';
+        setupQuadScreen();
+        var starts = [];
+        for (var i = 0; i < numStarts; i++) { var route = generateBadRoute(NUM_STOPS), d = routeDistance(state.stops, route); starts.push({ route: route, best: d, bestRoute: route.slice(), stag: 0, done: false, finalStep: 0 }); updateParallelCard(i, d, 0, false); }
+        state.s3Starts = starts; state.s3BestIdx = null; state.generation = 0; state.running = true;
+        document.getElementById('btn-stop-3').disabled = false; document.getElementById('btn-run-parallel').disabled = true;
+        function step() {
+            var allDone = starts.every(function(s) { return s.done; });
+            if (!state.running || allDone || state.generation >= MAX_STEPS) { starts.forEach(function(s) { if (!s.done) s.finalStep = state.generation; }); finishStage3(starts); return; }
+            state.generation++;
+            var globalBest = Infinity, globalBestIdx = 0;
+            for (var i = 0; i < numStarts; i++) {
+                var s = starts[i];
+                if (!s.done) { var result = twoOptBatch(state.stops, s.route, TWO_OPT_BATCH); s.route = result.route; var d = routeDistance(state.stops, s.route); if (d < s.best) { s.best = d; s.bestRoute = s.route.slice(); s.stag = 0; } else s.stag++; if (s.stag >= STAGNATION_LIMIT) { s.done = true; s.finalStep = state.generation; } }
+                if (s.best < globalBest) { globalBest = s.best; globalBestIdx = i; }
+                updateParallelCard(i, s.best, s.done ? s.finalStep : state.generation, s.done);
+            }
+            state.route = starts[globalBestIdx].bestRoute.slice(); state.efforts[3] = state.generation;
+            updateGenOverlay('Step ' + state.generation + ' | Best: ' + globalBest.toFixed(1) + ' (Start ' + (globalBestIdx + 1) + ')');
+            render(); state.animFrame = setTimeout(function() { requestAnimationFrame(step); }, delay);
+        }
+        step();
+    }
+
+    function finishStage3(starts) {
+        stopRunning(); document.getElementById('btn-run-parallel').disabled = false;
+        var bestIdx = 0;
+        for (var i = 1; i < starts.length; i++) { if (starts[i].best < starts[bestIdx].best) bestIdx = i; }
+        state.s3BestIdx = bestIdx; state.bestDistances[3] = starts[bestIdx].best;
+        state.bestRoutes[3] = starts[bestIdx].bestRoute.slice(); state.route = starts[bestIdx].bestRoute.slice();
+        for (var i = 0; i < starts.length; i++) { document.getElementById('pcard-' + i).classList.toggle('winner', i === bestIdx); updateParallelCard(i, starts[i].best, starts[i].finalStep, true); }
+        var deltaEl = document.getElementById('parallel-delta'), explainerEl = document.getElementById('parallel-explainer');
+        deltaEl.textContent = 'Start ' + (bestIdx + 1) + ' wins with distance ' + starts[bestIdx].best.toFixed(1);
+        deltaEl.className = 'compare-card-delta positive'; deltaEl.style.display = 'block';
+        explainerEl.innerHTML = '<strong>More exploration, more compute.</strong> Each random start dropped you into a completely different region of the solution landscape. 2-opt optimized each one independently, and each converged to a different local minimum. By running ' + starts.length + ' random starts in parallel, you explored ' + starts.length + ' basins of attraction and kept the best \u2014 but you also used ' + starts.length + '\u00D7 the total compute. This is a real tradeoff: broader exploration improves your odds, but it costs proportionally more resources.';
+        explainerEl.style.display = 'block';
+        updateStageHistory(3, starts[bestIdx].best);
+        unlockStage(4);
+        document.getElementById('btn-next-4').style.display = '';
+        render(); announce('Parallel starts complete. Explore More unlocked.');
+    }
+
+    function resetStage(n) {
+        stopRunning(); stopCrossingAnimation();
+        state.bestRoutes[n] = null; state.bestDistances[n] = Infinity; state.efforts[n] = 0; state.generation = 0;
+        if (n === 2) { state.s2Results = { random: null, greedy: null }; state.s2StartRoutes = { random: generateBadRoute(NUM_STOPS), greedy: greedyRoute(state.stops) }; state.s2SplitActive = true; setupSplitScreen(); resetEvoInsight(); showEvoInsight(false); document.getElementById('comparison-cards').style.display = 'none'; }
+        if (n === 3) { state.s3Starts = null; state.s3BestIdx = null; document.getElementById('parallel-cards').style.display = 'none'; hideQuadScreen(); }
+        var prev = n - 1; if (prev >= 1 && state.bestRoutes[prev]) state.route = state.bestRoutes[prev].slice();
+        var labels = { 1: 'Untangle', 2: 'Smart Start', 3: 'Parallel' };
+        var h = document.getElementById('hist-' + n); h.classList.remove('completed'); h.innerHTML = (labels[n] || 'Stage ' + n) + ': \u2014';
+        updateGenOverlay(''); render(); announce('Stage ' + n + ' reset.');
+    }
+
+    function wireSliderDisplay(sliderId, displayId, formatter) {
+        var slider = document.getElementById(sliderId), display = document.getElementById(displayId);
+        if (!slider || !display) return;
+        slider.addEventListener('input', function() { display.textContent = formatter ? formatter(slider.value) : slider.value; });
+    }
+
+    function handleTabKeyboard(e) {
+        var tabs = Array.from(document.querySelectorAll('.stage-tab:not(:disabled)')), currentIdx = tabs.indexOf(e.target);
+        if (currentIdx === -1) return; var newIdx = currentIdx;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIdx = (currentIdx + 1) % tabs.length; }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIdx = (currentIdx - 1 + tabs.length) % tabs.length; }
+        if (newIdx !== currentIdx) { tabs[newIdx].focus(); tabs[newIdx].click(); }
+    }
+
+    function init() {
+        document.getElementById('stage-desc').innerHTML = stageDescriptions[0];
+        document.getElementById('btn-new-layout').addEventListener('click', function() { newLayout(true); });
+        document.getElementById('btn-goal-next-1').addEventListener('click', function() {
+            document.getElementById('goal-phase-0').style.display = 'none';
+            document.getElementById('goal-phase-1').style.display = '';
+            startGreedyBuild();
+        });
+        document.getElementById('btn-build-greedy').addEventListener('click', function() {
+            stopGreedyBuild();
+            startGreedyBuild();
+        });
+        document.getElementById('btn-play-goal').addEventListener('click', function() { state.droneProgress = 0; startDroneFlight(); });
+        document.getElementById('btn-pause-goal').addEventListener('click', stopDroneFlight);
+        document.getElementById('btn-start-challenge').addEventListener('click', function() { stopDroneFlight(); showGoalSplit(false); unlockStage(1); switchStage(1); });
+        canvas.addEventListener('click', handleCanvasClick);
+        canvas.addEventListener('mousemove', handleCanvasMouseMove);
+        canvas.addEventListener('touchend', function(e) { e.preventDefault(); var touch = e.changedTouches[0]; handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY }); });
+        document.getElementById('btn-submit').addEventListener('click', submitRoute);
+        document.getElementById('btn-run-2opt').addEventListener('click', runTwoOptStage2);
+        document.getElementById('btn-stop-2').addEventListener('click', function() { stopRunning(); document.getElementById('btn-run-2opt').disabled = false; });
+        document.getElementById('btn-run-parallel').addEventListener('click', runParallelStage3);
+        document.getElementById('btn-stop-3').addEventListener('click', function() { stopRunning(); document.getElementById('btn-run-parallel').disabled = false; });
+        document.getElementById('btn-next-3').addEventListener('click', function() { switchStage(3); });
+        document.getElementById('btn-next-4').addEventListener('click', function() { switchStage(4); });
+        document.getElementById('btn-reset-2').addEventListener('click', function() { resetStage(2); document.getElementById('btn-run-2opt').disabled = false; document.getElementById('btn-next-3').style.display = 'none'; });
+        document.getElementById('btn-reset-3').addEventListener('click', function() { resetStage(3); document.getElementById('btn-run-parallel').disabled = false; document.getElementById('btn-next-4').style.display = 'none'; });
+        document.querySelectorAll('.stage-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() { if (!tab.disabled) switchStage(parseInt(tab.dataset.stage)); });
+            tab.addEventListener('keydown', handleTabKeyboard);
+        });
+        wireSliderDisplay('speed-goal', 'speed-goal-val', speedLabel);
+        wireSliderDisplay('speed-2', 'speed-2-val', speedLabel);
+        wireSliderDisplay('speed-3', 'speed-3-val', speedLabel);
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { if (state.running) stopRunning(); if (state.droneFlying) stopDroneFlight(); } });
+        window.addEventListener('resize', function() { resizeCanvas(); render(); });
+        newLayout();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
