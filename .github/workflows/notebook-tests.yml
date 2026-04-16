@@ -1,0 +1,177 @@
+name: Test Solution Notebooks
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - '**/solutions/**/*.ipynb'
+      - '**/Solutions/**/*.ipynb'
+      - '**/*Solution*.ipynb'
+      - '.github/workflows/notebook-tests.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-notebooks:
+    name: "${{ matrix.module }} (${{ matrix.image }})"
+    runs-on: linux-amd64-gpu-rtxpro6000-latest-2
+    container:
+      image: ${{ matrix.image }}
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ghcr.io/nvidia/cudaqx
+        module:
+          - quick-start-to-quantum
+          - chemistry-simulations
+          - qis-examples
+          - hybrid-workflows
+          - qaoa-for-max-cut
+          - qec101
+          - dynamics101
+          - quantum-applications-to-finance
+          - ai-for-quantum
+        include:
+          # Per-module solutions path and notebook pattern.
+          # These properties are merged into every image × module combination.
+          - module: quick-start-to-quantum
+            solutions_path: quick-start-to-quantum/solutions
+            pattern: "*.ipynb"
+
+          - module: chemistry-simulations
+            solutions_path: chemistry-simulations/solutions
+            pattern: "*.ipynb"
+
+          - module: qis-examples
+            solutions_path: qis-examples/solutions
+            pattern: "*.ipynb"
+
+          - module: hybrid-workflows
+            solutions_path: hybrid-workflows/solutions
+            pattern: "*.ipynb"
+
+          - module: qaoa-for-max-cut
+            solutions_path: qaoa-for-max-cut
+            pattern: "*Solution*.ipynb"
+
+          - module: qec101
+            solutions_path: qec101/Solutions
+            pattern: "*.ipynb"
+
+          - module: dynamics101
+            solutions_path: dynamics101/Solutions
+            pattern: "*.ipynb"
+
+          - module: quantum-applications-to-finance
+            solutions_path: quantum-applications-to-finance/solutions
+            pattern: "*.ipynb"
+
+          - module: ai-for-quantum
+            solutions_path: ai-for-quantum/solutions
+            pattern: "*.ipynb"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Jupyter and dependencies
+        run: |
+          pip install --quiet --upgrade \
+            jupyter \
+            nbconvert \
+            qutip \
+            torch \
+            scikit-learn \
+            matplotlib-venn
+
+      - name: Run solution notebooks — ${{ matrix.module }}
+        shell: bash
+        run: |
+          SOLUTIONS_PATH="${{ matrix.solutions_path }}"
+          PATTERN="${{ matrix.pattern }}"
+          MODULE="${{ matrix.module }}"
+          IMAGE="${{ matrix.image }}"
+
+          # Verify the directory exists
+          if [ ! -d "$SOLUTIONS_PATH" ]; then
+            echo "Directory '$SOLUTIONS_PATH' not found — skipping."
+            {
+              echo "## 📓 $MODULE ($IMAGE)"
+              echo "> ⚠️ Solutions directory not found — skipped."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Collect matching notebooks (maxdepth 1 to avoid .ipynb_checkpoints)
+          # Use NUL-delimited output to safely handle filenames with spaces
+          NOTEBOOKS=$(find "$SOLUTIONS_PATH" -maxdepth 1 -name "$PATTERN" -print0 | sort -z | xargs -0 printf '%s\n')
+
+          if [ -z "$NOTEBOOKS" ]; then
+            echo "No notebooks matching '$PATTERN' found in '$SOLUTIONS_PATH' — skipping."
+            {
+              echo "## 📓 $MODULE ($IMAGE)"
+              echo "> ⚠️ No solution notebooks found — skipped."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "Notebooks to execute:"
+          echo "$NOTEBOOKS"
+          echo "================================"
+
+          # Start summary table
+          {
+            echo "## 📓 $MODULE ($IMAGE)"
+            echo "| Notebook | Status |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          PASSED=0
+          FAILED=0
+          FAILED_LIST=""
+
+          while IFS= read -r nb; do
+            BASENAME=$(basename "$nb")
+            # Get path relative to the module root
+            NB_REL="${nb#$MODULE/}"
+            echo "::group::▶ $nb"
+            if PYTHONPATH="$PWD/$MODULE:${PYTHONPATH:-}" jupyter nbconvert \
+                --to notebook \
+                --execute \
+                --inplace \
+                --ExecutePreprocessor.timeout=600 \
+                --ExecutePreprocessor.kernel_name=python3 \
+                "$nb"; then
+              echo "✅ Passed: $nb"
+              PASSED=$((PASSED + 1))
+              echo "| \`$BASENAME\` | ✅ Passed |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "❌ Failed: $nb"
+              FAILED=$((FAILED + 1))
+              FAILED_LIST="$FAILED_LIST\n  - $nb"
+              echo "| \`$BASENAME\` | ❌ Failed |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "::endgroup::"
+          done <<< "$NOTEBOOKS"
+
+          # Write summary footer
+          {
+            echo ""
+            echo "**$PASSED passed, $FAILED failed**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "================================"
+          echo "Results for $MODULE:"
+          echo "  Passed : $PASSED"
+          echo "  Failed : $FAILED"
+
+          if [ $FAILED -gt 0 ]; then
+            echo "::error::$FAILED notebook(s) failed in $MODULE:$FAILED_LIST"
+            exit 1
+          fi
