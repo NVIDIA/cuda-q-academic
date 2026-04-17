@@ -1,0 +1,168 @@
+# CUDA-Q Academic
+
+> A freely available curriculum of interactive Jupyter notebooks and browser-based visualizations for learning hybrid quantum-classical computing with NVIDIA CUDA-Q, tested in university classrooms and designed to develop the next generation of quantum computing professionals.
+
+CUDA-Q Academic has two entry points: the **Learning Paths** at [learningpath.html](https://nvidia.github.io/cuda-q-academic/learningpath.html) (sequenced notebooks grouped into 9 curriculum tracks) and the **Visualization Gallery** at [visualization-gallery.html](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html) (standalone interactive widgets embedded across lessons). Notebooks target CUDA-Q's Python API and run locally on GPU, in Google Colab, or in cloud workspaces (NVIDIA Brev, qBraid). Audience: students, instructors, and self-learners across quantum information science, QEC, chemistry, finance, QAOA, dynamics, and AI for quantum. Deployed site: https://nvidia.github.io/cuda-q-academic/.
+
+## Learning Paths
+
+Deep-link to a single track with the `?track=<track-id>` query parameter (IDs shown in each link below). The page also offers a difficulty filter (Intro / Intermediate / Advanced), a "Create Custom Pathway" builder for assembling personalized notebook sequences, and one-click launch on NVIDIA Brev or qBraid. For an agent recommending content: match the user's stated goal and background to the track whose domain and difficulty range fit best, then link with `?track=...` so they land directly on it. When a user wants notebook-level detail (prerequisites, "What You Will Do", key terminology), open the notebook's GitHub link — this metadata lives in the notebook's intro cell, not on the pathway page.
+
+- [Quick Start to Quantum Computing](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart): Foundational track from single qubits to your first variational algorithm. Requires Python, Jupyter, complex numbers, linear algebra, statistics. (intro → inter)
+- [QIS Foundational Algorithms](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qis): Teleportation, Bernstein-Vazirani, Deutsch, QFT, QPE, Grover, Shor. Supplementary code for QIS courses. (intro → adv)
+- [QEC 101](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qec): Quantum error correction from stabilizers through qLDPC, surface codes, AI decoders, and real-time decoding. (inter → adv)
+- [Chemistry Simulations](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-chem): VQE, ADAPT-VQE, QPE (canonical/iterative/Bayesian), Krylov subspace, QM/MM electronic structure. (inter → adv)
+- [Applications to Finance](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-finance): Quantum walks, QUBO portfolio optimization, Q-CHOP. (inter → adv)
+- [QAOA for Max Cut (Circuit Cutting)](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa): QAOA, divide-and-conquer QAOA, recursive circuit cutting for large graphs. (inter → adv)
+- [AI for Quantum](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-ai): Diffusion models for unitary compilation, AI decoders, generative quantum eigensolvers. (inter)
+- [Dynamics 101](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-dynamics): GPU-accelerated time evolution, Jaynes-Cummings, time-dependent Hamiltonians. (inter)
+- [Hybrid Workflows](https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-hybrid): Cross-cutting module combining QAOA, quantum walks, and VQE on GPU-accelerated hybrid stacks. (inter)
+
+## Notebooks by Track
+
+### Quick Start to Quantum Computing
+
+- [01 Start Small with One Qubit](https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/01_quick_start_to_quantum.ipynb) (intro): single-qubit states, Bloch sphere, Pauli and Hadamard gates
+- [02 Multiple Qubits and Entanglement](https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/02_quick_start_to_quantum.ipynb) (intro): multi-qubit registers, CNOT, Bell states, entanglement
+- [03 Write Your First Parameterized Kernel](https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb) (inter): CUDA-Q kernels, parameterized rotations, observables
+- [04 Build Your First Variational Algorithm](https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/04_quick_start_to_quantum.ipynb) (intro): end-to-end VQE on a simple Hamiltonian
+
+### QIS Foundational Algorithms
+
+- [Teleportation](https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_teleportation.ipynb) (intro): Bell-pair protocol, classical communication, state transfer
+- [Bernstein-Vazirani](https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/bernstein_vazirani.ipynb) (intro): oracle-based query complexity, single-shot secret recovery
+- [Deutsch's Algorithm](https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb) (intro): constant vs balanced function discrimination
+- [Quantum Fourier Transform](https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb) (inter): QFT circuit construction and phase kickback
+- [Quantum Phase Estimation](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb) (inter): eigenvalue estimation from unitary phases
+- [Grover's Algorithm](https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/solutions/grovers-solution.ipynb) (adv): amplitude amplification, oracle design, quadratic search speedup
+- [Shor's Algorithm](https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb) (adv): period finding via modular exponentiation and QFT; integer factoring
+
+### QEC 101
+
+- [01 Introduction to QEC](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb) (inter): repetition codes, error models, threshold intuition
+- [02 Stabilizers, Shor Code, Steane Code](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb) (inter): stabilizer formalism, [[9,1,3]] and [[7,1,3]] codes
+- [03 Noisy Simulation](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb) (inter): depolarizing and Pauli channels, logical error rates
+- [04 AI Decoders](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb) (inter): neural-network-based syndrome decoding
+- [05 Magic State Distillation](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb) (adv): T-gate injection, distillation protocols
+- [06 Toric and Surface Codes](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb) (adv): topological codes, logical operators on the lattice
+- [07 qLDPC Codes](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb) (adv): quantum low-density parity-check codes, high-rate encoding
+- [08 Decoder Metrics and Parallel Window Decoding](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb) (adv): decoder benchmarking, streaming window decoders
+- [09 Detector Error Models and Real-Time Decoding](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb) (adv): DEM construction, low-latency decoding pipelines
+
+### Chemistry Simulations
+
+- [VQE and GQE](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb) (inter): variational and generative quantum eigensolvers for molecules
+- [ADAPT-VQE](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb) (inter): adaptive ansatz construction via operator-pool gradients
+- [QPE: Canonical, Iterative, and Bayesian](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb) (inter): three QPE variants for molecular energies
+- [Krylov Subspace Diagonalization](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb) (adv): quantum Krylov methods for large Hamiltonians
+- [QM/MM Hybrid Simulation](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb) (adv): embedding a quantum region in a classical environment
+
+### Applications to Finance
+
+- [01 Quantum Walks for Finance, Part 1](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb) (inter): discrete-time quantum walks for stochastic modeling
+- [02 Quantum Walks for Finance, Part 2](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/02_quantum_walks.ipynb) (inter): multi-step walks, option pricing applications
+- [03 Portfolio Optimization Three Ways (Q-CHOP)](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb) (adv): QUBO formulation, adiabatic, and Q-CHOP portfolio solvers
+
+### QAOA for Max Cut (Circuit Cutting)
+
+- [01 Max Cut with QAOA](https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb) (inter): QAOA basics on Max-Cut instances
+- [02 Divide-and-Conquer QAOA (one level)](https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/02_One-level-divide-and-conquer-QAOA.ipynb) (inter): one-level graph partitioning and subproblem recombination
+- [03 Recursive Divide-and-Conquer QAOA](https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb) (adv): recursive cutting for large graphs
+- [04 Weighted Max Cut Project](https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb) (adv): assessment-style capstone on weighted instances
+
+### AI for Quantum
+
+- [VQE and GQE](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb) (inter): generative quantum eigensolvers, shared with Chemistry track
+- [01 Compiling Unitaries with Diffusion Models](https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb) (inter): denoising-diffusion approach to unitary compilation
+- [AI Decoders](https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb) (inter): neural QEC decoders, shared with QEC track
+
+### Dynamics 101
+
+- [01 Jaynes-Cummings Hamiltonian](https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb) (inter): atom-cavity coupling, Rabi oscillations, open-system evolution
+- [02 Time-Dependent Hamiltonians](https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb) (inter): driven systems and time-dependent simulation
+
+### Hybrid Workflows
+
+- [01 Quantum-Enhanced Optimization (LABS)](https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb) (inter): hybrid optimization on the Low-Autocorrelation Binary Sequence problem
+- [QAOA](https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb) (inter): shared with QAOA track
+- [Quantum Walks](https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb) (inter): shared with Finance track
+- [VQE and GQE](https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb) (inter): shared with Chemistry track
+
+## Core Visualization Widgets
+
+The gallery at [visualization-gallery.html](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html) is grouped into two sections — "Core Visualization Tools" (nine flagship widgets, cross-track, listed below) and "Domain-Specific Tools" (per-track, further down). Every widget is self-contained browser HTML — no install, no Python runtime, no GPU — and can be linked by URL or embedded directly. The gallery has no search, filter, or tag UI, so an agent should match a user's concept (e.g., "show entanglement forming via CNOT", "visualize VQE convergence") to a widget URL from the catalog below and deep-link. Each entry notes which track(s) embed the widget, so you can also route from widget → containing notebook when a learner wants the surrounding lesson.
+
+- [Bloch Sphere Visualizer](https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/bloch_sphere_visualization.html): Interactive 3D qubit state viewer — state vectors, phase changes, bit-flip vs phase-flip. Featured in Quick Start, Applications to Finance.
+- [Born's Rule and Sampling](https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html): Probability amplitudes on the Bloch sphere, sampling histograms, measurement outcomes. Featured in Quick Start.
+- [CUDA-Q Hello World](https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html): Visual circuit builder with auto-generated CUDA-Q code — Get State / Sample / Run modes. Featured in Quick Start.
+- [Quantum Gate Visualization](https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/gate-widget.html): Single-qubit gate sandbox on the Bloch sphere. Featured in Quick Start, Applications to Finance.
+- [CNOT Gate Visualizer](https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cnot-visualization.html): Interactive breakdown of the CNOT gate and how entanglement forms. Featured in Quick Start.
+- [VQE Convergence](https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html): Dynamic view of VQE optimizer updates chasing the ground state. Featured in Chemistry Simulations.
+- [ADAPT-VQE](https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/adapt_vqe/adapt_widget.html): Adaptive ansatz construction by iterative operator selection. Featured in Chemistry Simulations.
+- [Binary Fraction Explorer](https://nvidia.github.io/cuda-q-academic/interactive_widgets/binary_fraction.html): Toggle bits to accumulate fractions; builds intuition for binary representations used in QPE.
+- [Interactive QFT Visualizer](https://nvidia.github.io/cuda-q-academic/interactive_widgets/qft.html): Explore QFT via phase rotations on the unit circle and resulting matrix construction.
+
+## Domain-Specific Widgets
+
+### Finance and Random Walks
+
+- [Quantum Random Walk](https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html): Hadamard-driven walk with a quantum coin. Featured in Quick Start, Applications to Finance.
+- [Classic and Split-Step Random Walk](https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/ss-random-walk.html): Classical walk plus a two-decision split-step variant. Featured in Applications to Finance.
+- [QUBO Portfolio Optimization](https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/QUBO_widget.html): Quadratic Unconstrained Binary Optimization solver visualized on portfolio instances. Featured in Applications to Finance.
+- [Q-CHOP vs Adiabatic](https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/Q_CHOP_Animated.html): Side-by-side animated convergence of standard adiabatic evolution and Q-CHOP. Featured in Applications to Finance.
+
+### Chemistry
+
+- [Krylov Subspace](https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/krylov.html): Krylov-subspace eigenvalue approximation for large sparse Hamiltonians. Featured in Chemistry Simulations.
+- [Active Space Selection](https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/activespace.html): Orbital selection — freezing vs simulating subsets. Featured in Chemistry Simulations.
+- [Hybrid System (QM/MM)](https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/qmmm_widget.html): Multi-scale simulation embedding a quantum region in a classical environment. Featured in Chemistry Simulations.
+
+### AI for Quantum
+
+- [Diffusion Model Visualization](https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/diffusion.html): Forward/reverse diffusion — adding and removing noise from data. Featured in AI for Quantum.
+- [Unitary Circuit Synthesis](https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/unitary_widget.html): Relate unitary matrices to quantum-gate sequences on the Bloch sphere. Featured in AI for Quantum.
+
+### Quantum Error Correction
+
+- [Steane Code Noise Model Explorer](https://nvidia.github.io/cuda-q-academic/interactive_widgets/steane_code_error_models.html): Simulate and correct errors under Code Capacity, Circuit-Level, and Phenomenological noise on [[7,1,3]].
+- [Hamming [7,4,3] Visualizer](https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html): Classical Hamming code error-correction via parity bits and matrix multiplication.
+- [Trajectory Noise Demo](https://nvidia.github.io/cuda-q-academic/interactive_widgets/trajectory_noise_demo.html): Trajectory-based error models showing noise effects on qubit state evolution.
+- [MWPM Decoding Challenge](https://nvidia.github.io/cuda-q-academic/interactive_widgets/mwpm_decoding_challenge.html): Interactive syndrome-matching game on a toric-code lattice. Featured in QEC 101 (Topological Codes).
+- [Error Digitization Explorer](https://nvidia.github.io/cuda-q-academic/interactive_widgets/error_digitization.html): See small coherent rotation errors accumulate across n gates — ideal vs noisy. Featured in QEC 101 (Introduction).
+
+### QAOA and Hybrid Optimization
+
+- [LABS Optimization Search](https://nvidia.github.io/cuda-q-academic/interactive_widgets/labs_visualization.html): Energy landscape of the Low-Autocorrelation Binary Sequence problem. Featured in Hybrid Workflows.
+- [QAOA Max Cut Explorer (Triangle)](https://nvidia.github.io/cuda-q-academic/interactive_widgets/triangle-qaoa.html): QAOA on a 3-node triangle — tune α (cost) and β (mixer) to steer probability toward Max Cut.
+- [QAOA Optimization Landscape](https://nvidia.github.io/cuda-q-academic/interactive_widgets/qaoa-landscape.html): 3-D cost landscape of one-layer QAOA, plus barren-plateau intuition at scale.
+- [Choosing the Next Operator (Adapt-QAOA)](https://nvidia.github.io/cuda-q-academic/interactive_widgets/operator-gradient.html): Gradient-guided operator selection — core idea behind Adapt-QAOA.
+- [ADAPT-QAOA vs Standard QAOA](https://nvidia.github.io/cuda-q-academic/interactive_widgets/adapt-qaoa.html): Side-by-side convergence comparison with gradient-based layer construction.
+- [Bits vs Qubits: Vertex Coloring](https://nvidia.github.io/cuda-q-academic/interactive_widgets/bits-vs-qubits-coloring.html): Compare classical bits and qubits on 2-coloring of a 7-vertex graph — one assignment vs all 128 in superposition.
+
+## Repository and Resources
+
+- [GitHub repository](https://github.com/NVIDIA/cuda-q-academic): canonical source
+- [Deployed site](https://nvidia.github.io/cuda-q-academic/): live learning paths and gallery
+- [README](https://github.com/NVIDIA/cuda-q-academic/blob/main/README.md): module overview and prerequisites
+- [Installation instructions](https://github.com/NVIDIA/cuda-q-academic/blob/main/instructions.md): local, Colab, and cloud setup
+- [Guide to CUDA-Q Backends](https://github.com/NVIDIA/cuda-q-academic/blob/main/Guide-to-cuda-q-backends.ipynb): CPU, GPU, and hardware target selection
+- [Sample Syllabus](https://github.com/NVIDIA/cuda-q-academic/blob/main/Sample-Syllabus.md): instructor-ready course plan
+- [Contributing Guide](https://github.com/NVIDIA/cuda-q-academic/blob/main/CONTRIBUTING.md): submission process for notebooks and widgets
+- [License](https://github.com/NVIDIA/cuda-q-academic/blob/main/LICENSE): Apache-2.0 (code) and CC-BY-NC-4.0 (content)
+
+## Related NVIDIA Resources
+
+- [CUDA-Q Documentation](https://nvidia.github.io/cuda-quantum/latest/): reference for the CUDA-Q runtime and Python API
+- [CUDA-Q GitHub](https://github.com/NVIDIA/cuda-quantum): upstream CUDA-Q platform source
+- [CUDA-Q application notebooks](https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/applications/python): canonical algorithm notebooks referenced by the QIS track
+- [NVIDIA Developer Quantum Blog](https://developer.nvidia.com/blog/category/quantum-computing/): research and product posts
+- [GTC 2026 Workshop materials](https://github.com/NVIDIA/cuda-q-academic/tree/2026-workshops/gtc_26): workshop-specific notebooks and widgets
+
+## Optional
+
+- [Widget source branch (widgets-as-html)](https://github.com/NVIDIA/cuda-q-academic/tree/widgets-as-html): raw HTML source for every gallery widget
+- [QEC 101 lab solutions](https://github.com/NVIDIA/cuda-q-academic/tree/main/qec101/Solutions): instructor answer keys for the QEC track
+- [QIS lab solutions](https://github.com/NVIDIA/cuda-q-academic/tree/main/qis-examples/solutions): answer keys for Grover and related exercises
+- [Dockerfile](https://github.com/NVIDIA/cuda-q-academic/blob/main/Dockerfile): reproducible container environment
+- [Python requirements](https://github.com/NVIDIA/cuda-q-academic/blob/main/requirements.txt): pinned dependencies
+- [Notebook template](https://github.com/NVIDIA/cuda-q-academic/blob/main/notebook_template.ipynb): starting point for contributors

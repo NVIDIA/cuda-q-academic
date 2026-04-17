@@ -122,6 +122,54 @@
   #focus-banner a { color: var(--nvidia-green); font-weight: bold; text-decoration: none; cursor: pointer; }
   #focus-banner a:hover { text-decoration: underline; }
 
+  /* USAGE CALLOUT (Top Instructions) */
+  .usage-callout {
+      background: rgba(118, 185, 0, 0.05);
+      border: 1px solid var(--nvidia-accent);
+      border-left: 4px solid var(--nvidia-green);
+      border-radius: 4px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+  }
+  .callout-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+  }
+  .callout-step { display: flex; gap: 12px; align-items: flex-start; }
+  .callout-step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      background: var(--nvidia-green); color: black;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.85rem;
+  }
+  .callout-step-body { font-size: 0.85rem; color: var(--nvidia-gray); line-height: 1.5; flex: 1; min-width: 0; }
+  .callout-step-body strong { color: var(--nvidia-light); display: block; margin-bottom: 4px; font-size: 0.9rem; }
+  .callout-step-body p { margin: 0; }
+  .callout-step-body em { color: var(--nvidia-green); font-style: normal; font-weight: 600; }
+  .callout-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+  .workspace-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(118, 185, 0, 0.08);
+      border: 1px solid var(--nvidia-green);
+      color: var(--nvidia-green);
+      padding: 8px 14px; border-radius: 4px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.3px;
+      transition: all 0.15s; min-height: 40px;
+  }
+  .workspace-btn:hover { background: var(--nvidia-green); color: black; }
+  .workspace-btn img { height: 18px; width: auto; }
+  .workspace-btn img.qbraid-icon { background: #222; padding: 2px; border-radius: 2px; }
+
+  @media (max-width: 900px) {
+      .callout-row { grid-template-columns: 1fr; gap: 16px; }
+  }
+
   /* GRID SYSTEM */
   .pathway-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 
@@ -181,13 +229,14 @@
   .notebook-list::-webkit-scrollbar { width: 6px; }
   .notebook-list::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 3px; }
 
-  .notebook-item { 
-      border-bottom: 1px solid var(--nvidia-accent); padding: 10px 10px; 
-      font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  .notebook-item {
+      border-bottom: 1px solid var(--nvidia-accent);
+      font-size: 0.85rem; display: flex; flex-direction: column;
       transition: background-color 0.2s; border-left: 3px solid transparent;
   }
   .notebook-item.filter-match { border-left-color: var(--nvidia-green); background-color: rgba(118, 185, 0, 0.08); opacity: 1; }
   .notebook-item.filter-dim { opacity: 0.3; filter: grayscale(100%); }
+  .nb-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 10px; }
   
   /* UPDATED: Scrollable Notebook Name */
   .nb-name { 
@@ -210,6 +259,49 @@
 
   .pathway-card.colab-active .badge-colab, .pathway-card.gh-active .badge-gh { display: flex; }
   .pathway-card.colab-active .nb-name, .pathway-card.gh-active .nb-name { opacity: 0.7; }
+
+  /* GET STARTED (per-lesson dropdown) */
+  .get-started-btn {
+      background: rgba(118, 185, 0, 0.1);
+      border: 1px solid var(--nvidia-green);
+      color: var(--nvidia-green);
+      padding: 5px 10px; border-radius: 3px;
+      font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      cursor: pointer; flex-shrink: 0;
+      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 4px;
+  }
+  .get-started-btn:hover { background: var(--nvidia-green); color: black; }
+  .get-started-btn .chev { transition: transform 0.2s; display: inline-block; }
+  .notebook-item.expanded .get-started-btn { background: var(--nvidia-green); color: black; }
+  .notebook-item.expanded .get-started-btn .chev { transform: rotate(180deg); }
+
+  .lesson-actions {
+      display: none;
+      flex-direction: column; gap: 4px;
+      padding: 0 10px 10px 10px;
+  }
+  .notebook-item.expanded .lesson-actions { display: flex; }
+  .lesson-action-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 3px;
+      color: var(--nvidia-light);
+      text-decoration: none;
+      font-size: 0.8rem; font-weight: 600;
+      transition: all 0.15s;
+  }
+  .lesson-action-btn:hover {
+      border-color: var(--nvidia-green);
+      background: rgba(118, 185, 0, 0.1);
+      color: white;
+  }
+  .lesson-action-btn img { height: 18px; width: auto; }
+  .lesson-action-btn svg { width: 18px; height: 18px; fill: var(--nvidia-light); }
+  .lesson-action-btn:hover svg { fill: var(--nvidia-green); }
 
   /* FOOTER */
   .launch-footer { margin-top: auto; border-top: 1px dashed var(--nvidia-accent); padding: 12px 16px; background: rgba(0,0,0,0.2); }
@@ -420,6 +512,40 @@
       </a>
   </header>
   <main>
+    <section class="usage-callout" id="usage-callout" aria-label="How to use this page">
+        <div class="callout-row">
+            <div class="callout-step">
+                <div class="callout-step-num">1</div>
+                <div class="callout-step-body">
+                    <strong>Launch a full Project Workspace</strong>
+                    <p>Spin up a cloud environment with every lesson preloaded — no local setup needed.</p>
+                    <div class="callout-actions">
+                        <button class="workspace-btn" onclick="openBrevModal()" title="Launch in Brev">
+                            <img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt=""> Launch in Brev
+                        </button>
+                        <button class="workspace-btn" onclick="openQbraidModal()" title="Launch on qBraid">
+                            <img class="qbraid-icon" src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt=""> Launch on qBraid
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="callout-step">
+                <div class="callout-step-num">2</div>
+                <div class="callout-step-body">
+                    <strong>Or open lessons individually</strong>
+                    <p>Click <em>Get Started</em> on any lesson below to open the notebook in <em>Colab</em> or view the <em>GitHub source</em>.</p>
+                </div>
+            </div>
+            <div class="callout-step">
+                <div class="callout-step-num">3</div>
+                <div class="callout-step-body">
+                    <strong>Filter or build your own pathway</strong>
+                    <p>Use the difficulty filters below, or click <em>+ Create Custom Pathway</em> to assemble your own study plan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="filter-bar" id="filter-controls">
         <div class="filter-group">
             <span class="filter-label">Filter Notebooks:</span>
@@ -487,7 +613,8 @@
             { name: "Magic State Distillation", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb" },
             { name: "Toric and Surface Codes", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb" },
             { name: "qLDPC Codes", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb" },
-            { name: "Decoder Metrics and Parallel Window Decoding", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb" }
+            { name: "Decoder Metrics and Parallel Window Decoding", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb" },
+            { name: "Detector Error Models and Real-Time Decoding", difficulty: "adv", isNew: true, colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb" }
         ]
     },
     {
@@ -587,43 +714,34 @@
             <ul class="notebook-list" aria-label="${m.title} Notebooks">
                 ${m.notebooks.map(nb => `
                     <li class="notebook-item" data-difficulty="${nb.difficulty || 'intro'}" data-new="${nb.isNew || false}">
-                        <span class="nb-name" title="${nb.name}">
-                            ${nb.name}
-                            ${nb.isNew ? '<span class="new-badge">NEW</span>' : ''}
-                        </span>
-                        <div class="action-badges">
-                            ${nb.type === 'tool' 
+                        <div class="nb-row">
+                            <span class="nb-name" title="${nb.name}">
+                                ${nb.name}
+                                ${nb.isNew ? '<span class="new-badge">NEW</span>' : ''}
+                            </span>
+                            ${nb.type === 'tool'
                                 ? `<a class="badge-link badge-tool" href="${nb.url}" target="_blank">Open</a>`
-                                : `<a class="badge-link badge-colab" href="${nb.colab}" target="_blank">Run</a>
-                                   <a class="badge-link badge-gh" href="${nb.gh || '#'}" target="_blank">View</a>`
+                                : `<button class="get-started-btn" onclick="toggleLessonActions(this)" aria-expanded="false">Get Started <span class="chev">▾</span></button>`
                             }
                         </div>
+                        ${nb.type === 'tool' ? '' : `
+                        <div class="lesson-actions">
+                            <a class="lesson-action-btn" href="${nb.colab}" target="_blank" rel="noopener">
+                                <img src="https://colab.research.google.com/assets/colab-badge.svg" alt=""> Open notebook in Colab
+                            </a>
+                            <a class="lesson-action-btn" href="${nb.gh || '#'}" target="_blank" rel="noopener">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg> View GitHub source
+                            </a>
+                        </div>`}
                     </li>
                 `).join('')}
             </ul>
           </div>
-          
-          <div class="launch-footer">
-            <div class="launch-section">
-                <div class="launch-label">Project Workspace <span class="launch-sub">(Full Repo Access)</span></div>
-                <div class="launch-row">
-                    <button class="launch-btn" onclick="openBrevModal()" title="Launch in Brev">
-                        <img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt="Brev"/>
-                    </button>
-                    
-                    <button class="launch-btn" onclick="openQbraidModal()" title="Launch in qBraid">
-                        <img src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="qBraid" style="background:#222; border-radius:2px; padding:2px;"/>
-                    </button>
-                </div>
-            </div>
-            
-            <div style="border-top: 1px dashed #444; margin: 4px 0 8px 0;"></div>
 
+          <div class="launch-footer">
             <div class="launch-section" style="margin-bottom:0;">
-                <div class="launch-label">Run, View, or Share <span class="launch-sub"></span></div>
                 <div class="launch-row">
-                    <button class="launch-btn" onclick="toggleMode('${m.id}', 'colab', this)" title="Open in Colab"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Colab"/></button>
-                    <button class="launch-btn gh-btn" onclick="toggleMode('${m.id}', 'gh', this)" title="View in GitHub"><svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></button>
+                    <span class="launch-label" style="flex: 1;">Share this Pathway</span>
                     <a href="${m.isCustom ? '#' : '?track=' + m.id}" class="share-btn" onclick="copyLink(event, '${m.id}', ${m.isCustom})" title="Copy link to module">🔗</a>
                 </div>
             </div>
@@ -654,11 +772,19 @@
   }
 
   // 4. INTERACTION
-  function toggleMode(cardId, mode, btn) {
-      const card = document.getElementById(cardId);
-      if(mode === 'colab') card.classList.toggle('colab-active');
-      else if(mode === 'gh') card.classList.toggle('gh-active');
-      btn.classList.toggle('active');
+  function toggleLessonActions(btn) {
+      const item = btn.closest('.notebook-item');
+      const wasOpen = item.classList.contains('expanded');
+      // Collapse any other open rows across all cards
+      document.querySelectorAll('.notebook-item.expanded').forEach(el => {
+          el.classList.remove('expanded');
+          const b = el.querySelector('.get-started-btn');
+          if (b) b.setAttribute('aria-expanded', 'false');
+      });
+      if (!wasOpen) {
+          item.classList.add('expanded');
+          btn.setAttribute('aria-expanded', 'true');
+      }
   }
 
   function copyLink(e, cardId, isCustom) {
