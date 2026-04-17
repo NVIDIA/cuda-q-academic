@@ -143,7 +143,7 @@ jobs:
             galois \
             torch \
             scikit-learn \
-            cudaq-solvers[gqe] \
+            libgfortran5 \
             matplotlib-venn
 
       - name: Run solution notebooks — ${{ matrix.module }}
