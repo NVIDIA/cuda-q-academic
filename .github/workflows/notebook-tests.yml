@@ -132,6 +132,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq && apt-get install -y -qq libgfortran5
+
       - name: Install Jupyter and dependencies
         run: |
           pip install --quiet --upgrade \
@@ -143,7 +147,6 @@ jobs:
             galois \
             torch \
             scikit-learn \
-            libgfortran5 \
             matplotlib-venn
 
       - name: Run solution notebooks — ${{ matrix.module }}
