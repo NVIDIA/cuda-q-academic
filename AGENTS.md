@@ -7,12 +7,24 @@ Instructions for AI coding agents (Claude Code, Copilot, Cursor, Codex, etc.) wo
 
 CUDA-Q Academic is a collection of Jupyter notebooks that teach quantum computing with [CUDA-Q](https://developer.nvidia.com/cuda-q). It is organized as nine self-contained lesson modules, each of which lives in a top-level folder. Human-facing overview: [README.md](README.md). Authoritative curriculum + launch page (hosted): https://nvidia.github.io/cuda-q-academic/learningpath.html.
 
+The authoritative machine-readable content catalog in this repo is [curriculum.json](curriculum.json). It is the source of truth for lesson discovery, track membership, prerequisites, difficulty, keywords, summaries, and the live visualization-gallery widget inventory.
 
-## Discovering what a lesson covers  — **primary behavioral instruction**
+## Content inventory  — **primary behavioral instruction**
 
-When a user asks "what does lesson X cover?", "which notebook teaches Y?", "what are the prerequisites for Z?", or similar:
+When a user asks what content exists, which track or lesson covers a topic, what the prerequisites or difficulty are, which widgets are live, or where to deep-link them, start with [curriculum.json](curriculum.json).
 
-1. Locate the lesson folder (see **Repository layout** below).
+1. Use `track_order` plus `tracks` to enumerate the nine learning paths. A track's ordered `lesson_ids` list is the canonical lesson sequence for that path.
+2. Use `lessons` to resolve a lesson's title, links, prerequisites, difficulty, keywords, summary, and cross-track membership. Shared notebooks appear once and may be referenced by multiple tracks.
+3. Use `widget_gallery_order` plus `widgets` to enumerate the live Visualization Gallery. Widget source files may live on the `widgets-as-html` branch even when they are absent from `main`; rely on each widget's `source_url` and `source_repo_path`.
+4. When a lesson has `source_kind == "external_notebook"`, trust the catalog link instead of searching for a local file in this repo.
+5. When `curriculum.json` and a notebook intro disagree, treat that as drift and update both in the same change.
+
+
+## Inspecting a notebook directly  — **secondary detail source**
+
+When a user needs notebook-level detail beyond what is in `curriculum.json` (for example the full "What You Will Do" list, CUDA-Q APIs used, or GPU requirement), inspect the notebook itself:
+
+1. Resolve the lesson in [curriculum.json](curriculum.json) first when possible, then locate the notebook path (see **Repository layout** below).
 2. For each `.ipynb` in that folder, parse the JSON and find the **first cell whose `cell_type == "markdown"`**. (Most notebooks open with an SPDX license code cell at index 0; the intro markdown cell is therefore at index 1. A few notebooks — e.g. `ai-for-quantum/01_compiling_unitaries_diffusion.ipynb` — place the markdown at index 0. Always use *first markdown cell*, not a fixed index.)
 3. That cell follows a fixed schema defined by [notebook_template.ipynb](notebook_template.ipynb):
 
@@ -36,7 +48,7 @@ When a user asks "what does lesson X cover?", "which notebook teaches Y?", "what
    **Solutions:** [`solutions/<notebook>_solutions.ipynb`](solutions/...)
    ```
 
-4. Quote from these fields when answering the user. **Do not infer lesson content from the filename alone** — filenames are terse and frequently ambiguous.
+4. Quote from these fields when answering the user or when validating/updating `curriculum.json`. **Do not infer lesson content from the filename alone** — filenames are terse and frequently ambiguous.
 5. **Detect GPU requirement.** Scan every markdown cell for the literal text `GPU Required` (emitted by the green callout div defined in [notebook_template.ipynb](notebook_template.ipynb)). When present, the notebook must be run on a GPU-equipped environment; report this alongside the lesson content. Do **not** match on the brand-green color `#76b900` alone — the template reuses it for Exercise callouts, so it is not a reliable GPU signal. Absence of the `GPU Required` text means the notebook is expected to run on CPU.
 6. If the expected labeled sections are missing, the notebook may predate the template. Fall back to the first ~200 words of markdown content and flag the gap to the user.
 
@@ -78,6 +90,7 @@ cuda-q-academic/
 ├── ai-for-quantum/               # AI for Quantum
 ├── chemistry-simulations/        # VQE, ADAPT-VQE, QM/MM, Krylov
 ├── hybrid-workflows/             # Hybrid classical–quantum workflows
+├── curriculum.json               # canonical lesson/widget catalog for agents
 ├── Guide-to-cuda-q-backends.ipynb
 ├── notebook_template.ipynb
 ├── Sample-Syllabus.md
@@ -111,6 +124,7 @@ Each lesson folder contains:
 When adding or editing lessons:
 
 - Follow [notebook_template.ipynb](notebook_template.ipynb) exactly for new notebooks: SPDX license cell at index 0, intro markdown cell with the full labeled schema at index 1, then the Colab install cell, kernel-restart note, imports, and numbered `## 1.`, `## 2.`, … sections with `---` horizontal rules between them.
+- Update [curriculum.json](curriculum.json) whenever lesson metadata changes: new notebook, renamed notebook, changed prerequisites, changed summary, changed track membership, or changed lesson difficulty/keywords.
 - Place solution notebooks under the module's `solutions/` subfolder, named `<notebook_name>_solutions.ipynb`.
 - Put images under `images/` (or `Images/` if the module already uses that capitalization — match what exists).
 - Update the module's local `README.md` when adding or renaming notebooks.
@@ -134,12 +148,14 @@ Before claiming a change is complete:
 - GitHub Pages serves from the **`widgets-as-html` branch**, not `main`.
 - [learningpath.html](https://nvidia.github.io/cuda-q-academic/learningpath.html) and [visualization-gallery.html](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html) live on `widgets-as-html`.
 - When a new module is added to `main`, it must also be registered in `learningpath.html` on `widgets-as-html` for it to appear in the curriculum builder. That is a **separate branch and a separate pull request**.
+- When the live widget set changes, update [curriculum.json](curriculum.json) in `main` and update `visualization-gallery.html` on `widgets-as-html`; these are related but separate changes.
 - Do not attempt to edit `learningpath.html` from `main` — it will not be there.
 
 
 ## What NOT to do
 
 - Do not guess lesson content from filenames; use the intro-cell protocol above.
+- Do not maintain a second handwritten lesson/widget catalog outside [curriculum.json](curriculum.json), the notebook intro cells, and the gallery page.
 - Do not commit solution code into the main-track notebook cells; solutions live in `solutions/`.
 - Do not add per-module marketing prose or prerequisites to the root [README.md](README.md) — that content belongs on the Learning Paths page.
 - Do not edit `learningpath.html` from the `main` branch.
