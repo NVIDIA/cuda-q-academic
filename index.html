@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUDA-Q Academic</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * , *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --nvidia-green: #76b900;
+    --nvidia-dark: #1A1A1A;
+    --nvidia-mid: #2A2A2A;
+    --nvidia-accent: #444444;
+    --nvidia-light: #E0E0E0;
+    --nvidia-gray: #AAAAAA;
+  }
+
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    background:
+      radial-gradient(circle at top left, rgba(118, 185, 0, 0.08), transparent 22rem),
+      radial-gradient(circle at bottom right, rgba(118, 185, 0, 0.06), transparent 26rem),
+      var(--nvidia-dark);
+    color: var(--nvidia-light);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .widget-container {
+    background-color: var(--nvidia-mid);
+    border: 1px solid var(--nvidia-accent);
+    border-top: 4px solid var(--nvidia-green);
+    border-radius: 8px;
+    padding: 32px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--nvidia-accent);
+    padding-bottom: 24px;
+  }
+
+  h1 {
+    color: var(--nvidia-green);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 16px 0;
+    font-weight: 700;
+  }
+
+  .summary-text {
+    color: var(--nvidia-gray);
+    margin: 0 auto 14px;
+    max-width: 860px;
+    line-height: 1.6;
+  }
+
+  .subtle-note {
+    color: var(--nvidia-gray);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .section-header {
+    margin: 0 0 18px 0;
+    color: var(--nvidia-light);
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--nvidia-accent);
+  }
+
+  .pathway-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .pathway-card {
+    background-color: #222;
+    border: 1px solid var(--nvidia-accent);
+    border-top: 2px solid var(--nvidia-green);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .pathway-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--nvidia-gray);
+    transition: transform 0.2s;
+  }
+
+  .card-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-kicker {
+    color: var(--nvidia-green);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+
+  .card-title h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: white;
+    font-weight: 700;
+  }
+
+  .card-title p {
+    margin: 10px 0 0 0;
+    font-size: 0.92rem;
+    color: var(--nvidia-gray);
+    line-height: 1.6;
+  }
+
+  .launch-footer {
+    margin-top: auto;
+    border-top: 1px dashed var(--nvidia-accent);
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .launch-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .btn-nvidia-primary {
+    background: var(--nvidia-mid);
+    color: white;
+    border: 1px solid var(--nvidia-accent);
+    border-bottom: 2px solid var(--nvidia-green);
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn-nvidia-primary:hover {
+    background: var(--nvidia-green);
+    color: black;
+    border-color: var(--nvidia-green);
+  }
+
+  .page-footer {
+    margin-top: auto;
+    padding-top: 28px;
+    text-align: center;
+    border-top: 1px solid var(--nvidia-accent);
+    color: var(--nvidia-gray);
+    font-size: 0.85rem;
+  }
+
+  .page-footer a {
+    color: var(--nvidia-green);
+    text-decoration: none;
+  }
+
+  .page-footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 900px) {
+    .pathway-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 18px 12px; }
+    .widget-container { padding: 18px; min-height: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="widget-container">
+  <header>
+    <h1>CUDA-Q Academic</h1>
+    <p class="summary-text">
+      CUDA-Q Academic is NVIDIA's open curriculum for hybrid quantum-classical computing, built around
+      interactive notebooks and browser-based visualizations for students, instructors, and self-learners
+      exploring quantum computing with CUDA-Q.
+    </p>
+    <p class="subtle-note">
+      Start from the repository, jump into the lesson planner, or explore the visualization gallery.
+    </p>
+  </header>
+
+  <main>
+    <h2 class="section-header">Get Started</h2>
+    <div class="pathway-grid">
+      <article class="pathway-card">
+        <div class="card-content">
+          <div class="card-kicker">Source</div>
+          <div class="card-title">
+            <h2>Main Repository</h2>
+            <p>
+              Browse the notebooks, curriculum files, documentation, and source materials in the
+              canonical CUDA-Q Academic repository.
+            </p>
+          </div>
+        </div>
+        <div class="launch-footer">
+          <div class="launch-row">
+            <a class="btn-nvidia-primary" href="https://github.com/NVIDIA/cuda-q-academic">Open GitHub</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pathway-card">
+        <div class="card-content">
+          <div class="card-kicker">Launch</div>
+          <div class="card-title">
+            <h2>Lesson Planner</h2>
+            <p>
+              Explore the learning paths, compare tracks, and jump directly into the curriculum by
+              topic and difficulty.
+            </p>
+          </div>
+        </div>
+        <div class="launch-footer">
+          <div class="launch-row">
+            <a class="btn-nvidia-primary" href="learningpath.html">Open Learning Paths</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pathway-card">
+        <div class="card-content">
+          <div class="card-kicker">Explore</div>
+          <div class="card-title">
+            <h2>Visualization Gallery</h2>
+            <p>
+              Open the interactive widget gallery for visual intuition around algorithms, error
+              correction, optimization, and quantum workflows.
+            </p>
+          </div>
+        </div>
+        <div class="launch-footer">
+          <div class="launch-row">
+            <a class="btn-nvidia-primary" href="visualization-gallery.html">Open Gallery</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <p>
+      The live site is hosted here. The machine-readable curriculum catalog lives in the
+      repository's <code>main</code> branch.
+      <br>
+      See <a href="llms.txt">llms.txt</a> for agent-facing navigation guidance.
+    </p>
+  </footer>
+</div>
+</body>
+</html>

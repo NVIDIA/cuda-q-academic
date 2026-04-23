@@ -1,0 +1,35 @@
+# CUDA-Q Academic
+
+> Live site for CUDA-Q Academic learning paths and browser-based visualization widgets.
+
+This branch serves the deployed CUDA-Q Academic website. The authoritative machine-readable curriculum catalog is maintained in the `main` branch at [curriculum.json](https://github.com/NVIDIA/cuda-q-academic/blob/main/curriculum.json).
+
+Use `curriculum.json` as the source of truth for:
+
+- learning-path and track inventory
+- lesson titles, prerequisites, difficulty, keywords, and summaries
+- shared-lesson membership across tracks
+- live widget inventory and widget metadata
+
+Use this deployed branch for the public URLs that learners and agents should open in a browser.
+
+## Core Resources
+
+- [curriculum.json (main branch)](https://github.com/NVIDIA/cuda-q-academic/blob/main/curriculum.json): canonical machine-readable catalog for tracks, lessons, and widgets
+- [Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html): live entry point for the nine curriculum tracks
+- [Visualization Gallery](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html): live widget gallery
+- [GitHub repository](https://github.com/NVIDIA/cuda-q-academic): canonical source repository
+- [README](https://github.com/NVIDIA/cuda-q-academic/blob/main/README.md): human overview of the curriculum
+
+## How To Navigate
+
+- Start with [curriculum.json](https://github.com/NVIDIA/cuda-q-academic/blob/main/curriculum.json) to discover tracks, lessons, prerequisites, difficulty, summaries, and widgets.
+- Use `tracks[*].learning_path_url` from the catalog to deep-link learners to the live Learning Paths page.
+- Use `widgets[*].live_url` from the catalog to deep-link learners to live browser widgets on this deployed site.
+- Use `lessons[*].link` from the catalog for notebook-level lesson links in the main repository.
+- Treat this deployed branch as the runtime surface for hosted HTML pages, not as the authoritative metadata catalog.
+
+## Optional
+
+- [Widget source branch](https://github.com/NVIDIA/cuda-q-academic/tree/widgets-as-html): deployed-site source files
+- [AGENTS.md](https://github.com/NVIDIA/cuda-q-academic/blob/main/AGENTS.md): maintainer instructions for coding agents working in the repository

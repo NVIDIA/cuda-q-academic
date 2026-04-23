@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pauli Propagation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { 
+            --nvidia-green: #76b900;
+            --nvidia-green-dark: #5e9400;
+            --nvidia-dark: #1A1A1A;
+            --nvidia-mid: #2A2A2A;
+            --nvidia-accent: #444444;
+            --nvidia-light: #E0E0E0;
+            --nvidia-gray: #AAAAAA;
+        }
+        .widget-container {
+            background-color: var(--nvidia-mid);
+            border: 1px solid var(--nvidia-accent);
+            border-top: 4px solid var(--nvidia-green);
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) { .widget-container { padding: 32px; } }
+        .widget-container h1 {
+            color: var(--nvidia-green);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            margin-top: 0;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .widget-container .summary-text {
+            color: var(--nvidia-gray);
+            margin-bottom: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .instructions-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--nvidia-accent);
+            border-radius: 8px;
+        }
+        .instructions-section h2 {
+            color: var(--nvidia-green);
+            font-size: 1.1rem;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+        }
+        .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
+        .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+        .skip-link:focus { top: 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+        .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
+        .widget-footer-links a:hover { color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+        .widget-footer-links a:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+        body { 
+            background-color: var(--nvidia-dark); 
+            color: var(--nvidia-light); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+        }
+        .nv-green { color: var(--nvidia-green); }
+        .bg-nv-green { background-color: var(--nvidia-green); }
+        .border-nv-green { border-color: var(--nvidia-green); }
+        
+        .circuit-container {
+            /* Changed for Mobile: Flex column on small, Row on lg */
+            display: flex; 
+            flex-direction: column;
+            background: linear-gradient(145deg, #0f0f0f, #050505); 
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 20px; 
+            min-height: 280px; 
+            position: relative; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        @media (min-width: 1024px) {
+            .circuit-container {
+                flex-direction: row;
+                align-items: center;
+                padding: 40px 24px; 
+            }
+        }
+
+        /* Wrapper to handle scrolling of circuit on mobile */
+        .circuit-scroll-area {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 10px; /* Space for scrollbar */
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 1024px) {
+            .circuit-scroll-area {
+                margin-bottom: 0;
+                overflow-x: visible;
+                padding-bottom: 0;
+            }
+        }
+
+        /* Canonical circuit CSS — same as CNOT vis and Bloch sphere vis (SVG only, same classes) */
+        .circuit-wire { stroke: #E0E0E0; stroke-width: 2; }
+        .circuit-gate-box { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
+        .circuit-gate-text { fill: #E0E0E0; font-family: Inter, sans-serif; font-weight: bold; font-size: 16px; text-anchor: middle; dominant-baseline: middle; }
+        .circuit-gate-param { fill: #E0E0E0; font-family: Inter, sans-serif; font-weight: bold; font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+        .circuit-qubit-label { fill: #76b900; font-family: Inter, sans-serif; font-size: 14px; font-weight: bold; }
+        .circuit-ctrl-dot { fill: #76b900; stroke: none; }
+        .circuit-ctrl-line { stroke: #E0E0E0; stroke-width: 2; }
+        .circuit-target-circle { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
+        .circuit-target-plus { stroke: #76b900; stroke-width: 2; }
+        
+        /* Controls Area */
+        .controls-area {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            width: 100%;
+            padding-top: 20px;
+            border-top: 1px solid #222;
+        }
+
+        @media (min-width: 1024px) {
+            .controls-area {
+                flex-direction: column;
+                width: auto;
+                height: 180px;
+                padding-top: 0;
+                padding-left: 24px;
+                border-top: none;
+                border-left: 1px solid #222;
+                margin-left: 24px;
+            }
+        }
+
+        .obs-selector {
+            width: 48px; 
+            height: 48px; 
+            border: 2px solid #333; 
+            border-radius: 10px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-weight: 900; 
+            font-size: 1.3rem; 
+            cursor: pointer; 
+            background: #111;
+            transition: all 0.2s;
+        }
+        .obs-selector:hover {
+            border-color: var(--nvidia-green);
+            background: #1a1a1a;
+        }
+        .step-card { 
+            background: #0a0a0a; 
+            border-left: 3px solid #222; 
+            padding: 14px; 
+            font-size: 0.9rem;
+            transition: border-color 0.3s, background 0.2s;
+            overflow-x: auto;
+        }
+        .step-card:hover {
+            border-left-color: var(--nvidia-green);
+        }
+        .step-card.hover-active {
+            border-left-color: var(--nvidia-green) !important;
+            background: rgba(118, 185, 0, 0.08);
+        }
+        .gate-hover-group { cursor: pointer; transition: filter 0.15s; }
+        .gate-hover-group:hover, .gate-hover-group.hover-active { filter: url(#gate-glow); }
+        .gate-hover-group:focus { outline: 3px solid var(--nvidia-green); outline-offset: 2px; filter: url(#gate-glow); }
+        .gate-badge-circle { fill: #76b900; stroke: #1A1A1A; stroke-width: 1.5; }
+        .gate-badge-text { fill: #000000; font-family: Inter, sans-serif; font-weight: 700; font-size: 11px; text-anchor: middle; dominant-baseline: middle; }
+        .step-badge { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--nvidia-green); color: #000; font-size: 10px; font-weight: 700; margin-right: 6px; flex-shrink: 0; }
+        .tab-btn { 
+            padding: 12px 16px; 
+            background: #111; 
+            color: #666; 
+            font-weight: 700; 
+            border-radius: 10px 10px 0 0; 
+            border: 1px solid #222;
+            border-bottom: none;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            flex: 1;
+        }
+        @media (min-width: 768px) {
+            .tab-btn { padding: 12px 24px; font-size: 1rem; flex: none; }
+        }
+
+        .tab-btn.active { 
+            background: var(--nvidia-green); 
+            color: #000; 
+            border-color: var(--nvidia-green);
+        }
+        .matrix-table {
+            width: 100%;
+            font-size: 11px;
+            border-collapse: collapse;
+        }
+        .matrix-table th, .matrix-table td {
+            border: 1px solid #333;
+            padding: 6px 4px;
+            text-align: center;
+        }
+        .matrix-table th { background: #111; color: var(--nvidia-green); font-weight: 800; }
+        .matrix-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="widget-container" id="main-content">
+        <header>
+            <h1>Pauli Propagation</h1>
+            <p class="summary-text">Simulate the backward flow and branching of observables through quantum circuits.</p>
+        </header>
+        <section class="instructions-section" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">Instructions</h2>
+            <ol>
+                <li>Select a circuit (Ex 1 or Ex 2). Click the observable buttons (X, Y, Z) for each qubit to set the initial observable.</li>
+                <li>Watch the Propagation History: observables are pushed backward through the circuit with Heisenberg rules (H, S, CNOT, RX).</li>
+                <li>The Expectation Value is the sum of coefficients for branches containing only I or Z.</li>
+            </ol>
+            <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons.</p>
+        </section>
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+        <div class="flex gap-1 overflow-x-auto">
+            <button id="btn1" onclick="switchCircuit(1)" class="tab-btn active" tabindex="0">Ex 1: Clifford Chain</button>
+            <button id="btn2" onclick="switchCircuit(2)" class="tab-btn" tabindex="0">Ex 2: Varying Rotations</button>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+            <div class="xl:col-span-8 space-y-8">
+                <div class="circuit-container">
+                    
+                    <div class="circuit-scroll-area">
+                        <div id="circuitDisplay" class="flex flex-1 min-h-[180px]"></div>
+                    </div>
+
+                    <div class="controls-area">
+                        <div class="text-[10px] text-zinc-500 uppercase font-bold hidden lg:block mb-2 text-center">Initial</div>
+                        <div class="flex flex-col items-center">
+                            <span class="lg:hidden text-[10px] text-zinc-500 font-bold mb-1">Q0</span>
+                            <button id="obs0" onclick="toggleObservable(0)" class="obs-selector" tabindex="0" aria-label="Toggle Q0 observable">X</button>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="lg:hidden text-[10px] text-zinc-500 font-bold mb-1">Q1</span>
+                            <button id="obs1" onclick="toggleObservable(1)" class="obs-selector" tabindex="0" aria-label="Toggle Q1 observable">X</button>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="lg:hidden text-[10px] text-zinc-500 font-bold mb-1">Q2</span>
+                            <button id="obs2" onclick="toggleObservable(2)" class="obs-selector" tabindex="0" aria-label="Toggle Q2 observable">Y</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end border-b border-zinc-800 pb-2">
+                        <h3 class="text-xl font-bold nv-green">Propagation History</h3>
+                        <span class="text-[10px] text-zinc-500 uppercase font-bold hidden md:inline">Heisenberg Picture (Right to Left)</span>
+                    </div>
+                    <div id="propHistory" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-4 space-y-6">
+                <div id="finalScore" class="p-6 bg-zinc-900 border border-nv-green rounded-2xl shadow-lg">
+                    <div class="text-xs uppercase font-black opacity-60 text-nv-green mb-1">Expectation Value</div>
+                    <div id="scoreVal" class="text-4xl font-black nv-green mb-3">1.0000</div>
+                    <div class="text-[11px] text-gray-400 leading-relaxed">
+                        <p>$\langle 000 | O_{propagated} | 000 \rangle$</p>
+                        <p class="mt-2 opacity-60">Sum of coefficients for branches containing only <strong>I</strong> or <strong>Z</strong> components.</p>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-xl">
+                    <h3 class="font-black mb-4 nv-green border-b border-zinc-700 pb-3 text-sm uppercase tracking-widest">Heisenberg Rules</h3>
+                    <div class="space-y-5 text-[12px] leading-relaxed">
+                        <section>
+                            <span class="text-white font-bold block mb-1 underline">Clifford Gates (Backward):</span>
+                            <div class="grid grid-cols-1 gap-2 text-gray-400">
+                                <div class="bg-black/40 p-2 rounded">
+                                    <strong class="text-nv-green">Hadamard (H):</strong> $Z \leftrightarrow X, Y \to -Y$
+                                </div>
+                                <div class="bg-black/40 p-2 rounded">
+                                    <strong class="text-nv-green">Phase (S):</strong> $X \to Y, Y \to -X$
+                                </div>
+                                <div class="bg-black/40 p-2 rounded">
+                                    <strong class="text-nv-green">Rotation (RX):</strong> Branching logic
+                                    <div class="mt-1 text-nv-green/80 italic">$Z \to \cos\theta Z + \sin\theta Y$</div>
+                                    <div class="text-nv-green/80 italic">$Y \to \cos\theta Y - \sin\theta Z$</div>
+                                    <div class="text-nv-green/80 italic mt-1 font-bold border-t border-zinc-700 pt-1">$X \to X$ (Identity)</div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <hr class="border-zinc-800">
+
+                        <section>
+                            <span class="text-white font-bold block mb-2">CNOT Mapping:</span>
+                            <table class="matrix-table text-zinc-300">
+                                <thead>
+                                    <tr><th>In (R)</th><th>Out (L)</th><th>Phase</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>$XI$</td><td>$XX$</td><td>$+1$</td></tr>
+                                    <tr><td>$YI$</td><td>$YX$</td><td>$+1$</td></tr>
+                                    <tr><td>$ZI$</td><td>$ZI$</td><td>$+1$</td></tr>
+                                    <tr class="border-t-2 border-zinc-700"><td>$IX$</td><td>$IX$</td><td>$+1$</td></tr>
+                                    <tr><td>$IY$</td><td>$ZY$</td><td>$+1$</td></tr>
+                                    <tr><td>$IZ$</td><td>$ZZ$</td><td>$+1$</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="mt-4 p-3 bg-black rounded border border-zinc-800 font-mono text-[10px] text-zinc-400">
+                                <strong class="text-nv-green uppercase block mb-1">Product Rule:</strong>
+                                To propagate $X \otimes X$, multiply the results:
+                                <br>$(XI \to XX) \cdot (IX \to IX) = \mathbf{XI}$
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const circuits = {
+            1: [
+                { type: 'H', q1: 0 },
+                { type: 'CNOT', q1: 0, q2: 1 },
+                { type: 'S', q1: 1 },
+                { type: 'CNOT', q1: 1, q2: 2 },
+                { type: 'H', q1: 2 }
+            ],
+            2: [
+                { type: 'RX', q1: 0, theta: Math.PI/4, label: 'π/4' },   
+                { type: 'CNOT', q1: 0, q2: 1 },
+                { type: 'RX', q1: 1, theta: Math.PI/8, label: 'π/8' },  
+                { type: 'CNOT', q1: 1, q2: 2 }
+            ]
+        };
+
+        let currentId = 1;
+        let observable = ["X", "X", "Y"];
+        const PAULIS = ["I", "X", "Y", "Z"];
+
+        const multPauli = (a, b) => {
+            if (a === 'I') return { p: b, s: 0 };
+            if (b === 'I') return { p: a, s: 0 };
+            if (a === b) return { p: 'I', s: 0 };
+            const table = {
+                'XY': { p: 'Z', s: 1 }, 'YX': { p: 'Z', s: 3 },
+                'YZ': { p: 'X', s: 1 }, 'ZY': { p: 'X', s: 3 },
+                'ZX': { p: 'Y', s: 1 }, 'XZ': { p: 'Y', s: 3 }
+            };
+            return table[a + b];
+        };
+
+        function switchCircuit(id) {
+            currentId = id;
+            document.getElementById('btn1').classList.toggle('active', id === 1);
+            document.getElementById('btn2').classList.toggle('active', id === 2);
+            renderAndCalculate();
+        }
+
+        function toggleObservable(idx) {
+            const next = (PAULIS.indexOf(observable[idx]) + 1) % PAULIS.length;
+            observable[idx] = PAULIS[next];
+            document.getElementById(`obs${idx}`).innerText = observable[idx];
+            renderAndCalculate();
+        }
+
+        function renderAndCalculate() {
+            renderCircuit();
+            calculatePropagation();
+            setupHoverLinks();
+        }
+
+        function renderCircuit() {
+            const circuit = circuits[currentId];
+            const nCols = circuit.length;
+            const LEFT = 32, COL_W = 80;
+            const WIRE_YS = [40, 100, 160];
+            const svgW = LEFT + nCols * COL_W + 20;
+            const svgH = 210;
+            const GATE_W = 44, GATE_H = 36, GATE_W_P = 56, GATE_H_P = 48;
+
+            let svg = `<svg width="100%" height="${svgH}" viewBox="0 -10 ${svgW} ${svgH}" aria-label="Quantum circuit">`;
+            svg += `<defs><filter id="gate-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/><feFlood flood-color="#76b900" flood-opacity="0.7"/><feComposite in2="blur" operator="in" result="glow"/><feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+            for (let q = 0; q < 3; q++) {
+                svg += `<line x1="${LEFT}" y1="${WIRE_YS[q]}" x2="${LEFT + nCols * COL_W}" y2="${WIRE_YS[q]}" class="circuit-wire" />`;
+                svg += `<text x="8" y="${WIRE_YS[q] + 4}" class="circuit-qubit-label">Q${q}</text>`;
+            }
+            circuit.forEach((gate, i) => {
+                const cx = LEFT + i * COL_W + COL_W / 2;
+                const stepNum = circuit.length - i;
+                svg += `<g class="gate-hover-group" data-gate-index="${i}" tabindex="0" role="button" aria-label="Gate ${gate.type}, propagation step ${stepNum}">`;
+                if (gate.type === 'CNOT') {
+                    const y0 = WIRE_YS[gate.q1], y1 = WIRE_YS[gate.q2];
+                    svg += `<line x1="${cx}" y1="${y0}" x2="${cx}" y2="${y1}" class="circuit-ctrl-line" />`;
+                    svg += `<circle cx="${cx}" cy="${y0}" r="5" class="circuit-ctrl-dot" />`;
+                    svg += `<circle cx="${cx}" cy="${y1}" r="10" class="circuit-target-circle" />`;
+                    svg += `<line x1="${cx - 10}" y1="${y1}" x2="${cx + 10}" y2="${y1}" class="circuit-target-plus" />`;
+                    svg += `<line x1="${cx}" y1="${y1 - 10}" x2="${cx}" y2="${y1 + 10}" class="circuit-target-plus" />`;
+                    const badgeY = Math.min(y0, y1) - 18;
+                    svg += `<circle cx="${cx}" cy="${badgeY}" r="9" class="gate-badge-circle"/>`;
+                    svg += `<text x="${cx}" y="${badgeY + 1}" class="gate-badge-text">${stepNum}</text>`;
+                } else {
+                    const y = WIRE_YS[gate.q1];
+                    const isParam = gate.type === 'RX';
+                    const w = isParam ? GATE_W_P : GATE_W, h = isParam ? GATE_H_P : GATE_H;
+                    svg += `<rect x="${cx - w/2}" y="${y - h/2}" width="${w}" height="${h}" class="circuit-gate-box" rx="4" />`;
+                    if (isParam) {
+                        svg += `<text x="${cx}" y="${y - 6}" class="circuit-gate-text" style="font-size:14px">${gate.type}</text>`;
+                        svg += `<text x="${cx}" y="${y + 10}" class="circuit-gate-param">θ = ${gate.label}</text>`;
+                    } else {
+                        svg += `<text x="${cx}" y="${y + 2}" class="circuit-gate-text">${gate.type}</text>`;
+                    }
+                    const badgeY = y - h/2 - 14;
+                    svg += `<circle cx="${cx}" cy="${badgeY}" r="9" class="gate-badge-circle"/>`;
+                    svg += `<text x="${cx}" y="${badgeY + 1}" class="gate-badge-text">${stepNum}</text>`;
+                }
+                svg += `</g>`;
+            });
+            svg += '</svg>';
+            document.getElementById('circuitDisplay').innerHTML = svg;
+        }
+
+        function calculatePropagation() {
+            const container = document.getElementById('propHistory');
+            container.innerHTML = '';
+            const circuit = circuits[currentId];
+            
+            let currentStrings = [{ paulis: [...observable], coeff: 1.0, sign: 0 }];
+
+            addStepUI("Final Measurement Basis", currentStrings);
+
+            for (let i = circuit.length - 1; i >= 0; i--) {
+                const gate = circuit[i];
+                let nextStrings = [];
+                currentStrings.forEach(entry => {
+                    nextStrings.push(...applyGateBackward(gate, entry));
+                });
+                currentStrings = consolidate(nextStrings);
+                
+                const desc = gate.type + (gate.type === 'CNOT' ? ` (Q${gate.q1}→Q${gate.q2})` : ` (Q${gate.q1})`);
+                addStepUI(`Passed through ${desc}`, currentStrings, i);
+            }
+
+            const finalValue = currentStrings.reduce((acc, s) => {
+                const isAllIZ = s.paulis.every(p => p === 'I' || p === 'Z');
+                if (!isAllIZ) return acc;
+                const signVal = [1, 0, -1, 0][s.sign]; 
+                return acc + (s.coeff * signVal);
+            }, 0);
+
+            document.getElementById('scoreVal').innerText = finalValue.toFixed(4);
+            
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        function applyGateBackward(gate, entry) {
+            let p = [...entry.paulis];
+            let s = entry.sign;
+            let c = entry.coeff;
+            const q = gate.q1;
+
+            if (gate.type === 'H') {
+                if (p[q] === 'X') p[q] = 'Z'; 
+                else if (p[q] === 'Z') p[q] = 'X'; 
+                else if (p[q] === 'Y') s = (s + 2) % 4;
+                return [{ paulis: p, coeff: c, sign: s }];
+            } 
+            else if (gate.type === 'S') {
+                if (p[q] === 'X') p[q] = 'Y'; 
+                else if (p[q] === 'Y') { p[q] = 'X'; s = (s + 2) % 4; }
+                return [{ paulis: p, coeff: c, sign: s }];
+            } 
+            else if (gate.type === 'RX') {
+                const theta = gate.theta;
+                const cos = Math.cos(theta);
+                const sin = Math.sin(theta);
+                
+                if (p[q] === 'Z') {
+                    return [
+                        { paulis: [...p], coeff: c * cos, sign: s },
+                        { paulis: (() => { let p2=[...p]; p2[q]='Y'; return p2; })(), coeff: c * sin, sign: s }
+                    ];
+                }
+                if (p[q] === 'Y') {
+                    return [
+                        { paulis: [...p], coeff: c * cos, sign: s },
+                        { paulis: (() => { let p2=[...p]; p2[q]='Z'; return p2; })(), coeff: c * sin, sign: (s + 2) % 4 }
+                    ];
+                }
+                // If p[q] === 'X' or 'I', it remains unchanged (commutes)
+                return [{ paulis: p, coeff: c, sign: s }];
+            }
+            else if (gate.type === 'CNOT') {
+                const ctrl = gate.q1, trgt = gate.q2;
+                
+                let c_spread = { c: 'I', t: 'I', s: 0 };
+                if (p[ctrl] === 'X') { c_spread.c = 'X'; c_spread.t = 'X'; }
+                else if (p[ctrl] === 'Z') { c_spread.c = 'Z'; c_spread.t = 'I'; }
+                else if (p[ctrl] === 'Y') { c_spread.c = 'Y'; c_spread.t = 'X'; }
+
+                let t_spread = { c: 'I', t: 'I', s: 0 };
+                if (p[trgt] === 'X') { t_spread.c = 'I'; t_spread.t = 'X'; }
+                else if (p[trgt] === 'Z') { t_spread.c = 'Z'; t_spread.t = 'Z'; }
+                else if (p[trgt] === 'Y') { t_spread.c = 'Z'; t_spread.t = 'Y'; }
+
+                const res_c = multPauli(c_spread.c, t_spread.c);
+                const res_t = multPauli(c_spread.t, t_spread.t);
+                p[ctrl] = res_c.p;
+                p[trgt] = res_t.p;
+                s = (s + res_c.s + res_t.s) % 4;
+                return [{ paulis: p, coeff: c, sign: s }];
+            }
+            return [{ paulis: p, coeff: c, sign: s }];
+        }
+
+        function consolidate(list) {
+            const map = new Map();
+            list.forEach(item => {
+                const key = item.paulis.join('');
+                const complexCoeff = { 
+                    real: [item.coeff, 0, -item.coeff, 0][item.sign],
+                    imag: [0, item.coeff, 0, -item.coeff][item.sign]
+                };
+                const existing = map.get(key) || { real: 0, imag: 0 };
+                map.set(key, { real: existing.real + complexCoeff.real, imag: existing.imag + complexCoeff.imag });
+            });
+            let result = [];
+            map.forEach((val, key) => {
+                const mag = Math.sqrt(val.real**2 + val.imag**2);
+                if (mag < 1e-6) return;
+                let s = 0;
+                let c = 0;
+                if (Math.abs(val.imag) < 1e-6) { s = val.real > 0 ? 0 : 2; c = Math.abs(val.real); } 
+                else if (Math.abs(val.real) < 1e-6) { s = val.imag > 0 ? 1 : 3; c = Math.abs(val.imag); } 
+                else { s = 0; c = val.real; }
+                result.push({ paulis: key.split(''), coeff: c, sign: s });
+            });
+            return result;
+        }
+
+        function addStepUI(title, strings, gateIndex) {
+            const container = document.getElementById('propHistory');
+            const card = document.createElement('div');
+            card.className = "step-card";
+            if (gateIndex !== undefined && gateIndex !== null) {
+                card.setAttribute('data-gate-index', gateIndex);
+            }
+            const stepNum = (gateIndex !== undefined && gateIndex !== null)
+                ? circuits[currentId].length - gateIndex : null;
+            const badgeHtml = stepNum !== null
+                ? `<span class="step-badge" aria-hidden="true">${stepNum}</span>` : '';
+            const signs = ["+1", "+i", "-1", "-i"];
+            const signColors = ["nv-green", "text-blue-400", "text-red-500", "text-purple-400"];
+            let content = strings.map(s => `
+                <div class="flex items-center gap-4 mt-2 first:mt-0">
+                    <span class="w-12 text-right ${signColors[s.sign]} font-black font-mono text-sm">${(s.coeff * (s.sign === 2 ? -1 : 1)).toFixed(2)}</span>
+                    <span class="text-zinc-700 h-4 w-[1px] bg-zinc-800"></span>
+                    <div class="flex gap-1">
+                        ${s.paulis.map(p => `<span class="px-2 py-0.5 bg-zinc-900 border border-zinc-700 rounded text-[10px] font-bold">${p}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+            card.innerHTML = `<div class="text-[10px] uppercase text-zinc-500 font-bold tracking-tight flex items-center">${badgeHtml}${title}</div>${content}`;
+            container.appendChild(card);
+        }
+        function setupHoverLinks() {
+            document.querySelectorAll('.gate-hover-group[data-gate-index]').forEach(g => {
+                const idx = g.getAttribute('data-gate-index');
+                g.addEventListener('mouseenter', () => {
+                    const card = document.querySelector(`.step-card[data-gate-index="${idx}"]`);
+                    if (card) card.classList.add('hover-active');
+                });
+                g.addEventListener('mouseleave', () => {
+                    const card = document.querySelector(`.step-card[data-gate-index="${idx}"]`);
+                    if (card) card.classList.remove('hover-active');
+                });
+            });
+            document.querySelectorAll('.step-card[data-gate-index]').forEach(card => {
+                const idx = card.getAttribute('data-gate-index');
+                card.addEventListener('mouseenter', () => {
+                    const gate = document.querySelector(`.gate-hover-group[data-gate-index="${idx}"]`);
+                    if (gate) gate.classList.add('hover-active');
+                });
+                card.addEventListener('mouseleave', () => {
+                    const gate = document.querySelector(`.gate-hover-group[data-gate-index="${idx}"]`);
+                    if (gate) gate.classList.remove('hover-active');
+                });
+            });
+        }
+        window.onload = renderAndCalculate;
+    </script>
+</body>
+</html>
