@@ -5,7 +5,7 @@ Use `curriculum.json` as the source of truth for all content discovery in this r
 What `curriculum.json` contains
 
 - `metadata`: scope, update date, and the policy for lesson and widget metadata.
-- `track_order`: the canonical order of the nine CUDA-Q Academic learning paths.
+- `track_order`: the canonical order of the ten CUDA-Q Academic learning paths.
 - `tracks[track_id]`: the human title, live learning-path URL, difficulty range, short track summary, and ordered `lesson_ids` for that track.
 - `lessons[lesson_id]`: the canonical lesson record with `title`, `primary_track_id`, `track_ids`, `source_kind`, `repo_path`, `link`, `difficulty`, `prerequisites`, `keywords`, `summary`, and `metadata_source`.
 - `widget_gallery_order`: the canonical order of widgets in the live Visualization Gallery.
@@ -17,9 +17,10 @@ How to navigate it
 2. To list the lessons in a path, read `tracks[track_id].lesson_ids` in order, then resolve each id in `lessons`.
 3. To answer "which lesson should I send for topic X?", search `lessons[*].keywords`, `summary`, and `prerequisites`, then use `track_ids` to map the result back to one or more tracks.
 4. To deep-link a learner to a hosted path, use `tracks[track_id].learning_path_url`.
-5. To deep-link a learner to a notebook, use `lessons[lesson_id].link`. When working locally in the repo, use `lessons[lesson_id].repo_path`.
-6. To find live widgets, iterate `widget_gallery_order` or filter `widgets[*]` by `gallery_section`, `keywords`, or `related_track_ids`.
-7. To answer a more detailed notebook question than the catalog provides, open the notebook named by `repo_path` and inspect its first markdown cell.
+5. If a newly added track has not yet been registered on the deployed `widgets-as-html` branch, `learning_path_url` may temporarily point to the top-level Learning Paths page instead of a track-specific deep link.
+6. To deep-link a learner to a notebook, use `lessons[lesson_id].link`. When working locally in the repo, use `lessons[lesson_id].repo_path`.
+7. To find live widgets, iterate `widget_gallery_order` or filter `widgets[*]` by `gallery_section`, `keywords`, or `related_track_ids`.
+8. To answer a more detailed notebook question than the catalog provides, open the notebook named by `repo_path` and inspect its first markdown cell.
 
 Important modeling rules
 

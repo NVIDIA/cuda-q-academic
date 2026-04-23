@@ -5,7 +5,7 @@ Instructions for AI coding agents (Claude Code, Copilot, Cursor, Codex, etc.) wo
 
 ## Repository purpose
 
-CUDA-Q Academic is a collection of Jupyter notebooks that teach quantum computing with [CUDA-Q](https://developer.nvidia.com/cuda-q). It is organized as nine self-contained lesson modules, each of which lives in a top-level folder. Human-facing overview: [README.md](README.md). Authoritative curriculum + launch page (hosted): https://nvidia.github.io/cuda-q-academic/learningpath.html.
+CUDA-Q Academic is a collection of Jupyter notebooks that teach quantum computing with [CUDA-Q](https://developer.nvidia.com/cuda-q). It is organized as ten self-contained lesson modules, each of which lives in a top-level folder. Human-facing overview: [README.md](README.md). Hosted curriculum and launch page: https://nvidia.github.io/cuda-q-academic/learningpath.html.
 
 The authoritative machine-readable content catalog in this repo is [curriculum.json](curriculum.json). It is the source of truth for lesson discovery, track membership, prerequisites, difficulty, keywords, summaries, and the live visualization-gallery widget inventory.
 
@@ -13,7 +13,7 @@ The authoritative machine-readable content catalog in this repo is [curriculum.j
 
 When a user asks what content exists, which track or lesson covers a topic, what the prerequisites or difficulty are, which widgets are live, or where to deep-link them, start with [curriculum.json](curriculum.json).
 
-1. Use `track_order` plus `tracks` to enumerate the nine learning paths. A track's ordered `lesson_ids` list is the canonical lesson sequence for that path.
+1. Use `track_order` plus `tracks` to enumerate the ten learning paths. A track's ordered `lesson_ids` list is the canonical lesson sequence for that path.
 2. Use `lessons` to resolve a lesson's title, links, prerequisites, difficulty, keywords, summary, and cross-track membership. Shared notebooks appear once and may be referenced by multiple tracks.
 3. Use `widget_gallery_order` plus `widgets` to enumerate the live Visualization Gallery. Widget source files may live on the `widgets-as-html` branch even when they are absent from `main`; rely on each widget's `source_url` and `source_repo_path`.
 4. When a lesson has `source_kind == "external_notebook"`, trust the catalog link instead of searching for a local file in this repo.
@@ -82,13 +82,14 @@ Apply this to every notebook in the target module and parse the `**What You Will
 ```
 cuda-q-academic/
 ├── quick-start-to-quantum/       # Quick Start to Quantum Computing
+├── simulation/                   # Quantum algorithm simulation backends
 ├── qis-examples/                 # Quantum Information Science Examples
-├── qaoa-for-max-cut/             # QAOA for Max Cut
-├── quantum-applications-to-finance/
 ├── qec101/                       # Quantum Error Correction 101
-├── dynamics101/                  # GPU-accelerated quantum dynamics
-├── ai-for-quantum/               # AI for Quantum
 ├── chemistry-simulations/        # VQE, ADAPT-VQE, QM/MM, Krylov
+├── quantum-applications-to-finance/
+├── qaoa-for-max-cut/             # QAOA for Max Cut
+├── ai-for-quantum/               # AI for Quantum
+├── dynamics101/                  # GPU-accelerated quantum dynamics
 ├── hybrid-workflows/             # Hybrid classical–quantum workflows
 ├── curriculum.json               # canonical lesson/widget catalog for agents
 ├── Guide-to-cuda-q-backends.ipynb
@@ -148,6 +149,7 @@ Before claiming a change is complete:
 - GitHub Pages serves from the **`widgets-as-html` branch**, not `main`.
 - [learningpath.html](https://nvidia.github.io/cuda-q-academic/learningpath.html) and [visualization-gallery.html](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html) live on `widgets-as-html`.
 - When a new module is added to `main`, it must also be registered in `learningpath.html` on `widgets-as-html` for it to appear in the curriculum builder. That is a **separate branch and a separate pull request**.
+- Until that hosted learning-path update lands, a new track's `learning_path_url` in [curriculum.json](curriculum.json) may temporarily point to the top-level Learning Paths page instead of a track-specific deep link.
 - When the live widget set changes, update [curriculum.json](curriculum.json) in `main` and update `visualization-gallery.html` on `widgets-as-html`; these are related but separate changes.
 - Do not attempt to edit `learningpath.html` from `main` — it will not be there.
 

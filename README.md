@@ -9,7 +9,7 @@
 
 ## About
 
-NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantum-education-with-ai-supercomputing-and-nvidia-cuda-q-academic/) is a freely available, open-source collection of interactive Jupyter notebooks that prepare the next generation of quantum computing professionals by combining high-performance computing with quantum computing. Developed by NVIDIA in collaboration with universities and tested in real classroom settings, CUDA-Q Academic is organized as a modular curriculum of topic areas ranging from a Quick Start to Quantum Computing through Quantum Error Correction, Dynamics 101, AI for Quantum, Chemistry Simulations, and more.  Each is built using [CUDA-Q](https://developer.nvidia.com/cuda-q), NVIDIA's open-source platform for hybrid classical–quantum computing. Materials are free to use for educational purposes under Apache-2.0 and CC-BY-NC-4.0; see [LICENSE](LICENSE).
+NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantum-education-with-ai-supercomputing-and-nvidia-cuda-q-academic/) is a freely available, open-source collection of interactive Jupyter notebooks that prepare the next generation of quantum computing professionals by combining high-performance computing with quantum computing. Developed by NVIDIA in collaboration with universities and tested in real classroom settings, CUDA-Q Academic is organized as a modular curriculum of topic areas ranging from a Quick Start to Quantum Computing through Quantum Error Correction, Quantum Algorithm Simulation 101, Dynamics 101, AI for Quantum, Chemistry Simulations, and more. Each is built using [CUDA-Q](https://developer.nvidia.com/cuda-q), NVIDIA's open-source platform for hybrid classical-quantum computing. Materials are free to use for educational purposes under Apache-2.0 and CC-BY-NC-4.0; see [LICENSE](LICENSE).
 
 
 ## Quick Links
@@ -18,6 +18,7 @@ NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantu
 |---|---|
 | Learning Paths (launch modules, build a curriculum) | https://nvidia.github.io/cuda-q-academic/learningpath.html |
 | Visualization Gallery (interactive widgets) | https://nvidia.github.io/cuda-q-academic/visualization-gallery.html |
+| Machine-readable curriculum catalog | [curriculum.json](curriculum.json) |
 | Guide to CUDA-Q Backends | [Guide-to-cuda-q-backends.ipynb](Guide-to-cuda-q-backends.ipynb) |
 | Sample Syllabus | [Sample-Syllabus.md](Sample-Syllabus.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
@@ -26,21 +27,22 @@ NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantu
 
 ## Repository Contents
 
-The repository is organized with the following learning paths modules. For module overviews, prerequisites, and a curriculum builder, visit the [Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html) page — that page is the authoritative description of each track.
+The repository is organized into the learning path modules below. For machine-readable lesson and widget discovery, use [curriculum.json](curriculum.json). For hosted module overviews, prerequisites, and a curriculum builder, visit the [Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html) page.
 
 | Module | Folder | Topic |
 |---|---|---|
 | Quick Start to Quantum Computing | [quick-start-to-quantum/](quick-start-to-quantum/) | From zero to a variational algorithm in CUDA-Q |
+| Quantum Algorithm Simulation 101 | [simulation/](simulation/) | Choosing between state vector, tensor network, MPS, Pauli propagation, and stabilizer simulation |
 | Quantum Information Science Examples | [qis-examples/](qis-examples/) | Foundational quantum algorithms to complement QIS courses |
-| QAOA for Max Cut | [qaoa-for-max-cut/](qaoa-for-max-cut/) | Divide-and-conquer QAOA with circuit cutting |
-| Quantum Applications for Finance | [quantum-applications-to-finance/](quantum-applications-to-finance/) | Quantum walks, portfolio optimization, QChop |
 | Quantum Error Correction 101 | [qec101/](qec101/) | Classical and quantum codes, decoders, magic-state distillation |
-| Dynamics 101 | [dynamics101/](dynamics101/) | GPU-accelerated Schrödinger and Lindblad time evolution |
-| AI for Quantum | [ai-for-quantum/](ai-for-quantum/) | Using AI models to enable quantum computing |
 | Chemistry Simulations | [chemistry-simulations/](chemistry-simulations/) | VQE, ADAPT-VQE, QM/MM, Krylov methods, and more.
+| Quantum Applications for Finance | [quantum-applications-to-finance/](quantum-applications-to-finance/) | Quantum walks, portfolio optimization, QChop |
+| QAOA for Max Cut | [qaoa-for-max-cut/](qaoa-for-max-cut/) | Divide-and-conquer QAOA with circuit cutting |
+| AI for Quantum | [ai-for-quantum/](ai-for-quantum/) | Using AI models to enable quantum computing |
+| Dynamics 101 | [dynamics101/](dynamics101/) | GPU-accelerated Schrödinger and Lindblad time evolution |
 | Hybrid Workflows | [hybrid-workflows/](hybrid-workflows/) | Hybrid classical–quantum workflow examples |
 
-Each module folder contains numbered Jupyter notebooks, a module-local `README.md`, a `solutions/` subfolder, and an `images/` subfolder with figures.
+Each module folder contains student notebooks, a module-local `README.md`, a `solutions/` subfolder, and an `images/` subfolder with figures.
 
 
 ## How to Run

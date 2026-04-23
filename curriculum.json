@@ -8,6 +8,7 @@
   },
   "track_order": [
     "quick-start-to-quantum",
+    "simulation-101",
     "qis-foundational-algorithms",
     "qec-101",
     "chemistry-simulations",
@@ -31,6 +32,17 @@
         "quickstart-02-multiple-qubits-and-entanglement",
         "quickstart-03-write-your-first-parameterized-kernel",
         "quickstart-04-build-your-first-variational-algorithm"
+      ]
+    },
+    "simulation-101": {
+      "title": "Quantum Algorithm Simulation 101",
+      "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html",
+      "difficulty_range": [
+        "intermediate"
+      ],
+      "summary": "Introduces the tradeoffs between state vector, tensor network, MPS, Pauli propagation, and stabilizer simulation in CUDA-Q.",
+      "lesson_ids": [
+        "simulation-101-choosing-the-right-simulator"
       ]
     },
     "qis-foundational-algorithms": {
@@ -261,6 +273,31 @@
       ],
       "summary": "Builds an end-to-end variational workflow for a simple Hamiltonian using CUDA-Q.",
       "metadata_source": "llms.txt + module README + notebook title"
+    },
+    "simulation-101-choosing-the-right-simulator": {
+      "title": "Choosing the Right Simulator",
+      "primary_track_id": "simulation-101",
+      "track_ids": [
+        "simulation-101"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "simulation/simulation101.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/simulation101.ipynb",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "Python and Jupyter notebook familiarity",
+        "basic quantum-computing knowledge (qubits, gates, circuits, bra-ket notation, measurement)",
+        "expectation values and Pauli operators are helpful"
+      ],
+      "keywords": [
+        "state vector",
+        "tensor network",
+        "matrix product state",
+        "Pauli propagation",
+        "stabilizer simulation"
+      ],
+      "summary": "Compares state vector, tensor network, MPS, Pauli propagation, and stabilizer methods so learners can choose the right CUDA-Q simulator.",
+      "metadata_source": "notebook intro cell + module README"
     },
     "teleportation": {
       "title": "Teleportation",
