@@ -11,7 +11,7 @@ Quantum Algorithm Simulation 101 introduces the main simulator families used thr
 
 ## Notebooks
 
-* [simulation101.ipynb](simulation101.ipynb) - core lesson on choosing the right simulator for a quantum algorithm workflow.
-* [solutions/simulation101_solutions.ipynb](solutions/simulation101_solutions.ipynb) - worked reference implementation for every exercise in the student notebook.
+* [01_simulation101.ipynb](01_simulation101.ipynb) - core lesson on choosing the right simulator for a quantum algorithm workflow.
+* [solutions/01_simulation101_solutions.ipynb](solutions/01_simulation101_solutions.ipynb) - worked reference implementation for every exercise in the student notebook.
 
 These notebooks are designed to run on a GPU-equipped environment with CUDA-Q and `cudaq-qec` available. For local installation instructions, see the [CUDA-Q install guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q). For cloud-based launch options, visit the [CUDA-Q Academic Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html).

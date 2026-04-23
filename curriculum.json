@@ -281,8 +281,8 @@
         "simulation-101"
       ],
       "source_kind": "local_notebook",
-      "repo_path": "simulation/simulation101.ipynb",
-      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/simulation101.ipynb",
+      "repo_path": "simulation/01_simulation101.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter notebook familiarity",
