@@ -1,0 +1,41 @@
+CUDA-Q Academic
+
+Use `curriculum.json` as the source of truth for all content discovery in this repository.
+
+What `curriculum.json` contains
+
+- `metadata`: scope, update date, and the policy for lesson and widget metadata.
+- `track_order`: the canonical order of the ten CUDA-Q Academic learning paths.
+- `tracks[track_id]`: the human title, live learning-path URL, difficulty range, short track summary, and ordered `lesson_ids` for that track.
+- `lessons[lesson_id]`: the canonical lesson record with `title`, `primary_track_id`, `track_ids`, `source_kind`, `repo_path`, `link`, `difficulty`, `prerequisites`, `keywords`, `summary`, and `metadata_source`.
+- `widget_gallery_order`: the canonical order of widgets in the live Visualization Gallery.
+- `widgets[widget_id]`: the canonical widget record with `title`, `gallery_section`, `live_url`, `source_url`, `source_repo_path`, `related_content`, `related_track_ids`, `summary`, `keywords`, and `metadata_source`.
+
+How to navigate it
+
+1. To list the learning paths, iterate `track_order` and resolve each id in `tracks`.
+2. To list the lessons in a path, read `tracks[track_id].lesson_ids` in order, then resolve each id in `lessons`.
+3. To answer "which lesson should I send for topic X?", search `lessons[*].keywords`, `summary`, and `prerequisites`, then use `track_ids` to map the result back to one or more tracks.
+4. To deep-link a learner to a hosted path, use `tracks[track_id].learning_path_url`.
+5. If a newly added track has not yet been registered on the deployed `widgets-as-html` branch, `learning_path_url` may temporarily point to the top-level Learning Paths page instead of a track-specific deep link.
+6. To deep-link a learner to a notebook, use `lessons[lesson_id].link`. When working locally in the repo, use `lessons[lesson_id].repo_path`.
+7. To find live widgets, iterate `widget_gallery_order` or filter `widgets[*]` by `gallery_section`, `keywords`, or `related_track_ids`.
+8. To answer a more detailed notebook question than the catalog provides, open the notebook named by `repo_path` and inspect its first markdown cell.
+
+Important modeling rules
+
+- Shared lessons appear once in `lessons` and can belong to multiple tracks through `track_ids`.
+- External lessons that live outside this repo use `source_kind: external_notebook` and should be linked through `lessons[lesson_id].link`.
+- Live widget metadata comes from the published gallery on the `widgets-as-html` branch, so some widget `source_repo_path` values do not exist on `main`.
+
+Maintenance rules
+
+- Update `curriculum.json` whenever lessons, track membership, prerequisites, difficulty, keywords, summaries, or live widgets change.
+- Keep `curriculum.json` aligned with notebook intro cells for local lessons.
+- If the live widget inventory changes, also update `visualization-gallery.html` on the `widgets-as-html` branch.
+
+Recommended agent behavior
+
+- Start with `curriculum.json` for discovery and routing.
+- Use notebook intro cells only for deeper lesson detail, validation, or metadata refreshes.
+- Prefer linking users to the canonical track or lesson URL already stored in the catalog instead of rebuilding URLs by hand.
