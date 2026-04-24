@@ -4,15 +4,16 @@ default:
   image:
     name: ghcr.io/nvidia/cudaqx
     entrypoint: [""]
-
+ 
 variables:
   PIP_ROOT_USER_ACTION: ignore
   PYTHONUNBUFFERED: "1"
-
+  GIT_DEPTH: "0"
+ 
 stages:
   - test
-
-.notebook-test:
+ 
+test:notebooks:
   stage: test
   timeout: 90 minutes
   before_script:
@@ -30,74 +31,130 @@ stages:
   script:
     - |
       set -u
-      echo "Module         : $MODULE"
-      echo "Solutions path : $SOLUTIONS_PATH"
-      echo "Pattern        : $PATTERN"
  
-      if [ ! -d "$SOLUTIONS_PATH" ]; then
-        echo "ERROR: directory '$SOLUTIONS_PATH' does not exist"
-        exit 1
-      fi
+      # -----------------------------------------------------------------------
+      # Module definitions: "MODULE|SOLUTIONS_PATH|PATTERN"
+      # -----------------------------------------------------------------------
+      MODULES=(
+        "quick-start-to-quantum|quick-start-to-quantum/solutions|*.ipynb"
+        "qis-examples|qis-examples/solutions|*.ipynb"
+        # "chemistry-simulations|chemistry-simulations/solutions|*.ipynb"
+        # "hybrid-workflows|hybrid-workflows/solutions|*.ipynb"
+        # "qaoa-for-max-cut|qaoa-for-max-cut|*Solution*.ipynb"
+        # "qec101|qec101/Solutions|*.ipynb"
+        "dynamics101|dynamics101/Solutions|*.ipynb"
+        "quantum-applications-to-finance|quantum-applications-to-finance/solutions|*.ipynb"
+        "ai-for-quantum|ai-for-quantum/solutions|*.ipynb"
+      )
  
-      mapfile -t NOTEBOOKS < <(find "$SOLUTIONS_PATH" -maxdepth 1 -name "$PATTERN" | sort)
- 
-      if [ "${#NOTEBOOKS[@]}" -eq 0 ]; then
-        echo "ERROR: no notebooks matching '$PATTERN' in '$SOLUTIONS_PATH'"
-        exit 1
-      fi
- 
-      echo "Notebooks to execute:"
-      printf '  %s\n' "${NOTEBOOKS[@]}"
-      echo "================================"
- 
-      PASSED=0
-      FAILED=0
-      FAILED_LIST=()
- 
-      for nb in "${NOTEBOOKS[@]}"; do
-        echo "▶ $nb"
-        if PYTHONPATH="$PWD/$MODULE:${PYTHONPATH:-}" jupyter nbconvert \
-             --to notebook \
-             --execute \
-             --inplace \
-             --ExecutePreprocessor.timeout=600 \
-             --ExecutePreprocessor.kernel_name=python3 \
-             "$nb"; then
-          echo "PASS: $nb"
-          PASSED=$((PASSED + 1))
+      # -----------------------------------------------------------------------
+      # FILTER (optional) — restrict MODULES to those affected by this commit.
+      # Leave commented out to always run every module.
+      #
+      # When enabled:
+      #   - On default branch / scheduled / manual runs: run everything
+      #   - On branch pushes / MRs: run only modules whose directory changed,
+      #     plus all modules if .gitlab-ci.yml itself changed
+      # -----------------------------------------------------------------------
+      if [ "${CI_COMMIT_BRANCH:-}" = "${CI_DEFAULT_BRANCH:-}" ] \
+         || [ "${CI_PIPELINE_SOURCE:-}" = "web" ] \
+         || [ "${CI_PIPELINE_SOURCE:-}" = "schedule" ]; then
+        echo "Running all modules (trigger: ${CI_PIPELINE_SOURCE:-unknown})"
+      else
+        if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
+          CHANGED=$(git diff --name-only "$CI_MERGE_REQUEST_DIFF_BASE_SHA" HEAD || true)
         else
-          echo "FAIL: $nb"
-          FAILED=$((FAILED + 1))
-          FAILED_LIST+=("$nb")
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
         fi
+        echo "Changed files:"
+        echo "$CHANGED" | sed 's/^/  /'
+      
+        if echo "$CHANGED" | grep -qE "^\.gitlab-ci\.yml$"; then
+          echo ".gitlab-ci.yml changed — running all modules."
+        else
+          FILTERED=()
+          for entry in "${MODULES[@]}"; do
+            IFS='|' read -r MODULE _ _ <<< "$entry"
+            if echo "$CHANGED" | grep -qE "^${MODULE}/"; then
+              FILTERED+=("$entry")
+            fi
+          done
+          MODULES=("${FILTERED[@]}")
+        fi
+      fi
+ 
+      if [ "${#MODULES[@]}" -eq 0 ]; then
+        echo "No modules to run."
+        exit 0
+      fi
+ 
+      # -----------------------------------------------------------------------
+      # Execute each module's notebooks
+      # -----------------------------------------------------------------------
+      TOTAL_PASSED=0
+      TOTAL_FAILED=0
+      ALL_FAILED=()
+ 
+      for entry in "${MODULES[@]}"; do
+        IFS='|' read -r MODULE SOLUTIONS_PATH PATTERN <<< "$entry"
+ 
+        echo "================================"
+        echo "Module         : $MODULE"
+        echo "Solutions path : $SOLUTIONS_PATH"
+        echo "Pattern        : $PATTERN"
+        echo "================================"
+ 
+        if [ ! -d "$SOLUTIONS_PATH" ]; then
+          echo "SKIP: directory '$SOLUTIONS_PATH' does not exist"
+          continue
+        fi
+ 
+        mapfile -t NOTEBOOKS < <(find "$SOLUTIONS_PATH" -maxdepth 1 -name "$PATTERN" | sort)
+ 
+        if [ "${#NOTEBOOKS[@]}" -eq 0 ]; then
+          echo "SKIP: no notebooks matching '$PATTERN' in '$SOLUTIONS_PATH'"
+          continue
+        fi
+ 
+        for nb in "${NOTEBOOKS[@]}"; do
+          echo "▶ $nb"
+          if PYTHONPATH="$PWD/$MODULE:${PYTHONPATH:-}" jupyter nbconvert \
+               --to notebook \
+               --execute \
+               --inplace \
+               --ExecutePreprocessor.timeout=600 \
+               --ExecutePreprocessor.kernel_name=python3 \
+               "$nb"; then
+            echo "PASS: $nb"
+            TOTAL_PASSED=$((TOTAL_PASSED + 1))
+          else
+            echo "FAIL: $nb"
+            TOTAL_FAILED=$((TOTAL_FAILED + 1))
+            ALL_FAILED+=("$nb")
+          fi
+        done
       done
  
       echo "================================"
-      echo "Results for $MODULE:"
-      echo "  Passed : $PASSED"
-      echo "  Failed : $FAILED"
+      echo "Summary:"
+      echo "  Passed : $TOTAL_PASSED"
+      echo "  Failed : $TOTAL_FAILED"
  
-      if [ "$FAILED" -gt 0 ]; then
+      if [ "$TOTAL_FAILED" -gt 0 ]; then
         echo "Failed notebooks:"
-        printf '  %s\n' "${FAILED_LIST[@]}"
+        printf '  %s\n' "${ALL_FAILED[@]}"
         exit 1
       fi
   artifacts:
     when: always
     paths:
-      - "$MODULE/**/*.ipynb"
+      - "quick-start-to-quantum/solutions/*.ipynb"
+      - "qis-examples/solutions/*.ipynb"
+      # - "chemistry-simulations/solutions/*.ipynb"
+      # - "hybrid-workflows/solutions/*.ipynb"
+      # - "qaoa-for-max-cut/*Solution*.ipynb"
+      # - "qec101/Solutions/*.ipynb"
+      - "dynamics101/Solutions/*.ipynb"
+      - "quantum-applications-to-finance/solutions/*.ipynb"
+      - "ai-for-quantum/solutions/*.ipynb"
     expire_in: 1 week
- 
-test:notebooks:
-  extends: .notebook-test
-  parallel:
-    matrix:
-      - MODULE: quick-start-to-quantum
-        SOLUTIONS_PATH: quick-start-to-quantum/solutions
-        PATTERN: "*.ipynb"
-      - MODULE: qis-examples
-        SOLUTIONS_PATH: qis-examples/solutions
-        PATTERN: "*.ipynb"
-      - MODULE: quantum-applications-to-finance
-        SOLUTIONS_PATH: quantum-applications-to-finance/solutions
-        PATTERN: "*.ipynb"
