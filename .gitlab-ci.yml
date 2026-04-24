@@ -1,26 +1,100 @@
 # .gitlab-ci.yml
  
-variables:
-  NOTEBOOK: "quick-start-to-quantum/solutions/01_quick_start_to_quantum_solution.ipynb"
- 
-test-one-notebook:
+default:
   image:
     name: ghcr.io/nvidia/cudaqx
     entrypoint: [""]
-  script:
+
+variables:
+  PIP_ROOT_USER_ACTION: ignore
+  PYTHONUNBUFFERED: "1"
+
+stages:
+  - test
+
+.notebook-test:
+  stage: test
+  timeout: 90 minutes
+  before_script:
     - apt-get update -qq && apt-get install -y -qq libgfortran5
-    - pip install --quiet --upgrade jupyter nbconvert
-    - echo "Running $NOTEBOOK"
-    - jupyter nbconvert
-        --to notebook
-        --execute
-        --inplace
-        --ExecutePreprocessor.timeout=600
-        --ExecutePreprocessor.kernel_name=python3
-        "$NOTEBOOK"
+    - pip install --quiet --upgrade
+        jupyter
+        nbconvert
+        qutip
+        pyscf
+        genQC
+        galois
+        torch
+        scikit-learn
+        matplotlib-venn
+  script:
+    - |
+      set -u
+      echo "Module         : $MODULE"
+      echo "Solutions path : $SOLUTIONS_PATH"
+      echo "Pattern        : $PATTERN"
+ 
+      if [ ! -d "$SOLUTIONS_PATH" ]; then
+        echo "ERROR: directory '$SOLUTIONS_PATH' does not exist"
+        exit 1
+      fi
+ 
+      mapfile -t NOTEBOOKS < <(find "$SOLUTIONS_PATH" -maxdepth 1 -name "$PATTERN" | sort)
+ 
+      if [ "${#NOTEBOOKS[@]}" -eq 0 ]; then
+        echo "ERROR: no notebooks matching '$PATTERN' in '$SOLUTIONS_PATH'"
+        exit 1
+      fi
+ 
+      echo "Notebooks to execute:"
+      printf '  %s\n' "${NOTEBOOKS[@]}"
+      echo "================================"
+ 
+      PASSED=0
+      FAILED=0
+      FAILED_LIST=()
+ 
+      for nb in "${NOTEBOOKS[@]}"; do
+        echo "▶ $nb"
+        if PYTHONPATH="$PWD/$MODULE:${PYTHONPATH:-}" jupyter nbconvert \
+             --to notebook \
+             --execute \
+             --inplace \
+             --ExecutePreprocessor.timeout=600 \
+             --ExecutePreprocessor.kernel_name=python3 \
+             "$nb"; then
+          echo "PASS: $nb"
+          PASSED=$((PASSED + 1))
+        else
+          echo "FAIL: $nb"
+          FAILED=$((FAILED + 1))
+          FAILED_LIST+=("$nb")
+        fi
+      done
+ 
+      echo "================================"
+      echo "Results for $MODULE:"
+      echo "  Passed : $PASSED"
+      echo "  Failed : $FAILED"
+ 
+      if [ "$FAILED" -gt 0 ]; then
+        echo "Failed notebooks:"
+        printf '  %s\n' "${FAILED_LIST[@]}"
+        exit 1
+      fi
   artifacts:
     when: always
     paths:
-      - "$NOTEBOOK"
+      - "$MODULE/**/*.ipynb"
     expire_in: 1 week
  
+test:notebooks:
+  extends: .notebook-test
+  parallel:
+    matrix:
+      - MODULE: quick-start-to-quantum
+        SOLUTIONS_PATH: quick-start-to-quantum/solutions
+        PATTERN: "*.ipynb"
+      - MODULE: qis-examples
+        SOLUTIONS_PATH: qis-examples/solutions
+        PATTERN: "*.ipynb"
