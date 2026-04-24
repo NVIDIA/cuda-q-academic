@@ -98,3 +98,6 @@ test:notebooks:
       - MODULE: qis-examples
         SOLUTIONS_PATH: qis-examples/solutions
         PATTERN: "*.ipynb"
+      - MODULE: quantum-applications-to-finance
+        SOLUTIONS_PATH: quantum-applications-to-finance/solutions
+        PATTERN: "*.ipynb"
