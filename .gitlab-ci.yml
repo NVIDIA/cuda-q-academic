@@ -1,25 +1,23 @@
 # .gitlab-ci.yml
  
 variables:
-  NOTEBOOK: "../quick-start-to-quantum/solutions/01_quick_start_to_quantum.ipynb"
+  NOTEBOOK: "quick-start-to-quantum/solutions/01_quick_start_to_quantum_solution.ipynb"
  
 test-one-notebook:
   image:
     name: ghcr.io/nvidia/cudaqx
     entrypoint: [""]
   script:
-      - pwd
-      - ls
-    # - apt-get update -qq && apt-get install -y -qq libgfortran5
-    # - pip install --quiet --upgrade jupyter nbconvert
-    # - echo "Running $NOTEBOOK"
-    # - jupyter nbconvert
-    #     --to notebook
-    #     --execute
-    #     --inplace
-    #     --ExecutePreprocessor.timeout=600
-    #     --ExecutePreprocessor.kernel_name=python3
-    #     "$NOTEBOOK"
+    - apt-get update -qq && apt-get install -y -qq libgfortran5
+    - pip install --quiet --upgrade jupyter nbconvert
+    - echo "Running $NOTEBOOK"
+    - jupyter nbconvert
+        --to notebook
+        --execute
+        --inplace
+        --ExecutePreprocessor.timeout=600
+        --ExecutePreprocessor.kernel_name=python3
+        "$NOTEBOOK"
   artifacts:
     when: always
     paths:
