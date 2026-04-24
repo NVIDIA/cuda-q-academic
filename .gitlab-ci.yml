@@ -38,13 +38,13 @@ test:notebooks:
       MODULES=(
         "quick-start-to-quantum|quick-start-to-quantum/solutions|*.ipynb"
         "qis-examples|qis-examples/solutions|*.ipynb"
-        # "chemistry-simulations|chemistry-simulations/solutions|*.ipynb"
-        # "hybrid-workflows|hybrid-workflows/solutions|*.ipynb"
+        "chemistry-simulations|chemistry-simulations/solutions|*.ipynb"
+        "hybrid-workflows|hybrid-workflows/solutions|*.ipynb"
         "qaoa-for-max-cut|qaoa-for-max-cut|*Solution*.ipynb"
-        # "qec101|qec101/Solutions|*.ipynb"
-        # "dynamics101|dynamics101/Solutions|*.ipynb"
-        # "quantum-applications-to-finance|quantum-applications-to-finance/solutions|*.ipynb"
-        # "ai-for-quantum|ai-for-quantum/solutions|*.ipynb"
+        "qec101|qec101/Solutions|*.ipynb"
+        "dynamics101|dynamics101/Solutions|*.ipynb"
+        "quantum-applications-to-finance|quantum-applications-to-finance/solutions|*.ipynb"
+        "ai-for-quantum|ai-for-quantum/solutions|*.ipynb"
       )
  
       # -----------------------------------------------------------------------
@@ -150,11 +150,11 @@ test:notebooks:
     paths:
       - "quick-start-to-quantum/solutions/*.ipynb"
       - "qis-examples/solutions/*.ipynb"
-      # - "chemistry-simulations/solutions/*.ipynb"
-      # - "hybrid-workflows/solutions/*.ipynb"
+      - "chemistry-simulations/solutions/*.ipynb"
+      - "hybrid-workflows/solutions/*.ipynb"
       - "qaoa-for-max-cut/*Solution*.ipynb"
-      # - "qec101/Solutions/*.ipynb"
-      # - "dynamics101/Solutions/*.ipynb"
-      # - "quantum-applications-to-finance/solutions/*.ipynb"
-      # - "ai-for-quantum/solutions/*.ipynb"
+      - "qec101/Solutions/*.ipynb"
+      - "dynamics101/Solutions/*.ipynb"
+      - "quantum-applications-to-finance/solutions/*.ipynb"
+      - "ai-for-quantum/solutions/*.ipynb"
     expire_in: 1 week
