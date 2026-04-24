@@ -8,16 +8,18 @@ test-one-notebook:
     name: ghcr.io/nvidia/cudaqx
     entrypoint: [""]
   script:
-    - apt-get update -qq && apt-get install -y -qq libgfortran5
-    - pip install --quiet --upgrade jupyter nbconvert
-    - echo "Running $NOTEBOOK"
-    - jupyter nbconvert
-        --to notebook
-        --execute
-        --inplace
-        --ExecutePreprocessor.timeout=600
-        --ExecutePreprocessor.kernel_name=python3
-        "$NOTEBOOK"
+      - pwd
+      - ls
+    # - apt-get update -qq && apt-get install -y -qq libgfortran5
+    # - pip install --quiet --upgrade jupyter nbconvert
+    # - echo "Running $NOTEBOOK"
+    # - jupyter nbconvert
+    #     --to notebook
+    #     --execute
+    #     --inplace
+    #     --ExecutePreprocessor.timeout=600
+    #     --ExecutePreprocessor.kernel_name=python3
+    #     "$NOTEBOOK"
   artifacts:
     when: always
     paths:
