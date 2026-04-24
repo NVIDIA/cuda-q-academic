@@ -4,8 +4,9 @@ variables:
   NOTEBOOK: "quick-start-to-quantum/solutions/01_quick_start_to_quantum.ipynb"
  
 test-one-notebook:
-  image: ghcr.io/nvidia/cudaqx
-  entrypoint: [""]
+  image:
+    name: ghcr.io/nvidia/cudaqx
+    entrypoint: [""]
   script:
     - apt-get update -qq && apt-get install -y -qq libgfortran5
     - pip install --quiet --upgrade jupyter nbconvert
