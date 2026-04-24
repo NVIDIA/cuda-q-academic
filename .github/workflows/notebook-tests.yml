@@ -3,22 +3,83 @@ name: Test Solution Notebooks
 on:
   push:
     branches:
+      - main
+      - "pull-request/[0-9]+"
       - "**"
-    paths:
-      - '**/solutions/**/*.ipynb'
-      - '**/Solutions/**/*.ipynb'
-      - '**/*Solution*.ipynb'
-      - '.github/workflows/notebook-tests.yml'
+    # paths:
+    #   - '**/solutions/**/*.ipynb'
+    #   - '**/Solutions/**/*.ipynb'
+    #   - '**/*Solution*.ipynb'
+    #   - '.github/workflows/notebook-tests.yml'
   workflow_dispatch:
+    inputs:
+      run_all:
+        description: "Run all modules (ignore change detection)"
+        type: boolean
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    name: Detect changed modules
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.filter.outputs.modules }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed modules
+        id: filter
+        shell: bash
+        run: |
+          ALL_MODULES='["quick-start-to-quantum","chemistry-simulations","qis-examples","hybrid-workflows","qaoa-for-max-cut","qec101","dynamics101","quantum-applications-to-finance","ai-for-quantum"]'
+
+          # Run all modules on workflow_dispatch or push to main
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "modules=$ALL_MODULES" >> "$GITHUB_OUTPUT"
+            echo "Running all modules (trigger: ${{ github.event_name }}, ref: ${{ github.ref }})"
+            exit 0
+          fi
+
+          # For branch pushes, detect which modules changed
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          echo ""
+
+          # If the workflow file itself changed, run everything
+          if echo "$CHANGED_FILES" | grep -q '.github/workflows/test-solution-notebooks.yml'; then
+            echo "Workflow file changed — running all modules"
+            echo "modules=$ALL_MODULES" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGED_MODULES="[]"
+          for mod in quick-start-to-quantum chemistry-simulations qis-examples hybrid-workflows qaoa-for-max-cut qec101 dynamics101 quantum-applications-to-finance ai-for-quantum; do
+            if echo "$CHANGED_FILES" | grep -q "^$mod/"; then
+              CHANGED_MODULES=$(echo "$CHANGED_MODULES" | python3 -c "import sys,json; m=json.load(sys.stdin); m.append('$mod'); print(json.dumps(m))")
+            fi
+          done
+
+          if [ "$CHANGED_MODULES" = "[]" ]; then
+            echo "No module changes detected — running all modules as fallback"
+            CHANGED_MODULES="$ALL_MODULES"
+          fi
+
+          echo "modules=$CHANGED_MODULES" >> "$GITHUB_OUTPUT"
+          echo "Modules to test: $CHANGED_MODULES"
+
   test-notebooks:
     name: "${{ matrix.module }} (${{ matrix.image }})"
-    runs-on: linux-amd64-gpu-rtxpro6000-latest-2
+    needs: detect-changes
+    runs-on: ubuntu-latest
     container:
       image: ${{ matrix.image }}
       options: --user root
@@ -27,16 +88,7 @@ jobs:
       matrix:
         image:
           - ghcr.io/nvidia/cudaqx
-        module:
-          - quick-start-to-quantum
-          - chemistry-simulations
-          - qis-examples
-          - hybrid-workflows
-          - qaoa-for-max-cut
-          - qec101
-          - dynamics101
-          - quantum-applications-to-finance
-          - ai-for-quantum
+        module: ${{ fromJson(needs.detect-changes.outputs.modules) }}
         include:
           # Per-module solutions path and notebook pattern.
           # These properties are merged into every image × module combination.
@@ -80,12 +132,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Install system dependencies
+        run: |
+          apt-get update -qq && apt-get install -y -qq libgfortran5
+
       - name: Install Jupyter and dependencies
         run: |
           pip install --quiet --upgrade \
             jupyter \
             nbconvert \
             qutip \
+            pyscf \
+            genQC \
+            galois \
             torch \
             scikit-learn \
             matplotlib-venn
