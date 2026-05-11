@@ -158,3 +158,11 @@ test:notebooks:
       - "quantum-applications-to-finance/solutions/*.ipynb"
       - "ai-for-quantum/solutions/*.ipynb"
     expire_in: 1 week
+
+include:
+  - project: xagents/bootstrapper
+    file: gitlab/pipeline-analysis/template.yml
+
+":mag: AI Failure Analysis":
+  extends:
+    - .ai-failure-analysis
