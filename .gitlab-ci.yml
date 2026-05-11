@@ -160,9 +160,9 @@ test:notebooks:
     expire_in: 1 week
 
 include:
-  - project: xagents/bootstrapper
+  - project: agentics/bootstrapper
     file: gitlab/pipeline-analysis/template.yml
 
-":mag: AI Failure Analysis":
+"🔍 AI Failure Analysis":
   extends:
     - .ai-failure-analysis
