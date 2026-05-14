@@ -155,12 +155,48 @@ def uccsd_circuit_vqe(spin_mult,
 
         return energy
 
+    # TEMPORARY (cuda-quantum 0.14.x): central-difference gradient that
+    # evaluates all 2N perturbed parameter vectors in a single broadcasted
+    # cudaq.observe call instead of 2N separate calls. Works around a
+    # per-call dispatch regression introduced in cuda-quantum 0.14.0
+    # (~50 ms/call vs <1 ms in 0.13.0); without it, scipy's default
+    # jac='3-point' fires hundreds of observe calls per L-BFGS-B iteration
+    # and the optimizer takes tens of minutes. Remove once the upstream
+    # dispatch regression is fixed.
+    def batched_gradient(theta_np):
+        h = 1e-6
+        n_params = len(theta_np)
+        # batch shape: (2*n_params, n_params); row 2i = theta + h*e_i, row 2i+1 = theta - h*e_i
+        batch = np.tile(theta_np, (2 * n_params, 1)).astype(np.float64)
+        for i in range(n_params):
+            batch[2 * i, i]     += h
+            batch[2 * i + 1, i] -= h
+        Nb = 2 * n_params
+        if not only_singles and not only_doubles:
+            results = cudaq.observe(
+                uccsd_kernel, hamiltonian,
+                [qubits_num] * Nb, [electron_count] * Nb, batch,
+                [word_single] * Nb, [word_double] * Nb,
+                [coef_single] * Nb, [coef_double] * Nb)
+        elif only_singles and not only_doubles:
+            results = cudaq.observe(
+                uccsd_single_kernel, hamiltonian,
+                [qubits_num] * Nb, [electron_count] * Nb, batch,
+                [word_single] * Nb, [coef_single] * Nb)
+        else:  # only_doubles
+            results = cudaq.observe(
+                uccsd_double_kernel, hamiltonian,
+                [qubits_num] * Nb, [electron_count] * Nb, batch,
+                [word_double] * Nb, [coef_double] * Nb)
+        expvals = np.array([r.expectation() for r in results])
+        return (expvals[0::2] - expvals[1::2]) / (2 * h)
+
     if optimize:
         if method == 'L-BFGS-B':
             result_vqe = minimize(cost,
                                   theta,
                                   method='L-BFGS-B',
-                                  jac='3-point',
+                                  jac=batched_gradient,
                                   tol=vqe_tol)
             print('Optimizer exited successfully: ',
                   result_vqe.success,
@@ -169,7 +205,7 @@ def uccsd_circuit_vqe(spin_mult,
             result_vqe = minimize(cost,
                                   theta,
                                   method='BFGS',
-                                  jac='3-point',
+                                  jac=batched_gradient,
                                   options={'gtol': 1e-5})
             print('Optimizer exited successfully: ',
                   result_vqe.success,
