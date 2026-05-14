@@ -54,7 +54,7 @@ def parse_obs_csr(j, dims):
 ### Main decoder loop ###
 
 
-def run_decoder(filename, num_shots, run_as_batched, print_output=False, osd=0):
+def run_decoder(filename, num_shots, run_as_batched, print_output=False, osd=0, osd_order=0):
     """
     Load a JSON file and decode "num_shots" syndromes.
     """
@@ -90,7 +90,7 @@ def run_decoder(filename, num_shots, run_as_batched, print_output=False, osd=0):
     #  3) there are an additional k + osd_order*(osd_order-1)/2 error
     #     mechanisms checked.
     # Ref: https://arxiv.org/pdf/2005.07016
-    osd_order = 0
+    # osd_order is taken from the caller (defaults to 0)
 
     # Maximum number of BP iterations before attempting OSD (if necessary)
     max_iter = 50
