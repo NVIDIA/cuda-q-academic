@@ -733,6 +733,16 @@
         ]
     },
     {
+        id: "track-calibration",
+        levelLabel: "",
+        title: "Calibration",
+        description: "",
+        folder: "calibration",
+        notebooks: [
+            { name: "Start Here", difficulty: "intro", isNew: true, colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb" }
+        ]
+    },
+    {
         id: "track-hybrid",
         levelLabel: "",
         title: "Hybrid Workflows",
@@ -938,6 +948,14 @@
           html = html.replace(/src="(\.\/|)(?!http)([^"]+)"/g, `src="${baseUrl}$2"`);
 
           contentDiv.innerHTML = html;
+
+          contentDiv.querySelectorAll('a[href]').forEach(a => {
+              const href = a.getAttribute('href');
+              if (href && !href.startsWith('#')) {
+                  a.setAttribute('target', '_blank');
+                  a.setAttribute('rel', 'noopener noreferrer');
+              }
+          });
       } catch (err) {
           contentDiv.innerHTML = `<p style="color:#ff5555; text-align:center;">Could not load guide. <br> <a href="https://github.com/NVIDIA/cuda-q-academic/tree/main/${module.folder}" target="_blank" style="color:var(--nvidia-green);">View on GitHub</a></p>`;
       }
