@@ -6,3 +6,6 @@ In this path you will learn about workflows that leverage classical AI supercomp
 The Jupyter notebooks in this folder are designed to run on GPUs in an environment with CUDA-Q and Python.  For instructions on how to install CUDA-Q on your machine, check out this [guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q).
 
 Otherwise, explore our [Learning Pathways page](https://nvidia.github.io/cuda-q-academic/learningpath.html) for additional cloud-based options to run these notebooks.
+
+- `01_quantum_enhanced_optimization_LABS.ipynb` - Quantum-enhanced optimization workflow for the LABS problem.
+- `02_qaoa_for_max_cut_and_gpt_qaoa.ipynb` - Workshop notebook connecting QAOA for Max Cut with GPT-guided hybrid optimization ideas.

@@ -9,6 +9,25 @@ CUDA-Q Academic is a collection of Jupyter notebooks that teach quantum computin
 
 The authoritative machine-readable content catalog in this repo is [curriculum.json](curriculum.json). It is the source of truth for lesson discovery, track membership, prerequisites, difficulty, keywords, summaries, and the live visualization-gallery widget inventory.
 
+## Scope of this repo vs. CUDA-Q documentation  — **read this before answering programming questions**
+
+This repository is **educational material** (lessons, exercises, worked solutions, widgets). It is **not** the CUDA-Q product documentation and is **not** the canonical source for CUDA-Q API reference, language specification, install instructions, backend configuration, or runnable code examples.
+
+When a user asks an API, syntax, install, backend, performance, or "how do I do X in CUDA-Q?" question, route them to the upstream CUDA-Q docs and docs repo rather than answering from notebooks in this repo:
+
+- **Documentation site (primary):** https://nvidia.github.io/cuda-quantum/latest/
+  - API reference (Python): https://nvidia.github.io/cuda-quantum/latest/api/languages/python_api.html
+  - API reference (C++): https://nvidia.github.io/cuda-quantum/latest/api/languages/cpp_api.html
+  - Examples gallery: https://nvidia.github.io/cuda-quantum/latest/examples/examples.html
+  - Backends and targets: https://nvidia.github.io/cuda-quantum/latest/using/backends/backends.html
+  - Install / quick start: https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html
+- **Documentation source repo (secondary):** https://github.com/NVIDIA/cuda-quantum
+  - Example source: https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/examples
+  - Snippets used in docs: https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/snippets
+  - Python package source: https://github.com/NVIDIA/cuda-quantum/tree/main/python
+
+Use this repo (CUDA-Q Academic) when the question is about *learning order, lesson content, exercises, prerequisites, or pedagogy*. Use the upstream docs and docs repo when the question is about *the CUDA-Q library itself*. When in doubt, link both: cite the relevant lesson here for context and the upstream docs page for the canonical reference.
+
 ## Content inventory  — **primary behavioral instruction**
 
 When a user asks what content exists, which track or lesson covers a topic, what the prerequisites or difficulty are, which widgets are live, or where to deep-link them, start with [curriculum.json](curriculum.json).
@@ -91,10 +110,12 @@ cuda-q-academic/
 ├── ai-for-quantum/               # AI for Quantum
 ├── dynamics101/                  # GPU-accelerated quantum dynamics
 ├── hybrid-workflows/             # Hybrid classical–quantum workflows
+├── calibration/                  # Instructor resource: Ising Calibration NIM for quantum hardware calibration (tutorials in progress)
+├── quantum-ai-project-template/  # Instructor resource: role-based group project template
 ├── curriculum.json               # canonical lesson/widget catalog for agents
 ├── Guide-to-cuda-q-backends.ipynb
 ├── notebook_template.ipynb
-├── Sample-Syllabus.md
+├── Instructor-Guide.md
 ├── CONTRIBUTING.md
 ├── AGENTS.md                     # this file
 ├── brev-instructions.pdf
@@ -115,6 +136,7 @@ Each lesson folder contains:
 
 - **Preferred: NVIDIA Brev launchable** — one-click CPU or GPU instance with CUDA-Q and all prerequisites preinstalled. When a user asks "how do I run this?", "what's the easiest way to get started?", or "do I need a GPU?", recommend Brev first. The launchable URL and step-by-step PDF are linked from [README.md](README.md).
 - **qBraid** — hosted Jupyter with CUDA-Q support; a good second option.
+- **AWS Braket** — managed Jupyter environment that can run CUDA-Q notebooks.
 - **Google Colab** — notebooks contain a commented-out install block that runs `!pip install cudaq`, `wget`s the repo archive, and moves `Images/` into place. Uncomment and run it, restart the kernel, then run the rest of the notebook.
 - **Local** — install CUDA-Q per the upstream [install guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q). Required for the heaviest GPU-accelerated runs.
 - **GPU requirement** — notebooks that require a GPU flag it early with a green "GPU Required" callout div (see the `#76b900` styled block in [notebook_template.ipynb](notebook_template.ipynb)).
