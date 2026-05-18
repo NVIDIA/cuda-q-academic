@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CUDA-Q Academic</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- marked is only used by the preview modal to render the README inline for
+     "README-only" tracks (e.g. instructor templates). Notebook-based tracks
+     never call it, so the network cost is only paid when a learner opens
+     the project guide for one of those tracks. -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <style>
@@ -372,17 +376,106 @@
 
   .builder-body { padding: 20px; overflow-y: auto; flex: 1; }
   
-  /* Preview Content Styling (Markdown) */
+  /* Preview Content Styling — composed from curriculum.json */
   .preview-content { color: #E0E0E0; font-size: 0.95rem; line-height: 1.6; }
-  .preview-content h1, .preview-content h2, .preview-content h3 { color: var(--nvidia-green); margin-top: 24px; }
-  .preview-content a { color: #76b900; text-decoration: none; }
+  .preview-content h3 { color: var(--nvidia-green); margin: 24px 0 12px 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .preview-content a { color: var(--nvidia-green); text-decoration: none; }
   .preview-content a:hover { text-decoration: underline; }
-  .preview-content pre { background: #111; padding: 12px; border-radius: 4px; overflow-x: auto; border: 1px solid #444; }
-  .preview-content code { font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; }
-  .preview-content img { max-width: 100%; border-radius: 4px; border: 1px solid #444; }
-  .preview-content table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-  .preview-content th, .preview-content td { border: 1px solid #444; padding: 8px; text-align: left; }
-  .preview-content th { background-color: #333; }
+
+  .track-meta { padding: 0 0 16px 0; border-bottom: 1px solid var(--nvidia-accent); margin-bottom: 8px; }
+  .track-summary-text { color: var(--nvidia-light); margin: 0 0 12px 0; font-size: 1rem; line-height: 1.5; }
+  .track-meta-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .meta-pill {
+      background: rgba(118, 185, 0, 0.08);
+      border: 1px solid var(--nvidia-accent);
+      color: var(--nvidia-gray);
+      padding: 4px 10px; border-radius: 999px; font-size: 0.75rem;
+  }
+  .meta-pill strong { color: var(--nvidia-green); font-weight: 700; }
+
+  .lesson-preview-list { counter-reset: lp; list-style: none; padding: 0; margin: 0 0 8px 0; }
+  .widget-preview-list { list-style: none; padding: 0; margin: 0 0 8px 0; }
+  .lesson-preview-item, .widget-preview-item {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      color: var(--nvidia-light);
+      position: relative;
+  }
+  .lesson-preview-item { counter-increment: lp; padding-left: 44px; }
+  .lesson-preview-item::before {
+      content: counter(lp);
+      position: absolute; left: 12px; top: 12px;
+      width: 22px; height: 22px;
+      background: var(--nvidia-green); color: black;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.7rem;
+  }
+  .lesson-preview-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .lesson-preview-title { font-weight: 700; color: white; flex: 1; min-width: 0; font-size: 0.95rem; }
+  .diff-pill { font-size: 9px; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px; }
+  .diff-intro    { background: rgba(118,185,0,0.15);  color: var(--nvidia-green); border: 1px solid var(--nvidia-green); }
+  .diff-intermediate { background: rgba(168,199,250,0.12); color: var(--colab-text);   border: 1px solid var(--colab-text); }
+  .diff-advanced { background: rgba(255,138,138,0.12); color: #ff8a8a;             border: 1px solid #ff8a8a; }
+  .new-pill { font-size: 9px; background: var(--nvidia-green); color: black; padding: 2px 6px; border-radius: 999px; font-weight: 800; letter-spacing: 0.3px; }
+
+  .lesson-preview-summary { color: var(--nvidia-gray); font-size: 0.9rem; margin: 0 0 8px 0; line-height: 1.45; }
+  .lesson-preview-details { margin: 0 0 8px 0; font-size: 0.85rem; }
+  .lesson-preview-details summary { color: var(--nvidia-gray); cursor: pointer; outline: none; padding: 2px 0; }
+  .lesson-preview-details summary:hover { color: var(--nvidia-light); }
+  .lesson-preview-details ul { margin: 6px 0 0 0; padding-left: 20px; color: var(--nvidia-gray); }
+  .lesson-preview-details li { margin-bottom: 2px; }
+
+  .keyword-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+  .keyword-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--nvidia-accent);
+      color: var(--nvidia-gray);
+      font-size: 0.7rem; padding: 2px 8px; border-radius: 999px;
+  }
+  .lesson-preview-link {
+      color: var(--nvidia-green);
+      text-decoration: none;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      display: inline-block;
+  }
+  .lesson-preview-link:hover { text-decoration: underline; color: white; }
+
+  /* Inline-rendered README (only used for README-only tracks like
+     quantum-ai-project-template). Keeps the modal looking native by
+     reusing the same green-accent header style as the rest of the modal. */
+  .readme-rendered { color: var(--nvidia-light); line-height: 1.6; font-size: 0.95rem; }
+  .readme-rendered h1, .readme-rendered h2, .readme-rendered h3, .readme-rendered h4 {
+      color: var(--nvidia-green); margin: 20px 0 10px 0;
+  }
+  .readme-rendered h1 { font-size: 1.2rem; }
+  .readme-rendered h2 { font-size: 1.05rem; }
+  .readme-rendered h3 { font-size: 0.95rem; text-transform: none; letter-spacing: 0; }
+  .readme-rendered a { color: var(--nvidia-green); text-decoration: none; }
+  .readme-rendered a:hover { text-decoration: underline; }
+  .readme-rendered pre {
+      background: #111; padding: 12px; border-radius: 4px;
+      overflow-x: auto; border: 1px solid #444;
+  }
+  .readme-rendered code {
+      font-family: monospace; background: rgba(255,255,255,0.08);
+      padding: 2px 5px; border-radius: 3px; font-size: 0.85em;
+  }
+  .readme-rendered pre code { background: transparent; padding: 0; }
+  .readme-rendered img { max-width: 100%; border-radius: 4px; border: 1px solid #444; }
+  .readme-rendered table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  .readme-rendered th, .readme-rendered td { border: 1px solid #444; padding: 8px; text-align: left; }
+  .readme-rendered th { background-color: #333; }
+  .readme-rendered ul, .readme-rendered ol { padding-left: 24px; }
+  .readme-rendered li { margin-bottom: 4px; }
+  .readme-rendered blockquote {
+      border-left: 3px solid var(--nvidia-green); padding-left: 12px;
+      margin: 12px 0; color: var(--nvidia-gray);
+  }
 
   /* Inputs */
   .form-group { margin-bottom: 16px; }
@@ -414,6 +507,17 @@
       padding: 8px 16px; cursor: pointer; font-size: 0.85rem; width: 100%; margin-top: 8px;
   }
   .btn-secondary:hover { border-color: var(--nvidia-light); color: var(--nvidia-light); }
+
+  /* Loading / Error states for data-driven grid */
+  .grid-status {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--nvidia-gray);
+      font-size: 0.95rem;
+  }
+  .grid-status.error { color: #ff8888; }
+  .grid-status .retry-link { color: var(--nvidia-green); cursor: pointer; text-decoration: underline; }
 
   @media (max-width: 900px) { .pathway-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 600px) { .pathway-grid { grid-template-columns: 1fr; } .widget-container { padding: 16px; } }
@@ -587,16 +691,21 @@
         <div class="filter-group">
             <span class="filter-label">Filter Notebooks:</span>
             <button class="filter-btn active" onclick="filterNotebooks('all')">All</button>
-            <div class="filter-divider"></div> <button class="filter-btn" onclick="filterNotebooks('intro')">Intro</button>
+            <div class="filter-divider"></div>
+            <button class="filter-btn" onclick="filterNotebooks('intro')">Intro</button>
             <button class="filter-btn" onclick="filterNotebooks('inter')">Intermediate</button>
             <button class="filter-btn" onclick="filterNotebooks('adv')">Advanced</button>
+            <div class="filter-divider"></div>
+            <button class="filter-btn filter-new-btn" onclick="filterNotebooks('new')">New</button>
         </div>
 
         <button class="filter-btn create-btn" onclick="openBuilder()">+ Create Custom Pathway</button>
     </section>
 
 
-      <div class="pathway-grid" id="grid-container"></div>
+      <div class="pathway-grid" id="grid-container">
+        <div class="grid-status" id="grid-status">Loading learning paths from <code>curriculum.json</code>…</div>
+      </div>
   </main>
   <footer class="page-footer">
       <p>
@@ -607,162 +716,205 @@
 </div>
 
 <script>
-  // 1. DATA SOURCE
-  // Note: 'folder' property added for Readme Fetching
-  const modules = [
-    {
-        id: "track-quickstart",
-        levelLabel: "",
-        title: "Quick Start to Quantum Computing with CUDA-Q",
-        description: "",
-        folder: "quick-start-to-quantum",
-        notebooks: [
-            { name: "Interactive: Hello World", type: "tool", url: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html", difficulty: "intro" },
-            { name: "Start Small with One Qubit", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/01_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/01_quick_start_to_quantum.ipynb" },
-            { name: "Multiple Qubits and Entanglement", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/02_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/02_quick_start_to_quantum.ipynb" },
-            { name: "Write Your First Parameterized Kernel", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb" },
-            { name: "Build Your First Variational Algorithm", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/04_quick_start_to_quantum.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/04_quick_start_to_quantum.ipynb" }
-        ]
-    },
-    {
-        id: "track-simulation",
-        levelLabel: "",
-        title: "Quantum Algorithm Simulation 101",
-        description: "",
-        folder: "simulation",
-        notebooks: [
-            { name: "Choosing the Right Simulator", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb" }
-        ]
-    },
-    {
-        id: "track-qis",
-        levelLabel: "",
-        title: "QIS Foundational Algorithms",
-        description: "",
-        folder: "qis-examples", 
-        notebooks: [
-            { name: "Interactive: Hello World", type: "tool", url: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html", difficulty: "intro" },
-            { name: "Interactive: Born's Rule", type: "tool", url: "https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html", difficulty: "intro" },
-            { name: "Teleportation", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_teleportation.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_teleportation.ipynb" },
-            { name: "Bernstein Vazirani", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/bernstein_vazirani.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/bernstein_vazirani.ipynb" },
-            { name: "Deutsch's Algorithm", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb" },
-            { name: "QFT", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb" },
-            { name: "QPE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb" },
-            { name: "Grover's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb" },
-            { name: "Shor's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb" }
-        ]
-    },
-    {
-        id: "track-qec",
-        levelLabel: "",
-        title: "QEC 101",
-        description: "",
-        folder: "qec101",
-        notebooks: [
-            { name: "Introduction to QEC", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb" },
-            { name: "Stabilizers, Shor Code, Steane Code", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb" },
-            { name: "Noisy Simulation", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb" },
-            { name: "AI Decoders", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb" },
-            { name: "Magic State Distillation", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb" },
-            { name: "Toric and Surface Codes", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb" },
-            { name: "qLDPC Codes", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/07_QEC_qLDPC.ipynb" },
-            { name: "Decoder Metrics and Parallel Window Decoding", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb" },
-            { name: "Detector Error Models and Real-Time Decoding", difficulty: "adv", isNew: true, colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb" }
-        ]
-    },
-    {
-        id: "track-chem",
-        levelLabel: "",
-        title: "Chemistry Simulations",
-        description: "",
-        folder: "chemistry-simulations",
-        notebooks: [
-        { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" },
-            { name: "ADAPT-VQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb" },
-            { name: "QPE: Canonical, Iterative, and Bayesian", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb" },
-            { name: "Krylov_Subspace", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb" },
-            { name: "QMMM", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb" }
-        ]
-    },
-    {
-        id: "track-finance",
-        levelLabel: "",
-        title: "Applications to Finance",
-        description: "",
-        folder: "quantum-applications-to-finance",
-        notebooks: [
-        { name: "Quantum Walks for Finance Part 1", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" },
-            { name: "Quantum Walks for Finance Part 2", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/02_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/02_quantum_walks.ipynb" },
-            { name: "Portfolio Optimization 3 Ways", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb" }
-        ]
-    },
-    {
-        id: "track-qaoa",
-        levelLabel: "",
-        title: "QAOA for Max Cut (Circuit Cutting)",
-        description: "",
-        folder: "qaoa-for-max-cut",
-        notebooks: [
-            { name: "Max Cut for QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" },
-            { name: "Divide and Conquer QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/02_One-level-divide-and-conquer-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/02_One-level-divide-and-conquer-QAOA.ipynb" },
-            { name: "Recursive Divide and Conquer QAOA", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb" },
-            { name: "Weighted Max Cut Project", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb" }
-        ]
-    },
-    {
-        id: "track-ai",
-        levelLabel: "",
-        title: "AI for Quantum",
-        description: "",
-        folder: "ai-for-quantum",
-        notebooks: [
-            { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" },
-            { name: "Compiling Unitaries with Diffusion Models", difficulty: "int", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb" },
-            { name: "AI Decoders", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb" }
-        ]
-    },
-    {
-        id: "track-dynamics",
-        levelLabel: "",
-        title: "Dynamics 101",
-        description: "",
-        folder: "dynamics101",
-        notebooks: [
-            { name: "Jaynes Cummings Hamiltonian", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/01_Jaynes_Cummings.ipynb" },
-            { name: "Time Dependent Hamiltonians", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb" }
-        ]
-    },
-    {
-        id: "track-calibration",
-        levelLabel: "",
-        title: "Calibration",
-        description: "",
-        folder: "calibration",
-        notebooks: [
-            { name: "Start Here", difficulty: "intro", isNew: true, colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb" }
-        ]
-    },
-    {
-        id: "track-hybrid",
-        levelLabel: "",
-        title: "Hybrid Workflows",
-        description: "",
-        folder: "hybrid-workflows",
-        notebooks: [
-            { name: "Quantum Enhanced Optimization", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb" },
-            { name: "QAOA for Max Cut and GPT QAOA", difficulty: "inter", isNew: true, colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb" },
-            { name: "QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" },
-            { name: "Quantum Walks", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" },
-            { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" }
-        ]
-    }
-  ];
+  // =========================================================
+  // 1. DATA SOURCE — curriculum.json (the canonical inventory)
+  // =========================================================
+  //
+  // This page builds the `modules` array dynamically from curriculum.json
+  // on the main branch of NVIDIA/cuda-q-academic. That file is the single
+  // source of truth; updating it on main automatically updates this page
+  // the next time someone loads it. No local copy is consulted.
+  //
+  const CURRICULUM_URL = 'https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/curriculum.json';
 
-  // 2. RENDER LOGIC
+  // Map curriculum.json track keys → the internal short IDs that v1 used.
+  // These short IDs are what `?track=...` deep-links rely on, so we preserve
+  // them for backward compatibility with shared links.
+  const TRACK_ID_MAP = {
+      'quick-start-to-quantum':       'track-quickstart',
+      'simulation-101':               'track-simulation',
+      'qis-foundational-algorithms':  'track-qis',
+      'qec-101':                      'track-qec',
+      'chemistry-simulations':        'track-chem',
+      'applications-to-finance':      'track-finance',
+      'qaoa-for-max-cut':             'track-qaoa',
+      'ai-for-quantum':               'track-ai',
+      'dynamics-101':                 'track-dynamics',
+      'hybrid-workflows':             'track-hybrid',
+      'calibration':                  'track-calibration',
+      'quantum-ai-project-template':  'track-qaipt'
+  };
+
+  // curriculum.json uses verbose difficulty strings; the filter bar uses
+  // 3-letter codes. Map between them.
+  const DIFFICULTY_MAP = {
+      'intro':        'intro',
+      'intermediate': 'inter',
+      'advanced':     'adv'
+  };
+
+  // Mutable: populated from curriculum.json on init.
+  let modules = [];
+  // Holds the full parsed curriculum.json so the preview modal can compose
+  // its own description directly from the catalog (lesson summaries,
+  // prerequisites, keywords, etc.) — no README fetch required.
+  let curriculumData = null;
+
+  // =========================================================
+  // 2. CURRICULUM LOADING
+  // =========================================================
+
+  async function fetchCurriculum() {
+      const res = await fetch(CURRICULUM_URL, { cache: 'no-store' });
+      if (!res.ok) {
+          throw new Error('HTTP ' + res.status + ' from ' + CURRICULUM_URL);
+      }
+      return await res.json();
+  }
+
+  function githubToColab(link) {
+      if (!link) return null;
+      if (!link.startsWith('https://github.com/')) return null;
+      return link.replace('https://github.com/', 'https://colab.research.google.com/github/');
+  }
+
+  // Pick the "home" folder for a track by finding the first lesson that
+  // names this track as its primary_track_id and has a repo_path. This is
+  // what the README preview button uses to fetch the right README.
+  function deriveTrackFolder(trackKey, curriculum) {
+      const track = curriculum.tracks[trackKey];
+      if (!track || !Array.isArray(track.lesson_ids)) return trackKey;
+      for (const lessonId of track.lesson_ids) {
+          const lesson = curriculum.lessons[lessonId];
+          if (lesson && lesson.primary_track_id === trackKey && lesson.repo_path) {
+              return lesson.repo_path.split('/')[0];
+          }
+      }
+      // Fallback: first lesson with any repo_path
+      for (const lessonId of track.lesson_ids) {
+          const lesson = curriculum.lessons[lessonId];
+          if (lesson && lesson.repo_path) return lesson.repo_path.split('/')[0];
+      }
+      return trackKey;
+  }
+
+  // Per-track widget curation:
+  //   - If the track defines `widget_ids`, treat that as the curated, ordered list.
+  //   - Otherwise fall back to filtering by `widgets[*].related_track_ids` for
+  //     backwards-compatibility with older curriculum.json revisions.
+  function buildWidgetEntriesForTrack(trackKey, curriculum) {
+      const track = (curriculum.tracks || {})[trackKey] || {};
+      const widgets = curriculum.widgets || {};
+      const entries = [];
+
+      if (Array.isArray(track.widget_ids)) {
+          for (const widgetId of track.widget_ids) {
+              const widget = widgets[widgetId];
+              if (!widget) continue;
+              entries.push({
+                  name: 'Interactive: ' + widget.title,
+                  type: 'tool',
+                  url: widget.live_url,
+                  difficulty: 'intro'
+              });
+          }
+          return entries;
+      }
+
+      const order = curriculum.widget_gallery_order || Object.keys(widgets);
+      for (const widgetId of order) {
+          const widget = widgets[widgetId];
+          if (!widget) continue;
+          if (!(widget.related_track_ids || []).includes(trackKey)) continue;
+          entries.push({
+              name: 'Interactive: ' + widget.title,
+              type: 'tool',
+              url: widget.live_url,
+              difficulty: 'intro'
+          });
+      }
+      return entries;
+  }
+
+  // A "README lesson" is one whose canonical artifact is a markdown file
+  // (instructor template, syllabus, etc.) rather than a runnable notebook.
+  // These get a "View Guide" button instead of the "Get Started" dropdown,
+  // because Colab cannot open .md files.
+  function isReadmeLesson(lesson) {
+      if (!lesson) return false;
+      if (lesson.source_kind === 'instructor_template') return true;
+      const path = (lesson.repo_path || lesson.link || '').toLowerCase();
+      return path.endsWith('.md');
+  }
+
+  function buildModulesFromCurriculum(curriculum) {
+      const result = [];
+      const trackOrder = curriculum.track_order || Object.keys(curriculum.tracks || {});
+
+      for (const trackKey of trackOrder) {
+          const track = (curriculum.tracks || {})[trackKey];
+          if (!track) continue;
+
+          const internalId = TRACK_ID_MAP[trackKey] || ('track-' + trackKey);
+          const folder = deriveTrackFolder(trackKey, curriculum);
+
+          const rawLessons = (track.lesson_ids || [])
+              .map(id => (curriculum.lessons || {})[id])
+              .filter(Boolean);
+
+          const lessonEntries = rawLessons.map(lesson => {
+              const colab = githubToColab(lesson.link);
+              return {
+                  name: lesson.title,
+                  difficulty: DIFFICULTY_MAP[lesson.difficulty] || lesson.difficulty || 'intro',
+                  colab: colab,
+                  gh: lesson.link,
+                  isNew: lesson.is_new === true,
+                  isReadme: isReadmeLesson(lesson)
+              };
+          });
+
+          const widgetEntries = buildWidgetEntriesForTrack(trackKey, curriculum);
+
+          // A README-only track has no runnable notebooks at all — either
+          // it has no lessons or every lesson is markdown. quantum-ai-project-
+          // template is the canonical example. For these we surface the actual
+          // README in the preview modal instead of just the curriculum.json
+          // summary. (Array.every returns true on an empty array, so the same
+          // expression handles the 0-lesson edge case.)
+          const isReadmeOnly = rawLessons.every(isReadmeLesson);
+
+          result.push({
+              id: internalId,
+              curriculumKey: trackKey,
+              levelLabel: '',
+              title: track.title,
+              description: track.summary || '',
+              folder: folder,
+              isReadmeOnly: isReadmeOnly,
+              notebooks: [...widgetEntries, ...lessonEntries]
+          });
+      }
+
+      return result;
+  }
+
+  function showLoadError(err) {
+      const container = document.getElementById('grid-container');
+      container.innerHTML = `
+        <div class="grid-status error">
+          Could not load <code>curriculum.json</code>: ${(err && err.message) ? err.message : err}
+          <br><br>
+          <a class="retry-link" onclick="bootstrap()">Retry</a>
+        </div>
+      `;
+  }
+
+  // =========================================================
+  // 3. RENDER LOGIC (unchanged from v1)
+  // =========================================================
   function renderCards() {
       const container = document.getElementById('grid-container');
-      const brevLink = "https://brev.nvidia.com/launchable/deploy?launchableID=env-2zjo3nxqb6jbM5vtfJFQDWrb0Qd";
-      const qBraidLink = "https://account.qbraid.com/?gitHubUrl=https://github.com/NVIDIA/cuda-q-academic.git";
 
       container.innerHTML = modules.map(m => `
         <article class="pathway-card ${m.isCustom ? 'custom-card' : ''}" id="${m.id}">
@@ -772,7 +924,7 @@
                 <div class="card-title">
                     <h3>${m.title}</h3>
                     <p>${m.description}</p>
-                    ${m.folder ? `<button class="readme-btn" onclick="openPreview('${m.id}')">Description</button>` : ''}
+                    ${m.curriculumKey ? `<button class="readme-btn" onclick="openPreview('${m.id}')">Description</button>` : ''}
                 </div>
             </div>
             <ul class="notebook-list" aria-label="${m.title} Notebooks">
@@ -785,10 +937,12 @@
                             </span>
                             ${nb.type === 'tool'
                                 ? `<a class="badge-link badge-tool" href="${nb.url}" target="_blank">Open</a>`
-                                : `<button class="get-started-btn" onclick="toggleLessonActions(this)" aria-expanded="false">Get Started <span class="chev">▾</span></button>`
+                                : (nb.isReadme
+                                    ? `<button class="get-started-btn" onclick="openPreview('${m.id}')">View Guide</button>`
+                                    : `<button class="get-started-btn" onclick="toggleLessonActions(this)" aria-expanded="false">Get Started <span class="chev">▾</span></button>`)
                             }
                         </div>
-                        ${nb.type === 'tool' ? '' : `
+                        ${(nb.type === 'tool' || nb.isReadme) ? '' : `
                         <div class="lesson-actions">
                             <a class="lesson-action-btn" href="${nb.colab}" target="_blank" rel="noopener">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt=""> Open notebook in Colab
@@ -814,14 +968,16 @@
       `).join('');
   }
 
-  // 3. FILTERING
+  // =========================================================
+  // 4. FILTERING (unchanged from v1)
+  // =========================================================
   function filterNotebooks(level) {
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
       
       document.querySelectorAll('.notebook-item').forEach(item => {
           item.classList.remove('filter-match', 'filter-dim');
-          if (level === 'all') return; // If 'all', loop finishes here, everything is visible
+          if (level === 'all') return;
           
           let match = false;
           if (level === 'new') {
@@ -835,11 +991,12 @@
       });
   }
 
-  // 4. INTERACTION
+  // =========================================================
+  // 5. INTERACTION (unchanged from v1)
+  // =========================================================
   function toggleLessonActions(btn) {
       const item = btn.closest('.notebook-item');
       const wasOpen = item.classList.contains('expanded');
-      // Collapse any other open rows across all cards
       document.querySelectorAll('.notebook-item.expanded').forEach(el => {
           el.classList.remove('expanded');
           const b = el.querySelector('.get-started-btn');
@@ -878,29 +1035,22 @@
   }
 
   function clearTrack(e) {
-      if(e) e.preventDefault(); // Handle cases where e might be undefined if called manually
+      if(e) e.preventDefault();
       
-      // 1. Reset URL
       const url = new URL(window.location.href);
       url.searchParams.delete('track');
       url.searchParams.delete('custom');
       window.history.pushState({}, '', url);
       
-      // 2. Show Header and Filters
       document.querySelector('header').style.display = 'block';
       document.getElementById('filter-controls').style.display = 'flex';
       
-      // (Note: We removed the line attempting to hide 'focus-banner' since that element is deleted)
-
-      // 3. Show ALL cards again
       document.querySelectorAll('.pathway-card').forEach(c => {
           c.style.display = 'flex';
       });
 
-      // 4. Reset the Grid layout (remove the centering/max-width used for single view)
       document.querySelector('.pathway-grid').style.cssText = "";
 
-      // 5. Remove the "Return" button we added dynamically
       const returnBtn = document.querySelector('.card-return-link');
       if (returnBtn) {
           returnBtn.remove();
@@ -908,48 +1058,141 @@
   }
 
   // =========================================================
-  // PREVIEW LOGIC (README FETCHING)
+  // 6. PREVIEW LOGIC — composed from curriculum.json
   // =========================================================
-  
-  async function openPreview(cardId) {
-      const modal = document.getElementById('preview-modal');
-      const contentDiv = document.getElementById('preview-body');
-      const titleDiv = document.getElementById('preview-title');
-      
-      const module = modules.find(m => m.id === cardId);
-      if (!module || !module.folder) return;
+  //
+  // v1 fetched each track's README.md from raw.githubusercontent.com and
+  // rendered it as markdown. v2 instead composes the preview directly from
+  // the canonical fields in curriculum.json (track summary + each lesson's
+  // summary, prerequisites, keywords, difficulty, and is_new flag, plus the
+  // curated widget list). This avoids a network round-trip and gives us a
+  // consistent layout that stays in lockstep with the catalog.
 
-      modal.classList.add('open');
-      titleDiv.innerText = module.title;
-      contentDiv.innerHTML = '<p style="text-align:center; color: #aaa;">Fetching Course Guide...</p>';
+  function escapeHtml(s) {
+      return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+  }
+
+  function renderTrackPreview(trackKey) {
+      const track = (curriculumData && curriculumData.tracks) ? curriculumData.tracks[trackKey] : null;
+      if (!track) return '<p style="color:#ff5555;">Track not found in curriculum.json.</p>';
+
+      const lessons = (track.lesson_ids || [])
+          .map(id => (curriculumData.lessons || {})[id])
+          .filter(Boolean);
+
+      const widgets = (track.widget_ids || [])
+          .map(id => (curriculumData.widgets || {})[id])
+          .filter(Boolean);
+
+      const difficultyLabel = (track.difficulty_range || []).join(' / ') || '—';
+
+      let html = `
+          <div class="track-meta">
+              ${track.summary ? `<p class="track-summary-text">${escapeHtml(track.summary)}</p>` : ''}
+              <div class="track-meta-row">
+                  <span class="meta-pill">Difficulty: <strong>${escapeHtml(difficultyLabel)}</strong></span>
+                  <span class="meta-pill"><strong>${lessons.length}</strong> lesson${lessons.length === 1 ? '' : 's'}</span>
+                  ${widgets.length ? `<span class="meta-pill"><strong>${widgets.length}</strong> widget${widgets.length === 1 ? '' : 's'}</span>` : ''}
+              </div>
+          </div>
+      `;
+
+      if (lessons.length) {
+          html += `<h3>Lessons</h3><ol class="lesson-preview-list">`;
+          for (const lesson of lessons) {
+              const linkLabel = lesson.source_kind === 'instructor_template'
+                  ? 'Open template →'
+                  : 'Open notebook source →';
+              html += `
+                  <li class="lesson-preview-item">
+                      <div class="lesson-preview-header">
+                          <span class="lesson-preview-title">${escapeHtml(lesson.title)}</span>
+                          ${lesson.difficulty ? `<span class="diff-pill diff-${escapeHtml(lesson.difficulty)}">${escapeHtml(lesson.difficulty)}</span>` : ''}
+                          ${lesson.is_new ? '<span class="new-pill">NEW</span>' : ''}
+                      </div>
+                      ${lesson.summary ? `<p class="lesson-preview-summary">${escapeHtml(lesson.summary)}</p>` : ''}
+                      ${(lesson.prerequisites && lesson.prerequisites.length) ? `
+                          <details class="lesson-preview-details">
+                              <summary>Prerequisites</summary>
+                              <ul>${lesson.prerequisites.map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>
+                          </details>
+                      ` : ''}
+                      ${(lesson.keywords && lesson.keywords.length) ? `
+                          <div class="keyword-row">
+                              ${lesson.keywords.map(k => `<span class="keyword-chip">${escapeHtml(k)}</span>`).join('')}
+                          </div>
+                      ` : ''}
+                      ${lesson.link ? `<a class="lesson-preview-link" href="${escapeHtml(lesson.link)}" target="_blank" rel="noopener">${linkLabel}</a>` : ''}
+                  </li>
+              `;
+          }
+          html += `</ol>`;
+      }
+
+      if (widgets.length) {
+          html += `<h3>Interactive Widgets</h3><ul class="widget-preview-list">`;
+          for (const widget of widgets) {
+              html += `
+                  <li class="widget-preview-item">
+                      <div class="lesson-preview-header">
+                          <span class="lesson-preview-title">${escapeHtml(widget.title)}</span>
+                      </div>
+                      ${widget.summary ? `<p class="lesson-preview-summary">${escapeHtml(widget.summary)}</p>` : ''}
+                      ${(widget.keywords && widget.keywords.length) ? `
+                          <div class="keyword-row">
+                              ${widget.keywords.map(k => `<span class="keyword-chip">${escapeHtml(k)}</span>`).join('')}
+                          </div>
+                      ` : ''}
+                      ${widget.live_url ? `<a class="lesson-preview-link" href="${escapeHtml(widget.live_url)}" target="_blank" rel="noopener">Launch widget →</a>` : ''}
+                  </li>
+              `;
+          }
+          html += `</ul>`;
+      }
+
+      return html;
+  }
+
+  // For README-only tracks, fetch the canonical README from the main branch
+  // and render it (as markdown) appended below the curriculum-derived
+  // summary inside the preview modal.
+  async function appendReadmeSection(module, contentDiv) {
+      if (!module.folder) return;
+
+      const section = document.createElement('section');
+      section.className = 'readme-section';
+      section.innerHTML = '<h3>Project Guide</h3><p style="color:#aaa;">Fetching guide from GitHub…</p>';
+      contentDiv.appendChild(section);
 
       const readmeUrl = `https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/${module.folder}/README.md`;
-
+      let status = 0;
       try {
           const response = await fetch(readmeUrl);
-          if (!response.ok) throw new Error("Readme not found");
-          
+          status = response.status;
+          if (!response.ok) throw new Error('README not found (HTTP ' + response.status + ')');
+
           let text = await response.text();
-          
-          // Truncate logic: Stop before "Notebooks" header
-          // This regex looks for "# Notebooks" or "## Notebooks" (case insensitive)
-          const splitRegex = /^#+\s*Notebooks/im;
-          const match = text.match(splitRegex);
-          if(match) {
-             text = text.substring(0, match.index);
+
+          let html;
+          if (typeof marked !== 'undefined' && marked.parse) {
+              html = marked.parse(text);
+          } else {
+              html = '<pre style="white-space: pre-wrap;">' + escapeHtml(text) + '</pre>';
           }
 
-          // 1. Convert Markdown to HTML
-          let html = marked.parse(text);
-          
-          // 2. Fix Relative Image Links
-          // Replace src="./image.png" with full raw github path
+          // Rewrite relative <img src="./foo.png"> to point at the raw branch
+          // so screenshots and diagrams in the README still resolve.
           const baseUrl = `https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/${module.folder}/`;
           html = html.replace(/src="(\.\/|)(?!http)([^"]+)"/g, `src="${baseUrl}$2"`);
 
-          contentDiv.innerHTML = html;
+          section.innerHTML = '<h3>Project Guide</h3><div class="readme-rendered">' + html + '</div>';
 
-          contentDiv.querySelectorAll('a[href]').forEach(a => {
+          section.querySelectorAll('a[href]').forEach(a => {
               const href = a.getAttribute('href');
               if (href && !href.startsWith('#')) {
                   a.setAttribute('target', '_blank');
@@ -957,7 +1200,49 @@
               }
           });
       } catch (err) {
-          contentDiv.innerHTML = `<p style="color:#ff5555; text-align:center;">Could not load guide. <br> <a href="https://github.com/NVIDIA/cuda-q-academic/tree/main/${module.folder}" target="_blank" style="color:var(--nvidia-green);">View on GitHub</a></p>`;
+          // 404 = the track was registered in curriculum.json before its
+          // folder was merged to main. Render a friendly "coming soon"
+          // notice instead of a scary error.
+          if (status === 404) {
+              section.innerHTML =
+                  '<h3>Project Guide</h3>' +
+                  '<p style="color:var(--nvidia-gray); line-height:1.5;">' +
+                  'The full project guide for this track has not been published to the ' +
+                  '<code>main</code> branch yet. Refer to the summary above for an overview, ' +
+                  'and watch the ' +
+                  '<a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener" ' +
+                  'style="color:var(--nvidia-green);">CUDA-Q Academic repository</a> ' +
+                  'for updates.</p>';
+          } else {
+              section.innerHTML =
+                  '<h3>Project Guide</h3>' +
+                  '<p style="color:#ff8888;">Could not load the README. ' +
+                  `<a href="https://github.com/NVIDIA/cuda-q-academic/tree/main/${escapeHtml(module.folder)}" ` +
+                  'target="_blank" rel="noopener" style="color:var(--nvidia-green);">View on GitHub</a></p>';
+          }
+      }
+  }
+
+  function openPreview(cardId) {
+      const modal = document.getElementById('preview-modal');
+      const contentDiv = document.getElementById('preview-body');
+      const titleDiv = document.getElementById('preview-title');
+
+      const module = modules.find(m => m.id === cardId);
+      if (!module) return;
+
+      modal.classList.add('open');
+      titleDiv.innerText = module.title;
+
+      if (!module.curriculumKey || !curriculumData) {
+          contentDiv.innerHTML = '<p style="color:#ff5555; text-align:center;">No catalog entry available for this pathway.</p>';
+          return;
+      }
+
+      contentDiv.innerHTML = renderTrackPreview(module.curriculumKey);
+
+      if (module.isReadmeOnly) {
+          appendReadmeSection(module, contentDiv);
       }
   }
 
@@ -966,7 +1251,7 @@
   }
 
   // =========================================================
-  // CUSTOM BUILDER LOGIC
+  // 7. CUSTOM BUILDER LOGIC (unchanged from v1)
   // =========================================================
 
   function openBuilder() {
@@ -975,7 +1260,6 @@
       if(document.querySelectorAll('.notebook-row').length === 0) addNotebookRow();
   }
 
-  // Generate Options String for Select Dropdown
   function getCatalogOptions() {
       let options = `<option value="">-- Select a Notebook --</option>`;
       
@@ -1098,21 +1382,44 @@
       window.location.href = url.toString();
   }
 
-// 5. INITIALIZATION
-window.addEventListener('DOMContentLoaded', () => {
-      
+  // =========================================================
+  // 8. INITIALIZATION
+  // =========================================================
+
+  async function bootstrap() {
+      // Reset to loading state in case this was a retry.
+      const container = document.getElementById('grid-container');
+      container.innerHTML = '<div class="grid-status" id="grid-status">Loading learning paths from <code>curriculum.json</code>…</div>';
+
+      let curriculum;
+      try {
+          curriculum = await fetchCurriculum();
+      } catch (err) {
+          console.error('curriculum.json fetch failed', err);
+          showLoadError(err);
+          return;
+      }
+
+      try {
+          curriculumData = curriculum;
+          modules = buildModulesFromCurriculum(curriculum);
+      } catch (err) {
+          console.error('failed to map curriculum.json', err);
+          showLoadError(err);
+          return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       const customData = params.get('custom');
       const trackId = params.get('track');
 
-      // Helper function to add the return link inside the specific card
       const addReturnLink = (targetId) => {
           const card = document.getElementById(targetId);
           if(card) {
              const returnBtn = document.createElement('div');
              returnBtn.className = 'card-return-link';
              returnBtn.innerHTML = '← Return to CUDA-Q Academic Learning Paths';
-             returnBtn.onclick = clearTrack; // Uses your existing clearTrack function
+             returnBtn.onclick = clearTrack;
              card.appendChild(returnBtn);
           }
       };
@@ -1141,7 +1448,6 @@ window.addEventListener('DOMContentLoaded', () => {
               
               modules.unshift(newModule);
               
-              // Hide main interface elements
               document.querySelector('header').style.display = 'none';
               document.getElementById('filter-controls').style.display = 'none';
               
@@ -1152,32 +1458,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
       renderCards(); 
 
-      // LOGIC FOR SINGLE VIEW (Custom or Standard)
       if (customData || trackId) {
           const activeId = customData ? "track-custom" : trackId;
 
-          // 1. Hide header/filters
           document.querySelector('header').style.display = 'none';
           document.getElementById('filter-controls').style.display = 'none';
 
-          // 2. Hide all other cards
           document.querySelectorAll('.pathway-card').forEach(c => {
               if (c.id !== activeId) c.style.display = 'none';
           });
 
-          // 3. Center the grid
           const grid = document.querySelector('.pathway-grid');
           grid.style.display = 'block';
           grid.style.maxWidth = '600px';
           grid.style.margin = '0 auto';
 
-          // 4. Inject the "Return" link inside the card footer
           addReturnLink(activeId);
       }
-  });
+  }
 
+  window.addEventListener('DOMContentLoaded', bootstrap);
 
-  // 6. KEYBOARD SHORTCUTS
+  // =========================================================
+  // 9. KEYBOARD SHORTCUTS (unchanged from v1)
+  // =========================================================
   document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { 
           e.preventDefault(); 
