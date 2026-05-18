@@ -22,7 +22,7 @@ NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantu
 | CUDA-Q Newsletter (updates, tutorials, events) | https://www.nvidia.com/en-us/solutions/quantum-computing/cuda-q-newsletter/ |
 | Machine-readable curriculum catalog | [curriculum.json](curriculum.json) |
 | Guide to CUDA-Q Backends | [Guide-to-cuda-q-backends.ipynb](Guide-to-cuda-q-backends.ipynb) |
-| Sample Syllabus | [Sample-Syllabus.md](Sample-Syllabus.md) |
+| Instructor Guide | [Instructor-Guide.md](Instructor-Guide.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Install CUDA-Q | https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html |
 

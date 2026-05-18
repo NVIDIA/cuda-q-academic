@@ -94,7 +94,7 @@ cuda-q-academic/
 ├── curriculum.json               # canonical lesson/widget catalog for agents
 ├── Guide-to-cuda-q-backends.ipynb
 ├── notebook_template.ipynb
-├── Sample-Syllabus.md
+├── Instructor-Guide.md
 ├── CONTRIBUTING.md
 ├── AGENTS.md                     # this file
 ├── brev-instructions.pdf
