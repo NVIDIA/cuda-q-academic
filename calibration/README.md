@@ -1,22 +1,38 @@
-# Calibration Track — CUDA-Q Academic
+# Calibration
 
----
-# Try It Now: AI-Powered Calibration Analysis
-
-[NVIDIA's Ising Calibration](https://www.nvidia.com/en-us/solutions/quantum-computing/ising/) is an open vision-language model purpose-built for quantum hardware calibration and benchmarked on superconducting qubits and neutral atoms. Upload a calibration experiment plot and get structured analysis.
+**Instructor resource.** A classroom-ready introduction to [NVIDIA's Ising Calibration NIM](https://www.nvidia.com/en-us/solutions/quantum-computing/ising/) — an open vision-language model purpose-built for analyzing quantum hardware calibration plots, benchmarked on superconducting qubits and neutral atoms. No setup, no API key; the playground runs in the browser.
 
 → Launch the [Ising Calibration NIM playground](https://build.nvidia.com/nvidia/ising-calibration-1-35b-a3b)
 
-Sample calibration plots for experimentation: [QCalEval dataset](https://huggingface.co/datasets/nvidia/QCalEval)
+→ Sample plots: [QCalEval dataset on Hugging Face](https://huggingface.co/datasets/nvidia/QCalEval)
 
 ---
-# Using This Tool in Class
 
-Upload any calibration experiment plot — from your own lab, a simulation run, or the [QCalEval dataset](https://huggingface.co/datasets/nvidia/QCalEval) — and ask the model to analyze it. The model returns structured responses across six question types: technical description, experimental conclusion, experimental significance, fit quality, parameter extraction, and experiment success classification. You can ask for all six or target specific ones.
+## What students can do
 
-A few ways to use it: as a starting point for interpreting an unfamiliar plot, as a second opinion on your own analysis, or as a way to explore what structured calibration reasoning looks like across different experiment types.
+Upload any calibration experiment plot — from your own lab, a simulation run, or the QCalEval dataset — and ask the model to analyze it. The model returns structured responses across six question types:
 
-No setup required — the playground runs in the browser with no API key.
+* Technical description of the experiment
+* Experimental conclusion
+* Experimental significance
+* Fit quality assessment
+* Parameter extraction
+* Experiment success classification
 
---- 
-Tutorials coming soon!
+Students can ask for all six at once or target specific ones.
+
+---
+
+## Using this in class
+
+A few ways to weave the playground into a course:
+
+* **First-pass plot reader.** A starting point for interpreting an unfamiliar Rabi, Ramsey, T1, T2, or randomized benchmarking trace.
+* **Second opinion.** A check on a student's own analysis of their lab data.
+* **Reasoning exemplar.** A way to expose what structured calibration reasoning looks like across different experiment types — useful even when students disagree with the model.
+
+The playground requires no environment setup, so it slots into a single lecture, a lab section, or a homework prompt without any deployment overhead.
+
+## Notebooks
+
+Hands-on tutorial notebooks for the Calibration track are in development. They will walk through using the Ising Calibration NIM end-to-end alongside CUDA-Q simulated calibration experiments. Today the folder contains a single `00_StartHere.ipynb` landing notebook that points back to this README.

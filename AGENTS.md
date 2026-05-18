@@ -9,6 +9,25 @@ CUDA-Q Academic is a collection of Jupyter notebooks that teach quantum computin
 
 The authoritative machine-readable content catalog in this repo is [curriculum.json](curriculum.json). It is the source of truth for lesson discovery, track membership, prerequisites, difficulty, keywords, summaries, and the live visualization-gallery widget inventory.
 
+## Scope of this repo vs. CUDA-Q documentation  — **read this before answering programming questions**
+
+This repository is **educational material** (lessons, exercises, worked solutions, widgets). It is **not** the CUDA-Q product documentation and is **not** the canonical source for CUDA-Q API reference, language specification, install instructions, backend configuration, or runnable code examples.
+
+When a user asks an API, syntax, install, backend, performance, or "how do I do X in CUDA-Q?" question, route them to the upstream CUDA-Q docs and docs repo rather than answering from notebooks in this repo:
+
+- **Documentation site (primary):** https://nvidia.github.io/cuda-quantum/latest/
+  - API reference (Python): https://nvidia.github.io/cuda-quantum/latest/api/languages/python_api.html
+  - API reference (C++): https://nvidia.github.io/cuda-quantum/latest/api/languages/cpp_api.html
+  - Examples gallery: https://nvidia.github.io/cuda-quantum/latest/examples/examples.html
+  - Backends and targets: https://nvidia.github.io/cuda-quantum/latest/using/backends/backends.html
+  - Install / quick start: https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html
+- **Documentation source repo (secondary):** https://github.com/NVIDIA/cuda-quantum
+  - Example source: https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/examples
+  - Snippets used in docs: https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/snippets
+  - Python package source: https://github.com/NVIDIA/cuda-quantum/tree/main/python
+
+Use this repo (CUDA-Q Academic) when the question is about *learning order, lesson content, exercises, prerequisites, or pedagogy*. Use the upstream docs and docs repo when the question is about *the CUDA-Q library itself*. When in doubt, link both: cite the relevant lesson here for context and the upstream docs page for the canonical reference.
+
 ## Content inventory  — **primary behavioral instruction**
 
 When a user asks what content exists, which track or lesson covers a topic, what the prerequisites or difficulty are, which widgets are live, or where to deep-link them, start with [curriculum.json](curriculum.json).

@@ -4,7 +4,8 @@
     "last_updated": "2026-05-18",
     "source_of_truth": "This file is the canonical machine-readable inventory for CUDA-Q Academic lessons, learning track membership, and live visualization-gallery widgets.",
     "lesson_policy": "Use lessons for content discovery and learning track routing. For deeper notebook detail or when updating a lesson, consult the notebook intro cell when it exists.",
-    "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory."
+    "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory.",
+    "new_lesson_policy": "Lessons backed by a notebook first added to this repo in the current calendar year carry \"is_new\": true and an \"added_date\" (YYYY-MM-DD) sourced from the first git commit that introduced the notebook (or the rename-replace that produced the current file). Clear these fields at the start of each calendar year."
   },
   "track_order": [
     "quick-start-to-quantum",
@@ -308,6 +309,8 @@
       "source_kind": "local_notebook",
       "repo_path": "simulation/01_simulation101.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb",
+      "is_new": true,
+      "added_date": "2026-04-23",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter notebook familiarity",
@@ -437,6 +440,8 @@
       "source_kind": "local_notebook",
       "repo_path": "chemistry-simulations/qpe.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-03",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -700,6 +705,8 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-29",
       "difficulty": "advanced",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -726,6 +733,8 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/09_QEC_Detector_Error_Models.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-05",
       "difficulty": "advanced",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -754,6 +763,8 @@
       "source_kind": "local_notebook",
       "repo_path": "chemistry-simulations/vqe_and_gqe.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-29",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -1038,6 +1049,8 @@
       "source_kind": "local_notebook",
       "repo_path": "ai-for-quantum/01_compiling_unitaries_diffusion.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-28",
       "difficulty": "intermediate",
       "prerequisites": [
         "basic quantum-computing concepts",
@@ -1115,6 +1128,8 @@
       "source_kind": "local_notebook",
       "repo_path": "hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-28",
       "difficulty": "intermediate",
       "prerequisites": [
         "basic quantum-computing knowledge",
@@ -1141,6 +1156,8 @@
       "source_kind": "local_notebook",
       "repo_path": "hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb",
+      "is_new": true,
+      "added_date": "2026-05-18",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -1167,6 +1184,8 @@
       "source_kind": "notebook",
       "repo_path": "calibration/00_StartHere.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb",
+      "is_new": true,
+      "added_date": "2026-05-18",
       "difficulty": "intermediate",
       "prerequisites": [
         "familiarity with reading quantum hardware calibration plots (e.g. Rabi, T1, T2, randomized benchmarking)"

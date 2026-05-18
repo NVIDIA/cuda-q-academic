@@ -28,17 +28,40 @@ Three things in the template require your input before students see any files. E
 
 ### 1. Choose or provide the project problem
 
-Decide which of the following fits your course:
+You have three paths: pick one of the suggested projects below as-is (Options A–D), let students design their own (Option E), or add a course-specific problem of your own. Each suggested project includes a defined problem, a classical comparator, and a link to the relevant CUDA-Q Academic scaffold. The four criteria a valid problem should meet are described in "[Choosing a problem](#choosing-a-problem)" below.
 
-**Option A — Use a suggested project (Options A–D in the "Suggested projects" section below).** These are ready to use as written. No changes needed. Each includes a defined problem, a classical comparator, and a link to the relevant CUDA-Q Academic scaffold.
+**Option A — LABS Optimization (MIT iQuHACK 2026)**
+QAOA-seeded hybrid quantum-classical algorithm for the Low Autocorrelation of Binary Sequences problem, GPU-accelerated with Memetic Tabu Search. *Classical comparator:* MTS run without quantum seeding. Full scaffold at [iQuHACK/2026-NVIDIA](https://github.com/iQuHACK/2026-NVIDIA).
 
-**Option B — Add a course-specific project.** If you have a problem relevant to your domain or course topic, add it as Option E (or replace an existing option). At minimum, your problem description should include:
+**Option B — QAOA for Max-Cut with Circuit Cutting**
+QAOA for graph Max-Cut with CUDA-Q circuit cutting for smaller QPU simulators. *Classical comparator:* Goemans-Williamson SDP (0.878-approximation guarantee). Based on the [CUDA-Q Academic circuit cutting notebooks](https://github.com/NVIDIA/cuda-q-academic).
+
+**Option C — Hybrid Quantum Neural Network**
+Hybrid QNN classifier (parametrized quantum circuit layers + classical dense layers) vs. a classical neural network of comparable parameter count. *Classical comparator:* matched parameter count, same dataset and split.
+
+**Option D — Quantum Error Correction Decoder**
+Compare decoding strategies for a small error correcting code in CUDA-Q. *Classical comparator:* minimum-weight perfect matching (MWPM), the standard classical decoder for surface codes.
+
+**Option E — Student-Designed Project (open-ended)**
+Add a Brainstorm Milestone before Milestone 1 — typically one additional week or a dedicated session. Direct students to the [Superpowers brainstorming skill](https://github.com/obra/superpowers/blob/main/skills/brainstorming/SKILL.md) (`/superpowers:brainstorm`) alongside the four criteria in "Choosing a problem" below — it enforces a one-question-at-a-time dialogue, proposes 2–3 approaches before settling, and won't advance to implementation until the team approves the design. The Project Lead explores candidate problems with their agent, the QA PIC evaluates each against the four criteria, and the team votes. You may want to review and approve each team's problem statement before they proceed to Milestone 1. If you use this option, share this quick-start prompt with students:
+
+```
+We are a quantum computing team in [class name] with access to [hardware/simulator].
+Our quantum computing and educational background is [].
+We have [] hours over [] weeks to complete this project.
+Help us brainstorm 3-5 project ideas. For each, describe:
+- The problem and a known classical algorithm that solves it well
+- Why that classical algorithm is the right comparator (not a strawman)
+- One quantum approach that might improve on it and why
+- Two competing metrics we could use to measure the comparison
+We will decide — help us reason through the options.
+```
+
+**Adding a course-specific problem.** If you have a problem relevant to your domain or course topic, replace one of the options above (or add it as Option F). At minimum, your problem description should include:
 - The problem statement and why it is hard classically
 - The quantum approach you expect teams to take
 - The classical comparator teams should benchmark against, and why it is the right one
 - A pointer to any CUDA-Q Academic module or external scaffold that gives teams a starting point
-
-**Option C — Let students find their own problem (open-ended).** See Option E in the Suggested Projects section below — it includes the four criteria and a brainstorm prompt to share with students. For the structured brainstorm process, direct students to the [Superpowers brainstorming skill](https://github.com/obra/superpowers/blob/main/skills/brainstorming/SKILL.md) (`/superpowers:brainstorm`) — it enforces a one-question-at-a-time dialogue, proposes 2–3 approaches before settling, and won't advance to implementation until the team approves the design. If you use this option, add a Brainstorm Milestone before Milestone 1 and allocate time for it — typically one additional week or a dedicated session. You may want to review and approve each team's problem statement before they proceed to Milestone 2.
 
 ### 2. Tell students what tools and compute they have access to
 
@@ -49,7 +72,7 @@ The student guide and role cards describe agent setup in general terms — stude
 **Compute resources:** which execution environments are available and how to access them:
 - **CPU simulation** — qBraid or Google Colab are generally accessible without special provisioning; confirm which your course supports
 - **GPU acceleration** — if you are provisioning Brev access, GPU cloud credits, or a university HPC allocation for Milestone 3, tell students this before they start and include access instructions; if GPU access is not available, tell them CPU simulation is sufficient and they should document the backend limitation in their results
-- **Real QPU access** — if available through qBraid, AWS Braket, or another cloud QPU provider, specify which hardware, how to request access, and any shot budget or cost constraints students should stay within
+- **Real QPU access** — if available through a [CUDA-Q hardware backend](https://nvidia.github.io/cuda-quantum/latest/using/backends/hardware.html) directly, qBraid, AWS Braket, or another cloud QPU provider, specify which hardware, how to request access, and any shot budget or cost constraints students should stay within
 
 Students who do not know what compute they have will either under-use what is available or spend time chasing access they do not have. Setting this expectation at kickoff prevents both.
 
@@ -97,8 +120,9 @@ Students need access to at least one of the following environments before Milest
 - **[qBraid](https://account.qbraid.com)** — CUDA-Q pre-installed, supports classroom collaboration, recommended for Milestones 1–2
 - **[Google Colab](https://colab.research.google.com)** — Zero setup, uncomment install cell in each notebook
 - **[Brev](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-39dN1v7RucHHgj97LILUlnXjnk5)** — One-click GPU environment, needed for Milestone 3 GPU optimization
+- **[AWS Braket](https://aws.amazon.com/braket/)** — Managed quantum development environment that can run CUDA-Q notebooks in Jupyter, with optional access to real QPU hardware
 
-Students who pursue real QPU execution will need qBraid's hardware access, AWS Braket, or another cloud QPU provider account.
+Students who pursue real QPU execution have two paths: target a supported QPU directly through a [CUDA-Q hardware backend](https://nvidia.github.io/cuda-quantum/latest/using/backends/hardware.html) (if your course or institution has credentials for that vendor), or go through a cloud QPU provider such as qBraid's hardware access, AWS Braket, or another platform that brokers QPU time.
 
 ### AI agent setup
 
@@ -144,32 +168,7 @@ The third criterion is the one worth expanding: **the problem should be open-end
 
 Good candidate problem domains from CUDA-Q Academic: QAOA for combinatorial optimization (Max-Cut, LABS, portfolio optimization), hybrid quantum-classical neural networks, quantum error correction decoding, and circuit simulation benchmarking. Each has a natural quantum-kernel + classical-GPU-workload decomposition, a clear classical baseline, and multiple plausible success metrics.
 
-### Suggested projects
-
-**Option A — LABS Optimization (MIT iQuHACK 2026)**
-QAOA-seeded hybrid quantum-classical algorithm for the Low Autocorrelation of Binary Sequences problem, GPU-accelerated with Memetic Tabu Search. *Classical comparator:* MTS run without quantum seeding. Full scaffold at [iQuHACK/2026-NVIDIA](https://github.com/iQuHACK/2026-NVIDIA).
-
-**Option B — QAOA for Max-Cut with Circuit Cutting**
-QAOA for graph Max-Cut with CUDA-Q circuit cutting for smaller QPU simulators. *Classical comparator:* Goemans-Williamson SDP (0.878-approximation guarantee). Based on the [CUDA-Q Academic circuit cutting notebooks](https://github.com/NVIDIA/cuda-q-academic).
-
-**Option C — Hybrid Quantum Neural Network**
-Hybrid QNN classifier (parametrized quantum circuit layers + classical dense layers) vs. a classical neural network of comparable parameter count. *Classical comparator:* matched parameter count, same dataset and split.
-
-**Option D — Quantum Error Correction Decoder**
-Compare decoding strategies for a small error correcting code in CUDA-Q. *Classical comparator:* minimum-weight perfect matching (MWPM), the standard classical decoder for surface codes.
-
-**Option E — Student-Designed Project**
-Add a Brainstorm Milestone before Milestone 1. Direct students to the [Superpowers brainstorming skill](https://github.com/obra/superpowers/blob/main/skills/brainstorming/SKILL.md) (`/superpowers:brainstorm`) alongside the four criteria — it guides a structured ideation dialogue and requires team sign-off before moving to implementation. Project Lead explores candidate problems with their agent, QA PIC evaluates each against the four criteria above, team votes. If you use this option, also share this quick-start prompt with students:
-
-```
-We are a quantum computing team with access to [hardware/simulator].
-Help us brainstorm 3-5 project ideas. For each, describe:
-- The problem and a known classical algorithm that solves it well
-- Why that classical algorithm is the right comparator (not a strawman)
-- One quantum approach that might improve on it and why
-- Two competing metrics we could use to measure the comparison
-I will decide — help me reason through the options.
-```
+The suggested project options (A–E) are listed in "[Choose or provide the project problem](#1-choose-or-provide-the-project-problem)" above.
 
 ### Scaling for course constraints
 
