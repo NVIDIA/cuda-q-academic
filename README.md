@@ -59,6 +59,7 @@ Each module folder contains student notebooks, a module-local `README.md`, a `so
 | Resource | Folder | Description |
 |---|---|---|
 | Quantum AI Project Template | [quantum-ai-project-template/](quantum-ai-project-template/) | Role-based group project template for deploying a quantum-GPU computing project in a course. Includes faculty guides, student-facing templates, and role cards. Not a self-paced module — see the folder README for deployment instructions. |
+| Calibration | [calibration/](calibration/) | Classroom guide for using [NVIDIA's Ising Calibration](https://build.nvidia.com/nvidia/ising-calibration-1-35b-a3b) — an open vision-language model purpose-built for quantum hardware calibration plot analysis. Browser-based NIM playground (no setup, no API key) plus sample plots from the [QCalEval dataset](https://huggingface.co/datasets/nvidia/QCalEval). Hands-on tutorial notebooks coming soon. |
 
 
 ## How to Run

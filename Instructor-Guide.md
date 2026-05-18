@@ -24,6 +24,7 @@ The builder shows all available modules. Select any subset — a single module f
 | AI for Quantum | Intermediate | AI models for unitary compilation, error correction, and eigensolvers |
 | Dynamics 101 | Intermediate | Jaynes-Cummings dynamics and time-dependent Hamiltonians |
 | Hybrid Workflows | Intermediate | Cross-cutting hybrid classical-quantum workflows |
+| Calibration (preview) | Intermediate | Classroom use of NVIDIA's Ising Calibration NIM — an open vision-language model for analyzing quantum hardware calibration plots; tutorial notebooks coming soon |
 | Quantum AI Project Template | Intermediate–Advanced | Role-based group project structure with AI agent configurations |
 
 ### 2. Pick the notebooks
