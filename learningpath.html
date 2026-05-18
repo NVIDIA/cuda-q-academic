@@ -305,6 +305,14 @@
 
   /* FOOTER */
   .launch-footer { margin-top: auto; border-top: 1px dashed var(--nvidia-accent); padding: 12px 16px; background: rgba(0,0,0,0.2); }
+  .page-footer {
+      text-align: center;
+      padding: 24px 12px 8px;
+      color: var(--nvidia-gray);
+      font-size: 0.95rem;
+  }
+  .page-footer a { color: var(--nvidia-green); text-decoration: none; }
+  .page-footer a:hover { text-decoration: underline; }
   /* Updated footer classes for clarity */
   .launch-section { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
   .launch-label { font-size: 0.7rem; color: var(--nvidia-gray); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; display:flex; justify-content: space-between;}
@@ -502,6 +510,32 @@
         </div>
     </div>
 </div>
+<div class="modal-overlay" id="braket-modal">
+    <div class="builder-container" style="max-width: 500px;">
+        <div class="builder-header">
+            <h2>Launch Instructions</h2>
+            <button class="close-modal" onclick="closeModal('braket-modal')">×</button>
+        </div>
+        <div class="builder-body">
+            <p style="color: var(--nvidia-light); margin-bottom: 16px;">
+                To access this project on AWS Braket:
+            </p>
+            <ol style="color: var(--nvidia-gray); line-height: 1.6; margin-bottom: 24px; padding-left: 20px;">
+                <li style="margin-bottom:8px;"><a href="https://aws.amazon.com/console/" target="_blank" rel="noopener" style="color: var(--nvidia-green);">Log in to your AWS account</a>. New to AWS? <a href="https://aws.amazon.com/getting-started/" target="_blank" rel="noopener" style="color: var(--nvidia-green);">Get started here</a>.</li>
+                <li style="margin-bottom:8px;"><a href="https://us-east-1.console.aws.amazon.com/braket/home?region=us-east-1#/notebook-instances" target="_blank" rel="noopener" style="color: var(--nvidia-green);">Launch a Braket Notebook instance</a>.</li>
+                <li style="margin-bottom:8px;">In the Launcher tab, click the <strong>CUDA-Q and Braket</strong> icon to navigate to the CUDA-Q examples folder.</li>
+                <li style="margin-bottom:8px;">Follow the instructions in <strong>1_CUDA-Q_Applications_Hub.ipynb</strong> / <strong>2_CUDA-Q_Academic_library.ipynb</strong>.</li>
+                <li>Navigate to the desired example.</li>
+            </ol>
+            
+            <div style="text-align: center; margin-top: 24px;">
+                <a href="https://us-east-1.console.aws.amazon.com/braket/home?region=us-east-1#/notebook-instances" target="_blank" onclick="closeModal('braket-modal')" rel="noopener" class="workspace-btn" style="display: inline-flex; text-decoration: none; transition: transform 0.2s;">
+                    Launch on AWS Braket
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="widget-container">
   <header>
       <h1>CUDA-Q Academic Learning Pathways</h1>
@@ -525,6 +559,9 @@
                         </button>
                         <button class="workspace-btn" onclick="openQbraidModal()" title="Launch on qBraid">
                             <img class="qbraid-icon" src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt=""> Launch on qBraid
+                        </button>
+                        <button class="workspace-btn" onclick="openBraketModal()" title="Launch on AWS Braket">
+                            Launch on AWS Braket
                         </button>
                     </div>
                 </div>
@@ -561,6 +598,12 @@
 
       <div class="pathway-grid" id="grid-container"></div>
   </main>
+  <footer class="page-footer">
+      <p>
+        Stay connected: sign up for the CUDA-Q newsletter for updates on new content and events.
+        <a href="https://www.nvidia.com/en-us/solutions/quantum-computing/cuda-q-newsletter/" target="_blank" rel="noopener">Newsletter →</a>
+      </p>
+  </footer>
 </div>
 
 <script>
@@ -582,6 +625,16 @@
         ]
     },
     {
+        id: "track-simulation",
+        levelLabel: "",
+        title: "Quantum Algorithm Simulation 101",
+        description: "",
+        folder: "simulation",
+        notebooks: [
+            { name: "Choosing the Right Simulator", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb" }
+        ]
+    },
+    {
         id: "track-qis",
         levelLabel: "",
         title: "QIS Foundational Algorithms",
@@ -595,8 +648,8 @@
             { name: "Deutsch's Algorithm", difficulty: "intro", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb" },
             { name: "QFT", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb" },
             { name: "QPE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb" },
-            { name: "Grover's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/solutions/grovers-solution.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/solutions/grovers-solution.ipynb" },
-            { name: "Shor's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/teleportation.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb" }
+            { name: "Grover's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb" },
+            { name: "Shor's Algorithm", difficulty: "adv", colab: "https://colab.research.google.com/github/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb", gh: "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb" }
         ]
     },
     {
@@ -646,7 +699,7 @@
     {
         id: "track-qaoa",
         levelLabel: "",
-        title: "Circuit Cutting & Max Cut",
+        title: "QAOA for Max Cut (Circuit Cutting)",
         description: "",
         folder: "qaoa-for-max-cut",
         notebooks: [
@@ -664,7 +717,7 @@
         folder: "ai-for-quantum",
         notebooks: [
             { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" },
-            { name: "Compiling Unitaries with Diffusion Models", difficulty: "int", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_using_diffusion_models.ipynb" },
+            { name: "Compiling Unitaries with Diffusion Models", difficulty: "int", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb" },
             { name: "AI Decoders", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb" }
         ]
     },
@@ -687,6 +740,7 @@
         folder: "hybrid-workflows",
         notebooks: [
             { name: "Quantum Enhanced Optimization", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb" },
+            { name: "QAOA for Max Cut and GPT QAOA", difficulty: "inter", isNew: true, colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb" },
             { name: "QAOA", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" },
             { name: "Quantum Walks", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb", gh: "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" },
             { name: "VQE and GQE", difficulty: "inter", colab: "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb", gh:"https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb" }
@@ -1124,6 +1178,9 @@ window.addEventListener('DOMContentLoaded', () => {
 }
 function openBrevModal() {
     document.getElementById('brev-modal').classList.add('open');
+}
+function openBraketModal() {
+    document.getElementById('braket-modal').classList.add('open');
 }
 </script>
 </body>
