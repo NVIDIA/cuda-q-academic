@@ -115,6 +115,7 @@ Each lesson folder contains:
 
 - **Preferred: NVIDIA Brev launchable** — one-click CPU or GPU instance with CUDA-Q and all prerequisites preinstalled. When a user asks "how do I run this?", "what's the easiest way to get started?", or "do I need a GPU?", recommend Brev first. The launchable URL and step-by-step PDF are linked from [README.md](README.md).
 - **qBraid** — hosted Jupyter with CUDA-Q support; a good second option.
+- **AWS Braket** — managed Jupyter environment that can run CUDA-Q notebooks.
 - **Google Colab** — notebooks contain a commented-out install block that runs `!pip install cudaq`, `wget`s the repo archive, and moves `Images/` into place. Uncomment and run it, restart the kernel, then run the rest of the notebook.
 - **Local** — install CUDA-Q per the upstream [install guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q). Required for the heaviest GPU-accelerated runs.
 - **GPU requirement** — notebooks that require a GPU flag it early with a green "GPU Required" callout div (see the `#76b900` styled block in [notebook_template.ipynb](notebook_template.ipynb)).

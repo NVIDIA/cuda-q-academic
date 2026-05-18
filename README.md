@@ -5,6 +5,7 @@
 >
 > * Visit the **[CUDA-Q Academic Learning Paths](https://nvidia.github.io/cuda-q-academic/learningpath.html)** to launch the modules and build a custom curriculum.
 > * Browse the **[CUDA-Q Academic Visualization Gallery](https://nvidia.github.io/cuda-q-academic/visualization-gallery.html)** to experiment with the interactive tools featured in the lessons.
+> * **Stay Connected:** [Sign up for the CUDA-Q newsletter](https://www.nvidia.com/en-us/solutions/quantum-computing/cuda-q-newsletter/) to get updates on tutorials, releases, and events.
 
 
 ## About
@@ -18,11 +19,20 @@ NVIDIA's [CUDA-Q Academic](https://developer.nvidia.com/blog/transforming-quantu
 |---|---|
 | Learning Paths (launch modules, build a curriculum) | https://nvidia.github.io/cuda-q-academic/learningpath.html |
 | Visualization Gallery (interactive widgets) | https://nvidia.github.io/cuda-q-academic/visualization-gallery.html |
+| CUDA-Q Newsletter (updates, tutorials, events) | https://www.nvidia.com/en-us/solutions/quantum-computing/cuda-q-newsletter/ |
 | Machine-readable curriculum catalog | [curriculum.json](curriculum.json) |
 | Guide to CUDA-Q Backends | [Guide-to-cuda-q-backends.ipynb](Guide-to-cuda-q-backends.ipynb) |
 | Sample Syllabus | [Sample-Syllabus.md](Sample-Syllabus.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Install CUDA-Q | https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html |
+
+
+<details>
+<summary>Coming from another quantum framework?</summary>
+
+The [CUDA-Q Hello World visualization](https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/cudaq-hello-world.html) shows how a quantum circuit diagram translates into CUDA-Q code — a good starting point before you open your first notebook.
+
+</details>
 
 
 ## Repository Contents
@@ -44,6 +54,12 @@ The repository is organized into the learning path modules below. For machine-re
 
 Each module folder contains student notebooks, a module-local `README.md`, a `solutions/` subfolder, and an `images/` subfolder with figures.
 
+### Instructor Resources
+
+| Resource | Folder | Description |
+|---|---|---|
+| Quantum AI Project Template | [quantum-ai-project-template/](quantum-ai-project-template/) | Role-based group project template for deploying a quantum-GPU computing project in a course. Includes faculty guides, student-facing templates, and role cards. Not a self-paced module — see the folder README for deployment instructions. |
+
 
 ## How to Run
 
@@ -56,6 +72,7 @@ Each module folder contains student notebooks, a module-local `README.md`, a `so
 Other entry points:
 
 - **qBraid** — hosted Jupyter environment with CUDA-Q support. Visit [qbraid.com](https://www.qbraid.com/).
+- **AWS Braket** — managed quantum development environment that can run CUDA-Q notebooks in Jupyter.
 - **Google Colab** — each notebook includes a commented-out install cell. Uncomment it, run it to install CUDA-Q and download supporting assets, restart the kernel, and run the notebook.
 - **Local** — install CUDA-Q directly following the [CUDA-Q install guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q). Recommended for the largest GPU-accelerated examples.
 
