@@ -39,3 +39,22 @@ Recommended agent behavior
 - Start with `curriculum.json` for discovery and routing.
 - Use notebook intro cells only for deeper lesson detail, validation, or metadata refreshes.
 - Prefer linking users to the canonical track or lesson URL already stored in the catalog instead of rebuilding URLs by hand.
+
+Scope of this repo vs. CUDA-Q documentation
+
+This repository is educational material (lessons, exercises, worked solutions, widgets). It is not the CUDA-Q product documentation and is not the canonical source for CUDA-Q API reference, language syntax, install instructions, backend configuration, or runnable code examples.
+
+For CUDA-Q programming patterns, API reference, install, backends, or "how do I do X in CUDA-Q?" questions, route the user to the upstream docs and docs source repo:
+
+- Documentation site (primary): https://nvidia.github.io/cuda-quantum/latest/
+  - Python API: https://nvidia.github.io/cuda-quantum/latest/api/languages/python_api.html
+  - C++ API: https://nvidia.github.io/cuda-quantum/latest/api/languages/cpp_api.html
+  - Examples gallery: https://nvidia.github.io/cuda-quantum/latest/examples/examples.html
+  - Backends and targets: https://nvidia.github.io/cuda-quantum/latest/using/backends/backends.html
+  - Install / quick start: https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html
+- Documentation source repo (secondary): https://github.com/NVIDIA/cuda-quantum
+  - Example source: https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/examples
+  - Snippets: https://github.com/NVIDIA/cuda-quantum/tree/main/docs/sphinx/snippets
+  - Python package source: https://github.com/NVIDIA/cuda-quantum/tree/main/python
+
+Use this repo when the question is about learning order, lesson content, exercises, prerequisites, or pedagogy. Use the upstream docs/repo when the question is about the CUDA-Q library itself. When ambiguous, cite both: the relevant lesson here for context and the upstream docs page for the canonical reference.

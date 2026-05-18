@@ -1,10 +1,11 @@
 {
   "metadata": {
     "schema_version": 1,
-    "last_updated": "2026-04-23",
-    "source_of_truth": "This file is the canonical machine-readable inventory for CUDA-Q Academic lessons, track membership, and live visualization-gallery widgets.",
-    "lesson_policy": "Use lessons for content discovery and track routing. For deeper notebook detail or when updating a lesson, consult the notebook intro cell when it exists.",
-    "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory."
+    "last_updated": "2026-05-18",
+    "source_of_truth": "This file is the canonical machine-readable inventory for CUDA-Q Academic lessons, learning track membership, and live visualization-gallery widgets.",
+    "lesson_policy": "Use lessons for content discovery and learning track routing. For deeper notebook detail or when updating a lesson, consult the notebook intro cell when it exists.",
+    "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory.",
+    "new_lesson_policy": "Lessons backed by a notebook first added to this repo in the current calendar year carry \"is_new\": true and an \"added_date\" (YYYY-MM-DD) sourced from the first git commit that introduced the notebook (or the rename-replace that produced the current file). Clear these fields at the start of each calendar year."
   },
   "track_order": [
     "quick-start-to-quantum",
@@ -16,15 +17,16 @@
     "qaoa-for-max-cut",
     "ai-for-quantum",
     "dynamics-101",
-    "hybrid-workflows"
+    "hybrid-workflows",
+    "calibration",
+    "quantum-ai-project-template"
   ],
   "tracks": {
     "quick-start-to-quantum": {
       "title": "Quick Start to Quantum Computing",
       "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-quickstart",
       "difficulty_range": [
-        "intro",
-        "intermediate"
+        "intro"
       ],
       "summary": "Foundational track from single qubits to a first variational algorithm in CUDA-Q.",
       "lesson_ids": [
@@ -50,7 +52,7 @@
       "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qis",
       "difficulty_range": [
         "intro",
-        "advanced"
+        "intermediate"
       ],
       "summary": "Foundational quantum algorithms spanning teleportation, oracle problems, QFT, phase estimation, Grover, and Shor.",
       "lesson_ids": [
@@ -106,7 +108,7 @@
         "intermediate",
         "advanced"
       ],
-      "summary": "Finance-focused lessons on quantum walks, portfolio optimization, and Q-CHOP.",
+      "summary": "Finance-focused lessons on quantum walks, portfolio optimization with QAOA and industry relevant quantum algorithm Q-CHOP.",
       "lesson_ids": [
         "quantum-walks-for-finance-part-1",
         "quantum-walks-for-finance-part-2",
@@ -117,8 +119,7 @@
       "title": "QAOA for Max Cut (Circuit Cutting)",
       "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qaoa",
       "difficulty_range": [
-        "intermediate",
-        "advanced"
+        "intermediate"
       ],
       "summary": "QAOA for Max Cut with divide-and-conquer and recursive circuit-cutting strategies.",
       "lesson_ids": [
@@ -138,7 +139,8 @@
       "lesson_ids": [
         "vqe-and-gqe",
         "compiling-unitaries-with-diffusion-models",
-        "qec-04-ai-decoders"
+        "qec-04-ai-decoders",
+        "qaoa-max-cut-and-gpt-qaoa-workshop"
       ]
     },
     "dynamics-101": {
@@ -164,7 +166,31 @@
         "labs-optimization",
         "max-cut-with-qaoa",
         "quantum-walks-for-finance-part-1",
-        "vqe-and-gqe"
+        "vqe-and-gqe",
+        "qaoa-max-cut-and-gpt-qaoa-workshop"
+      ]
+    },
+    "calibration": {
+      "title": "Calibration",
+      "learning_path_url": null,
+      "difficulty_range": [
+        "intermediate"
+      ],
+      "summary": "Instructor resource: classroom guide for NVIDIA's Ising Calibration NIM, an open vision-language model purpose-built for analyzing quantum hardware calibration plots. Browser-based playground with no setup; sample plots from the QCalEval dataset. Hands-on tutorial notebooks are in development.",
+      "lesson_ids": [
+        "calibration-start-here"
+      ]
+    },
+    "quantum-ai-project-template": {
+      "title": "Quantum AI Project Template",
+      "learning_path_url": null,
+      "difficulty_range": [
+        "intermediate",
+        "advanced"
+      ],
+      "summary": "Instructor resource: a role-based group project template for deploying a quantum-GPU computing project in a course. Includes faculty deployment guides, student-facing templates, and AI agent role cards. Not a self-paced module.",
+      "lesson_ids": [
+        "quantum-ai-project-template-overview"
       ]
     }
   },
@@ -283,6 +309,8 @@
       "source_kind": "local_notebook",
       "repo_path": "simulation/01_simulation101.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb",
+      "is_new": true,
+      "added_date": "2026-04-23",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter notebook familiarity",
@@ -412,6 +440,8 @@
       "source_kind": "local_notebook",
       "repo_path": "chemistry-simulations/qpe.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-03",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -439,7 +469,7 @@
       "source_kind": "local_notebook",
       "repo_path": "qis-examples/grovers.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb",
-      "difficulty": "advanced",
+      "difficulty": "intermediate",
       "prerequisites": [
         "superposition and amplitudes",
         "oracle circuits",
@@ -465,7 +495,7 @@
       "source_kind": "external_notebook",
       "repo_path": null,
       "link": "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb",
-      "difficulty": "advanced",
+      "difficulty": "intermediate",
       "prerequisites": [
         "Quantum Fourier Transform",
         "modular arithmetic",
@@ -596,7 +626,7 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/05_QEC_MSD.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb",
-      "difficulty": "advanced",
+      "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
         "basic quantum computing concepts",
@@ -622,7 +652,7 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/06_QEC_Topological_Codes.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/06_QEC_Topological_Codes.ipynb",
-      "difficulty": "advanced",
+      "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
         "basic quantum computing concepts",
@@ -675,6 +705,8 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-29",
       "difficulty": "advanced",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -701,6 +733,8 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/09_QEC_Detector_Error_Models.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-05",
       "difficulty": "advanced",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -729,6 +763,8 @@
       "source_kind": "local_notebook",
       "repo_path": "chemistry-simulations/vqe_and_gqe.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-29",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -963,7 +999,7 @@
       "source_kind": "local_notebook",
       "repo_path": "qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/03_Recursive-divide-and-conquer.ipynb",
-      "difficulty": "advanced",
+      "difficulty": "intermediate",
       "prerequisites": [
         "Divide-and-Conquer QAOA (One Level)",
         "recursive algorithm intuition",
@@ -988,7 +1024,7 @@
       "source_kind": "local_notebook",
       "repo_path": "qaoa-for-max-cut/04_Assessment.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/04_Assessment.ipynb",
-      "difficulty": "advanced",
+      "difficulty": "intermediate",
       "prerequisites": [
         "QAOA for Max Cut Labs 1-3",
         "weighted graph intuition",
@@ -1013,6 +1049,8 @@
       "source_kind": "local_notebook",
       "repo_path": "ai-for-quantum/01_compiling_unitaries_diffusion.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-28",
       "difficulty": "intermediate",
       "prerequisites": [
         "basic quantum-computing concepts",
@@ -1090,6 +1128,8 @@
       "source_kind": "local_notebook",
       "repo_path": "hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-28",
       "difficulty": "intermediate",
       "prerequisites": [
         "basic quantum-computing knowledge",
@@ -1105,6 +1145,89 @@
       ],
       "summary": "Builds a quantum-enhanced workflow for the low-autocorrelation binary sequence optimization problem.",
       "metadata_source": "notebook intro cell + llms.txt"
+    },
+    "qaoa-max-cut-and-gpt-qaoa-workshop": {
+      "title": "02 QAOA for Max Cut and GPT-QAOA Workshop",
+      "primary_track_id": "hybrid-workflows",
+      "track_ids": [
+        "hybrid-workflows",
+        "ai-for-quantum"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb",
+      "is_new": true,
+      "added_date": "2026-05-18",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "Python and Jupyter familiarity",
+        "basic quantum computing concepts",
+        "QAOA intuition (angles, variational optimization)",
+        "basic graph concepts (vertices, edges, cuts)"
+      ],
+      "keywords": [
+        "QAOA",
+        "Max Cut",
+        "hybrid workflows",
+        "GPT-QAOA",
+        "variational optimization"
+      ],
+      "summary": "Workshop-style notebook that develops Max-Cut QAOA intuition and extends to hybrid GPT-assisted QAOA workflows.",
+      "metadata_source": "2026 workshop notebook adapted for hybrid-workflows track"
+    },
+    "calibration-start-here": {
+      "title": "00 Start Here — Calibration Track",
+      "primary_track_id": "calibration",
+      "track_ids": [
+        "calibration"
+      ],
+      "source_kind": "notebook",
+      "repo_path": "calibration/00_StartHere.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb",
+      "is_new": true,
+      "added_date": "2026-05-18",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "familiarity with reading quantum hardware calibration plots (e.g. Rabi, T1, T2, randomized benchmarking)"
+      ],
+      "keywords": [
+        "calibration",
+        "Ising Calibration",
+        "NIM",
+        "vision-language model",
+        "QCalEval",
+        "hardware characterization",
+        "instructor resource",
+        "coming soon"
+      ],
+      "summary": "Coming-soon landing notebook for the Calibration track. Points instructors and learners to the calibration/ README, which covers using NVIDIA's Ising Calibration NIM playground for structured analysis of calibration experiment plots and links to the QCalEval sample dataset.",
+      "metadata_source": "calibration/README.md"
+    },
+    "quantum-ai-project-template-overview": {
+      "title": "Quantum AI Project Template",
+      "primary_track_id": "quantum-ai-project-template",
+      "track_ids": [
+        "quantum-ai-project-template"
+      ],
+      "source_kind": "instructor_template",
+      "repo_path": "quantum-ai-project-template/README.md",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-ai-project-template/README.md",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "Quick Start to Quantum Computing or equivalent CUDA-Q familiarity",
+        "basic hybrid quantum-classical algorithm concepts"
+      ],
+      "keywords": [
+        "group project",
+        "role-based learning",
+        "agentic AI",
+        "quantum-GPU",
+        "POGIL",
+        "course template",
+        "instructor resource"
+      ],
+      "summary": "Role-based group project template for deploying a quantum-GPU computing project in a course. Covers four student roles (Project Lead, Performance Optimization PIC, QA PIC, Technical Marketing PIC), four milestones, AI agent configurations, and a deliverable template. Faculty deployment guide and pedagogical rationale included.",
+      "metadata_source": "quantum-ai-project-template/README.md"
     }
   },
   "widget_gallery_order": [

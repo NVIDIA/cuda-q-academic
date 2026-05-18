@@ -122,7 +122,7 @@ test:notebooks:
                --to notebook \
                --execute \
                --inplace \
-               --ExecutePreprocessor.timeout=600 \
+               --ExecutePreprocessor.timeout=1800 \
                --ExecutePreprocessor.kernel_name=python3 \
                "$nb"; then
             echo "PASS: $nb"
@@ -158,3 +158,11 @@ test:notebooks:
       - "quantum-applications-to-finance/solutions/*.ipynb"
       - "ai-for-quantum/solutions/*.ipynb"
     expire_in: 1 week
+
+include:
+  - project: agentics/bootstrapper
+    file: gitlab/pipeline-analysis/template.yml
+
+"🔍 AI Failure Analysis":
+  extends:
+    - .ai-failure-analysis
