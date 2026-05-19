@@ -1362,16 +1362,28 @@
   }
 
   function getCatalogOptions() {
-      let options = `<option value="">-- Select a Notebook --</option>`;
-      
+      let options = `<option value="">-- Select a Notebook or Widget --</option>`;
+
       modules.forEach(m => {
-          if (m.isCustom) return; 
+          if (m.isCustom) return;
           options += `<optgroup label="${m.title}">`;
           m.notebooks.forEach(nb => {
               options += `<option value="${m.id}|${nb.name}">${nb.name}</option>`;
           });
           options += `</optgroup>`;
       });
+
+      if (curriculumData && curriculumData.widgets) {
+          const order = curriculumData.widget_gallery_order || Object.keys(curriculumData.widgets);
+          options += `<optgroup label="── Visualization Gallery ──">`;
+          order.forEach(id => {
+              const w = curriculumData.widgets[id];
+              if (w && w.live_url) {
+                  options += `<option value="widget|${id}">Interactive: ${w.title}</option>`;
+              }
+          });
+          options += `</optgroup>`;
+      }
 
       options += `<option value="custom_entry" style="color:var(--nvidia-green);">+ Custom / External...</option>`;
       return options;
@@ -1414,10 +1426,22 @@
           row.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
       } else if (val === "") {
           customFields.classList.remove('active');
+      } else if (val.startsWith('widget|')) {
+          customFields.classList.remove('active');
+          row.querySelector('[data-field="is_catalog"]').value = "true";
+
+          const widgetId = val.slice('widget|'.length);
+          const widget = curriculumData && curriculumData.widgets && curriculumData.widgets[widgetId];
+          if (widget) {
+              row.querySelector('[data-field="name"]').value = 'Interactive: ' + widget.title;
+              row.querySelector('[data-field="colab"]').value = widget.live_url;
+              row.querySelector('[data-field="gh"]').value = widget.source_url || "";
+              row.querySelector('[data-field="type"]').value = "tool";
+          }
       } else {
           customFields.classList.remove('active');
           row.querySelector('[data-field="is_catalog"]').value = "true";
-          
+
           const [trackId, nbName] = val.split('|');
           const track = modules.find(t => t.id === trackId);
           if (track) {
@@ -1540,7 +1564,7 @@
                   notebooks: data.nbs.map(n => ({
                       name: n.name,
                       difficulty: "inter",
-                      type: n.type || (n.colab.includes('github.io') ? 'tool' : 'notebook'),
+                      type: n.type || ((n.colab || '').includes('github.io') ? 'tool' : 'notebook'),
                       url: n.colab,
                       colab: n.colab,
                       gh: n.gh
