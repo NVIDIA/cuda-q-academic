@@ -1220,7 +1220,7 @@
       ]
     },
     "qaoa-max-cut-and-gpt-qaoa-workshop": {
-      "title": "02 QAOA for Max Cut and GPT-QAOA Workshop",
+      "title": "02 QAOA for Max Cut and GPT-QAOA",
       "primary_track_id": "hybrid-workflows",
       "track_ids": [
         "hybrid-workflows",
