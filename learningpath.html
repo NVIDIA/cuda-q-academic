@@ -859,6 +859,11 @@
       return link.replace('https://github.com/', 'https://colab.research.google.com/github/');
   }
 
+  // Strip leading numeric prefixes (e.g. "01 ", "02 ") from curriculum titles.
+  function stripNum(title) {
+      return (title || '').replace(/^\d+\s+/, '');
+  }
+
   // Pick the "home" folder for a track by finding the first lesson that
   // names this track as its primary_track_id and has a repo_path. This is
   // what the README preview button uses to fetch the right README.
@@ -907,10 +912,10 @@
   // Featured widgets appear as inline Open-button items in the card list.
   // Only Hello World (Quick Start + QIS) and Born's Rule (Quick Start) qualify.
   function buildWidgetEntriesForTrack(trackKey, curriculum) {
-      return getWidgetsForTrack(trackKey, curriculum)
+          return getWidgetsForTrack(trackKey, curriculum)
           .filter(w => isFeaturedWidget(w, trackKey))
           .map(w => ({
-              name: 'Interactive: ' + w.title,
+              name: 'Interactive: ' + stripNum(w.title),
               type: 'tool',
               url: w.live_url,
               difficulty: 'intro'
@@ -921,7 +926,7 @@
   function buildSupplementaryWidgetsForTrack(trackKey, curriculum) {
       return getWidgetsForTrack(trackKey, curriculum)
           .filter(w => !isFeaturedWidget(w, trackKey))
-          .map(w => ({ name: w.title, url: w.live_url }));
+          .map(w => ({ name: stripNum(w.title), url: w.live_url }));
   }
 
   // Returns widgets explicitly linked to a lesson via its widget_ids array.
@@ -935,7 +940,7 @@
           .map(id => widgets[id])
           .filter(Boolean)
           .filter(w => !isFeaturedWidget(w, trackKey))
-          .map(w => ({ name: w.title, url: w.live_url }));
+          .map(w => ({ name: stripNum(w.title), url: w.live_url }));
   }
 
   // A "README lesson" is one whose canonical artifact is a markdown file
@@ -967,7 +972,7 @@
           const lessonEntries = rawLessons.map(lesson => {
               const colab = githubToColab(lesson.link);
               return {
-                  name: lesson.title,
+                  name: stripNum(lesson.title),
                   difficulty: DIFFICULTY_MAP[lesson.difficulty] || lesson.difficulty || 'intro',
                   colab: colab,
                   gh: lesson.link,
@@ -992,7 +997,7 @@
               id: internalId,
               curriculumKey: trackKey,
               levelLabel: '',
-              title: track.title,
+              title: stripNum(track.title),
               description: track.summary || '',
               folder: folder,
               isReadmeOnly: isReadmeOnly,
@@ -1225,7 +1230,7 @@
               html += `
                   <li class="lesson-preview-item">
                       <div class="lesson-preview-header">
-                          <span class="lesson-preview-title">${escapeHtml(lesson.title)}</span>
+                          <span class="lesson-preview-title">${escapeHtml(stripNum(lesson.title))}</span>
                           ${lesson.difficulty ? `<span class="diff-pill diff-${escapeHtml(lesson.difficulty)}">${escapeHtml(lesson.difficulty)}</span>` : ''}
                           ${lesson.is_new ? '<span class="new-pill">NEW</span>' : ''}
                       </div>
@@ -1254,7 +1259,7 @@
               html += `
                   <li class="widget-preview-item">
                       <div class="lesson-preview-header">
-                          <span class="lesson-preview-title">${escapeHtml(widget.title)}</span>
+                          <span class="lesson-preview-title">${escapeHtml(stripNum(widget.title))}</span>
                       </div>
                       ${widget.summary ? `<p class="lesson-preview-summary">${escapeHtml(widget.summary)}</p>` : ''}
                       ${(widget.keywords && widget.keywords.length) ? `
@@ -1392,7 +1397,7 @@
           order.forEach(id => {
               const w = curriculumData.widgets[id];
               if (w && w.live_url) {
-                  options += `<option value="widget|${id}">Interactive: ${w.title}</option>`;
+                  options += `<option value="widget|${id}">Interactive: ${stripNum(w.title)}</option>`;
               }
           });
           options += `</optgroup>`;
@@ -1446,7 +1451,7 @@
           const widgetId = val.slice('widget|'.length);
           const widget = curriculumData && curriculumData.widgets && curriculumData.widgets[widgetId];
           if (widget) {
-              row.querySelector('[data-field="name"]').value = 'Interactive: ' + widget.title;
+              row.querySelector('[data-field="name"]').value = 'Interactive: ' + stripNum(widget.title);
               row.querySelector('[data-field="colab"]').value = widget.live_url;
               row.querySelector('[data-field="gh"]').value = widget.source_url || "";
               row.querySelector('[data-field="type"]').value = "tool";
