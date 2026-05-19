@@ -210,8 +210,18 @@
   .card-title h3 { 
       margin: 0; font-size: 1.1rem; color: white; font-weight: 700; 
       white-space: nowrap; overflow-x: auto; scrollbar-width: none;
+      cursor: default;
+      mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
   }
-  .card-title h3::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
+  .card-title h3::-webkit-scrollbar { display: none; }
+  /* On hover: drop the fade mask and reveal a thin scrollbar instead */
+  .card-title h3:hover {
+      mask-image: none; -webkit-mask-image: none;
+      scrollbar-width: thin; scrollbar-color: var(--nvidia-accent) transparent;
+  }
+  .card-title h3:hover::-webkit-scrollbar { display: block; height: 3px; }
+  .card-title h3:hover::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 2px; }
   
   .card-title p { margin: 4px 0 8px 0; font-size: 0.9rem; color: var(--nvidia-gray); }
 
@@ -249,9 +259,20 @@
       overflow-x: auto; 
       flex: 1; min-width: 0; 
       display: flex; align-items: center; gap: 6px;
-      scrollbar-width: none; /* Firefox */
+      scrollbar-width: none;
+      cursor: default;
+      /* Fade right edge to hint at overflow without overlapping the action button */
+      mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
   }
-  .nb-name::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+  .nb-name::-webkit-scrollbar { display: none; }
+  /* On hover: drop the fade mask and reveal a thin scrollbar instead */
+  .nb-name:hover {
+      mask-image: none; -webkit-mask-image: none;
+      scrollbar-width: thin; scrollbar-color: var(--nvidia-accent) transparent;
+  }
+  .nb-name:hover::-webkit-scrollbar { display: block; height: 3px; }
+  .nb-name:hover::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 2px; }
 
   .new-badge { font-size: 9px; background: var(--nvidia-green); color: black; padding: 1px 4px; border-radius: 2px; font-weight: 800; flex-shrink: 0; }
 
@@ -519,6 +540,34 @@
   .grid-status.error { color: #ff8888; }
   .grid-status .retry-link { color: var(--nvidia-green); cursor: pointer; text-decoration: underline; }
 
+  /* VISUALIZATION LINKS inside Get Started dropdown */
+  .lesson-viz-section {
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--nvidia-accent);
+  }
+  .lesson-viz-label {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--nvidia-gray); font-weight: 700; margin-bottom: 4px; padding: 0 2px;
+  }
+  .lesson-viz-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px;
+      background: rgba(118, 185, 0, 0.05);
+      border: 1px solid rgba(118, 185, 0, 0.3);
+      border-radius: 3px;
+      color: var(--nvidia-green);
+      text-decoration: none;
+      font-size: 0.8rem; font-weight: 600;
+      transition: all 0.15s;
+  }
+  .lesson-viz-btn:hover {
+      border-color: var(--nvidia-green);
+      background: rgba(118, 185, 0, 0.15);
+      color: white;
+  }
+  .lesson-viz-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
   @media (max-width: 900px) { .pathway-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 600px) { .pathway-grid { grid-template-columns: 1fr; } .widget-container { padding: 16px; } }
 </style>
@@ -541,10 +590,10 @@
                 <input type="text" id="c-desc" class="nvidia-input" placeholder="Short summary..." value="Personalized learning selection.">
             </div>
             
-            <label style="color: var(--nvidia-gray); font-size: 0.85rem;">Select Notebooks</label>
+            <label style="color: var(--nvidia-gray); font-size: 0.85rem;">Select Resources</label>
             <div id="builder-list"></div>
             
-            <button class="btn-secondary" onclick="addNotebookRow()">+ Add Notebook from Catalog</button>
+            <button class="btn-secondary" onclick="addNotebookRow()">+ Add Resource from Catalog</button>
             <button class="btn-secondary" style="border-color: var(--nvidia-green); color: var(--nvidia-green);" onclick="addHelloWorld()">+ Add "Hello World" Tool</button>
             <button class="btn-secondary" style="border-color: var(--nvidia-green); color: var(--nvidia-green);" onclick="addBornsRule()">+ Add "Born's Rule" Tool</button>
         </div>
@@ -753,6 +802,24 @@
       'advanced':     'adv'
   };
 
+  // Widgets that should appear as card-level items (Open button inline in the
+  // notebook list). Every other widget surfaces only inside the "Get Started"
+  // dropdown for lessons in that track.
+  // Match by live_url substring so widget IDs in curriculum.json don't matter.
+  const FEATURED_WIDGET_RULES = [
+      { urlMatch: 'cudaq-hello-world',          tracks: ['quick-start-to-quantum', 'qis-foundational-algorithms'] },
+      { urlMatch: 'borns-rule-widget-sampling', tracks: ['quick-start-to-quantum'] }
+  ];
+
+  function isFeaturedWidget(widget, trackKey) {
+      for (const rule of FEATURED_WIDGET_RULES) {
+          if ((widget.live_url || '').includes(rule.urlMatch)) {
+              return rule.tracks.includes(trackKey);
+          }
+      }
+      return false;
+  }
+
   // Mutable: populated from curriculum.json on init.
   let modules = [];
   // Holds the full parsed curriculum.json so the preview modal can compose
@@ -798,27 +865,19 @@
       return trackKey;
   }
 
-  // Per-track widget curation:
-  //   - If the track defines `widget_ids`, treat that as the curated, ordered list.
-  //   - Otherwise fall back to filtering by `widgets[*].related_track_ids` for
-  //     backwards-compatibility with older curriculum.json revisions.
-  function buildWidgetEntriesForTrack(trackKey, curriculum) {
+  // Returns all widgets associated with a track, regardless of featured status.
+  // Checks track.widget_ids first; falls back to widgets[*].related_track_ids.
+  function getWidgetsForTrack(trackKey, curriculum) {
       const track = (curriculum.tracks || {})[trackKey] || {};
       const widgets = curriculum.widgets || {};
-      const entries = [];
+      const result = [];
 
       if (Array.isArray(track.widget_ids)) {
           for (const widgetId of track.widget_ids) {
               const widget = widgets[widgetId];
-              if (!widget) continue;
-              entries.push({
-                  name: 'Interactive: ' + widget.title,
-                  type: 'tool',
-                  url: widget.live_url,
-                  difficulty: 'intro'
-              });
+              if (widget) result.push(widget);
           }
-          return entries;
+          return result;
       }
 
       const order = curriculum.widget_gallery_order || Object.keys(widgets);
@@ -826,14 +885,43 @@
           const widget = widgets[widgetId];
           if (!widget) continue;
           if (!(widget.related_track_ids || []).includes(trackKey)) continue;
-          entries.push({
-              name: 'Interactive: ' + widget.title,
-              type: 'tool',
-              url: widget.live_url,
-              difficulty: 'intro'
-          });
+          result.push(widget);
       }
-      return entries;
+      return result;
+  }
+
+  // Featured widgets appear as inline Open-button items in the card list.
+  // Only Hello World (Quick Start + QIS) and Born's Rule (Quick Start) qualify.
+  function buildWidgetEntriesForTrack(trackKey, curriculum) {
+      return getWidgetsForTrack(trackKey, curriculum)
+          .filter(w => isFeaturedWidget(w, trackKey))
+          .map(w => ({
+              name: 'Interactive: ' + w.title,
+              type: 'tool',
+              url: w.live_url,
+              difficulty: 'intro'
+          }));
+  }
+
+  // Non-featured widgets surface inside the "Get Started" dropdown.
+  function buildSupplementaryWidgetsForTrack(trackKey, curriculum) {
+      return getWidgetsForTrack(trackKey, curriculum)
+          .filter(w => !isFeaturedWidget(w, trackKey))
+          .map(w => ({ name: w.title, url: w.live_url }));
+  }
+
+  // Returns widgets explicitly linked to a lesson via its widget_ids array.
+  // Falls back to an empty list when the lesson has no widget_ids (so the
+  // "Interactive Visualizations" section simply doesn't render).
+  function buildWidgetsForLesson(lesson, trackKey, curriculum) {
+      const ids = lesson.widget_ids;
+      if (!Array.isArray(ids) || ids.length === 0) return [];
+      const widgets = curriculum.widgets || {};
+      return ids
+          .map(id => widgets[id])
+          .filter(Boolean)
+          .filter(w => !isFeaturedWidget(w, trackKey))
+          .map(w => ({ name: w.title, url: w.live_url }));
   }
 
   // A "README lesson" is one whose canonical artifact is a markdown file
@@ -870,11 +958,13 @@
                   colab: colab,
                   gh: lesson.link,
                   isNew: lesson.is_new === true,
-                  isReadme: isReadmeLesson(lesson)
+                  isReadme: isReadmeLesson(lesson),
+                  lessonWidgets: buildWidgetsForLesson(lesson, trackKey, curriculum)
               };
           });
 
           const widgetEntries = buildWidgetEntriesForTrack(trackKey, curriculum);
+          const supplementaryWidgets = buildSupplementaryWidgetsForTrack(trackKey, curriculum);
 
           // A README-only track has no runnable notebooks at all — either
           // it has no lessons or every lesson is markdown. quantum-ai-project-
@@ -892,6 +982,7 @@
               description: track.summary || '',
               folder: folder,
               isReadmeOnly: isReadmeOnly,
+              trackWidgets: supplementaryWidgets,
               notebooks: [...widgetEntries, ...lessonEntries]
           });
       }
@@ -950,6 +1041,15 @@
                             <a class="lesson-action-btn" href="${nb.gh || '#'}" target="_blank" rel="noopener">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg> View GitHub source
                             </a>
+                            ${(nb.lessonWidgets && nb.lessonWidgets.length) ? `
+                            <div class="lesson-viz-section">
+                                <div class="lesson-viz-label">Interactive Visualizations</div>
+                                ${nb.lessonWidgets.map(w => `
+                                <a class="lesson-viz-btn" href="${w.url}" target="_blank" rel="noopener">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                    ${w.name}
+                                </a>`).join('')}
+                            </div>` : ''}
                         </div>`}
                     </li>
                 `).join('')}
