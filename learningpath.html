@@ -99,7 +99,15 @@
   }
   .create-btn:hover { background: var(--nvidia-green); color: black; }
   
-  /* GALLERY BTN (Added Style) */
+  /* HEADER LINKS ROW */
+  .header-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+  }
+
   .gallery-btn {
       text-decoration: none; 
       display: inline-flex; 
@@ -107,7 +115,6 @@
       gap: 8px;
       border: 1px solid var(--nvidia-green); 
       color: var(--nvidia-green);
-      margin-top: 8px;
   }
   .gallery-btn:hover { background: var(--nvidia-green); color: black; }
 
@@ -154,20 +161,20 @@
   .callout-step-body strong { color: var(--nvidia-light); display: block; margin-bottom: 4px; font-size: 0.9rem; }
   .callout-step-body p { margin: 0; }
   .callout-step-body em { color: var(--nvidia-green); font-style: normal; font-weight: 600; }
-  .callout-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .callout-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; margin-top: 10px; width: fit-content; }
 
   .workspace-btn {
-      display: inline-flex; align-items: center; gap: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
       background: rgba(118, 185, 0, 0.08);
       border: 1px solid var(--nvidia-green);
       color: var(--nvidia-green);
-      padding: 8px 14px; border-radius: 4px; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700;
+      padding: 5px 12px; border-radius: 4px; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.3px;
-      transition: all 0.15s; min-height: 40px;
+      transition: all 0.15s; min-height: 30px;
   }
   .workspace-btn:hover { background: var(--nvidia-green); color: black; }
-  .workspace-btn img { height: 18px; width: auto; }
+  .workspace-btn img { height: 14px; width: auto; }
   .workspace-btn img.qbraid-icon { background: #222; padding: 2px; border-radius: 2px; }
 
   @media (max-width: 900px) {
@@ -692,11 +699,17 @@
 <div class="widget-container">
   <header>
       <h1>CUDA-Q Academic Learning Pathways</h1>
-      <p class="summary-text">Interactive tutorials for quantum-gpu supercomputing.</p>
-      
-      <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" class="filter-btn gallery-btn">
-          <span>🎨</span> Visualization Gallery
-      </a>
+      <div class="header-links">
+          <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener" class="filter-btn gallery-btn">
+              <span>🎨</span> Visualization Gallery
+          </a>
+          <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/Instructor-Guide.md" target="_blank" rel="noopener" class="filter-btn gallery-btn">
+              <span>📋</span> Instructor Guide
+          </a>
+          <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/README.md" target="_blank" rel="noopener" class="filter-btn gallery-btn">
+              <span>📖</span> Site README
+          </a>
+      </div>
   </header>
   <main>
     <section class="usage-callout" id="usage-callout" aria-label="How to use this page">
