@@ -1256,7 +1256,7 @@
       ]
     },
     "calibration-start-here": {
-      "title": "00 Start Here \u2014 Calibration Track",
+      "title": "Calibration Track",
       "primary_track_id": "calibration",
       "track_ids": [
         "calibration"
