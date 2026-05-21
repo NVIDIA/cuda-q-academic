@@ -72,7 +72,7 @@ The student guide and role cards describe agent setup in general terms — stude
 **Compute resources:** which execution environments are available and how to access them:
 - **CPU simulation** — qBraid or Google Colab are generally accessible without special provisioning; confirm which your course supports
 - **GPU acceleration** — if you are provisioning Brev access, GPU cloud credits, or a university HPC allocation for Milestone 3, tell students this before they start and include access instructions; if GPU access is not available, tell them CPU simulation is sufficient and they should document the backend limitation in their results
-- **Real QPU access** — if available through a [CUDA-Q hardware backend](https://nvidia.github.io/cuda-quantum/latest/using/backends/hardware.html) directly, qBraid, AWS Braket, or another cloud QPU provider, specify which hardware, how to request access, and any shot budget or cost constraints students should stay within
+- **Real QPU access** — if available through a [CUDA-Q hardware backend](https://nvidia.github.io/cuda-quantum/latest/using/backends/hardware.html) directly, qBraid, Amazon Braket, or another cloud QPU provider, specify which hardware, how to request access, and any shot budget or cost constraints students should stay within
 
 Students who do not know what compute they have will either under-use what is available or spend time chasing access they do not have. Setting this expectation at kickoff prevents both.
 
@@ -120,9 +120,9 @@ Students need access to at least one of the following environments before Milest
 - **[qBraid](https://account.qbraid.com)** — CUDA-Q pre-installed, supports classroom collaboration, recommended for Milestones 1–2
 - **[Google Colab](https://colab.research.google.com)** — Zero setup, uncomment install cell in each notebook
 - **[Brev](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-39dN1v7RucHHgj97LILUlnXjnk5)** — One-click GPU environment, needed for Milestone 3 GPU optimization
-- **[AWS Braket](https://aws.amazon.com/braket/)** — Managed quantum development environment that can run CUDA-Q notebooks in Jupyter, with optional access to real QPU hardware
+- **[Amazon Braket](https://aws.amazon.com/braket/)** — Managed quantum development environment that can run CUDA-Q notebooks in Jupyter, with optional access to real QPU hardware
 
-Students who pursue real QPU execution have two paths: target a supported QPU directly through a [CUDA-Q hardware backend](https://nvidia.github.io/cuda-quantum/latest/using/backends/hardware.html) (if your course or institution has credentials for that vendor), or go through a cloud QPU provider such as qBraid's hardware access, AWS Braket, or another platform that brokers QPU time.
+Students who pursue real QPU execution have two paths: target a supported QPU directly through a [CUDA-Q hardware backend](https://nvidia.github.io/cuda-quantum/latest/using/backends/hardware.html) (if your course or institution has credentials for that vendor), or go through a cloud QPU provider such as qBraid's hardware access, Amazon Braket, or another platform that brokers QPU time.
 
 ### AI agent setup
 
