@@ -18,7 +18,7 @@ All code in this project uses [CUDA-Q](https://github.com/NVIDIA/cuda-quantum), 
 | :---- | :---- | :---- | :---- |
 | Prototype | [qBraid](https://account.qbraid.com) or Google Colab | `qpp-cpu` (CPU simulator, always available) | Milestones 1–2 and early M3 |
 | GPU-accelerated | [Brev](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-39dN1v7RucHHgj97LILUlnXjnk5) | `nvidia` (single GPU) or `custatevec-fp32` (GPU, lower memory) | Milestone 3 optimization |
-| Real QPU *(optional)* | qBraid QPU access or AWS Braket | hardware backend | Milestone 3 stretch goal |
+| Real QPU *(optional)* | qBraid QPU access or Amazon Braket | hardware backend | Milestone 3 stretch goal |
 
 Your Performance Optimization PIC is responsible for the backend migration and for documenting the backend selection in the project plan. Every other team member should understand what backend the code is running on and why.
 
@@ -116,7 +116,7 @@ Teams of 4 use one person per role. Teams of 5 split the Performance Optimizatio
 
 **Before moving on:** *Does the results table compare quantum against classical on the same inputs and metric? If quantum underperformed: have you documented the crossover point or confirmed it is outside your tested range, and does the Technical Marketing PIC have a drafted null-result framing ready for the showcase?*
 
-**Platform transition:** CPU simulation → GPU cluster via Brev, real QPU via qBraid or AWS Braket, or both for hybrid problems
+**Platform transition:** CPU simulation → GPU cluster via Brev, real QPU via qBraid or Amazon Braket, or both for hybrid problems
 
 ---
 

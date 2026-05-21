@@ -89,7 +89,7 @@ It is not a self-paced module. See [quantum-ai-project-template/Teaching-Guide.m
 Other entry points:
 
 - **qBraid** — hosted Jupyter environment with CUDA-Q support. Visit [qbraid.com](https://www.qbraid.com/).
-- **AWS Braket** — managed quantum development environment that can run CUDA-Q notebooks in Jupyter.
+- **Amazon Braket** — managed quantum development environment that can run CUDA-Q notebooks in Jupyter.
 - **Google Colab** — each notebook includes a commented-out install cell. Uncomment it, run it to install CUDA-Q and download supporting assets, restart the kernel, and run the notebook.
 - **Local** — install CUDA-Q directly following the [CUDA-Q install guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html#install-cuda-q). Recommended for the largest GPU-accelerated examples.
 

@@ -99,7 +99,7 @@ cudaq.set_target('qpp-cpu')         # CPU simulator — always available, no GPU
 cudaq.set_target('nvidia')          # Single GPU (H100/A100) — requires CUDA
 cudaq.set_target('custatevec-fp32') # GPU, single-precision (less memory than nvidia)
 cudaq.set_target('tensornet')       # Tensor network — large, shallow circuits
-# Real QPU backends: 'ionq', 'quantinuum', 'iqm' — require credentials and qBraid or AWS Braket access
+# Real QPU backends: 'ionq', 'quantinuum', 'iqm' — require credentials and qBraid or Amazon Braket access
 
 # Execute
 counts = cudaq.sample(my_kernel, n=4, shots_count=1000)  # Returns measurement counts
