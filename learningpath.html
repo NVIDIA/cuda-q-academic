@@ -157,7 +157,7 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
   }
   .callout-row {
       display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 24px;
       align-items: start;
   }
@@ -174,7 +174,87 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
   .callout-step-body strong { color: var(--nvidia-light); display: block; margin-bottom: 4px; font-size: 0.9rem; }
   .callout-step-body p { margin: 0; }
   .callout-step-body em { color: var(--nvidia-green); font-style: normal; font-weight: 600; }
-  .callout-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; margin-top: 10px; width: fit-content; }
+
+  /* WHERE TO RUN — provider launch strip */
+  .launch-strip {
+      margin-bottom: 24px;
+      padding: 18px 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--nvidia-accent);
+      border-radius: 4px;
+  }
+  .launch-strip-heading {
+      margin: 0 0 4px 0;
+      font-size: 0.9rem;
+      color: var(--nvidia-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+  }
+  .launch-strip-desc {
+      margin: 0 0 14px 0;
+      font-size: 0.8rem;
+      color: var(--nvidia-gray);
+      line-height: 1.4;
+  }
+  .launch-strip-row {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--nvidia-accent) transparent;
+  }
+  .launch-strip-row::-webkit-scrollbar { height: 6px; }
+  .launch-strip-row::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 3px; }
+
+  .launch-card {
+      flex: 1 1 0;
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 12px;
+      background: rgba(118, 185, 0, 0.06);
+      border: 1px solid var(--nvidia-green);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      color: var(--nvidia-green);
+      transition: all 0.15s;
+      text-align: center;
+  }
+  .launch-card:hover { background: var(--nvidia-green); color: black; }
+  .launch-card:focus-visible { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+  .launch-card img { height: 22px; width: auto; max-width: 100%; object-fit: contain; }
+  .launch-card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      line-height: 1.3;
+  }
+  .launch-card-label--qureka { text-transform: none; }
+  .launch-card-sublabel {
+      font-size: 0.65rem;
+      color: var(--nvidia-gray);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      line-height: 1.3;
+  }
+  .launch-card:hover .launch-card-sublabel { color: rgba(0, 0, 0, 0.65); }
+  .launch-card img.qbraid-icon { background: #222; padding: 3px 6px; border-radius: 3px; }
+  .launch-card:hover img.qbraid-icon { background: rgba(0, 0, 0, 0.25); }
+  .launch-card img.qureka-icon { background: #fff; padding: 3px 6px; border-radius: 3px; height: 22px; width: auto; max-width: none; }
+  .launch-card:hover img.qureka-icon { background: rgba(255, 255, 255, 0.9); }
+  a.launch-card { text-decoration: none; }
+
+  @media (max-width: 640px) {
+      .launch-card { min-width: 130px; flex: 0 0 auto; }
+  }
 
   .workspace-btn {
       display: inline-flex; align-items: center; gap: 6px;
@@ -709,6 +789,33 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
         </div>
     </div>
 </div>
+<div class="modal-overlay" id="qureka-modal">
+    <div class="builder-container" style="max-width: 500px;">
+        <div class="builder-header">
+            <h2>Launch Instructions</h2>
+            <button class="close-modal" onclick="closeModal('qureka-modal')">×</button>
+        </div>
+        <div class="builder-body">
+            <p style="color: var(--nvidia-light); margin-bottom: 16px;">
+                To access CUDA-Q Academic on QuREKA:
+            </p>
+            <ol style="color: var(--nvidia-gray); line-height: 1.6; margin-bottom: 24px; padding-left: 20px;">
+                <li style="margin-bottom:8px;"><strong>Register and log in</strong> to your QuREKA account.</li>
+                <li style="margin-bottom:8px;">Go to <strong>Quantum Servers</strong> in the left-hand menu.</li>
+                <li style="margin-bottom:8px;">Click <strong>Create</strong> to launch a server. For GPU-based examples, please select a GPU-enabled server.</li>
+                <li style="margin-bottom:8px;">Once the server is launched, select your preferred language: <strong>English</strong>, <strong>Korean</strong>, or <strong>Japanese</strong>.</li>
+                <li style="margin-bottom:8px;">Click <strong>Clone</strong>.</li>
+                <li>Open any of the cloned notebooks and run it on the server.</li>
+            </ol>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <a href="https://qureka.io/en/academy" target="_blank" onclick="closeModal('qureka-modal')" rel="noopener" class="workspace-btn" style="display: inline-flex; text-decoration: none; text-transform: none; transition: transform 0.2s;">
+                    Launch on QuREKA
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="widget-container">
   <header>
       <h1>CUDA-Q Academic Learning Pathways</h1>
@@ -731,18 +838,7 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
                 <div class="callout-step-num">1</div>
                 <div class="callout-step-body">
                     <strong>Launch a full Project Workspace</strong>
-                    <p>Spin up a cloud environment with every lesson preloaded — no local setup needed.</p>
-                    <div class="callout-actions">
-                        <button class="workspace-btn" onclick="openBrevModal()" title="Launch in Brev">
-                            <img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt=""> Launch in Brev
-                        </button>
-                        <button class="workspace-btn" onclick="openQbraidModal()" title="Launch on qBraid">
-                            <img class="qbraid-icon" src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt=""> Launch on qBraid
-                        </button>
-                        <button class="workspace-btn" onclick="openBraketModal()" title="Launch on Amazon Braket">
-                            <img src="Arch_Amazon-Braket_16.png" alt="" style="height:16px;vertical-align:middle;margin-right:6px;"> Launch on Amazon Braket
-                        </button>
-                    </div>
+                    <p>Pick a provider in <em>Where to run</em> below — every lesson is preloaded, no local setup needed.</p>
                 </div>
             </div>
             <div class="callout-step">
@@ -759,6 +855,30 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
                     <p>Use the difficulty filters below, or click <em>+ Create Custom Pathway</em> to assemble your own study plan.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section class="launch-strip" id="where-to-run" aria-label="Where to run">
+        <h2 class="launch-strip-heading">Where to run</h2>
+        <p class="launch-strip-desc">Spin up a cloud workspace with every lesson preloaded.</p>
+        <div class="launch-strip-row">
+            <button type="button" class="launch-card" onclick="openBrevModal()" aria-label="Launch in Brev — opens setup instructions">
+                <img src="https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg" alt="">
+                <span class="launch-card-label">Launch in Brev</span>
+            </button>
+            <button type="button" class="launch-card" onclick="openQbraidModal()" aria-label="Launch on qBraid — opens setup instructions">
+                <img class="qbraid-icon" src="https://qbraid-static.s3.amazonaws.com/logos/Launch_on_qBraid_white.png" alt="">
+                <span class="launch-card-label">Launch on qBraid</span>
+            </button>
+            <button type="button" class="launch-card" onclick="openBraketModal()" aria-label="Launch on Amazon Braket — opens setup instructions">
+                <img src="https://nvidia.github.io/cuda-q-academic/Arch_Amazon-Braket_16.png" alt="Amazon Braket">
+                <span class="launch-card-label">Launch on Amazon Braket</span>
+            </button>
+            <button type="button" class="launch-card" onclick="openQurekaModal()" aria-label="Launch on QuREKA — opens setup instructions">
+                <img class="qureka-icon" src="https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/widgets-as-html/qureka-logo.png" alt="">
+                <span class="launch-card-label launch-card-label--qureka">Launch on QuREKA</span>
+                <span class="launch-card-sublabel">English · 한국어 · 日本語</span>
+            </button>
         </div>
     </section>
 
@@ -1659,6 +1779,9 @@ function openBrevModal() {
 }
 function openBraketModal() {
     document.getElementById('braket-modal').classList.add('open');
+}
+function openQurekaModal() {
+    document.getElementById('qureka-modal').classList.add('open');
 }
 </script>
 </body>
