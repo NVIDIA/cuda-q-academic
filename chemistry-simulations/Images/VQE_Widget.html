@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -70,9 +70,71 @@
             border: 1px solid var(--nvidia-accent);
             border-radius: 8px;
         }
-        .instructions-section h2 { color: var(--nvidia-green); font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 700; }
+        .instructions-section summary {
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .instructions-section summary::-webkit-details-marker { display: none; }
+        .instructions-section summary::before {
+            content: '▶';
+            font-size: 0.7rem;
+            color: var(--nvidia-green);
+            transition: transform 0.15s;
+            flex-shrink: 0;
+        }
+        .instructions-section[open] > summary::before { transform: rotate(90deg); }
+        .instructions-section summary:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        .instructions-section summary h2 { display: inline; }
+        .instructions-section h2 { color: var(--nvidia-green); font-size: 1.1rem; margin: 0; font-weight: 700; }
+        .instructions-section:not([open]) { padding-bottom: 16px; }
+        .instructions-section ol { margin-top: 12px; padding-left: 1.5em; margin-bottom: 12px; }
         .instructions-section ol, .instructions-section p { color: var(--nvidia-light); font-size: 0.95rem; line-height: 1.5; margin: 0 0 8px 0; }
         .instructions-section .kbd { background: var(--nvidia-accent); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+        .btn-primary, .btn-secondary, #control-bar button {
+            min-height: 44px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .btn-primary:focus, .btn-secondary:focus, #control-bar button:focus {
+            outline: 3px solid var(--nvidia-green);
+            outline-offset: 2px;
+        }
+        .btn-primary {
+            background: var(--nvidia-green);
+            color: var(--nvidia-dark);
+            border: 1px solid var(--nvidia-green);
+            padding: 12px 48px;
+            font-size: 1.25rem;
+        }
+        .btn-primary:hover { background: #8fd100; border-color: #8fd100; }
+        .btn-secondary {
+            background: var(--nvidia-mid);
+            color: #fff;
+            border: 1px solid var(--nvidia-accent);
+            border-bottom: 3px solid var(--nvidia-green);
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+        .btn-secondary:hover { background: var(--nvidia-green); color: var(--nvidia-dark); }
+        .btn-secondary.btn-reset {
+            background: transparent;
+            color: var(--nvidia-light);
+            border-bottom-width: 1px;
+        }
+        .btn-secondary.btn-reset:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .btn-secondary.btn-pause { border-bottom-color: #f9c500; }
+        .btn-secondary.btn-pause:hover { background: #f9c500; color: var(--nvidia-dark); }
+        #control-bar button:disabled { opacity: 0.45; cursor: not-allowed; }
         .skip-link { position: absolute; top: -40px; left: 0; background: var(--nvidia-green); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
         .skip-link:focus { top: 0; }
         .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
@@ -133,6 +195,15 @@
         .arrow-box .arrow-text {
             color: #76b900; /* nvidia-green */
             font-weight: bold;
+            min-height: 1.25rem;
+        }
+        /* Reserve space so ⟨H⟩ / θ labels never shift the layout */
+        #qpu-result {
+            min-height: 2.75rem;
+        }
+        #arrow-qpu-text,
+        #arrow-ai-text {
+            min-height: 1.25rem;
         }
     </style>
 </head>
@@ -143,16 +214,19 @@
             <h1>VQE Explorer</h1>
             <p class="summary-text">Run a stepped VQE simulation: QPU evaluates the circuit and the AI optimizer suggests parameters in a loop.</p>
         </header>
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
-                <li>Click <b>START VQE</b> to initialize the simulation and see the first state.</li>
-                <li>Use <b>▶ Play</b> to auto-run the loop, <b>⏸ Pause</b> to stop, or <b>⏭ Step</b> to advance one phase at a time (ideal for lecturing). Each step shows one phase of the QPU ↔ Optimizer loop.</li>
-                <li>Click <b>↺ Reset</b> to start over at any time.</li>
+                <li>Click <strong>▶ Play</strong> to auto-run the VQE loop, or <strong>⏭ Step</strong> to advance one phase at a time (ideal for lecturing). Each step shows one phase of the QPU ↔ Optimizer loop.</li>
+                <li>Click <strong>⏸ Pause</strong> to stop automatic playback.</li>
+                <li>Click <strong>↺ Reset</strong> to start over at any time.</li>
+                <li>Click the <strong>Instructions</strong> heading to collapse or expand this panel.</li>
             </ol>
-            <p><strong>Keyboard:</strong> <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons. <span class="kbd">ESC</span> to reset.</p>
-        </section>
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-center">
+            <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to navigate controls. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons. <span class="kbd">ESC</span> to reset.</p>
+        </details>
+
+        <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-start">
             <!-- QPU Box --><div id="qpu-box" class="loop-box lg:col-span-2 bg-nvidia-mid p-6 rounded-lg shadow-xl border-2 dimmed flex flex-col justify-between">
                 <div>
                     <h3 class="text-2xl font-semibold text-center text-nvidia-light">QPU</h3>
@@ -167,7 +241,7 @@
                         <span>⟨H⟩</span>
                     </div>
                     <p id="qpu-status" class="text-lg text-center text-nvidia-light h-16">Waiting for input...</p>
-                    <p id="qpu-result" class="text-3xl font-bold text-center text-nvidia-green mt-4 hidden"></p>
+                    <p id="qpu-result" class="text-3xl font-bold text-center text-nvidia-green mt-4 invisible" aria-hidden="true"></p>
                 </div>
                 <!-- Run QPU Button removed -->
             </div>
@@ -178,14 +252,14 @@
                     <svg class="w-full h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
                     </svg>
-                    <p id="arrow-qpu-text" class="text-center font-mono text-sm arrow-text hidden"></p>
+                    <p id="arrow-qpu-text" class="text-center font-mono text-sm arrow-text invisible" aria-hidden="true"></p>
                 </div>
                 <!-- Arrow: AI -> QPU -->
                 <div id="arrow-ai-to-qpu" class="arrow-box p-2 rounded-lg border-2 w-full dimmed">
                     <svg class="w-full h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
                     </svg>
-                    <p id="arrow-ai-text" class="text-center font-mono text-sm arrow-text hidden"></p>
+                    <p id="arrow-ai-text" class="text-center font-mono text-sm arrow-text invisible" aria-hidden="true"></p>
                 </div>
             </div>
 
@@ -211,19 +285,16 @@
         </div>
 
         <!-- Transport Controls --><div class="mt-8 flex flex-wrap justify-center gap-3" id="control-bar">
-            <button id="start-btn" tabindex="0" class="bg-nvidia-green text-nvidia-dark font-bold py-4 px-12 rounded-lg shadow-md hover:bg-green-400 transition-colors duration-200 text-xl min-h-[44px]">
-                START VQE
-            </button>
-            <button id="play-btn" tabindex="0" style="display:none" class="bg-nvidia-mid text-white font-bold py-3 px-6 rounded-lg border border-nvidia-accent border-b-[3px] border-b-nvidia-green hover:bg-nvidia-green hover:text-nvidia-dark transition-colors duration-200 text-base min-h-[44px]">
+            <button id="play-btn" type="button" class="btn-primary" aria-label="Play VQE loop automatically">
                 ▶ Play
             </button>
-            <button id="pause-btn" tabindex="0" style="display:none" class="bg-nvidia-mid text-white font-bold py-3 px-6 rounded-lg border border-nvidia-accent border-b-[3px] border-b-yellow-500 hover:bg-yellow-500 hover:text-nvidia-dark transition-colors duration-200 text-base min-h-[44px]">
+            <button id="pause-btn" type="button" style="display:none" class="btn-secondary btn-pause" aria-label="Pause automatic playback">
                 ⏸ Pause
             </button>
-            <button id="step-btn" tabindex="0" style="display:none" class="bg-nvidia-mid text-white font-bold py-3 px-6 rounded-lg border border-nvidia-accent border-b-[3px] border-b-nvidia-green hover:bg-nvidia-green hover:text-nvidia-dark transition-colors duration-200 text-base min-h-[44px]">
+            <button id="step-btn" type="button" class="btn-secondary" aria-label="Advance one VQE phase">
                 ⏭ Step
             </button>
-            <button id="reset-btn-main" tabindex="0" style="display:none" class="bg-transparent text-nvidia-light font-bold py-3 px-6 rounded-lg border border-nvidia-accent hover:bg-white/5 hover:text-white transition-colors duration-200 text-base min-h-[44px]">
+            <button id="reset-btn-main" type="button" class="btn-secondary btn-reset" aria-label="Reset simulation">
                 ↺ Reset
             </button>
         </div>
@@ -252,80 +323,124 @@
         const arrowQpuText = document.getElementById('arrow-qpu-text');
         const arrowAiText = document.getElementById('arrow-ai-text');
 
-        const startBtn = document.getElementById('start-btn');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
         const stepBtn = document.getElementById('step-btn');
         const resetBtnMain = document.getElementById('reset-btn-main');
+        const statusAnnounce = document.getElementById('status-announce');
 
         let vqeChart;
 
         const thetaSteps = [0.67, 1.0, 1.5, 2.0, 2.5, 3.0, 3.142];
+        const TOTAL_STEPS = thetaSteps.length;
         const PHASE_DELAY = 800;
         let currentStepIndex = 0;
         let currentSubPhase = 0;
         let expectationValues = [];
-        let labels = [];
         let historyRecorded = new Set();
         let activePhase = 'idle';
         let autoPlayTimer = null;
+
+        function buildChartLabels() {
+            return Array.from({ length: TOTAL_STEPS }, (_, i) => `Step ${i + 1}`);
+        }
+
+        function buildEmptySeries() {
+            return Array(TOTAL_STEPS).fill(null);
+        }
 
         function initChart() {
             if (vqeChart) vqeChart.destroy();
             plotContainer.innerHTML = '<canvas id="vqe-chart-canvas"></canvas>';
             const ctx = document.getElementById('vqe-chart-canvas').getContext('2d');
             plotContainer.classList.remove('hidden');
+            expectationValues = buildEmptySeries();
             vqeChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: buildChartLabels(),
                     datasets: [{
                         label: '⟨H⟩ (Expectation Value)',
-                        data: expectationValues,
+                        data: [...expectationValues],
                         borderColor: '#76b900',
-                        backgroundColor: 'rgba(118, 185, 0, 0.2)',
+                        backgroundColor: '#76b900',
                         pointBackgroundColor: '#76b900',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
                         pointHoverBorderColor: '#76b900',
-                        fill: true, tension: 0.3
+                        pointRadius: (ctx) => (ctx.raw == null ? 0 : 5),
+                        pointHoverRadius: (ctx) => (ctx.raw == null ? 0 : 7),
+                        fill: false,
+                        spanGaps: false,
+                        tension: 0.3
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 450, easing: 'easeOutQuart' },
+                    animations: {
+                        x: { duration: 0 },
+                        y: { duration: 0 },
+                        'x-axis': { duration: 0 },
+                        'y-axis': { duration: 0 }
+                    },
                     plugins: { legend: { labels: { color: '#f0f0f0' } }, title: { display: false } },
                     scales: {
-                        x: { title: { display: true, text: 'Step', color: '#f0f0f0' }, ticks: { color: '#f0f0f0' }, grid: { color: '#4a4a4a' } },
-                        y: { title: { display: true, text: '⟨H⟩', color: '#f0f0f0' }, ticks: { color: '#f0f0f0' }, grid: { color: '#4a4a4a' }, min: -1.1, max: 1.1 }
+                        x: {
+                            title: { display: true, text: 'Step', color: '#f0f0f0' },
+                            ticks: { color: '#f0f0f0' },
+                            grid: { color: '#4a4a4a' }
+                        },
+                        y: {
+                            title: { display: true, text: '⟨H⟩', color: '#f0f0f0' },
+                            ticks: { color: '#f0f0f0' },
+                            grid: { color: '#4a4a4a' },
+                            min: -1.1,
+                            max: 1.1
+                        }
                     }
                 }
             });
         }
 
         function updateHistory(step, expectation) {
-            labels.push(`Step ${step}`);
-            expectationValues.push(expectation);
+            const index = step - 1;
+            expectationValues[index] = expectation;
             const entry = document.createElement('p');
             entry.textContent = `Step ${step}: ⟨H⟩ = ${expectation.toFixed(5)}`;
             energyList.appendChild(entry);
             energyList.scrollTop = energyList.scrollHeight;
             if (vqeChart) {
-                vqeChart.data.labels = labels;
-                vqeChart.data.datasets[0].data = expectationValues;
+                vqeChart.data.datasets[0].data[index] = expectation;
                 vqeChart.update();
             }
         }
 
+        function announceStatus(message) {
+            if (statusAnnounce) statusAnnounce.textContent = message;
+        }
+
         function calculateExpectationZ(theta) { return Math.cos(theta); }
+
+        function hideValue(el) {
+            el.classList.add('invisible');
+            el.setAttribute('aria-hidden', 'true');
+        }
+
+        function showValue(el) {
+            el.classList.remove('invisible');
+            el.setAttribute('aria-hidden', 'false');
+        }
 
         function setAllDimmed() {
             qpuBox.classList.remove('highlighted'); qpuBox.classList.add('dimmed');
             aiBox.classList.remove('highlighted'); aiBox.classList.add('dimmed');
             arrowQpuToAi.classList.remove('highlighted'); arrowQpuToAi.classList.add('dimmed');
             arrowAiToQpu.classList.remove('highlighted'); arrowAiToQpu.classList.add('dimmed');
-            arrowQpuText.classList.add('hidden');
-            arrowAiText.classList.add('hidden');
-            qpuResult.classList.add('hidden');
+            hideValue(arrowQpuText);
+            hideValue(arrowAiText);
+            hideValue(qpuResult);
         }
 
         // --- SUB-PHASE STATE MACHINE ---
@@ -345,6 +460,7 @@
                     qpuBox.classList.remove('dimmed'); qpuBox.classList.add('highlighted');
                     qpuStatus.textContent = `Running circuit with θ = ${theta.toFixed(3)}...`;
                     aiStatus.textContent = 'Waiting for QPU result.';
+                    announceStatus(qpuStatus.textContent);
                     break;
                 }
                 case 1: {
@@ -354,11 +470,12 @@
                         historyRecorded.add(si);
                     }
                     qpuResult.textContent = `⟨H⟩ = ${exp.toFixed(5)}`;
-                    qpuResult.classList.remove('hidden');
+                    showValue(qpuResult);
                     arrowQpuToAi.classList.remove('dimmed'); arrowQpuToAi.classList.add('highlighted');
                     arrowQpuText.textContent = `⟨H⟩ = ${exp.toFixed(5)}`;
-                    arrowQpuText.classList.remove('hidden');
+                    showValue(arrowQpuText);
                     aiStatus.textContent = 'Receiving ⟨H⟩...';
+                    announceStatus(`Step ${si + 1}: ${qpuResult.textContent} sent to optimizer.`);
                     break;
                 }
                 case 2: {
@@ -366,10 +483,12 @@
                     if (si + 1 < thetaSteps.length) {
                         const nextTheta = thetaSteps[si + 1];
                         aiStatus.textContent = `Calculating... New θ = ${nextTheta.toFixed(3)}.`;
+                        announceStatus(aiStatus.textContent);
                     } else {
                         const exp = calculateExpectationZ(theta);
                         aiStatus.textContent = `Optimization complete. Final ⟨H⟩: ${exp.toFixed(5)}`;
                         qpuStatus.textContent = 'Run complete.';
+                        announceStatus('VQE optimization complete.');
                         activePhase = 'finished';
                         stopAutoPlay();
                         updateButtons();
@@ -381,8 +500,9 @@
                     const nextTheta = thetaSteps[si + 1];
                     arrowAiToQpu.classList.remove('dimmed'); arrowAiToQpu.classList.add('highlighted');
                     arrowAiText.textContent = `θ = ${nextTheta.toFixed(3)}`;
-                    arrowAiText.classList.remove('hidden');
+                    showValue(arrowAiText);
                     qpuStatus.textContent = 'Receiving new θ...';
+                    announceStatus(`Optimizer sending θ = ${nextTheta.toFixed(3)} to QPU.`);
                     break;
                 }
             }
@@ -407,11 +527,12 @@
 
         // --- TRANSPORT CONTROLS ---
 
-        function startVQE() {
+        function ensureInitialized() {
+            if (activePhase !== 'idle') return;
+
             currentStepIndex = 0;
             currentSubPhase = 0;
-            expectationValues = [];
-            labels = [];
+            expectationValues = buildEmptySeries();
             historyRecorded.clear();
             energyList.innerHTML = '';
             plotContainer.classList.add('hidden');
@@ -420,11 +541,15 @@
 
             initChart();
             activePhase = 'paused';
+            announceStatus('VQE simulation ready. Stepping through the first phase.');
             renderSubPhase();
-            updateButtons();
         }
 
         function playAutoRun() {
+            if (activePhase === 'finished') resetAll();
+            ensureInitialized();
+            if (activePhase === 'finished') return;
+
             activePhase = 'playing';
             updateButtons();
             scheduleNext();
@@ -450,6 +575,13 @@
 
         function stepOnce() {
             if (activePhase === 'finished') return;
+
+            if (activePhase === 'idle') {
+                ensureInitialized();
+                updateButtons();
+                return;
+            }
+
             activePhase = 'paused';
             stopAutoPlay();
             advanceToNext();
@@ -460,21 +592,25 @@
             activePhase = 'idle';
             stopAutoPlay();
             setAllDimmed();
+            qpuResult.textContent = '';
+            arrowQpuText.textContent = '';
+            arrowAiText.textContent = '';
             qpuStatus.textContent = `Current θ: ${thetaSteps[0].toFixed(3)}`;
             aiStatus.textContent = 'Waiting to start.';
             energyList.innerHTML = '';
             plotContainer.classList.add('hidden');
             plotContainer.innerHTML = '';
             if (vqeChart) { vqeChart.destroy(); vqeChart = null; }
+            announceStatus('Simulation reset.');
             updateButtons();
         }
 
         function updateButtons() {
-            startBtn.style.display = activePhase === 'idle' ? '' : 'none';
-            playBtn.style.display = activePhase === 'paused' ? '' : 'none';
-            pauseBtn.style.display = activePhase === 'playing' ? '' : 'none';
-            stepBtn.style.display = activePhase === 'paused' ? '' : 'none';
-            resetBtnMain.style.display = (activePhase !== 'idle') ? '' : 'none';
+            const isPlaying = activePhase === 'playing';
+            playBtn.style.display = isPlaying ? 'none' : '';
+            pauseBtn.style.display = isPlaying ? '' : 'none';
+            stepBtn.style.display = isPlaying ? 'none' : '';
+            stepBtn.disabled = activePhase === 'finished';
         }
 
         // --- INIT ---
@@ -483,7 +619,6 @@
         aiStatus.textContent = 'Waiting to start.';
         updateButtons();
 
-        startBtn.addEventListener('click', startVQE);
         playBtn.addEventListener('click', playAutoRun);
         pauseBtn.addEventListener('click', pauseAutoRun);
         stepBtn.addEventListener('click', stepOnce);
