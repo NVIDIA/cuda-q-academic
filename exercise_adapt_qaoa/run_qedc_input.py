@@ -2,8 +2,8 @@
 
 Examples:
 
-    python parallel_adapt_qaoa/run_qedc_input.py --list
-    python parallel_adapt_qaoa/run_qedc_input.py mc_004_003_000
+    python exercise_adapt_qaoa/run_qedc_input.py --list
+    python exercise_adapt_qaoa/run_qedc_input.py mc_004_003_000
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ def main(argv=None) -> int:
         return 0
 
     problem = load_qedc_maxcut(args.instance, args.data_dir)
-    from parallel_adapt_qaoa.adapt_qaoa import RunSettings, run_adapt_qaoa
+    from exercise_adapt_qaoa.adapt_qaoa import RunSettings, run_adapt_qaoa
 
     result = run_adapt_qaoa(
         problem.qubits_num,

@@ -5,7 +5,7 @@ each round by editing one CUDA-Q candidate kernel.
 
 ## Goal
 
-Run a fixed 3-layer QAOA baseline for `mc_008_003_000` with 40 optimizer
+Run a fixed 3-layer QAOA baseline for `mc_008_003_000` with 10 optimizer
 iterations, then search for a custom 6-parameter ansatz with lower gate score.
 
 Passing candidates satisfy:
@@ -31,7 +31,7 @@ Gate score:
 6. Parameters may be placed anywhere and reused by multiple gates.
 7. The harness calculates gate counts from the CUDA-Q kernel trace; do not add gate-count constants to the candidate.
 8. Write the reasoning for that logical change in `--note` and ledger.
-9. Keep experiment budget fixed at 40 optimizer iterations.
+9. Keep experiment budget fixed at 10 optimizer iterations.
 10. Do not edit evaluator logic or scoring logic during experiment rounds.
 11. Do not define candidate-specific optimizer initial parameters.
 12. Do not use CUDA-Q subkernels in the candidate file; write gates explicitly in `candidate_superkernel`.

@@ -2,7 +2,7 @@ import json
 import subprocess
 import sys
 
-from parallel_adapt_qaoa.adapt_qaoa import (
+from exercise_adapt_qaoa.adapt_qaoa import (
     MANUAL_EDGES,
     MANUAL_QUBITS,
     RunSettings,
@@ -46,7 +46,7 @@ def test_top_level_settings_runner_accepts_output_dir(tmp_path):
 
 def test_adapt_qaoa_script_runs_directly():
     completed = subprocess.run(
-        [sys.executable, "parallel_adapt_qaoa/adapt_qaoa.py"],
+        [sys.executable, "exercise_adapt_qaoa/adapt_qaoa.py"],
         check=True,
         capture_output=True,
         text=True,

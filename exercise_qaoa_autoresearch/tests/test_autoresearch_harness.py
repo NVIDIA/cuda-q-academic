@@ -94,8 +94,8 @@ def test_harness_loads_candidate_kernel_file_not_json_candidate():
     assert not hasattr(harness, "CANDIDATE_PATH")
 
 
-def test_harness_uses_40_iteration_budget_by_default():
-    assert harness.DEFAULT_MAX_ITERATIONS == 40
+def test_harness_uses_10_iteration_budget_by_default():
+    assert harness.DEFAULT_MAX_ITERATIONS == 10
 
 
 def test_baseline_ratio_defines_five_percent_passing_threshold():

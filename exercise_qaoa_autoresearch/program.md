@@ -11,7 +11,7 @@ python3 harness.py baseline
 ```
 
 The baseline is the hardcoded 3-layer QAOA circuit for `mc_008_003_000`,
-optimized from all-zero parameters for exactly 40 iterations.
+optimized from all-zero parameters for exactly 10 iterations by default.
 
 2. Use the baseline approximation ratio to define the passing band:
 
@@ -95,7 +95,7 @@ python3 harness.py baseline
 python3 harness.py eval --change "..." --note "..."
 ```
 
-The optimizer budget defaults to 40 iterations. Keep it fixed.
+The optimizer budget defaults to 10 iterations. Keep it fixed.
 
 The `--change` text should name exactly what changed in
 `candidate_kernel.py`. The `--note` text should explain why that single logical

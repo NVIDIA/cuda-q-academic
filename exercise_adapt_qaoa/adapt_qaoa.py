@@ -2,7 +2,7 @@
 
 Edit the settings below, then run:
 
-    python parallel_adapt_qaoa/adapt_qaoa.py
+    python exercise_adapt_qaoa/adapt_qaoa.py
 
 The problem can be written by hand, like the CUDA-Q notebook, or selected from
 the local QED-C MaxCut data by setting PROBLEM_SOURCE = "qedc".
@@ -27,7 +27,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 try:
-    from parallel_adapt_qaoa.run_qedc_input import load_qedc_maxcut
+    from exercise_adapt_qaoa.run_qedc_input import load_qedc_maxcut
 except ModuleNotFoundError:
     # Direct script execution makes this folder the first import location, so
     # fall back to the sibling file.

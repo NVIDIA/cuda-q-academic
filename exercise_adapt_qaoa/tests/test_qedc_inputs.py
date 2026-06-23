@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from parallel_adapt_qaoa.run_qedc_input import (
+from exercise_adapt_qaoa.run_qedc_input import (
     DEFAULT_DATA_DIR,
     QedcInputError,
     list_qedc_instances,
@@ -42,7 +42,7 @@ def test_rejects_missing_qedc_problem():
 
 def test_qedc_script_can_list_inputs():
     completed = subprocess.run(
-        [sys.executable, "parallel_adapt_qaoa/run_qedc_input.py", "--list"],
+        [sys.executable, "exercise_adapt_qaoa/run_qedc_input.py", "--list"],
         check=True,
         capture_output=True,
         text=True,
