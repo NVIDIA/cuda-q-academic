@@ -5,7 +5,9 @@ import pytest
 
 from exercise_adapt_qaoa.run_qedc_input import (
     DEFAULT_DATA_DIR,
+    DEFAULT_QEDC_INSTANCE,
     QedcInputError,
+    build_parser,
     list_qedc_instances,
     load_qedc_maxcut,
 )
@@ -33,6 +35,13 @@ def test_loads_qedc_problem_by_name():
     assert problem.qubits_num == 4
     assert problem.edges == [(0, 1), (0, 3), (0, 2), (1, 2), (1, 3), (2, 3)]
     assert problem.optimal_cut == 4
+
+
+def test_qedc_runner_defaults_to_workshop_instance():
+    args = build_parser().parse_args([])
+
+    assert DEFAULT_QEDC_INSTANCE == "mc_008_005_000"
+    assert args.instance == DEFAULT_QEDC_INSTANCE
 
 
 def test_rejects_missing_qedc_problem():

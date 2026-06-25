@@ -18,6 +18,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "maxcut_instances"
+DEFAULT_QEDC_INSTANCE = "mc_008_005_000"
 
 
 class QedcInputError(ValueError):
@@ -58,7 +59,7 @@ def load_qedc_maxcut(name: str, data_dir: str | Path = DEFAULT_DATA_DIR) -> Qedc
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run ADAPT-QAOA on a QED-C MaxCut input.")
-    parser.add_argument("instance", nargs="?", default="mc_004_003_000")
+    parser.add_argument("instance", nargs="?", default=DEFAULT_QEDC_INSTANCE)
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
     parser.add_argument("--list", action="store_true", help="List available QED-C inputs and exit")
     return parser

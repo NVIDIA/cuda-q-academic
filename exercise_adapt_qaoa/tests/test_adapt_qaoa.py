@@ -5,7 +5,10 @@ import sys
 from exercise_adapt_qaoa.adapt_qaoa import (
     MANUAL_EDGES,
     MANUAL_QUBITS,
+    QEDC_INSTANCE,
+    PROBLEM_SOURCE,
     RunSettings,
+    choose_problem,
     run_adapt_qaoa,
     run_from_top_level_settings,
 )
@@ -14,6 +17,17 @@ from exercise_adapt_qaoa.adapt_qaoa import (
 def test_manual_problem_is_available_at_top_of_file():
     assert MANUAL_QUBITS == 4
     assert MANUAL_EDGES == [(0, 1), (0, 3), (0, 2), (1, 2), (1, 3), (2, 3)]
+
+
+def test_top_level_settings_default_to_qedc_workshop_instance():
+    name, qubits_num, edges, optimal_cut = choose_problem()
+
+    assert PROBLEM_SOURCE == "qedc"
+    assert QEDC_INSTANCE == "mc_008_005_000"
+    assert name == QEDC_INSTANCE
+    assert qubits_num == 8
+    assert len(edges) == 20
+    assert optimal_cut == 16
 
 
 def test_small_manual_adapt_qaoa_run_writes_summary(tmp_path):
@@ -52,4 +66,7 @@ def test_adapt_qaoa_script_runs_directly():
         text=True,
     )
 
-    assert "manual_4q_complete" in completed.stdout
+    assert "mc_008_005_000" in completed.stdout
+    assert "Final energy:" in completed.stdout
+    assert "Iterations:" in completed.stdout
+    assert "Total time:" in completed.stdout
