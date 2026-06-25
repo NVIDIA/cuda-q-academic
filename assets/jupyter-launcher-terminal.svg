@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="892" viewBox="0 0 1220 892" role="img" aria-labelledby="title desc">
+  <title id="title">Jupyter launcher with workshop files and terminal button</title>
+  <desc id="desc">JupyterLab open in a browser with workshop files circled in green, the terminal launcher circled in red, and the plus button circled in blue.</desc>
+  <rect width="1220" height="892" fill="#ffffff"/>
+
+  <rect x="0" y="0" width="1220" height="31" fill="#f7f7f7" stroke="#c9c9c9"/>
+  <text x="32" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">File</text>
+  <text x="75" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">Edit</text>
+  <text x="121" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">View</text>
+  <text x="169" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">Run</text>
+  <text x="212" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">Kernel</text>
+  <text x="269" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">Tabs</text>
+  <text x="320" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">Settings</text>
+  <text x="389" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">Help</text>
+
+  <rect x="0" y="31" width="53" height="861" fill="#efefef" stroke="#c9c9c9"/>
+  <rect x="53" y="31" width="252" height="861" fill="#f8f8f8"/>
+  <rect x="305" y="31" width="8" height="861" fill="#b6b6b6"/>
+
+  <rect x="70" y="45" width="72" height="22" fill="#2f71d0"/>
+  <text x="101" y="61" fill="#fff" font-family="Arial, sans-serif" font-size="18">+</text>
+  <text x="159" y="60" fill="#555" font-family="Arial, sans-serif" font-size="18">+</text>
+  <text x="194" y="61" fill="#555" font-family="Arial, sans-serif" font-size="16">▲</text>
+  <text x="231" y="61" fill="#555" font-family="Arial, sans-serif" font-size="17">↻</text>
+  <text x="267" y="62" fill="#555" font-family="Arial, sans-serif" font-size="16">▼</text>
+
+  <rect x="0" y="83" width="53" height="1" fill="#c9c9c9"/>
+  <text x="28" y="61" fill="#555" font-family="Arial, sans-serif" font-size="21">■</text>
+  <text x="28" y="116" fill="#555" font-family="Arial, sans-serif" font-size="18">●</text>
+  <text x="28" y="169" fill="#555" font-family="Arial, sans-serif" font-size="22">≡</text>
+  <text x="26" y="224" fill="#555" font-family="Arial, sans-serif" font-size="22">✣</text>
+
+  <text x="68" y="126" fill="#111" font-family="Arial, sans-serif" font-size="14" font-weight="700">Name</text>
+  <text x="238" y="126" fill="#111" font-family="Arial, sans-serif" font-size="14">Modified</text>
+  <text x="69" y="148" fill="#666" font-family="Arial, sans-serif" font-size="17">■</text>
+  <text x="90" y="149" fill="#111" font-family="Arial, sans-serif" font-size="14">exercise_adapt_qa...</text>
+  <text x="249" y="149" fill="#111" font-family="Arial, sans-serif" font-size="14">1m ago</text>
+  <text x="69" y="173" fill="#666" font-family="Arial, sans-serif" font-size="17">■</text>
+  <text x="90" y="174" fill="#111" font-family="Arial, sans-serif" font-size="14">exercise_qaoa_aut...</text>
+  <text x="249" y="174" fill="#111" font-family="Arial, sans-serif" font-size="14">1m ago</text>
+  <text x="71" y="199" fill="#9c27b0" font-family="Arial, sans-serif" font-size="18" font-weight="700">M</text>
+  <text x="90" y="199" fill="#111" font-family="Arial, sans-serif" font-size="14">AGENTS.md</text>
+  <text x="249" y="199" fill="#111" font-family="Arial, sans-serif" font-size="14">1m ago</text>
+  <text x="71" y="224" fill="#9c27b0" font-family="Arial, sans-serif" font-size="18" font-weight="700">M</text>
+  <text x="90" y="224" fill="#111" font-family="Arial, sans-serif" font-size="14">README.md</text>
+  <text x="249" y="224" fill="#111" font-family="Arial, sans-serif" font-size="14">1m ago</text>
+
+  <rect x="313" y="31" width="907" height="39" fill="#bdbdbd"/>
+  <rect x="313" y="38" width="214" height="31" fill="#fff" stroke="#1976d2" stroke-width="2"/>
+  <text x="322" y="55" fill="#333" font-family="Arial, sans-serif" font-size="14">↗ Launcher</text>
+  <rect x="527" y="38" width="24" height="24" fill="#eee" stroke="#bdbdbd"/>
+  <text x="534" y="57" fill="#666" font-family="Arial, sans-serif" font-size="18">+</text>
+  <line x1="313" y1="70" x2="1220" y2="70" stroke="#bdbdbd"/>
+
+  <text x="518" y="132" fill="#f47721" font-family="Arial, sans-serif" font-size="24" font-weight="700">▣</text>
+  <text x="561" y="132" fill="#111" font-family="Arial, sans-serif" font-size="17">Notebook</text>
+  <line x1="516" y1="149" x2="1220" y2="149" stroke="#ddd"/>
+  <rect x="520" y="166" width="101" height="101" fill="#fff" stroke="#ddd"/>
+  <text x="548" y="207" fill="#3978b9" font-family="Arial, sans-serif" font-size="42" font-weight="700">Py</text>
+  <text x="545" y="245" fill="#111" font-family="Arial, sans-serif" font-size="13">Python 3</text>
+  <text x="543" y="259" fill="#111" font-family="Arial, sans-serif" font-size="12">(ipykernel)</text>
+
+  <text x="519" y="324" fill="#2b6cb0" font-family="Arial, sans-serif" font-size="24" font-weight="700">›_</text>
+  <text x="561" y="319" fill="#111" font-family="Arial, sans-serif" font-size="17">Console</text>
+  <line x1="516" y1="334" x2="1220" y2="334" stroke="#ddd"/>
+  <rect x="520" y="351" width="101" height="101" fill="#fff" stroke="#ddd"/>
+  <text x="548" y="393" fill="#3978b9" font-family="Arial, sans-serif" font-size="42" font-weight="700">Py</text>
+  <text x="545" y="431" fill="#111" font-family="Arial, sans-serif" font-size="13">Python 3</text>
+  <text x="543" y="445" fill="#111" font-family="Arial, sans-serif" font-size="12">(ipykernel)</text>
+
+  <text x="518" y="509" fill="#444" font-family="Arial, sans-serif" font-size="30" font-weight="700">$_</text>
+  <text x="561" y="506" fill="#111" font-family="Arial, sans-serif" font-size="17">Other</text>
+  <line x1="516" y1="521" x2="1220" y2="521" stroke="#ddd"/>
+  <rect x="520" y="537" width="102" height="102" fill="#fff" stroke="#ddd"/>
+  <rect x="550" y="551" width="42" height="42" fill="#555"/>
+  <text x="555" y="582" fill="#fff" font-family="Arial, sans-serif" font-size="28" font-weight="700">$_</text>
+  <text x="548" y="617" fill="#111" font-family="Arial, sans-serif" font-size="13">Terminal</text>
+  <rect x="638" y="537" width="102" height="102" fill="#fff" stroke="#ddd"/>
+  <text x="670" y="590" fill="#666" font-family="Arial, sans-serif" font-size="48">≡</text>
+  <text x="665" y="617" fill="#111" font-family="Arial, sans-serif" font-size="13">Text File</text>
+  <rect x="756" y="537" width="102" height="102" fill="#fff" stroke="#ddd"/>
+  <text x="790" y="591" fill="#9c27b0" font-family="Arial, sans-serif" font-size="54" font-weight="700">M</text>
+  <text x="769" y="617" fill="#111" font-family="Arial, sans-serif" font-size="13">Markdown File</text>
+  <rect x="873" y="537" width="102" height="102" fill="#fff" stroke="#ddd"/>
+  <text x="903" y="592" fill="#3978b9" font-family="Arial, sans-serif" font-size="42" font-weight="700">Py</text>
+  <text x="895" y="617" fill="#111" font-family="Arial, sans-serif" font-size="13">Python File</text>
+  <rect x="991" y="537" width="102" height="102" fill="#fff" stroke="#ddd"/>
+  <text x="1020" y="590" fill="#555" font-family="Arial, sans-serif" font-size="45">▣</text>
+  <text x="998" y="617" fill="#111" font-family="Arial, sans-serif" font-size="13">Show Contextual</text>
+  <text x="1022" y="632" fill="#111" font-family="Arial, sans-serif" font-size="13">Help</text>
+
+  <path d="M71 88 C139 90 220 113 276 161 C333 211 346 256 302 257 C209 260 132 243 74 218 C22 196 1 158 9 129 C16 102 40 91 71 88" fill="none" stroke="#18cc00" stroke-width="4"/>
+  <path d="M510 487 C534 464 576 461 607 480 C639 500 642 543 621 592 C601 638 559 671 512 666 C469 662 449 630 451 586 C453 544 478 503 510 487" fill="none" stroke="#e11" stroke-width="4"/>
+  <path d="M515 473 C526 467 538 464 548 466" fill="none" stroke="#e11" stroke-width="4" stroke-linecap="round"/>
+  <path d="M489 21 C509 9 554 9 573 17 C592 26 589 59 570 88 C550 120 493 100 488 59 C487 45 485 32 489 21" fill="none" stroke="#0753df" stroke-width="4"/>
+</svg>

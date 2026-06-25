@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="623" height="584" viewBox="0 0 623 584" role="img" aria-labelledby="title desc">
+  <title id="title">Codex CLI sign-in screen</title>
+  <desc id="desc">A Jupyter terminal showing the Codex CLI welcome screen and sign-in choices after running the codex command.</desc>
+  <rect width="623" height="584" fill="#ffffff"/>
+  <rect x="0" y="0" width="623" height="30" fill="#bfbfbf"/>
+  <rect x="48" y="5" width="213" height="25" fill="#fff" stroke="#9a9a9a"/>
+  <text x="55" y="22" fill="#111" font-family="Arial, sans-serif" font-size="14">$_ cudaq@2a2b2f0178e5: ~/cu</text>
+  <text x="278" y="23" fill="#777" font-family="Arial, sans-serif" font-size="22">+</text>
+  <rect x="0" y="30" width="43" height="554" fill="#f2f2f2"/>
+  <rect x="37" y="30" width="7" height="554" fill="#b8b8b8"/>
+
+  <g font-family="'Courier New', monospace" font-size="13" fill="#000">
+    <text x="86" y="88">;-;+===-,_</text>
+    <text x="84" y="103">_+,/\||+|"=|;_\*+_</text>
+    <text x="74" y="118">,;/*;|*|     "~!**+/\,</text>
+    <text x="66" y="133">/+/||;,+_        -=*||\,</text>
+    <text x="58" y="148">|*|/*/||*_         \\\|\,</text>
+    <text x="50" y="163">/|\\/-,-|\,,         \ ||</text>
+    <text x="48" y="178">-* |    ;*\|_"|        * /|</text>
+    <text x="44" y="193">,-|;|     ,- "|/\|       ~ /|</text>
+    <text x="58" y="208">_""|     ;|**|*~~~++  ++"~~"</text>
+    <text x="56" y="223">,\;\,. /*/;;||*|__!-=.,;\\\</text>
+    <text x="54" y="238">'^||  "||+,*  "********,///</text>
+    <text x="80" y="253">*~ \+             /^++/</text>
+    <text x="101" y="268">=^/**\,        ,+;/" |</text>
+    <text x="103" y="283">=^+,_**^=;;;,:=^;_+"</text>
+    <text x="132" y="298">**+;_~__~;)^"</text>
+
+    <text x="66" y="329">Welcome to Codex, OpenAI's command-line coding agent</text>
+    <text x="66" y="359">Sign in with ChatGPT to use Codex as part of your paid plan</text>
+    <text x="66" y="374">or connect an API key for usage-based billing</text>
+    <text x="55" y="405" fill="#62aebd">› 1. Sign in with ChatGPT</text>
+    <text x="89" y="420" fill="#8ecbd3">Usage included with Plus, Pro, Business, and Enterprise plans</text>
+    <text x="66" y="449">2. Sign in with Device Code</text>
+    <text x="89" y="464" fill="#6d5d7d">Sign in from another device with a one-time code</text>
+    <text x="66" y="493">3. Provide your own API key</text>
+    <text x="89" y="508" fill="#6d5d7d">Pay for what you use</text>
+    <text x="66" y="539" fill="#6d5d7d">Press enter to continue</text>
+  </g>
+</svg>

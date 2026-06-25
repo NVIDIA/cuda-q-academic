@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1261" height="572" viewBox="0 0 1261 572" role="img" aria-labelledby="title desc">
+  <title id="title">Brev workshop launchable deploy screen</title>
+  <desc id="desc">The agentic cudaq workshop launchable page with the Deploy Launchable button circled in red.</desc>
+  <rect width="1261" height="572" fill="#1a1a1a"/>
+
+  <text x="16" y="54" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="31" font-weight="700">agentic_cudaq_workshop</text>
+  <text x="16" y="85" fill="#c9c9c9" font-family="Arial, sans-serif" font-size="16">No description available</text>
+
+  <rect x="17" y="122" width="676" height="337" rx="4" fill="#161616" stroke="#373737"/>
+  <pattern id="dots" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="1" fill="#2d2d2d"/>
+  </pattern>
+  <rect x="17" y="122" width="676" height="337" rx="4" fill="url(#dots)" opacity=".85"/>
+
+  <rect x="34" y="140" width="379" height="303" rx="5" fill="#101010" stroke="#79b900"/>
+  <text x="50" y="168" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">Container</text>
+  <rect x="48" y="188" width="352" height="63" rx="4" fill="#151515" stroke="#404040" stroke-dasharray="7 6"/>
+  <rect x="151" y="202" width="144" height="28" fill="#222" stroke="#f5f5f5" stroke-dasharray="2 2"/>
+  <text x="162" y="221" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="13" font-weight="700">Docker Compose YAML</text>
+  <line x1="48" y1="265" x2="400" y2="265" stroke="#343434"/>
+  <text x="49" y="294" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">Compute</text>
+  <text x="49" y="322" fill="#d9d9d9" font-family="Arial, sans-serif" font-size="15">Instance type</text>
+  <rect x="49" y="330" width="351" height="100" rx="5" fill="#151515" stroke="#404040"/>
+  <rect x="65" y="348" width="72" height="64" fill="#050505"/>
+  <rect x="66" y="335" width="70" height="78" rx="3" fill="#060606" stroke="#79b900"/>
+  <text x="80" y="376" fill="#d9d9d9" font-family="Arial, sans-serif" font-size="21" font-weight="700">T4</text>
+  <text x="148" y="356" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">NVIDIA T4 (16 GiB)</text>
+  <text x="148" y="375" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="15">4 GPUs x 8 CPUs</text>
+  <text x="148" y="393" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="15">52 GiB RAM</text>
+  <text x="148" y="412" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="14">GCP</text>
+
+  <text x="468" y="197" fill="#d9d9d9" font-family="Arial, sans-serif" font-size="16" font-weight="700">Files</text>
+  <rect x="468" y="213" width="187" height="40" rx="6" fill="#151515" stroke="#333"/>
+  <text x="500" y="237" fill="#c7c7c7" font-family="Arial, sans-serif" font-size="12" font-weight="700">No file were uploaded</text>
+
+  <rect x="447" y="300" width="228" height="123" rx="5" fill="#101010" stroke="#79b900"/>
+  <text x="466" y="335" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">Exposed Ports</text>
+  <rect x="467" y="349" width="187" height="53" rx="5" fill="#151515" stroke="#404040"/>
+  <text x="475" y="370" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="13" font-weight="700">Tunnels:</text>
+  <text x="475" y="389" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="13">tunnel-1:8888</text>
+  <line x1="413" y1="220" x2="447" y2="220" stroke="#6f6f6f" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="413" y1="360" x2="447" y2="360" stroke="#79b900" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <rect x="833" y="26" width="398" height="532" rx="4" fill="#0d0d0f" stroke="#2a2a2a"/>
+  <text x="1120" y="56" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="22" font-weight="700">$1.92/hr</text>
+  <text x="1206" y="51" fill="#bdbdbd" font-family="Arial, sans-serif" font-size="12">i</text>
+  <line x1="833" y1="70" x2="1231" y2="70" stroke="#2a2a2a"/>
+
+  <text x="849" y="94" fill="#bfbfbf" font-family="Arial, sans-serif" font-size="14" font-weight="700">Instance type</text>
+  <text x="1187" y="94" fill="#79b900" font-family="Arial, sans-serif" font-size="14" font-weight="700">Edit</text>
+  <rect x="849" y="104" width="366" height="78" rx="5" fill="#121214" stroke="#333"/>
+  <rect x="864" y="112" width="61" height="61" rx="3" fill="#050505" stroke="#79b900"/>
+  <text x="883" y="140" fill="#d9d9d9" font-family="Arial, sans-serif" font-size="18" font-weight="700">T4</text>
+  <text x="952" y="128" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">NVIDIA T4 (16 GiB)</text>
+  <text x="952" y="147" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="15">4 GPUs x 8 CPUs</text>
+  <text x="952" y="166" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="15">52 GiB RAM</text>
+  <text x="861" y="209" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="14" font-weight="700">Cloud Provider</text>
+  <rect x="862" y="226" width="166" height="49" rx="5" fill="#171717" stroke="#79b900"/>
+  <text x="931" y="247" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="13" font-weight="700">GCP</text>
+  <text x="895" y="267" fill="#79b900" font-family="Arial, sans-serif" font-size="12" font-weight="700">Creator's Choice</text>
+
+  <line x1="833" y1="287" x2="1231" y2="287" stroke="#2a2a2a"/>
+  <text x="849" y="324" fill="#c9c9c9" font-family="Arial, sans-serif" font-size="14" font-weight="700">Storage</text>
+  <rect x="1090" y="305" width="96" height="30" rx="4" fill="#292a2e" stroke="#4b4b4b"/>
+  <text x="1105" y="325" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="16">256</text>
+  <text x="1194" y="324" fill="#c9c9c9" font-family="Arial, sans-serif" font-size="14">GiB</text>
+
+  <line x1="833" y1="355" x2="1231" y2="355" stroke="#2a2a2a"/>
+  <text x="849" y="383" fill="#c9c9c9" font-family="Arial, sans-serif" font-size="14" font-weight="700">Instance name</text>
+  <rect x="849" y="392" width="366" height="33" rx="4" fill="#1d1e22" stroke="#53545a"/>
+  <text x="858" y="415" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="15">agentic-cudaq-workshop-96287e</text>
+
+  <rect x="958" y="454" width="150" height="44" rx="22" fill="#568000"/>
+  <text x="984" y="481" fill="#020202" font-family="Arial, sans-serif" font-size="14">Deploy Launchable</text>
+  <path d="M955 441 C976 428 1015 428 1050 430 C1095 433 1120 446 1120 474 C1120 506 1082 520 1034 518 C985 516 944 503 939 475 C936 459 943 448 955 441" fill="none" stroke="#ff1c1c" stroke-width="5" stroke-linecap="round"/>
+  <path d="M952 446 C962 441 966 436 968 439" fill="none" stroke="#ff1c1c" stroke-width="5" stroke-linecap="round"/>
+
+  <text x="871" y="520" fill="#d0d0d0" font-family="Arial, sans-serif" font-size="13">By clicking 'Deploy', I consent to sharing my personal and</text>
+  <text x="882" y="539" fill="#d0d0d0" font-family="Arial, sans-serif" font-size="13">deployment data with GCP as described here.</text>
+</svg>

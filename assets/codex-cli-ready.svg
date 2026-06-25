@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1510" height="290" viewBox="0 0 1510 290" role="img" aria-labelledby="title desc">
+  <title id="title">Codex CLI ready interface</title>
+  <desc id="desc">The Codex CLI interface after sign-in, showing the OpenAI Codex header, selected model, directory, and prompt input.</desc>
+  <rect width="1510" height="290" fill="#ffffff"/>
+  <g font-family="'Courier New', monospace" font-size="13" fill="#111">
+    <rect x="3" y="38" width="280" height="75" rx="2" fill="#fafafa" stroke="#7d7d7d"/>
+    <text x="14" y="58">>_ <tspan font-weight="700">OpenAI Codex</tspan> <tspan fill="#6d5d7d">(v0.142.2)</tspan></text>
+    <text x="14" y="87" fill="#6d5d7d">model:</text>
+    <text x="91" y="87" font-weight="700">gpt-5.5</text>
+    <text x="162" y="87" fill="#0086a8">/model</text>
+    <text x="221" y="87" fill="#6d5d7d">to change</text>
+    <text x="14" y="103" fill="#6d5d7d">directory:</text>
+    <text x="91" y="103" font-weight="700">~/cuda-q-academic</text>
+
+    <text x="14" y="147" font-weight="700">Tip:</text>
+    <text x="51" y="147">GPT-5.5 is now available in Codex. It's our strongest agentic coding model yet, built to reason through large codebases, check assumptions with tools, and keep going until the work is done.</text>
+    <text x="14" y="177">Learn more: https://openai.com/index/introducing-gpt-5-5/</text>
+
+    <rect x="0" y="196" width="1510" height="42" fill="#eeeeee"/>
+    <text x="0" y="224">›</text>
+    <text x="14" y="224" fill="#6d5d7d">Summarize recent commits</text>
+    <text x="14" y="253" fill="#d97706">gpt-5.5 default</text>
+    <text x="122" y="253" fill="#6d5d7d">·</text>
+    <text x="143" y="253" fill="#259728">~/cuda-q-academic</text>
+  </g>
+</svg>

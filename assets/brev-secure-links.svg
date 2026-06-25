@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1273" height="313" viewBox="0 0 1273 313" role="img" aria-labelledby="title desc">
+  <title id="title">Brev Using Secure Links section</title>
+  <desc id="desc">The Using Secure Links section showing port 8888, a shareable URL, and the health status highlighted.</desc>
+  <rect width="1273" height="313" fill="#1a1a1a"/>
+  <text x="38" y="41" fill="#d8d8d8" font-family="Arial, sans-serif" font-size="25" font-weight="700">Using Secure Links</text>
+  <line x1="38" y1="62" x2="1254" y2="62" stroke="#323232" stroke-width="2"/>
+
+  <rect x="38" y="96" width="1216" height="210" rx="5" fill="#050505"/>
+  <text x="53" y="136" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="700">Access any http application protected with your login; share it with teammates, or the public.</text>
+  <text x="754" y="136" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="700" text-decoration="underline">Docs here.</text>
+  <rect x="1102" y="111" width="136" height="38" rx="6" fill="#66b800"/>
+  <text x="1120" y="135" fill="#020202" font-family="Arial, sans-serif" font-size="14">Share a Service</text>
+
+  <rect x="54" y="166" width="1184" height="120" rx="6" fill="#202124"/>
+  <rect x="54" y="166" width="1184" height="48" rx="6" fill="#2a2b2e"/>
+  <text x="65" y="195" fill="#ffffff" font-family="Arial, sans-serif" font-size="15" font-weight="700">Port</text>
+  <text x="161" y="195" fill="#ffffff" font-family="Arial, sans-serif" font-size="15" font-weight="700">Shareable URI</text>
+  <text x="695" y="195" fill="#ffffff" font-family="Arial, sans-serif" font-size="15" font-weight="700">Health</text>
+
+  <text x="65" y="255" fill="#d8e7ff" font-family="Arial, sans-serif" font-size="15">8888</text>
+  <text x="160" y="255" fill="#ffffff" font-family="Arial, sans-serif" font-size="15">https://tunnel-1-dh4a8ne0e.brevlab.com</text>
+  <rect x="438" y="241" width="18" height="18" rx="2" fill="none" stroke="#c9c9c9" stroke-width="2"/>
+  <path d="M443 254 L457 240" stroke="#c9c9c9" stroke-width="2" fill="none"/>
+  <path d="M451 240 H457 V246" stroke="#c9c9c9" stroke-width="2" fill="none"/>
+
+  <rect x="695" y="239" width="88" height="19" rx="10" fill="#76b900"/>
+  <circle cx="709" cy="248" r="6" fill="none" stroke="#9bd35a" stroke-width="2"/>
+  <text x="731" y="253" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="12" font-weight="700">Healthy</text>
+  <text x="1046" y="255" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="700">Edit Access</text>
+  <rect x="1148" y="230" width="78" height="41" rx="6" fill="#df2657"/>
+  <text x="1167" y="255" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="700">Delete</text>
+
+  <path d="M166 218 C230 211 296 221 358 220 C454 219 524 209 616 209 C695 209 752 211 777 230 C796 244 791 263 761 272 C706 290 595 279 512 278 C410 277 325 279 231 275 C174 273 144 263 151 247 C154 237 158 229 166 218" fill="none" stroke="#ff2020" stroke-width="4" stroke-linecap="round"/>
+</svg>
