@@ -1,0 +1,13 @@
+agent: marketer
+round: 4
+phase: marketer
+approval: false
+appeal_score_1_to_5: 4
+issue: "The corrected statistic is accurate, but 'with a 92.4 CASP14 Score' lands at the end like a technical footnote. Keep the number, but make it drive the title."
+statistic_requirement: "Keep 92.4 in the title and make it prominent."
+bold_suggested_title: "AlphaFold Scores 92.4 as AI Brings Protein Structures Into Focus"
+exaggeration_risk: "This is safer because it keeps the score as a score and does not say percent accuracy or solve protein folding."
+safe_hook: "Scores 92.4 as AI Brings Protein Structures Into Focus"
+memory_to_keep:
+  - "Make 92.4 prominent, but do not call it percent accuracy."
+notes_for_pr_writer: "Move the statistic forward so the title opens with the concrete result."

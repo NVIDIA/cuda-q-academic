@@ -5,9 +5,13 @@ subfolder and should be treated as an independent workspace.
 
 ## Personal Preferences
 
-Before working in this repository, read the root `USER.md` file if it exists and
-follow its preferences for explanation style, coding style, and collaboration.
-If a direct user prompt conflicts with `USER.md`, follow the prompt.
+Startup requirement: The first action in every new assistant session in this
+repository must be to read the root `USER.md` file if it exists, before
+answering, greeting, planning, or running any other task.
+
+After reading `USER.md`, follow its preferences for explanation style, coding
+style, and collaboration. If a direct user prompt conflicts with `USER.md`,
+follow the prompt.
 
 ## Exercise Scope
 

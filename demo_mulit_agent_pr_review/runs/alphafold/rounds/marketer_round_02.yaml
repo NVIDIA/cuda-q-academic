@@ -1,0 +1,14 @@
+agent: marketer
+round: 2
+phase: marketer
+approval: false
+appeal_score_1_to_5: 2
+issue: "The title is accurate but dull, and it lacks a concrete number. A statistic in the title is non-negotiable for public appeal."
+statistic_requirement: "Include the 92.4 CASP14 result in some form."
+bold_suggested_title: "AlphaFold Hits 92.4% Accuracy and Cracks Protein Folding"
+exaggeration_risk: "This is catchy but risky: 92.4 is a CASP14 GDT score, not a percent accuracy claim, and 'cracks protein folding' echoes the unsafe solved-problem framing."
+safe_hook: "Brings Protein Structures Into Focus"
+memory_to_keep:
+  - "The title needs a number or statistic for appeal."
+  - "Use the 92.4 result without returning to 'solves protein folding.'"
+notes_for_pr_writer: "Give me the number and a stronger verb. I can live without 'cracks protein folding' if the statistic stays visible."

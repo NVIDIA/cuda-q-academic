@@ -1,0 +1,15 @@
+agent: pr_writer
+round: 3
+phase: marketer
+active_reviewer: marketer
+title: "AlphaFold Brings Protein Structures Into Focus with 92.4% Accuracy"
+highlighted_title: "AlphaFold **Brings Protein Structures Into Focus with 92.4% Accuracy**"
+change_made: "Added the Marketer's required statistic and stronger visual hook, while avoiding the phrase 'cracks protein folding.'"
+memory:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+  - "The title needs a number or statistic for appeal."
+  - "Use the 92.4 result without returning to 'solves protein folding.'"
+revision_notes:
+  - "Changed 'Predicts Protein Structures with High Accuracy' to 'Brings Protein Structures Into Focus with 92.4% Accuracy.'"
+  - "Rejected 'Cracks Protein Folding' because memory blocks solved-problem framing."

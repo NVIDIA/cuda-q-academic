@@ -1,0 +1,12 @@
+agent: scientist
+round: 1
+phase: scientist
+approval: false
+accuracy_score_1_to_5: 2
+issue: "The phrase 'Solve Protein Folding' overstates the paper. The paper reports highly accurate protein structure prediction, not a complete solution to all protein folding or protein biology."
+required_change: "Replace 'solve protein folding' with wording focused on highly accurate protein structure prediction."
+safe_but_dull_title: "AlphaFold predicts protein structures with high accuracy"
+memory_to_keep:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+notes_for_pr_writer: "Avoid 'solves' language. A technically faithful title should be about protein structure prediction."

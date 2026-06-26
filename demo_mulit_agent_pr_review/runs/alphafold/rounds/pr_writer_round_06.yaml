@@ -1,0 +1,18 @@
+agent: pr_writer
+round: 6
+phase: final_scientist_check
+active_reviewer: scientist
+title: "AlphaFold Scores 92.4 on CASP14, Bringing Protein Structures Into Focus"
+highlighted_title: "AlphaFold Scores 92.4 **on CASP14**, Bringing Protein Structures Into Focus"
+change_made: "Added 'on CASP14' so the 92.4 statistic has a benchmark context."
+memory:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+  - "The title needs a number or statistic for appeal."
+  - "Use the 92.4 result without returning to 'solves protein folding.'"
+  - "Do not call the 92.4 result percent accuracy; label it as a CASP14 score or benchmark score."
+  - "Make 92.4 prominent, but do not call it percent accuracy."
+  - "If using 92.4 in the title, attach it to CASP14 or a structure benchmark."
+revision_notes:
+  - "Changed 'Scores 92.4 as AI...' to 'Scores 92.4 on CASP14, Bringing...'"
+  - "Kept the Marketer's prominent number while satisfying the Scientist's benchmark-context request."

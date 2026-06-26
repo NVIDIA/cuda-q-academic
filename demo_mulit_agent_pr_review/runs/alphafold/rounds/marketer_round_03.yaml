@@ -1,0 +1,13 @@
+agent: marketer
+round: 3
+phase: marketer
+approval: true
+appeal_score_1_to_5: 5
+issue: null
+statistic_requirement: null
+bold_suggested_title: null
+exaggeration_risk: null
+safe_hook: null
+memory_to_keep:
+  - "Keep a visible statistic in the final title."
+notes_for_pr_writer: "Approved for appeal. It has a number, a strong image, and avoids the dull abstract-title feel."

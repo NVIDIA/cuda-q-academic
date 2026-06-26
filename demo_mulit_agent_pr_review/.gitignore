@@ -1,0 +1,7 @@
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+runs/*/paper_text.txt
+runs/*/source.pdf
+runs/*/source/
+*.tmp
+.DS_Store

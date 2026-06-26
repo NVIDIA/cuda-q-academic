@@ -1,0 +1,13 @@
+agent: marketer
+round: 5
+phase: marketer
+approval: true
+appeal_score_1_to_5: 5
+issue: null
+statistic_requirement: null
+bold_suggested_title: null
+exaggeration_risk: null
+safe_hook: null
+memory_to_keep:
+  - "The final title should keep 92.4 prominent."
+notes_for_pr_writer: "Approved. The number is prominent and the language is clean and energetic."

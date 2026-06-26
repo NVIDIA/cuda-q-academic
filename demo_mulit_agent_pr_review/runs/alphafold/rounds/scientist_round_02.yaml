@@ -1,0 +1,12 @@
+agent: scientist
+round: 2
+phase: scientist
+approval: true
+accuracy_score_1_to_5: 5
+issue: null
+required_change: null
+safe_but_dull_title: null
+memory_to_keep:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+notes_for_pr_writer: "Approved. The title no longer claims that AlphaFold solves all protein folding."

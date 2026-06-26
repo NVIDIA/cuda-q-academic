@@ -1,0 +1,13 @@
+agent: marketer
+round: 6
+phase: marketer
+approval: true
+appeal_score_1_to_5: 5
+issue: null
+statistic_requirement: null
+bold_suggested_title: null
+exaggeration_risk: null
+safe_hook: null
+memory_to_keep:
+  - "The final title keeps 92.4 prominent and has an active visual hook."
+notes_for_pr_writer: "Approved. The title still opens with the number, and 'bringing protein structures into focus' keeps it public-facing."

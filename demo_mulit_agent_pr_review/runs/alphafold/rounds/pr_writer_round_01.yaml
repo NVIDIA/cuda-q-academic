@@ -1,0 +1,10 @@
+agent: pr_writer
+round: 1
+phase: initial
+active_reviewer: null
+title: "AlphaFold Uses AI to Solve Protein Folding"
+highlighted_title: "AlphaFold Uses AI to Solve Protein Folding"
+change_made: null
+memory: []
+revision_notes:
+  - "Initial draft used only the paper title and target audience context, so it leaned on a familiar public phrase: solve protein folding."

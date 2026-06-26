@@ -1,0 +1,11 @@
+agent: scientist
+round: 3
+phase: final_scientist_check
+approval: false
+accuracy_score_1_to_5: 3
+issue: "The title mislabels the statistic. '92.4% Accuracy' is misleading because the paper reports a median CASP14 GDT score of 92.4, not a generic percent accuracy."
+required_change: "Keep the statistic only if it is labeled as a CASP14 score or benchmark score, not as percent accuracy."
+safe_but_dull_title: "AlphaFold scores 92.4 in CASP14 protein structure prediction"
+memory_to_keep:
+  - "Do not call the 92.4 result percent accuracy; label it as a CASP14 score or benchmark score."
+notes_for_pr_writer: "The number can stay, but the unit has to be corrected."

@@ -1,0 +1,17 @@
+agent: pr_writer
+round: 5
+phase: marketer
+active_reviewer: marketer
+title: "AlphaFold Scores 92.4 as AI Brings Protein Structures Into Focus"
+highlighted_title: "AlphaFold **Scores 92.4 as AI** Brings Protein Structures Into Focus"
+change_made: "Moved the statistic forward and used the Marketer's safer score-based hook while preserving the Scientist memory that 92.4 is not percent accuracy."
+memory:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+  - "The title needs a number or statistic for appeal."
+  - "Use the 92.4 result without returning to 'solves protein folding.'"
+  - "Do not call the 92.4 result percent accuracy; label it as a CASP14 score or benchmark score."
+  - "Make 92.4 prominent, but do not call it percent accuracy."
+revision_notes:
+  - "Changed 'Brings Protein Structures Into Focus with a 92.4 CASP14 Score' to 'Scores 92.4 as AI Brings Protein Structures Into Focus.'"
+  - "Kept the score framing and avoided percent accuracy."

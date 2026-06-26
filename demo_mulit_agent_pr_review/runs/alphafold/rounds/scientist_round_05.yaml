@@ -1,0 +1,11 @@
+agent: scientist
+round: 5
+phase: final_scientist_check
+approval: false
+accuracy_score_1_to_5: 4
+issue: "The title says 'Scores 92.4' but does not say where. For a public PR title, the score needs a minimal benchmark label so readers do not treat it as a universal score."
+required_change: "Add a compact benchmark label such as 'on CASP14' or 'on a structure benchmark.'"
+safe_but_dull_title: "AlphaFold scores 92.4 on CASP14, bringing protein structures into focus"
+memory_to_keep:
+  - "If using 92.4 in the title, attach it to CASP14 or a structure benchmark."
+notes_for_pr_writer: "This is close. Add the benchmark context without making the title too long."

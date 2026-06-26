@@ -1,0 +1,12 @@
+agent: pr_writer
+round: 2
+phase: scientist
+active_reviewer: scientist
+title: "AlphaFold Predicts Protein Structures with High Accuracy"
+highlighted_title: "AlphaFold **Predicts Protein Structures with High Accuracy**"
+change_made: "Replaced 'Uses AI to Solve Protein Folding' with 'Predicts Protein Structures with High Accuracy' to satisfy the Scientist's required change."
+memory:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+revision_notes:
+  - "Changed 'Uses AI to Solve Protein Folding' to 'Predicts Protein Structures with High Accuracy.'"

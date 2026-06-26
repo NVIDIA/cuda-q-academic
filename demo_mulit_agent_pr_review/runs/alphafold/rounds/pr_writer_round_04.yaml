@@ -1,0 +1,16 @@
+agent: pr_writer
+round: 4
+phase: final_scientist_check
+active_reviewer: scientist
+title: "AlphaFold Brings Protein Structures Into Focus with a 92.4 CASP14 Score"
+highlighted_title: "AlphaFold Brings Protein Structures Into Focus with a **92.4 CASP14 Score**"
+change_made: "Changed '92.4% Accuracy' to '92.4 CASP14 Score' to satisfy the Scientist's statistic-framing correction."
+memory:
+  - "Do not say AlphaFold solves protein folding; say it predicts protein structures with high accuracy."
+  - "Keep the claim about protein structures, not all protein biology."
+  - "The title needs a number or statistic for appeal."
+  - "Use the 92.4 result without returning to 'solves protein folding.'"
+  - "Do not call the 92.4 result percent accuracy; label it as a CASP14 score or benchmark score."
+revision_notes:
+  - "Changed '92.4% Accuracy' to '92.4 CASP14 Score.'"
+  - "Preserved the Marketer's visual hook while fixing the Scientist's statistic objection."
