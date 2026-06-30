@@ -5,14 +5,16 @@ subfolder and should be treated as an independent workspace.
 
 ## Personal Preferences
 
-Startup requirement: The first action in every new assistant session in this
-repository must be to read the root `USER.md` file if it exists, before
-answering, greeting, planning, or running any other task.
+Mandatory startup requirement: The first action in every new assistant session
+in this repository must be to read
+`/home/cudaq/cuda-q-academic/USER.md` if it exists, before answering, greeting,
+planning, or running any other task. This absolute path applies even when the
+assistant is opened in an exercise subdirectory. Do not look only for a
+`USER.md` file in the current working directory.
 
 After reading `USER.md`, follow its preferences for explanation style, coding
 style, and collaboration. If a direct user prompt conflicts with `USER.md`,
 follow the prompt.
-
 ## Exercise Scope
 
 - When working inside an exercise subfolder, treat that folder as the active
