@@ -2,15 +2,12 @@ import math
 import random
 
 import cudaq
-import matplotlib
-
-matplotlib.use("Agg")
-
 import matplotlib.pyplot as plt
 from cudaq import spin
 from cudaq.dynamics import InitialState, Schedule
 
 
+plt.switch_backend("Agg")
 cudaq.set_target("dynamics")
 
 # Model one two-level spin and watch it for five relaxation times.
