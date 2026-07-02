@@ -2,6 +2,10 @@ import math
 import random
 
 import cudaq
+import matplotlib
+
+matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 from cudaq import spin
 from cudaq.dynamics import InitialState, Schedule
@@ -79,6 +83,3 @@ noisy_figure.tight_layout()
 noisy_figure.savefig("t1_experiment_noisy.png")
 print("Saved finite-shot plot to t1_experiment_noisy.png")
 print("Estimate T1 from the noisy points and explain your reasoning.")
-
-if plt.get_backend().lower() != "agg":
-    plt.show()
