@@ -52,4 +52,5 @@ axes.grid(True)
 figure.tight_layout()
 figure.savefig("t1_experiment.png")
 print("Saved plot to t1_experiment.png")
-plt.show()
+if plt.get_backend().lower() != "agg":
+    plt.show()
