@@ -25,10 +25,12 @@ probability at 101 delay times.
 
 The script will continue saving that smooth result as `t1_experiment.png`.
 It will then select every fifth delay time, leaving 21 experimental delays.
-At each selected delay, it will simulate 64 independent projective
+At each selected delay, it will simulate 32 independent projective
 measurements. Each measurement reports excited with the ideal CUDA-Q
 probability and ground otherwise. The measured excited-state fraction is the
-number of excited outcomes divided by 64.
+number of excited outcomes divided by 32. Compared with 64 shots, this raises
+the typical statistical scatter by about 41 percent while retaining an
+interpretable exponential trend.
 
 Python's standard-library `random.Random` will generate the Bernoulli outcomes.
 A fixed seed will make the workshop image reproducible. This sampling models
@@ -47,8 +49,8 @@ The new plot will:
 - save as `t1_experiment_noisy.png`.
 
 The script will print the two output filenames and prompt the learner to
-estimate T1 from the noisy plot. Both plots will be shown when Matplotlib has an
-interactive backend and will run without warnings under a headless backend.
+estimate T1 from the noisy plot. Matplotlib's headless backend will save both
+plots without trying to open display windows.
 
 ## README Changes
 
@@ -64,7 +66,7 @@ Checks will confirm that:
 
 - the script and README mention both output images;
 - the implementation imports the Python `random` module but not NumPy or CuPy;
-- the sampling uses 21 delays and 64 shots per delay;
+- the sampling uses 21 delays and 32 shots per delay;
 - the seeded noisy data are reproducible, bounded between zero and one, and
   differ from the ideal probabilities;
 - the ideal CUDA-Q result still has probability near `1/e` at one T1;
