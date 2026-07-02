@@ -20,7 +20,7 @@ The script creates two labeled plots:
 The ideal excited-state probability begins near 1, decays exponentially,
 reaches about 0.37 after one T1, and approaches 0 at long times.
 
-The finite-shot plot estimates each displayed probability from 64 binary
+The finite-shot plot estimates each displayed probability from 32 binary
 measurements. Its scatter is physically meaningful quantum projection noise:
 a real experiment only observes excited or ground on each shot and estimates
 the probability from those outcomes. It does not include readout error,

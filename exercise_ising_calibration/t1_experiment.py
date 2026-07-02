@@ -57,7 +57,7 @@ print("Saved ideal plot to t1_experiment.png")
 
 # A real experiment estimates each probability from a finite number of binary
 # measurements. Sampling only some delays makes that shot noise visible.
-shots_per_delay = 64
+shots_per_delay = 32
 measurement_times = time_steps[::5]
 ideal_measurement_probabilities = excited_state_probability[::5]
 random_generator = random.Random(7)
