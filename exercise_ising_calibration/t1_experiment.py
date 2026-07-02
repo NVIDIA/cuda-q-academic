@@ -1,4 +1,5 @@
 import math
+import random
 
 import cudaq
 import matplotlib.pyplot as plt
@@ -51,6 +52,33 @@ axes.set_ylim(0.0, 1.05)
 axes.grid(True)
 figure.tight_layout()
 figure.savefig("t1_experiment.png")
-print("Saved plot to t1_experiment.png")
+print("Saved ideal plot to t1_experiment.png")
+
+# A real experiment estimates each probability from a finite number of binary
+# measurements. Sampling only some delays makes that shot noise visible.
+shots_per_delay = 64
+measurement_times = time_steps[::5]
+ideal_measurement_probabilities = excited_state_probability[::5]
+random_generator = random.Random(7)
+measured_excited_state_fraction = [
+    sum(
+        random_generator.random() < probability
+        for _ in range(shots_per_delay)
+    ) / shots_per_delay
+    for probability in ideal_measurement_probabilities
+]
+
+noisy_figure, noisy_axes = plt.subplots()
+noisy_axes.scatter(measurement_times, measured_excited_state_fraction)
+noisy_axes.set_title("T1 Calibration with Finite-Shot Noise")
+noisy_axes.set_xlabel("Time")
+noisy_axes.set_ylabel("Measured excited-state fraction")
+noisy_axes.set_ylim(0.0, 1.05)
+noisy_axes.grid(True)
+noisy_figure.tight_layout()
+noisy_figure.savefig("t1_experiment_noisy.png")
+print("Saved finite-shot plot to t1_experiment_noisy.png")
+print("Estimate T1 from the noisy points and explain your reasoning.")
+
 if plt.get_backend().lower() != "agg":
     plt.show()
