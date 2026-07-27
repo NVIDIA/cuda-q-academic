@@ -189,8 +189,8 @@ submit the requested files.
 **Checklist: 5 minutes**
 
 - ☐ **Package the exercise folder.** Ask AI to create a zip file of the full
-  `exercise_adapt_qaoa/` folder, including code, tests, benchmark outputs, plots
-  or reports, planning notes, and saved conversations.
+  `03_04_exercise_qaoa_and_adapt/` folder, including code, tests, benchmark
+  outputs, plots or reports, planning notes, and saved conversations.
 
 - ☐ **Download the zip file.** Use the Jupyter file browser to download the zip
   file so you have a local copy of your work.

@@ -2,34 +2,22 @@
 
 Edit the settings below, then run:
 
-    python exercise_adapt_qaoa/adapt_qaoa.py
+    python adapt_qaoa.py
 """
 
 from __future__ import annotations
 
 import json
 import random
-import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-# Put the repo root first when this file is imported as a package module.
-if str(PROJECT_ROOT) in sys.path:
-    sys.path.remove(str(PROJECT_ROOT))
-sys.path.insert(0, str(PROJECT_ROOT))
 
 import cudaq
 import numpy as np
 from scipy.optimize import minimize
 
-try:
-    from exercise_adapt_qaoa.run_qedc_input import DEFAULT_QEDC_INSTANCE, load_qedc_maxcut
-except ModuleNotFoundError:
-    # Direct script execution makes this folder the first import location, so
-    # fall back to the sibling file.
-    from run_qedc_input import DEFAULT_QEDC_INSTANCE, load_qedc_maxcut
+from run_qedc_input import DEFAULT_QEDC_INSTANCE, load_qedc_maxcut
 
 
 # ---------------------------------------------------------------------------

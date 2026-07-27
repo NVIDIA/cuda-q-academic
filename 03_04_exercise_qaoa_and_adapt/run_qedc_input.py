@@ -2,20 +2,15 @@
 
 Examples:
 
-    python exercise_adapt_qaoa/run_qedc_input.py --list
-    python exercise_adapt_qaoa/run_qedc_input.py mc_004_003_000
+    python run_qedc_input.py --list
+    python run_qedc_input.py mc_004_003_000
 """
 
 from __future__ import annotations
 
 import argparse
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "maxcut_instances"
 DEFAULT_QEDC_INSTANCE = "mc_008_005_000"
@@ -73,7 +68,7 @@ def main(argv=None) -> int:
         return 0
 
     problem = load_qedc_maxcut(args.instance, args.data_dir)
-    from exercise_adapt_qaoa.adapt_qaoa import RunSettings, run_adapt_qaoa
+    from adapt_qaoa import RunSettings, run_adapt_qaoa
 
     result = run_adapt_qaoa(
         problem.qubits_num,
