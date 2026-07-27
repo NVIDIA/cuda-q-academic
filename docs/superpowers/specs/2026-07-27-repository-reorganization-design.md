@@ -36,6 +36,10 @@ projects will be copied from:
 Transient local files such as `__pycache__`, `.pytest_cache`, `.gpu.lock`, and
 the local Matplotlib cache directory will not be copied.
 
+Machine-specific absolute paths in the completed TensorNet command logs will
+be rewritten as portable relative commands. Experimental settings, timings,
+results, rationales, and conclusions will remain unchanged.
+
 ## Documentation
 
 `demos_autoresearch/README.md` will explain the two demo topics and direct

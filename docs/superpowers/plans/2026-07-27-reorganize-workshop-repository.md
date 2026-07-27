@@ -189,8 +189,10 @@ and:
 python run_round.py controlled
 ```
 
-Leave the completed `research/*/logs/` content unchanged because those files
-are historical records of the source run.
+In the completed `research/*/logs/` files, replace the machine-specific Python
+interpreter and source-directory prefixes in each command header with `python`
+and paths relative to the completed project. Do not alter experimental
+settings, timings, results, rationales, or conclusions.
 
 - [ ] **Step 4: Create the TensorNet topic README**
 
@@ -306,7 +308,7 @@ Expected: the notebook parses as JSON, the sample image exists, and both superse
 - [ ] **Step 6: Commit the calibration consolidation**
 
 ```bash
-git add -A -- 01_exercise_ising_calibration exercise_calibration exercise_ising_calibration
+git add -A
 git commit -m "refactor: consolidate Ising calibration exercise"
 ```
 
@@ -329,13 +331,16 @@ Expected: all Python files parse and the command prints the parsed file count.
 
 - [ ] **Step 2: Run the QEC plotting tests**
 
-Run:
+Run from `demos_autoresearch/cudaq_qec_decoder/completed`:
 
 ```bash
-pytest --import-mode=importlib demos_autoresearch/cudaq_qec_decoder/completed/tests/test_plot_ledger.py demos_autoresearch/cudaq_qec_decoder/ready_to_run/tests/test_plot_ledger.py -q
+python -m pytest tests/test_plot_ledger.py -q
 ```
 
-Expected: all tests pass.
+Then run the same command from
+`demos_autoresearch/cudaq_qec_decoder/ready_to_run`.
+
+Expected: each variant reports `1 passed`.
 
 - [ ] **Step 3: Validate TensorNet state and JSON files**
 
