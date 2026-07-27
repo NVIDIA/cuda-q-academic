@@ -1,0 +1,6 @@
+notebook
+matplotlib
+leaky
+hydra-core
+torch
+pymatching
