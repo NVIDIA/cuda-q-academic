@@ -1,7 +1,0 @@
-**/__pycache__/
-**/*.pyc
-**/.pytest_cache/
-**/output/data/
-ready_to_run_qec_autoresearch/output/ledger/
-ready_to_run_qec_autoresearch/output/plots/
-reports/

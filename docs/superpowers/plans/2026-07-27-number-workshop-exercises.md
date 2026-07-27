@@ -42,6 +42,7 @@ Run:
 
 ```bash
 git mv demo_qec_autoresearch/.gitignore demos_autoresearch/.gitignore
+rmdir demo_qec_autoresearch
 ```
 
 Replace `demos_autoresearch/.gitignore` with:

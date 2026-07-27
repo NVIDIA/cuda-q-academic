@@ -1,0 +1,7 @@
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/output/data/
+cudaq_qec_decoder/ready_to_run/output/ledger/
+cudaq_qec_decoder/ready_to_run/output/plots/
+reports/
