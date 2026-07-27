@@ -134,7 +134,7 @@ fall back to PDF only when HTML is missing or incomplete.
 To add one paper after the initial wiki has been built, ask Codex:
 
 ```text
-Work in exercise_wiki_llm.
+Work in demos_wiki_llm.
 
 Read AGENTS.md. Add this paper to the research wiki:
 
@@ -154,7 +154,7 @@ index/glossary/open questions.
 To add several papers, ask Codex:
 
 ```text
-Work in exercise_wiki_llm.
+Work in demos_wiki_llm.
 
 Read AGENTS.md. Add the following papers to the research wiki:
 
