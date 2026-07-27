@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.467193s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "find_threads=1 will remain valid and reduce runtime by at least 5% relative to round 15.", "rationale": "Round 15 repeated the rank-3 reference at 0.448 seconds and confirmed hyper-sample insensitivity. Reducing only find_threads from 10 to 1 tests whether thread-management overhead matters for this short path search.", "runtime_seconds": 0.46719341900461586, "settings": {"controlled_rank": 3, "deterministic": false, "find_limit": true, "find_threads": 1, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 1.802030s, value=-0.055774644017, valid=yes
+RESULT_JSON:{"absolute_error": 3.559827804547333e-07, "circuit": "controlled", "expectation": -0.05577464401721954, "expected": -0.055775, "hypothesis": "path_reuse=False will remain valid and complete below 2.2 seconds.", "rationale": "Round 6 took 4.293 seconds after path reuse was restored, reproducing a large penalty relative to round 5. Disabling only path reuse again tests whether the fast configuration itself repeats.", "runtime_seconds": 1.802029536003829, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

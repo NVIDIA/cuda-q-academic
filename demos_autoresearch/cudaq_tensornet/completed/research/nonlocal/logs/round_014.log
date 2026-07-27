@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.167793s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "Disabling find_limit will remain correct but regress runtime by at least 5% versus round 13 because unconstrained search adds overhead.", "rationale": "Round 13 was 1% slower at one hyper sample, falsifying a useful sample/thread interaction. Change only find_limit to False to test whether removing the path-search limiter expands work without enough path benefit.", "runtime_seconds": 1.1677931909944164, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": false, "find_threads": 1, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

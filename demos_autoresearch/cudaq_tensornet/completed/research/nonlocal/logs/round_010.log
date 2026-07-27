@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.183357s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "One find thread will remain correct and improve runtime by at least 5% versus round 9; otherwise the thread count is not a useful lever here.", "rationale": "Round 9 at eight hyper samples was only 1% slower than round 8, so sample count is not a confirmed effect. Change only find_threads from 10 to 1 to test whether path-search thread coordination adds avoidable overhead.", "runtime_seconds": 1.1833566360000987, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 1, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.469472s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "find_threads=64 will remain valid but will not improve by at least 5% relative to round 15's 0.448 seconds.", "rationale": "Round 16 at one find thread took 0.467 seconds, only 4.3% slower than the 10-thread round and within the noisy band. Raising only find_threads to 64 is a high-contrast test for a meaningful thread-count effect.", "runtime_seconds": 0.4694716839949251, "settings": {"controlled_rank": 3, "deterministic": false, "find_limit": true, "find_threads": 64, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

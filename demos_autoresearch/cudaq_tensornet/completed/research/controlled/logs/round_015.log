@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.448110s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "hyper_samples=8 will remain valid and finish within 5% of round 12's 0.445-second result.", "rationale": "Round 14 at 128 hyper-samples was still 0.446 seconds, falsifying a material sampling-cost effect across the tested range. Restoring only hyper_samples=8 provides a repeat of the rank-3 reference configuration.", "runtime_seconds": 0.448110325000016, "settings": {"controlled_rank": 3, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 2.085047s, value=0.000841051515, valid=yes
+RESULT_JSON:{"absolute_error": 1.5147261321754243e-09, "circuit": "nonlocal", "expectation": 0.0008410515147261322, "expected": 0.00084105, "hypothesis": "Controlled rank 2 will remain correct but regress by at least 15% versus round 18, showing that rank 1 remains preferable without path reuse.", "rationale": "Round 18 at 95% scratch took 1.151 seconds, essentially identical to round 15's 1.153 seconds at 50%, so scratch has no material effect. Change only controlled_rank to 2 to test its interaction with disabled path reuse.", "runtime_seconds": 2.085046678999788, "settings": {"controlled_rank": 2, "deterministic": false, "find_limit": true, "find_threads": 1, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 95}, "valid": true}
+
+[stderr]

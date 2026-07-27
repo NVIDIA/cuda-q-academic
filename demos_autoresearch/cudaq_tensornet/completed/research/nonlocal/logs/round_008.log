@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.267142s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "One hyper sample will remain correct and improve runtime by at least 5% versus round 7; a regression would show that path quality needs sampling.", "rationale": "Round 7 reproduced the no-reuse result at 1.361 seconds. Change only hyper_samples from 8 to 1 to test whether reducing path-search sampling overhead preserves a sufficiently good contraction path.", "runtime_seconds": 1.2671419649996096, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

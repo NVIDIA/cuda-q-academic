@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 3.808556s, value=0.000841057743, valid=yes
+RESULT_JSON:{"absolute_error": 7.742945849916437e-09, "circuit": "nonlocal", "expectation": 0.0008410577429458499, "expected": 0.00084105, "hypothesis": "Controlled rank 2 will remain correct and lower runtime by at least 5% relative to round 2; a smaller change will be treated as noisy.", "rationale": "Round 2 established a correct 2.978-second FP32 result. Change only controlled_rank from 1 to 2 to test whether a modestly less restrictive controlled-tensor representation reduces contraction overhead.", "runtime_seconds": 3.808556389005389, "settings": {"controlled_rank": 2, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": true, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.453777s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "controlled_rank=4 will remain valid and complete below 0.55 seconds.", "rationale": "Round 10 regressed to 1.846 seconds after rank was lowered to 2, strongly supporting a causal threshold effect. Restoring only controlled_rank=4 tests whether the fast side of the effect repeats.", "runtime_seconds": 0.45377746000303887, "settings": {"controlled_rank": 4, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

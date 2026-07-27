@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.153153s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "Re-enabling find_limit will remain correct and reproduce within 5% of round 13's 1.144-second runtime, indicating no material limiter effect.", "rationale": "Round 14 was only 2.1% slower than round 13 with find_limit disabled, so the predicted meaningful penalty did not occur. Reverse only find_limit to True to classify the small difference as reproducible or noise-scale.", "runtime_seconds": 1.153153380000731, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 1, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

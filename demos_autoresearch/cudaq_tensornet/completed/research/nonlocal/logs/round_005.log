@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.384053s, value=0.000841056230, valid=yes
+RESULT_JSON:{"absolute_error": 6.229546666166284e-09, "circuit": "nonlocal", "expectation": 0.0008410562295466661, "expected": 0.00084105, "hypothesis": "Disabling path reuse will remain correct and improve runtime by at least 5% versus round 4; otherwise reuse should remain enabled.", "rationale": "Round 4 recovered to 2.937 seconds at controlled rank 1, supporting rank 1 as the better structural choice. Change only path_reuse to False to test whether reuse bookkeeping adds cost in this single-observation run.", "runtime_seconds": 1.384052626999619, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

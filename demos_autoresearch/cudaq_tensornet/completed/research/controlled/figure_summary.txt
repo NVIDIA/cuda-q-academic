@@ -1,0 +1,1 @@
+FP32 made the timed-out baseline valid, while disabling path reuse produced a repeatable 2.37x improvement at low controlled rank. With reuse disabled, raising controlled rank from 2 into the rank-3/4 regime delivered another roughly 4x speedup; hyper-sampling, thread-count, and deterministic-mode changes were weak or negligible by comparison.

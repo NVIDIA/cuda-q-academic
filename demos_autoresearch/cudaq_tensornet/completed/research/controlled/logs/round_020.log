@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.447012s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "deterministic=False will remain valid and finish within 5% of round 18's 0.462-second result.", "rationale": "Round 19 with deterministic search took 0.446 seconds, only 3.5% faster than round 18 and within the noisy band. Reversing only deterministic mode provides the final repeat of the rank-3 reference.", "runtime_seconds": 0.4470117900054902, "settings": {"controlled_rank": 3, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

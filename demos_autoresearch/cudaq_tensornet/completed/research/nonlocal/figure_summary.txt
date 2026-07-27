@@ -1,0 +1,1 @@
+The fixed FP64 baseline timed out, while FP32 completed correctly; disabling path reuse then cut the FP32 runtime by roughly half, and one find thread produced the 1.137-second minimum. Controlled rank 1 was consistently much faster than rank 2, whereas hyper samples, find limiting, deterministic search, and scratch allocation showed weak, noisy, or negligible effects.

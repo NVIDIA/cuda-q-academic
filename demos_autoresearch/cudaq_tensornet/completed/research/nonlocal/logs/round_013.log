@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.143657s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "One hyper sample with one find thread will remain correct and improve runtime by at least 5% versus round 12, demonstrating an interaction.", "rationale": "Round 12 reproduced the one-thread result at 1.137 seconds. Earlier the hyper-sample effect was noisy with ten threads; change only hyper_samples to 1 to test whether it becomes useful with single-threaded search.", "runtime_seconds": 1.1436567179989652, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 1, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

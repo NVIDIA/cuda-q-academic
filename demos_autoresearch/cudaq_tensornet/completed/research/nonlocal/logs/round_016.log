@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.222600s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "Deterministic search will remain correct but regress runtime by at least 5% versus round 15 because it restricts path-search choices.", "rationale": "Round 15 reproduced round 13 within 1%, showing no material find_limit effect. Change only deterministic to True to test the runtime cost of constraining contraction-path search reproducibility.", "runtime_seconds": 1.2225995839980897, "settings": {"controlled_rank": 1, "deterministic": true, "find_limit": true, "find_threads": 1, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

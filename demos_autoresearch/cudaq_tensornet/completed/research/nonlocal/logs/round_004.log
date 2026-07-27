@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 2.937259s, value=0.000841057743, valid=yes
+RESULT_JSON:{"absolute_error": 7.742945849916437e-09, "circuit": "nonlocal", "expectation": 0.0008410577429458499, "expected": 0.00084105, "hypothesis": "Returning to controlled rank 1 will remain correct, beat round 3 by at least 15%, and land within 10% of round 2's 2.978-second runtime.", "rationale": "Round 3 at controlled rank 2 regressed 28% to 3.809 seconds. Reverse only that setting to rank 1 to test whether the large regression follows the rank choice rather than transient timing variation.", "runtime_seconds": 2.9372587589969044, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": true, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

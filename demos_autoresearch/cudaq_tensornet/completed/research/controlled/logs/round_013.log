@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.445461s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "hyper_samples=1 will remain valid and reduce runtime by at least 10% relative to round 12.", "rationale": "Round 12 showed rank 3 is also fast at 0.445 seconds, so the boundary is below rank 4. With contraction work now small, lowering only path-search hyper_samples from 8 to 1 tests whether sampling overhead is material.", "runtime_seconds": 0.44546111700037727, "settings": {"controlled_rank": 3, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

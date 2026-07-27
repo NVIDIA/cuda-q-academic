@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 4.231636s, value=-0.055774921551, valid=yes
+RESULT_JSON:{"absolute_error": 7.844865321932071e-08, "circuit": "controlled", "expectation": -0.05577492155134678, "expected": -0.055775, "hypothesis": "FP32 will complete within 30 seconds and pass the fixed expectation-value correctness check.", "rationale": "Round 1 timed out above 30 seconds with FP64. Reducing only precision to FP32 should lower tensor memory traffic and arithmetic cost while directly testing whether precision was the main barrier to completion.", "runtime_seconds": 4.231635916999949, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": true, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

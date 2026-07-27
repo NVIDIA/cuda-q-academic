@@ -1,0 +1,13 @@
+{
+  "benchmark_sha256": "8846ae587582d163a4720ec54580320b454b4c0f5e0fca453d19c0a0bab889a2",
+  "circuits": {
+    "controlled": {
+      "absolute_tolerance": 0.0001,
+      "expectation": -0.055775
+    },
+    "nonlocal": {
+      "absolute_tolerance": 0.0001,
+      "expectation": 0.00084105
+    }
+  }
+}

@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 1.150668s, value=0.000841057510, valid=yes
+RESULT_JSON:{"absolute_error": 7.510115206262567e-09, "circuit": "nonlocal", "expectation": 0.0008410575101152062, "expected": 0.00084105, "hypothesis": "A 95% scratch allowance will remain correct and improve runtime by at least 5% versus round 17 by enabling more efficient contractions.", "rationale": "Round 17 was only 0.8% faster than deterministic round 16 and failed to recover to round 15, leaving the deterministic effect noisy. Change only scratch_percentage from 50 to 95 to test a larger workspace allowance.", "runtime_seconds": 1.1506682370018098, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 1, "hyper_samples": 1, "path_reuse": false, "precision": "fp32", "scratch_percentage": 95}, "valid": true}
+
+[stderr]

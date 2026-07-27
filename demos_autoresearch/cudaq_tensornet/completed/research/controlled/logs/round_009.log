@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.423730s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "controlled_rank=4 will remain valid and differ in runtime by at least 10% from round 8.", "rationale": "Round 8 at controlled_rank=2 was effectively unchanged at 1.801 seconds. Because this circuit uses gates with three controls, increasing only the rank threshold to 4 tests a more structurally distinct tensor treatment.", "runtime_seconds": 0.42372969000280136, "settings": {"controlled_rank": 4, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

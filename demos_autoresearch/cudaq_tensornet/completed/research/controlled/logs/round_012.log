@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 0.444942s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "controlled_rank=3 will remain valid but take more than 1.5 seconds.", "rationale": "Round 11 repeated the rank-4 fast regime at 0.454 seconds. Testing only controlled_rank=3 now locates whether the sharp improvement begins exactly at rank 4 for the circuit's three-control gates.", "runtime_seconds": 0.44494182700145757, "settings": {"controlled_rank": 3, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

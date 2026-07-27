@@ -1,0 +1,8 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+[2026-07-24 10:34:25.840] [warning] [simulator_cutensornet.inc:62] Ignoring CUDAQ_TENSORNET_FIND_THREADS due to CUDAQ_TENSORNET_FIND_DETERMINISTIC
+controlled: 0.445824s, value=-0.055774942040, valid=yes
+RESULT_JSON:{"absolute_error": 5.795955657778018e-08, "circuit": "controlled", "expectation": -0.05577494204044342, "expected": -0.055775, "hypothesis": "deterministic=True will remain valid and change runtime by less than 10% relative to round 18.", "rationale": "Round 18 returned to 0.462 seconds at 10 threads, within the noisy band of the earlier reference. Changing only deterministic mode tests whether fixed path selection materially affects the fast rank-3 configuration.", "runtime_seconds": 0.44582371399883414, "settings": {"controlled_rank": 3, "deterministic": true, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

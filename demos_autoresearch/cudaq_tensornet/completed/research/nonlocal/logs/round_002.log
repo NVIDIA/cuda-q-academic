@@ -1,0 +1,7 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+nonlocal: 2.977698s, value=0.000841057743, valid=yes
+RESULT_JSON:{"absolute_error": 7.742945849916437e-09, "circuit": "nonlocal", "expectation": 0.0008410577429458499, "expected": 0.00084105, "hypothesis": "FP32 will complete within 30 seconds and remain within the evaluator's correctness tolerance; otherwise precision alone is insufficient.", "rationale": "Round 1 timed out after 30.11 seconds with FP64 and produced no valid runtime. Change only precision to FP32 to test whether arithmetic and memory cost, rather than the path-search settings, caused the timeout.", "runtime_seconds": 2.977697979004006, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": true, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]

@@ -1,0 +1,5 @@
+$ python evaluate.py nonlocal --experiment research/nonlocal/experiment.py
+
+[stdout]
+
+[stderr]

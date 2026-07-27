@@ -1,0 +1,7 @@
+$ python evaluate.py controlled --experiment research/controlled/experiment.py
+
+[stdout]
+controlled: 1.811175s, value=-0.055774644017, valid=yes
+RESULT_JSON:{"absolute_error": 3.559827804547333e-07, "circuit": "controlled", "expectation": -0.05577464401721954, "expected": -0.055775, "hypothesis": "path_reuse=False will remain valid but increase runtime by at least 5% relative to round 4.", "rationale": "Round 4 repeated the rank-1 configuration in 4.335 seconds, confirming that the small rank difference is not a strong effect. The observable contains multiple terms, so disabling only path reuse tests whether shared contraction planning materially benefits this workload.", "runtime_seconds": 1.811174561997177, "settings": {"controlled_rank": 1, "deterministic": false, "find_limit": true, "find_threads": 10, "hyper_samples": 8, "path_reuse": false, "precision": "fp32", "scratch_percentage": 50}, "valid": true}
+
+[stderr]
