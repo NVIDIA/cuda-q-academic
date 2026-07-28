@@ -23,7 +23,7 @@
    1. Enter your card information.
 
 4. Open the workshop launchable at
-   [https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3FcyH7sovB0xg02DVT3LIfymLq6](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3FcyH7sovB0xg02DVT3LIfymLq6)
+   [https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3H6j5NCoMPIUNiBDPPokL4HLVTM](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3H6j5NCoMPIUNiBDPPokL4HLVTM)
    and click the green **Deploy Launchable** button.
 
    <img src="assets/brev-deploy-launchable.svg" alt="Brev workshop launchable page with the Deploy Launchable button circled" width="720">
