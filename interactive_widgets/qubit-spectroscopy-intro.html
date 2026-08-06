@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qubit Spectroscopy (Intro) — CUDA-Q Academic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #76b900;
+  --accent-dark: #5e9400;
+  --bg: #1A1A1A;
+  --surface: #2A2A2A;
+  --border: #444444;
+  --fg: #E0E0E0;
+  --muted: #AAAAAA;
+  --warn: #ef9100;
+  --danger: #e52020;
+  --teal: #1dbba4;
+  --blue: #0074df;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: #000;
+  padding: 8px 16px;
+  z-index: 100;
+  text-decoration: none;
+  font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .widget-container { padding: 32px; }
+}
+.widget-container h1 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.widget-container .summary-text {
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.instructions-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.instructions-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol { margin-top: 12px; padding-left: 1.4em; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section .kbd {
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+.info-box > h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+.info-box h3 {
+  color: var(--fg);
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tab-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tab-btn[aria-selected="true"] {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+  border-bottom-color: var(--accent-dark);
+}
+.tab-btn:hover {
+  background: rgba(118,185,0,0.15);
+  color: #FFFFFF;
+}
+.tab-btn[aria-selected="true"]:hover {
+  background: var(--accent);
+  color: #000000;
+}
+.predict-group {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+}
+.predict-group legend,
+.diagnose-group legend {
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0 4px;
+}
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.2);
+  flex: 1 1 160px;
+}
+.radio-option:hover { border-color: var(--accent); }
+.radio-option:has(input:checked) {
+  border-color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  background: rgba(118,185,0,0.12);
+}
+.radio-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.radio-option span { color: var(--fg); font-size: 0.9rem; }
+.controls-locked .interactive-controls {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.interactive-controls[aria-disabled="true"] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.lock-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.control-group {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.readout-chip {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.fixed-freq {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.fixed-freq strong { color: var(--fg); }
+.zone-label {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+}
+.zone-label.under { color: var(--warn); border-color: var(--warn); }
+.zone-label.good { color: var(--accent); border-color: var(--accent); }
+.zone-label.over { color: var(--danger); border-color: var(--danger); }
+.slider-wrap:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  min-height: 44px;
+}
+input[type=range]:focus { outline: none; }
+input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A;
+}
+input[type=range]::-moz-range-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 14px; width: 14px; border-radius: 50%;
+  background: #76B900; cursor: pointer; border: 2px solid #1A1A1A;
+}
+.btn-primary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+}
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-secondary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 800px) {
+  .viz-grid { grid-template-columns: 1fr 1fr; }
+}
+.viz-panel {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 280px;
+}
+.viz-panel h3 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.viz-panel svg, .viz-panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+.level-glow { transition: opacity 0.25s, filter 0.25s; }
+.drive-arrow { transition: stroke-width 0.2s, opacity 0.2s; }
+.flip-cue { opacity: 0; pointer-events: none; }
+.flip-cue.active { animation: flipPulse 1.4s ease-out forwards; }
+.flip-cue.held { opacity: 1; }
+.ground-cue { opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.ground-cue.held { opacity: 1; }
+.blur-cue { opacity: 0; }
+@keyframes flipPulse {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 1; }
+}
+.pop-dot {
+  transition: cy 0.55s ease-out, opacity 0.25s, r 0.25s, fill 0.25s;
+}
+.control-hint {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: rgba(118,185,0,0.08);
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.control-hint strong { color: var(--accent); }
+.btn-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  max-width: 220px;
+  line-height: 1.35;
+}
+.term-gloss {
+  display: block;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.term-gloss strong { color: var(--fg); }
+.results-stack { display: flex; flex-direction: column; gap: 12px; }
+.prediction-line, .calibration-line, .omega-line {
+  margin: 0;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.calibration-line.success { color: var(--accent); font-weight: 700; }
+.status-banner {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+}
+.status-banner.flat { color: var(--muted); }
+.status-banner.clean { color: var(--accent); border-color: var(--accent); }
+.status-banner.broad { color: var(--danger); border-color: var(--danger); }
+.lab-inset {
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+}
+.lab-inset[hidden], [hidden] { display: none !important; }
+.lab-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 700px) {
+  .lab-grid { grid-template-columns: 1fr 1fr; }
+}
+.lab-card {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+}
+.lab-card img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  background: #111111;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.lab-card p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.diagnose-group {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.diagnose-feedback {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+.diagnose-feedback.correct { color: var(--accent); }
+.diagnose-feedback.incorrect { color: var(--warn); }
+.next-panel {
+  margin-top: 8px;
+}
+.next-panel p {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.next-panel .controls-row {
+  align-items: center;
+}
+.next-panel a {
+  color: #76b900;
+  font-weight: 700;
+  text-decoration: none;
+}
+.next-panel a:hover { text-decoration: underline; }
+.next-panel a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.next-panel .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.prompt-box {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.prompt-box-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.prompt-box-header strong {
+  display: block;
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.prompt-box .btn-secondary {
+  padding: 6px 12px;
+  min-height: 36px;
+  font-size: 0.85rem;
+}
+.prompt-box #playground-prompt {
+  margin: 0;
+}
+.widget-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.widget-footer a {
+  color: #76b900;
+  text-decoration: none;
+  font-weight: 700;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.widget-footer a:hover { text-decoration: underline; }
+.widget-footer a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .flip-cue.active { animation: none; opacity: 0.95; }
+  .pop-dot { transition: none; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+
+  <!-- Header -->
+  <header>
+    <h1>Qubit Spectroscopy</h1>
+    <p class="summary-text">Find the qubit transition frequency ω₀₁ by sweeping drive frequency — first at low power (flat spectrum), then after raising drive power so a clean peak can appear.</p>
+  </header>
+
+  <!-- Instructions -->
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol>
+      <li>Sweep <strong>Drive frequency</strong> across the <em>full</em> range at low power (you are sweeping the qubit drive — resonator readout <span aria-label="omega r">ω<sub>r</sub></span> is already calibrated).</li>
+      <li>Press <strong>Raise drive power</strong>, then sweep the same range again.</li>
+      <li>Watch for a clean peak near <span aria-label="omega zero one">ω<sub>01</sub></span>. On the level diagram, population moves to |1⟩ only while the drive is on resonance — it returns to |0⟩ when the drive moves away or is weak.</li>
+      <li>After the peak appears, diagnose the <strong>Ambiguous lab trace</strong> (not the clean reference). Then use <strong>What’s next</strong> to continue in the Ising Calibration playground.</li>
+      <li>Use <strong>Reset</strong> (or <span class="kbd">Esc</span>) anytime to start over from low power.</li>
+    </ol>
+    <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> moves through sliders, buttons, and radios; arrow keys adjust the focused slider or radio group; <span class="kbd">Enter</span>/<span class="kbd">Space</span> activates buttons and radios; <span class="kbd">Esc</span> resets.</p>
+  </details>
+
+  <!-- Controls -->
+  <section class="info-box" id="controls-section" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+    <div class="interactive-controls" id="intro-controls" aria-disabled="false">
+      <div class="controls-row">
+        <div class="control-group">
+          <label for="freq-slider">Drive frequency <span class="readout-chip" id="freq-label" aria-hidden="true">4.300 GHz</span></label>
+          <div class="slider-wrap">
+            <input type="range" id="freq-slider" min="0" max="100" value="0" step="1"
+              aria-label="Drive frequency from 4.30 to 4.36 gigahertz"
+              aria-valuemin="4.30" aria-valuemax="4.36" aria-valuenow="4.30" aria-valuetext="4.300 gigahertz">
+          </div>
+          <span class="btn-hint" id="freq-hint">Full range, low power first.</span>
+        </div>
+        <div>
+          <button type="button" class="btn-primary" id="raise-power-btn">Raise drive power</button>
+          <button type="button" class="btn-secondary" id="reset-btn" style="margin-left:8px">Reset</button>
+          <span class="btn-hint" id="raise-hint">Finish a full frequency sweep first.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-box" id="viz-section" aria-labelledby="viz-heading">
+    <h2 id="viz-heading">Primary visualization</h2>
+    <div class="viz-grid">
+      <div class="viz-panel" role="img" aria-labelledby="levels-caption" id="levels-panel">
+        <h3 id="levels-caption">Two-level energy diagram</h3>
+        <svg id="levels-svg" viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="460" height="300" fill="#000"/>
+          <text x="230" y="22" text-anchor="middle" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="12" font-weight="700" id="levels-status">Drive off resonance · low power</text>
+
+          <!-- |1⟩ level -->
+          <line id="level1-line" x1="90" y1="78" x2="250" y2="78" stroke="#E0E0E0" stroke-width="3"/>
+          <circle id="level1-glow" class="level-glow" cx="170" cy="78" r="42" fill="#76b900" opacity="0"/>
+          <text x="268" y="83" fill="#76b900" font-family="Inter, sans-serif" font-size="16" font-weight="700">|1⟩</text>
+          <text id="flip-cue" class="flip-cue" x="300" y="83" fill="#76b900" font-family="Inter, sans-serif" font-size="12" font-weight="700">in |1⟩ while driven</text>
+          <ellipse id="level1-blur" class="blur-cue" cx="170" cy="78" rx="90" ry="14" fill="none" stroke="#e52020" stroke-width="2" stroke-dasharray="4 4" opacity="0"/>
+
+          <!-- Drive arrow -->
+          <defs>
+            <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#ef9100"/>
+            </marker>
+          </defs>
+          <line id="drive-arrow" class="drive-arrow" x1="170" y1="208" x2="170" y2="86"
+            stroke="#ef9100" stroke-width="2" marker-end="url(#arrowhead)" opacity="0.35"/>
+          <text id="drive-label" x="186" y="150" fill="#ef9100" font-family="Inter, sans-serif" font-size="12" font-weight="700">drive</text>
+
+          <!-- Population marker -->
+          <circle id="pop-dot" class="pop-dot" cx="125" cy="218" r="10" fill="#0074df" stroke="#E0E0E0" stroke-width="2" opacity="0.95"/>
+
+          <!-- |0⟩ level -->
+          <line id="level0-line" x1="90" y1="218" x2="250" y2="218" stroke="#E0E0E0" stroke-width="3"/>
+          <text x="268" y="223" fill="#0074df" font-family="Inter, sans-serif" font-size="16" font-weight="700">|0⟩</text>
+          <text id="ground-cue" class="ground-cue held" x="300" y="223" fill="#0074df" font-family="Inter, sans-serif" font-size="12" font-weight="700">in |0⟩ when drive off</text>
+
+          <!-- Gap label -->
+          <text id="gap-label" x="72" y="152" text-anchor="end" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="12">ω₀₁</text>
+          <line x1="78" y1="86" x2="78" y2="210" stroke="#444444" stroke-width="1" stroke-dasharray="3 3"/>
+
+          <text id="match-label" x="230" y="275" text-anchor="middle" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="12">Drive frequency vs gap</text>
+        </svg>
+        <div class="legend">
+          <span><span class="legend-swatch" style="background:#0074df"></span>Population returns to |0⟩ when drive is off or weak</span>
+          <span><span class="legend-swatch" style="background:#76b900"></span>In |1⟩ only while driven on resonance</span>
+          <span><span class="legend-swatch" style="background:#ef9100"></span>Drive arrow (thickness = power)</span>
+        </div>
+      </div>
+
+      <div class="viz-panel">
+        <h3 id="spectrum-caption">Signal vs drive frequency</h3>
+        <canvas id="spectrum-canvas" width="480" height="280" role="img"
+          aria-labelledby="spectrum-caption"></canvas>
+        <div class="legend">
+          <span><span class="legend-swatch" style="background:#76b900"></span>Measured so far (traces as you sweep)</span>
+          <span><span class="legend-swatch" style="background:#ef9100"></span>Current drive frequency</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quantitative Results -->
+  <section class="info-box" id="results-section" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+    <div class="results-stack">
+      <p class="status-banner flat" id="spectrum-status" aria-live="polite" hidden></p>
+      <p class="calibration-line" id="calibration-line" hidden></p>
+
+      <div class="lab-inset" id="lab-inset" hidden>
+        <h3>Real lab data — compare</h3>
+        <div class="lab-grid">
+          <div class="lab-card">
+            <img id="lab-clean-img" src="qubitSpec.png" width="1024" height="665"
+              alt="Real Qblox qubit spectroscopy: blue data points and red Lorentzian fit versus frequency in gigahertz">
+            <p>Clean Qblox reference: measured |S<sub>21</sub>| (blue) with red Lorentzian fit. Scatter around the fit is normal lab noise when the peak is well calibrated.</p>
+          </div>
+          <div class="lab-card">
+            <canvas id="lab-ambiguous-canvas" width="400" height="200" role="img"
+              aria-label="Ambiguous lab trace that looks weak and noisy with no clear Lorentzian"></canvas>
+            <p id="ambiguous-trace-caption"><strong>Ambiguous lab trace</strong> — use this plot for the question below (not the clean reference).</p>
+          </div>
+        </div>
+        <fieldset class="diagnose-group" id="lab-diagnose-group">
+          <legend id="lab-diagnose-legend">Looking at the <strong>Ambiguous lab trace</strong> (right): is that trace under-driven, over-driven, or well-calibrated?</legend>
+          <div class="radio-row" role="radiogroup" aria-labelledby="lab-diagnose-legend">
+            <label class="radio-option"><input type="radio" name="lab-diagnose" value="under"> <span>Under-driven</span></label>
+            <label class="radio-option"><input type="radio" name="lab-diagnose" value="over"> <span>Over-driven</span></label>
+            <label class="radio-option"><input type="radio" name="lab-diagnose" value="good"> <span>Well-calibrated</span></label>
+          </div>
+          <p class="diagnose-feedback" id="diagnose-feedback" hidden></p>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-box next-panel" id="next-panel" aria-labelledby="next-heading" hidden>
+    <h2 id="next-heading">What’s next</h2>
+    <p>You’ve found a clean peak at the qubit drive frequency. Take the ambiguous lab-trace question further with the
+      <a href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Ising Calibration playground</a>
+      — upload a spectroscopy plot (or describe this experiment) and ask the agent what under-driving looks like and what else can produce a weak, noisy, ambiguous trace.</p>
+    <div class="prompt-box" role="region" aria-label="Suggested playground prompt">
+      <div class="prompt-box-header">
+        <strong>Suggested prompt</strong>
+        <button type="button" class="btn-secondary" id="copy-prompt-btn">Copy prompt</button>
+      </div>
+      <p id="playground-prompt">I just ran a qubit spectroscopy intro: sweep drive frequency at low power (flat spectrum), raise drive power, then re-sweep to find ω₀₁. I also compared a clean Lorentzian lab reference to an ambiguous under-driven / low-signal lab trace. Explain this calibration experiment briefly. If a spectroscopy calibration is under-driven, what should I change next? What other problems besides weak drive power could produce an ambiguous, noisy, no-clear-peak lab trace that looks similar?</p>
+    </div>
+    <p>Open the playground, paste the prompt, and optionally attach a spectroscopy plot for a second opinion.</p>
+    <div class="controls-row">
+      <a class="btn-primary" href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Open Ising Calibration playground</a>
+    </div>
+  </section>
+
+<div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <!-- Footer -->
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  const F_MIN = 4.300;
+  const F_MAX = 4.360;
+  const OMEGA_01 = 4.333;
+  const FOUND_TOL = 0.0012;
+  const ZONE_UNDER_MAX = 33;
+  const ZONE_GOOD_MAX = 66;
+  const POWER_INTRO_LOW = 12;
+  const POWER_INTRO_RAISED = 50;
+  const FREQ_DEFAULT = 0;
+  const SWEEP_END = 100;
+
+  const state = {
+    freqSlider: FREQ_DEFAULT,
+    freq: F_MIN,
+    introPowerRaised: false,
+    spectrumShape: 'flat',
+    omegaFound: false,
+    introMilestone: false,
+    flipCueActive: false,
+    exploredMin: FREQ_DEFAULT,
+    exploredMax: FREQ_DEFAULT,
+    introFlatSwept: false,
+    labDiagnose: null,
+    reducedMotion: false
+  };
+
+  const els = {};
+
+  function introFullSweepDone() {
+    return state.exploredMin <= FREQ_DEFAULT && state.exploredMax >= SWEEP_END;
+  }
+
+  function omega01SliderPos() {
+    return Math.round(((OMEGA_01 - F_MIN) / (F_MAX - F_MIN)) * 100);
+  }
+
+  /** Second sweep has measured through the true peak (not only parked on it right now). */
+  function peakCoveredBySweep() {
+    const p = omega01SliderPos();
+    return state.introPowerRaised && state.exploredMin <= p && state.exploredMax >= p;
+  }
+
+  function introResultsReady() {
+    // Show after a complete low-power sweep, or once power has been raised / peak found
+    return state.introFlatSwept || state.introPowerRaised || state.omegaFound;
+  }
+
+  function sliderToFreq(v) {
+    return F_MIN + (Number(v) / 100) * (F_MAX - F_MIN);
+  }
+
+  function formatGHz(f) {
+    return f.toFixed(3) + ' GHz';
+  }
+
+  function powerZoneFromSlider(v) {
+    const n = Number(v);
+    if (n <= ZONE_UNDER_MAX) return 'under';
+    if (n <= ZONE_GOOD_MAX) return 'good';
+    return 'over';
+  }
+
+  function zoneLabel(zone) {
+    if (zone === 'under') return 'Under-driven';
+    if (zone === 'good') return 'Good window';
+    return 'Over-driven';
+  }
+
+  function effectivePower() {
+    return state.introPowerRaised ? POWER_INTRO_RAISED : POWER_INTRO_LOW;
+  }
+
+  function effectiveFreq() {
+    return state.freq;
+  }
+
+  function effectiveZone() {
+    return powerZoneFromSlider(effectivePower());
+  }
+
+  function spectrumSignal(f, driveFreq, power) {
+    const zone = powerZoneFromSlider(power);
+    const df = f - OMEGA_01;
+    if (zone === 'under') {
+      const tiny = 0.04 / (1 + (df / 0.004) * (df / 0.004));
+      return 0.08 + tiny + (Math.sin(f * 8000) * 0.01);
+    }
+    if (zone === 'good') {
+      const gamma = 0.0022;
+      return 0.1 + 0.85 / (1 + (df / gamma) * (df / gamma));
+    }
+    const gamma = 0.0075;
+    const peak = 0.72 / (1 + (df / gamma) * (df / gamma));
+    const shoulder = 0.18 / (1 + ((df - 0.006) / 0.005) * ((df - 0.006) / 0.005));
+    const wiggle = 0.05 * Math.sin(df / 0.0018);
+    return 0.12 + peak + shoulder + wiggle;
+  }
+
+  function observedShape() {
+    const zone = effectiveZone();
+    const freq = effectiveFreq();
+    const onRes = Math.abs(freq - OMEGA_01) < FOUND_TOL;
+    if (zone === 'under') return 'flat-under';
+    if (zone === 'over') {
+      if (onRes || Math.abs(freq - OMEGA_01) < FOUND_TOL * 4) return 'broad';
+      return 'flat';
+    }
+    // After the raised-power sweep has covered the peak, keep the "found" result
+    if (state.omegaFound || peakCoveredBySweep()) return 'clean';
+    if (onRes) return 'clean';
+    if (Math.abs(freq - OMEGA_01) < FOUND_TOL * 5) return 'hunting';
+    if (state.introPowerRaised) return 'flat-resweep';
+    return 'flat';
+  }
+
+  function resonanceMatch() {
+    const det = Math.abs(effectiveFreq() - OMEGA_01);
+    return Math.max(0, 1 - det / ((F_MAX - F_MIN) * 0.55));
+  }
+
+  function announce(msg) {
+    if (!els.statusAnnounce) return;
+    els.statusAnnounce.textContent = msg;
+  }
+
+  function seededNoise(i, seed) {
+    const x = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  function labAmbiguousPoints(n) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      const f = F_MIN + t * (F_MAX - F_MIN);
+      const df = f - OMEGA_01;
+      const tiny = 0.05 / (1 + (df / 0.005) * (df / 0.005));
+      const noise = (seededNoise(i, 7.7) - 0.5) * 0.14;
+      pts.push({ f: f, y: Math.max(0.02, 0.12 + tiny + noise), fit: null });
+    }
+    return pts;
+  }
+
+  function cacheEls() {
+    els.statusAnnounce = document.getElementById('status-announce');
+    els.introControls = document.getElementById('intro-controls');
+    els.freqSlider = document.getElementById('freq-slider');
+    els.freqLabel = document.getElementById('freq-label');
+    els.freqHint = document.getElementById('freq-hint');
+    els.raisePowerBtn = document.getElementById('raise-power-btn');
+    els.resetBtn = document.getElementById('reset-btn');
+    els.copyPromptBtn = document.getElementById('copy-prompt-btn');
+    els.playgroundPrompt = document.getElementById('playground-prompt');
+    els.raiseHint = document.getElementById('raise-hint');
+    els.spectrumStatus = document.getElementById('spectrum-status');
+    els.calibrationLine = document.getElementById('calibration-line');
+    els.labInset = document.getElementById('lab-inset');
+    els.nextPanel = document.getElementById('next-panel');
+    els.diagnoseFeedback = document.getElementById('diagnose-feedback');
+    els.spectrumCanvas = document.getElementById('spectrum-canvas');
+    els.labAmbiguousCanvas = document.getElementById('lab-ambiguous-canvas');
+    els.levelsStatus = document.getElementById('levels-status');
+    els.driveArrow = document.getElementById('drive-arrow');
+    els.driveLabel = document.getElementById('drive-label');
+    els.level1Glow = document.getElementById('level1-glow');
+    els.level1Blur = document.getElementById('level1-blur');
+    els.flipCue = document.getElementById('flip-cue');
+    els.groundCue = document.getElementById('ground-cue');
+    els.popDot = document.getElementById('pop-dot');
+    els.matchLabel = document.getElementById('match-label');
+  }
+
+  function renderLevels() {
+    const zone = effectiveZone();
+    const match = resonanceMatch();
+    const shape = observedShape();
+    // Instantaneous drive condition (not the locked "peak found" result)
+    const drivenExcited = zone === 'good' && Math.abs(effectiveFreq() - OMEGA_01) < FOUND_TOL * 2.5;
+
+    let strokeW = 1.5;
+    let opacity = 0.3;
+    if (zone === 'under') { strokeW = 1.5; opacity = 0.3 + 0.15 * match; }
+    else if (zone === 'good') { strokeW = 3.5; opacity = 0.55 + 0.4 * match; }
+    else { strokeW = 7; opacity = 0.9; }
+
+    els.driveArrow.setAttribute('stroke-width', String(strokeW));
+    els.driveArrow.setAttribute('opacity', String(opacity));
+
+    const yBottom = 208;
+    const yTopFull = 86;
+    const yTop = yBottom - (yBottom - yTopFull) * (0.35 + 0.65 * match);
+    els.driveArrow.setAttribute('y1', String(yBottom));
+    els.driveArrow.setAttribute('y2', String(yTop));
+
+    els.level1Glow.setAttribute('opacity', drivenExcited ? '0.55' : '0');
+    els.level1Glow.setAttribute('r', drivenExcited ? '48' : '42');
+
+    const blurOn = shape === 'broad' && match >= 0.85;
+    els.level1Blur.setAttribute('opacity', blurOn ? '0.85' : '0');
+
+    if (els.popDot) {
+      if (drivenExcited) {
+        els.popDot.setAttribute('cy', '78');
+        els.popDot.setAttribute('fill', '#76b900');
+        els.popDot.setAttribute('r', '12');
+      } else {
+        els.popDot.setAttribute('cy', '218');
+        els.popDot.setAttribute('fill', '#0074df');
+        els.popDot.setAttribute('r', '10');
+      }
+    }
+
+    if (drivenExcited) {
+      if (els.groundCue) els.groundCue.classList.remove('held');
+      if (!state.flipCueActive) {
+        state.flipCueActive = true;
+        if (!state.reducedMotion) {
+          els.flipCue.classList.remove('active', 'held');
+          void els.flipCue.offsetWidth;
+          els.flipCue.classList.add('active');
+        } else {
+          els.flipCue.classList.add('held');
+        }
+      } else {
+        els.flipCue.classList.add('held');
+      }
+    } else {
+      state.flipCueActive = false;
+      els.flipCue.classList.remove('active', 'held');
+      if (els.groundCue) {
+        els.groundCue.classList.add('held');
+        els.groundCue.textContent = (zone === 'under' || match < 0.85)
+          ? 'in |0⟩ (off / weak)'
+          : 'in |0⟩ when drive off';
+      }
+    }
+
+    let status = '';
+    if (drivenExcited) status = 'On resonance · good window · population in |1⟩ while driven';
+    else if (zone === 'under' && match < 0.85) status = 'Off resonance · under-driven · population in |0⟩';
+    else if (zone === 'under') status = 'On resonance · under-driven (peak invisible) · population stays in |0⟩';
+    else if (zone === 'good') status = 'Near / off resonance · population returns to |0⟩';
+    else if (match >= 0.85) status = 'On resonance · over-driven (broadened)';
+    else status = 'Off resonance · over-driven · population in |0⟩';
+    els.levelsStatus.textContent = status;
+
+    els.matchLabel.textContent = 'Drive ↔ gap match ≈ ' + Math.round(match * 100) + '% · power: ' + zoneLabel(zone);
+    els.driveLabel.textContent = zone === 'under' ? 'weak drive' : (zone === 'over' ? 'strong drive' : 'drive');
+  }
+
+  function drawSpectrum() {
+    const canvas = els.spectrumCanvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    const pad = { l: 48, r: 16, t: 24, b: 40 };
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+    const power = effectivePower();
+    const driveFreq = effectiveFreq();
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#444444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, pad.t + plotH);
+    ctx.lineTo(pad.l + plotW, pad.t + plotH);
+    ctx.stroke();
+
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Drive frequency (GHz)', pad.l + plotW / 2, H - 10);
+    ctx.save();
+    ctx.translate(14, pad.t + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Signal', 0, 0);
+    ctx.restore();
+
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '11px Inter, sans-serif';
+    [F_MIN, OMEGA_01, F_MAX].forEach(function (f) {
+      const x = pad.l + ((f - F_MIN) / (F_MAX - F_MIN)) * plotW;
+      ctx.fillText(f.toFixed(3), x, pad.t + plotH + 16);
+    });
+
+    const n = 160;
+    let iStart = Math.round((state.exploredMin / 100) * (n - 1));
+    let iEnd = Math.round((state.exploredMax / 100) * (n - 1));
+    if (iEnd < iStart) { const tmp = iStart; iStart = iEnd; iEnd = tmp; }
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 2.5;
+    let started = false;
+    for (let i = iStart; i <= iEnd; i++) {
+      const t = i / (n - 1);
+      const f = F_MIN + t * (F_MAX - F_MIN);
+      const yVal = spectrumSignal(f, driveFreq, power);
+      const x = pad.l + t * plotW;
+      const y = pad.t + plotH - Math.min(1, Math.max(0, yVal)) * plotH;
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    if (started && iEnd > iStart) ctx.stroke();
+
+    const curYVal = spectrumSignal(driveFreq, driveFreq, power);
+    const mx = pad.l + ((driveFreq - F_MIN) / (F_MAX - F_MIN)) * plotW;
+    const my = pad.t + plotH - Math.min(1, Math.max(0, curYVal)) * plotH;
+    ctx.strokeStyle = '#ef9100';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(mx, pad.t);
+    ctx.lineTo(mx, pad.t + plotH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ef9100';
+    ctx.beginPath();
+    ctx.arc(mx, my, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#1A1A1A';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    if (iEnd === iStart) {
+      ctx.fillStyle = '#76b900';
+      ctx.beginPath();
+      ctx.arc(mx, my, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (state.omegaFound) {
+      const ox = pad.l + ((OMEGA_01 - F_MIN) / (F_MAX - F_MIN)) * plotW;
+      ctx.strokeStyle = '#444444';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath();
+      ctx.moveTo(ox, pad.t);
+      ctx.lineTo(ox, pad.t + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  function drawLabTrace(canvas, points, opts) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    const pad = { l: 36, r: 12, t: 16, b: 28 };
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#444444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, pad.t + plotH);
+    ctx.lineTo(pad.l + plotW, pad.t + plotH);
+    ctx.stroke();
+
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(opts.title, pad.l + plotW / 2, 12);
+
+    if (opts.showFit) {
+      ctx.beginPath();
+      ctx.strokeStyle = '#e52020';
+      ctx.lineWidth = 2;
+      points.forEach(function (p, i) {
+        const x = pad.l + ((p.f - F_MIN) / (F_MAX - F_MIN)) * plotW;
+        const y = pad.t + plotH - Math.min(1, Math.max(0, p.fit)) * plotH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    points.forEach(function (p) {
+      const x = pad.l + ((p.f - F_MIN) / (F_MAX - F_MIN)) * plotW;
+      const y = pad.t + plotH - Math.min(1, Math.max(0, p.y)) * plotH;
+      ctx.fillStyle = '#1dbba4';
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function renderLab() {
+    if (els.labInset.hidden) return;
+    drawLabTrace(els.labAmbiguousCanvas, labAmbiguousPoints(55), { title: 'Ambiguous lab trace', showFit: false });
+  }
+
+  function renderControls() {
+    // Raise only after a full low-power sweep (otherwise Results stay empty)
+    els.raisePowerBtn.disabled = state.introPowerRaised || !state.introFlatSwept;
+    if (state.introPowerRaised) {
+      els.raisePowerBtn.textContent = 'Drive power raised';
+      if (els.raiseHint) {
+        els.raiseHint.textContent = 'Re-sweep the same range to reveal the peak.';
+      }
+      if (els.freqHint) {
+        els.freqHint.textContent = 'Power raised — re-sweep where the low-power trace looked flat.';
+      }
+    } else if (!state.introFlatSwept) {
+      els.raisePowerBtn.textContent = 'Raise drive power';
+      if (els.raiseHint) {
+        els.raiseHint.textContent = 'Finish a full frequency sweep first.';
+      }
+      if (els.freqHint) {
+        els.freqHint.textContent = 'Full range, low power first.';
+      }
+    } else {
+      els.raisePowerBtn.textContent = 'Raise drive power';
+      if (els.raiseHint) {
+        els.raiseHint.textContent = 'Resets the slider so you can re-sweep at higher power.';
+      }
+      if (els.freqHint) {
+        els.freqHint.textContent = 'Full sweep done — raise power, then re-sweep.';
+      }
+    }
+  }
+
+  function renderResults() {
+    const shape = state.spectrumShape;
+
+    if (!introResultsReady()) {
+      els.spectrumStatus.className = 'status-banner flat';
+      els.spectrumStatus.textContent = '';
+      els.spectrumStatus.hidden = true;
+      els.calibrationLine.hidden = true;
+      els.calibrationLine.textContent = '';
+      els.labInset.hidden = true;
+      if (els.nextPanel) els.nextPanel.hidden = true;
+      return;
+    }
+
+    els.spectrumStatus.hidden = false;
+    els.spectrumStatus.className = 'status-banner';
+    if (shape === 'clean' || state.omegaFound) {
+      els.spectrumStatus.classList.add('clean');
+      els.spectrumStatus.textContent = 'You found a clean Lorentzian peak at ω₀₁ ≈ 4.333 GHz.';
+    } else if (shape === 'broad') {
+      els.spectrumStatus.classList.add('broad');
+      els.spectrumStatus.textContent = 'The peak is broadened / distorted — the drive is over-driven.';
+    } else if (shape === 'hunting') {
+      els.spectrumStatus.classList.add('flat');
+      els.spectrumStatus.textContent = 'The signal is rising near resonance — keep sweeping.';
+    } else if (shape === 'flat-resweep') {
+      els.spectrumStatus.classList.add('flat');
+      els.spectrumStatus.textContent = 'Drive power is raised; re-sweep to reveal the peak that was invisible at low power.';
+    } else if (shape === 'flat-under') {
+      els.spectrumStatus.classList.add('flat');
+      els.spectrumStatus.textContent = 'The spectrum is flat because the drive is under-driven — raise power, then sweep again.';
+    } else {
+      els.spectrumStatus.classList.add('flat');
+      els.spectrumStatus.textContent = 'The spectrum is flat (off resonance so far).';
+    }
+
+    if (state.introPowerRaised && !state.omegaFound) {
+      els.calibrationLine.hidden = false;
+      els.calibrationLine.className = 'calibration-line';
+      els.calibrationLine.textContent = 'Calibration change: increased drive amplitude into the spectroscopy window. Frequency slider was reset so you can re-trace the same range — the peak should now appear where the low-power sweep looked flat.';
+    } else {
+      els.calibrationLine.hidden = true;
+      els.calibrationLine.textContent = '';
+    }
+
+    const showLab = state.introMilestone;
+    els.labInset.hidden = !showLab;
+    if (showLab) renderLab();
+
+    if (els.nextPanel) {
+      const wasHidden = els.nextPanel.hidden;
+      els.nextPanel.hidden = !state.introMilestone;
+      if (state.introMilestone && wasHidden) {
+        announce('Peak found. Compare with real lab data below.');
+      }
+    }
+  }
+
+  function updateDerivedState() {
+    state.freq = sliderToFreq(state.freqSlider);
+    if (peakCoveredBySweep()) {
+      state.omegaFound = true;
+      state.introMilestone = true;
+    }
+    state.spectrumShape = observedShape();
+    if (state.introPowerRaised && state.spectrumShape === 'clean') {
+      state.omegaFound = true;
+      state.introMilestone = true;
+    }
+  }
+
+  function renderAll() {
+    updateDerivedState();
+    renderControls();
+    renderLevels();
+    drawSpectrum();
+    renderResults();
+  }
+
+  function resetIntroSweep() {
+    state.freqSlider = FREQ_DEFAULT;
+    state.freq = sliderToFreq(FREQ_DEFAULT);
+    state.exploredMin = FREQ_DEFAULT;
+    state.exploredMax = FREQ_DEFAULT;
+    state.omegaFound = false;
+    state.flipCueActive = false;
+    els.freqSlider.value = String(FREQ_DEFAULT);
+    els.freqLabel.textContent = formatGHz(state.freq);
+    els.freqSlider.setAttribute('aria-valuenow', state.freq.toFixed(3));
+    els.freqSlider.setAttribute('aria-valuetext', state.freq.toFixed(3) + ' gigahertz');
+  }
+
+  function resetAll() {
+    state.introPowerRaised = false;
+    state.introMilestone = false;
+    state.introFlatSwept = false;
+    state.labDiagnose = null;
+    document.querySelectorAll('input[name="lab-diagnose"]').forEach(function (r) { r.checked = false; });
+    els.diagnoseFeedback.hidden = true;
+    els.diagnoseFeedback.textContent = '';
+    els.labInset.hidden = true;
+    if (els.nextPanel) els.nextPanel.hidden = true;
+    resetIntroSweep();
+    renderAll();
+    announce('Widget reset to initial state');
+  }
+
+  function onFreqInput() {
+    state.freqSlider = Number(els.freqSlider.value);
+    state.freq = sliderToFreq(state.freqSlider);
+    if (state.freqSlider < state.exploredMin) state.exploredMin = state.freqSlider;
+    if (state.freqSlider > state.exploredMax) state.exploredMax = state.freqSlider;
+    if (introFullSweepDone() && !state.introFlatSwept) {
+      state.introFlatSwept = true;
+      if (!state.introPowerRaised) {
+        announce('Full frequency sweep complete. Spectrum is flat at low drive power.');
+      }
+    }
+    els.freqLabel.textContent = formatGHz(state.freq);
+    els.freqSlider.setAttribute('aria-valuenow', state.freq.toFixed(3));
+    els.freqSlider.setAttribute('aria-valuetext', state.freq.toFixed(3) + ' gigahertz');
+    renderAll();
+    if (state.omegaFound && state.introPowerRaised) {
+      announce('Found omega 0 1 approximately 4.333 gigahertz');
+    }
+  }
+
+  function onCopyPrompt() {
+    const text = (els.playgroundPrompt && els.playgroundPrompt.textContent || '').trim();
+    if (!text) return;
+    const done = function () {
+      if (els.copyPromptBtn) {
+        const prev = els.copyPromptBtn.textContent;
+        els.copyPromptBtn.textContent = 'Copied';
+        setTimeout(function () {
+          if (els.copyPromptBtn) els.copyPromptBtn.textContent = prev || 'Copy prompt';
+        }, 1600);
+      }
+      announce('Prompt copied to clipboard');
+    };
+    const fail = function () {
+      announce('Could not copy prompt. Select the text and copy manually.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+      return;
+    }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) done();
+      else fail();
+    } catch (err) {
+      fail();
+    }
+  }
+
+  function onRaisePower() {
+    if (state.introPowerRaised || !state.introFlatSwept) return;
+    state.introPowerRaised = true;
+    resetIntroSweep();
+    renderAll();
+    els.spectrumStatus.hidden = false;
+    els.spectrumStatus.className = 'status-banner flat';
+    els.spectrumStatus.textContent = 'Drive power is raised; re-sweep to reveal the peak that was invisible at low power.';
+    els.calibrationLine.hidden = false;
+    els.calibrationLine.className = 'calibration-line';
+    els.calibrationLine.textContent = 'Calibration change: increased drive amplitude into the spectroscopy window. Frequency slider was reset — re-sweep the same range.';
+    announce('Drive power raised. Re-sweep the same range to reveal the peak.');
+    els.freqSlider.focus();
+  }
+
+  function onLabDiagnose(value) {
+    state.labDiagnose = value;
+    els.diagnoseFeedback.hidden = false;
+    els.diagnoseFeedback.textContent = '';
+    if (value === 'under') {
+      els.diagnoseFeedback.className = 'diagnose-feedback correct';
+      els.diagnoseFeedback.textContent = 'Correct — under-driven. The signal is weak and noisy with no clear Lorentzian (not a broadened blob).';
+      announce('Correct. The ambiguous trace is under-driven: weak noisy signal, no clear Lorentzian.');
+    } else if (value === 'over') {
+      els.diagnoseFeedback.className = 'diagnose-feedback incorrect';
+      els.diagnoseFeedback.textContent = 'Not quite — over-driving usually looks like a broadened or distorted blob. This trace is mostly noise with no clear peak, which points to under-driving.';
+      announce('Not quite. Over-driving looks broadened; this noisy flat-ish trace is under-driven.');
+    } else {
+      els.diagnoseFeedback.className = 'diagnose-feedback incorrect';
+      els.diagnoseFeedback.textContent = 'Not quite — a well-calibrated trace shows a clear Lorentzian (like the clean reference on the left). This ambiguous trace is weak and noisy with no clear peak, so it is under-driven.';
+      announce('Not quite. Well-calibrated shows a clear Lorentzian; this trace is under-driven.');
+    }
+  }
+
+  function wireRadioGroup(name, onSelect) {
+    const radios = Array.prototype.slice.call(document.querySelectorAll('input[name="' + name + '"]'));
+    radios.forEach(function (radio, idx) {
+      radio.addEventListener('change', function () {
+        if (radio.checked) onSelect(radio.value);
+      });
+      radio.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        const dir = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1;
+        const next = (idx + dir + radios.length) % radios.length;
+        radios[next].checked = true;
+        radios[next].focus();
+        onSelect(radios[next].value);
+      });
+    });
+  }
+
+  function init() {
+    cacheEls();
+    state.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    wireRadioGroup('lab-diagnose', onLabDiagnose);
+    els.freqSlider.addEventListener('input', onFreqInput);
+    els.raisePowerBtn.addEventListener('click', onRaisePower);
+    if (els.resetBtn) els.resetBtn.addEventListener('click', resetAll);
+    if (els.copyPromptBtn) els.copyPromptBtn.addEventListener('click', onCopyPrompt);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') resetAll();
+    });
+    els.freqLabel.textContent = formatGHz(sliderToFreq(FREQ_DEFAULT));
+    els.freqSlider.value = String(FREQ_DEFAULT);
+    renderAll();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
