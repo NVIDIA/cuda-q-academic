@@ -1,22 +1,25 @@
 {
   "metadata": {
     "schema_version": 1,
-    "last_updated": "2026-04-23",
+    "last_updated": "2026-08-05",
     "source_of_truth": "This file is the canonical machine-readable inventory for CUDA-Q Academic lessons, learning track membership, and live visualization-gallery widgets.",
     "lesson_policy": "Use lessons for content discovery and learning track routing. For deeper notebook detail or when updating a lesson, consult the notebook intro cell when it exists.",
-    "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory."
+    "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory.",
+    "new_lesson_policy": "Lessons backed by a notebook first added to this repo in the current calendar year carry \"is_new\": true and an \"added_date\" (YYYY-MM-DD) sourced from the first git commit that introduced the notebook (or the rename-replace that produced the current file). Clear these fields at the start of each calendar year."
   },
   "track_order": [
     "quick-start-to-quantum",
-    "simulation-101",
     "qis-foundational-algorithms",
     "qec-101",
     "chemistry-simulations",
     "applications-to-finance",
     "qaoa-for-max-cut",
+    "quantum-machine-learning-and-data-analysis",
     "ai-for-quantum",
     "dynamics-101",
+    "simulation-101",
     "hybrid-workflows",
+    "calibration",
     "quantum-ai-project-template"
   ],
   "tracks": {
@@ -35,7 +38,7 @@
       ]
     },
     "simulation-101": {
-      "title": "Quantum Algorithm Simulation 101",
+      "title": "Quantum Algorithm Simulation",
       "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html",
       "difficulty_range": [
         "intermediate"
@@ -127,6 +130,20 @@
         "weighted-max-cut-project"
       ]
     },
+    "quantum-machine-learning-and-data-analysis": {
+      "title": "Quantum Machine Learning and Data Analysis",
+      "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qml",
+      "difficulty_range": [
+        "intermediate"
+      ],
+      "summary": "Explores quantum and hybrid approaches to machine learning and data analysis, including data encoding, model training, evaluation, and comparison with classical baselines.",
+      "is_new": true,
+      "added_date": "2026-08-05",
+      "more_lessons_coming_soon": true,
+      "lesson_ids": [
+        "introduction-to-hybrid-quantum-neural-networks"
+      ]
+    },
     "ai-for-quantum": {
       "title": "AI for Quantum",
       "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-ai",
@@ -168,6 +185,24 @@
         "qaoa-max-cut-and-gpt-qaoa-workshop"
       ]
     },
+    "calibration": {
+      "title": "Calibration",
+      "learning_path_url": null,
+      "difficulty_range": [
+        "intermediate"
+      ],
+      "summary": "Instructor resource: classroom guide for NVIDIA's Ising Calibration NIM, an open vision-language model purpose-built for analyzing quantum hardware calibration plots. Browser-based playground with no setup; sample plots from the QCalEval dataset. Includes the Qubit Spectroscopy (Intro) visualization; additional calibration visualization tools and Ising playground exercises are coming soon (more lessons Aug 10). Hands-on tutorial notebooks are in development.",
+      "more_lessons_coming_soon": true,
+      "more_lessons_coming_soon_label": "More lessons coming Aug 10",
+      "lesson_ids": [
+        "calibration-start-here"
+      ],
+      "widget_ids": [
+        "qubit-spectroscopy-intro",
+        "calibration-experiment-explorers",
+        "ising-calibration-playground-exercises"
+      ]
+    },
     "quantum-ai-project-template": {
       "title": "Quantum AI Project Template",
       "learning_path_url": null,
@@ -183,7 +218,7 @@
   },
   "lessons": {
     "quickstart-01-start-small-with-one-qubit": {
-      "title": "01 Start Small with One Qubit",
+      "title": "Start Small with One Qubit",
       "primary_track_id": "quick-start-to-quantum",
       "track_ids": [
         "quick-start-to-quantum"
@@ -207,10 +242,14 @@
         "measurement"
       ],
       "summary": "Introduces single-qubit states, Bloch-sphere intuition, and the Pauli and Hadamard gates in CUDA-Q.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": [
+        "bloch-sphere-visualizer",
+        "borns-rule-and-sampling"
+      ]
     },
     "quickstart-02-multiple-qubits-and-entanglement": {
-      "title": "02 Multiple Qubits and Entanglement",
+      "title": "Multiple Qubits and Entanglement",
       "primary_track_id": "quick-start-to-quantum",
       "track_ids": [
         "quick-start-to-quantum"
@@ -234,10 +273,14 @@
         "subkernels"
       ],
       "summary": "Builds intuition for multi-qubit registers, CNOT, Bell states, and entanglement in CUDA-Q.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "cnot-gate-visualizer",
+        "quantum-gate-visualization"
+      ]
     },
     "quickstart-03-write-your-first-parameterized-kernel": {
-      "title": "03 Write Your First Parameterized Kernel",
+      "title": "Write Your First Parameterized Kernel",
       "primary_track_id": "quick-start-to-quantum",
       "track_ids": [
         "quick-start-to-quantum"
@@ -259,10 +302,11 @@
         "CUDA-Q"
       ],
       "summary": "Introduces parameterized CUDA-Q kernels, rotation gates, and observable evaluation.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": []
     },
     "quickstart-04-build-your-first-variational-algorithm": {
-      "title": "04 Build Your First Variational Algorithm",
+      "title": "Build Your First Variational Algorithm",
       "primary_track_id": "quick-start-to-quantum",
       "track_ids": [
         "quick-start-to-quantum"
@@ -285,7 +329,8 @@
         "hybrid quantum-classical"
       ],
       "summary": "Builds an end-to-end variational workflow for a simple Hamiltonian using CUDA-Q.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": []
     },
     "simulation-101-choosing-the-right-simulator": {
       "title": "Choosing the Right Simulator",
@@ -296,6 +341,8 @@
       "source_kind": "local_notebook",
       "repo_path": "simulation/01_simulation101.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/simulation/01_simulation101.ipynb",
+      "is_new": true,
+      "added_date": "2026-04-23",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter notebook familiarity",
@@ -310,7 +357,10 @@
         "stabilizer simulation"
       ],
       "summary": "Compares state vector, tensor network, MPS, Pauli propagation, and stabilizer methods so learners can choose the right CUDA-Q simulator.",
-      "metadata_source": "notebook intro cell + module README"
+      "metadata_source": "notebook intro cell + module README",
+      "widget_ids": [
+        "pauli-propagation-visualizer"
+      ]
     },
     "teleportation": {
       "title": "Teleportation",
@@ -318,9 +368,10 @@
       "track_ids": [
         "qis-foundational-algorithms"
       ],
-      "source_kind": "external_notebook",
-      "repo_path": null,
-      "link": "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_teleportation.ipynb",
+      "source_kind": "local_notebook",
+      "repo_path": "qis-examples/quantum_teleportation.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/quantum_teleportation.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/quantum_teleportation.ipynb",
       "difficulty": "intro",
       "prerequisites": [
         "single- and two-qubit states",
@@ -344,9 +395,10 @@
       "track_ids": [
         "qis-foundational-algorithms"
       ],
-      "source_kind": "external_notebook",
-      "repo_path": null,
-      "link": "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/bernstein_vazirani.ipynb",
+      "source_kind": "local_notebook",
+      "repo_path": "qis-examples/bernstein_vazirani.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/bernstein_vazirani.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/bernstein_vazirani.ipynb",
       "difficulty": "intro",
       "prerequisites": [
         "superposition and Hadamard gates",
@@ -369,9 +421,10 @@
       "track_ids": [
         "qis-foundational-algorithms"
       ],
-      "source_kind": "external_notebook",
-      "repo_path": null,
-      "link": "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/deutsch_algorithm.ipynb",
+      "source_kind": "local_notebook",
+      "repo_path": "qis-examples/deutsch_algorithm.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/deutsch_algorithm.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/deutsch_algorithm.ipynb",
       "difficulty": "intro",
       "prerequisites": [
         "Hadamard gates",
@@ -395,9 +448,10 @@
       "track_ids": [
         "qis-foundational-algorithms"
       ],
-      "source_kind": "external_notebook",
-      "repo_path": null,
-      "link": "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/quantum_fourier_transform.ipynb",
+      "source_kind": "local_notebook",
+      "repo_path": "qis-examples/quantum_fourier_transform.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/quantum_fourier_transform.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/quantum_fourier_transform.ipynb",
       "difficulty": "intermediate",
       "prerequisites": [
         "complex numbers and phases",
@@ -425,6 +479,9 @@
       "source_kind": "local_notebook",
       "repo_path": "chemistry-simulations/qpe.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-03",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -441,7 +498,11 @@
         "eigenvalues"
       ],
       "summary": "Shows how canonical, iterative, and Bayesian QPE estimate eigenphases, with chemistry-motivated examples.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "interactive-qft-visualizer",
+        "binary-fraction-explorer"
+      ]
     },
     "grovers-algorithm": {
       "title": "Grover's Algorithm",
@@ -452,6 +513,7 @@
       "source_kind": "local_notebook",
       "repo_path": "qis-examples/grovers.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/grovers.ipynb",
       "difficulty": "intermediate",
       "prerequisites": [
         "superposition and amplitudes",
@@ -467,7 +529,8 @@
         "diffusion operator"
       ],
       "summary": "Covers oracle design and amplitude amplification for quadratic-speedup search.",
-      "metadata_source": "llms.txt + notebook title"
+      "metadata_source": "llms.txt + notebook title",
+      "widget_ids": []
     },
     "shors-algorithm": {
       "title": "Shor's Algorithm",
@@ -475,9 +538,10 @@
       "track_ids": [
         "qis-foundational-algorithms"
       ],
-      "source_kind": "external_notebook",
-      "repo_path": null,
-      "link": "https://github.com/NVIDIA/cuda-quantum/blob/main/docs/sphinx/applications/python/shors.ipynb",
+      "source_kind": "local_notebook",
+      "repo_path": "qis-examples/shors.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/shors.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/qis-examples/shors.ipynb",
       "difficulty": "intermediate",
       "prerequisites": [
         "Quantum Fourier Transform",
@@ -496,7 +560,7 @@
       "metadata_source": "llms.txt"
     },
     "qec-01-introduction-to-qec": {
-      "title": "01 Introduction to QEC",
+      "title": "Introduction to QEC",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -519,10 +583,14 @@
         "error correction basics"
       ],
       "summary": "Introduces repetition codes, Hamming codes, and the core ideas that separate quantum error correction from classical error correction.",
-      "metadata_source": "notebook intro cell"
+      "metadata_source": "notebook intro cell",
+      "widget_ids": [
+        "hamming-7-4-3-visualizer",
+        "error-digitization-explorer"
+      ]
     },
     "qec-02-stabilizers-shor-and-steane": {
-      "title": "02 Stabilizers, Shor Code, Steane Code",
+      "title": "Stabilizers, Shor Code, Steane Code",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -545,10 +613,11 @@
         "code capacity"
       ],
       "summary": "Introduces the stabilizer formalism and works through Shor and Steane code implementations in CUDA-Q.",
-      "metadata_source": "notebook intro cell"
+      "metadata_source": "notebook intro cell",
+      "widget_ids": []
     },
     "qec-03-noisy-simulation": {
-      "title": "03 Noisy Simulation",
+      "title": "Noisy Simulation",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -571,10 +640,13 @@
         "logical error rates"
       ],
       "summary": "Explores depolarizing and Pauli-style noise, noisy circuit simulation, and mitigation workflows in CUDA-Q.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "trajectory-noise-demo"
+      ]
     },
     "qec-04-ai-decoders": {
-      "title": "04 AI Decoders",
+      "title": "AI Decoders",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101",
@@ -598,10 +670,11 @@
         "belief propagation"
       ],
       "summary": "Introduces syndrome decoding through brute-force, neural, and BP+OSD decoders for Steane-code and qLDPC examples.",
-      "metadata_source": "notebook intro cell + llms.txt (notebook contains merge-conflict markers later in the file)"
+      "metadata_source": "notebook intro cell + llms.txt (notebook contains merge-conflict markers later in the file)",
+      "widget_ids": []
     },
     "qec-05-magic-state-distillation": {
-      "title": "05 Magic State Distillation",
+      "title": "Magic State Distillation",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -624,10 +697,11 @@
         "resource overhead"
       ],
       "summary": "Explains why magic states are needed for universal fault-tolerant quantum computing and implements a distillation protocol in CUDA-Q.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": []
     },
     "qec-06-toric-and-surface-codes": {
-      "title": "06 Toric and Surface Codes",
+      "title": "Toric and Surface Codes",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -650,10 +724,11 @@
         "logical operators"
       ],
       "summary": "Covers toric and surface-code structure, logical operators on lattices, and minimum-weight matching decoding.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": []
     },
     "qec-07-qldpc-codes": {
-      "title": "07 qLDPC Codes",
+      "title": "qLDPC Codes",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -677,10 +752,11 @@
         "BP+OSD"
       ],
       "summary": "Introduces quantum LDPC constructions and compares decoder performance on higher-rate code families.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": []
     },
     "qec-08-decoder-metrics-and-parallel-window-decoding": {
-      "title": "08 Decoder Metrics and Parallel Window Decoding",
+      "title": "Decoder Metrics and Parallel Window Decoding",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -688,6 +764,8 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/08_QEC_Decoder_metrics_and_parallel_window_decoding.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-29",
       "difficulty": "advanced",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -703,10 +781,11 @@
         "parallel window decoding"
       ],
       "summary": "Examines decoder benchmarking metrics and explores scalable temporal window-decoding strategies for large QEC systems.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": []
     },
     "qec-09-detector-error-models-and-real-time-decoding": {
-      "title": "09 Detector Error Models and Real-Time Decoding",
+      "title": "Detector Error Models and Real-Time Decoding",
       "primary_track_id": "qec-101",
       "track_ids": [
         "qec-101"
@@ -714,6 +793,8 @@
       "source_kind": "local_notebook",
       "repo_path": "qec101/09_QEC_Detector_Error_Models.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-05",
       "difficulty": "advanced",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -729,7 +810,10 @@
         "syndrome processing"
       ],
       "summary": "Introduces detector error models and the API patterns needed for low-latency, real-time decoding workflows.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "steane-code-noise-model-explorer"
+      ]
     },
     "vqe-and-gqe": {
       "title": "VQE and GQE",
@@ -742,6 +826,8 @@
       "source_kind": "local_notebook",
       "repo_path": "chemistry-simulations/vqe_and_gqe.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-29",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -757,7 +843,8 @@
         "barren plateaus"
       ],
       "summary": "Introduces variational and generative quantum eigensolvers for molecular ground-state preparation.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": []
     },
     "adapt-vqe": {
       "title": "ADAPT-VQE",
@@ -783,7 +870,10 @@
         "multi-QPU parallelism"
       ],
       "summary": "Demonstrates adaptive ansatz construction through operator-pool gradients and parallel CUDA-Q workflows.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "adapt-vqe-widget"
+      ]
     },
     "krylov-subspace-diagonalization": {
       "title": "Krylov Subspace Diagonalization",
@@ -809,7 +899,10 @@
         "MQPU"
       ],
       "summary": "Applies quantum Krylov-subspace diagonalization to approximate molecular eigenvalues with CUDA-Q.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "krylov-subspace-widget"
+      ]
     },
     "qmmm-hybrid-simulation": {
       "title": "QM/MM Hybrid Simulation",
@@ -836,10 +929,14 @@
         "self-consistent workflow"
       ],
       "summary": "Combines VQE and classical polarizable embedding to build a hybrid QM/MM chemistry workflow.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "hybrid-system-qmmm",
+        "active-space-selection"
+      ]
     },
     "quantum-walks-for-finance-part-1": {
-      "title": "01 Quantum Walks for Finance, Part 1",
+      "title": "Quantum Walks for Finance, Part 1",
       "primary_track_id": "applications-to-finance",
       "track_ids": [
         "applications-to-finance",
@@ -863,10 +960,13 @@
         "discrete-time walk"
       ],
       "summary": "Introduces discrete-time quantum walks as a tool for financial and stochastic modeling.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": [
+        "classic-and-split-step-random-walk"
+      ]
     },
     "quantum-walks-for-finance-part-2": {
-      "title": "02 Quantum Walks for Finance, Part 2",
+      "title": "Quantum Walks for Finance, Part 2",
       "primary_track_id": "applications-to-finance",
       "track_ids": [
         "applications-to-finance"
@@ -888,10 +988,11 @@
         "learnable walks"
       ],
       "summary": "Extends the quantum-walk toolkit to multi-step dynamics and option-pricing-style applications.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": []
     },
     "portfolio-optimization-three-ways-q-chop": {
-      "title": "03 Portfolio Optimization Three Ways (Q-CHOP)",
+      "title": "Portfolio Optimization Three Ways (Q-CHOP)",
       "primary_track_id": "applications-to-finance",
       "track_ids": [
         "applications-to-finance"
@@ -914,10 +1015,14 @@
         "Q-CHOP"
       ],
       "summary": "Formulates portfolio optimization as QUBO and compares QAOA, adiabatic, and Q-CHOP-style solution strategies.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "qubo-portfolio-optimization",
+        "q-chop-vs-adiabatic"
+      ]
     },
     "max-cut-with-qaoa": {
-      "title": "01 Max Cut with QAOA",
+      "title": "Max Cut with QAOA",
       "primary_track_id": "qaoa-for-max-cut",
       "track_ids": [
         "qaoa-for-max-cut",
@@ -940,10 +1045,11 @@
         "CUDA-Q"
       ],
       "summary": "Introduces QAOA on small Max-Cut instances and sets up the divide-and-conquer extension used later in the track.",
-      "metadata_source": "module README + notebook intro + llms.txt"
+      "metadata_source": "module README + notebook intro + llms.txt",
+      "widget_ids": []
     },
     "divide-and-conquer-qaoa-one-level": {
-      "title": "02 Divide-and-Conquer QAOA (One Level)",
+      "title": "Divide-and-Conquer QAOA (One Level)",
       "primary_track_id": "qaoa-for-max-cut",
       "track_ids": [
         "qaoa-for-max-cut"
@@ -965,10 +1071,11 @@
         "circuit cutting"
       ],
       "summary": "Shows how a one-level divide-and-conquer strategy breaks larger Max-Cut problems into tractable QAOA subproblems.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": []
     },
     "recursive-divide-and-conquer-qaoa": {
-      "title": "03 Recursive Divide-and-Conquer QAOA",
+      "title": "Recursive Divide-and-Conquer QAOA",
       "primary_track_id": "qaoa-for-max-cut",
       "track_ids": [
         "qaoa-for-max-cut"
@@ -990,10 +1097,11 @@
         "Max Cut"
       ],
       "summary": "Extends divide-and-conquer QAOA recursively to larger graph instances and deeper cutting workflows.",
-      "metadata_source": "llms.txt + module README + notebook title"
+      "metadata_source": "llms.txt + module README + notebook title",
+      "widget_ids": []
     },
     "weighted-max-cut-project": {
-      "title": "04 Weighted Max Cut Project",
+      "title": "Weighted Max Cut Project",
       "primary_track_id": "qaoa-for-max-cut",
       "track_ids": [
         "qaoa-for-max-cut"
@@ -1015,10 +1123,44 @@
         "optimization"
       ],
       "summary": "Serves as a capstone-style weighted Max-Cut assessment using the QAOA techniques developed earlier in the track.",
-      "metadata_source": "llms.txt + notebook title"
+      "metadata_source": "llms.txt + notebook title",
+      "widget_ids": []
+    },
+    "introduction-to-hybrid-quantum-neural-networks": {
+      "title": "An Introduction to Hybrid Quantum Neural Networks",
+      "primary_track_id": "quantum-machine-learning-and-data-analysis",
+      "track_ids": [
+        "quantum-machine-learning-and-data-analysis"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "quantum-machine-learning-and-data-analysis/01_an_introduction_to_hybrid_quantum_neural_networks.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/01_an_introduction_to_hybrid_quantum_neural_networks.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/01_an_introduction_to_hybrid_quantum_neural_networks.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-05",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "Python",
+        "Jupyter notebooks",
+        "basic quantum computing",
+        "variational quantum algorithms"
+      ],
+      "keywords": [
+        "quantum machine learning",
+        "data analysis",
+        "quantum neural network",
+        "hybrid quantum neural network",
+        "PyTorch",
+        "LSTM",
+        "parameter-shift rule",
+        "CUDA-Q"
+      ],
+      "summary": "Builds classical and quantum classifiers, then integrates a single-qubit CUDA-Q expectation value into a PyTorch LSTM time-series forecasting workflow.",
+      "metadata_source": "notebook intro cell + module README",
+      "widget_ids": []
     },
     "compiling-unitaries-with-diffusion-models": {
-      "title": "01 Compiling Unitaries with Diffusion Models",
+      "title": "Compiling Unitaries with Diffusion Models",
       "primary_track_id": "ai-for-quantum",
       "track_ids": [
         "ai-for-quantum"
@@ -1026,6 +1168,8 @@
       "source_kind": "local_notebook",
       "repo_path": "ai-for-quantum/01_compiling_unitaries_diffusion.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb",
+      "is_new": true,
+      "added_date": "2026-03-28",
       "difficulty": "intermediate",
       "prerequisites": [
         "basic quantum-computing concepts",
@@ -1040,10 +1184,14 @@
         "quantum circuits"
       ],
       "summary": "Uses diffusion models to synthesize quantum circuits that implement target unitaries.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "unitary-circuit-synthesis",
+        "diffusion-model-visualization"
+      ]
     },
     "jaynes-cummings-hamiltonian": {
-      "title": "01 Jaynes-Cummings Hamiltonian",
+      "title": "Jaynes-Cummings Hamiltonian",
       "primary_track_id": "dynamics-101",
       "track_ids": [
         "dynamics-101"
@@ -1066,10 +1214,11 @@
         "quantum dynamics"
       ],
       "summary": "Introduces GPU-accelerated dynamics through the Jaynes-Cummings model and atom-cavity time evolution.",
-      "metadata_source": "module README + llms.txt + notebook title"
+      "metadata_source": "module README + llms.txt + notebook title",
+      "widget_ids": []
     },
     "time-dependent-hamiltonians": {
-      "title": "02 Time-Dependent Hamiltonians",
+      "title": "Time-Dependent Hamiltonians",
       "primary_track_id": "dynamics-101",
       "track_ids": [
         "dynamics-101"
@@ -1092,10 +1241,11 @@
         "quantum dynamics"
       ],
       "summary": "Extends CUDA-Q Dynamics to driven systems with explicitly time-dependent Hamiltonian terms.",
-      "metadata_source": "module README + llms.txt + notebook title"
+      "metadata_source": "module README + llms.txt + notebook title",
+      "widget_ids": []
     },
     "labs-optimization": {
-      "title": "01 Quantum-Enhanced Optimization (LABS)",
+      "title": "Quantum-Enhanced Optimization (LABS)",
       "primary_track_id": "hybrid-workflows",
       "track_ids": [
         "hybrid-workflows"
@@ -1103,6 +1253,8 @@
       "source_kind": "local_notebook",
       "repo_path": "hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb",
+      "is_new": true,
+      "added_date": "2026-01-28",
       "difficulty": "intermediate",
       "prerequisites": [
         "basic quantum-computing knowledge",
@@ -1117,10 +1269,13 @@
         "radar"
       ],
       "summary": "Builds a quantum-enhanced workflow for the low-autocorrelation binary sequence optimization problem.",
-      "metadata_source": "notebook intro cell + llms.txt"
+      "metadata_source": "notebook intro cell + llms.txt",
+      "widget_ids": [
+        "labs-optimization-search"
+      ]
     },
     "qaoa-max-cut-and-gpt-qaoa-workshop": {
-      "title": "02 QAOA for Max Cut and GPT-QAOA Workshop",
+      "title": "QAOA for Max Cut and GPT-QAOA Workshop",
       "primary_track_id": "hybrid-workflows",
       "track_ids": [
         "hybrid-workflows",
@@ -1129,6 +1284,8 @@
       "source_kind": "local_notebook",
       "repo_path": "hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb",
       "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb",
+      "is_new": true,
+      "added_date": "2026-05-18",
       "difficulty": "intermediate",
       "prerequisites": [
         "Python and Jupyter familiarity",
@@ -1144,7 +1301,49 @@
         "variational optimization"
       ],
       "summary": "Workshop-style notebook that develops Max-Cut QAOA intuition and extends to hybrid GPT-assisted QAOA workflows.",
-      "metadata_source": "2026 workshop notebook adapted for hybrid-workflows track"
+      "metadata_source": "2026 workshop notebook adapted for hybrid-workflows track",
+      "widget_ids": [
+        "borns-rule-and-sampling",
+        "qaoa-max-cut-explorer",
+        "qaoa-optimization-landscape",
+        "choosing-the-next-operator-adapt-qaoa",
+        "adapt-qaoa-vs-standard-qaoa"
+      ]
+    },
+    "calibration-start-here": {
+      "title": "Start Here \u2014 Calibration Track",
+      "primary_track_id": "calibration",
+      "track_ids": [
+        "calibration"
+      ],
+      "source_kind": "notebook",
+      "repo_path": "calibration/00_StartHere.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb",
+      "is_new": true,
+      "added_date": "2026-05-18",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "familiarity with reading quantum hardware calibration plots (e.g. Rabi, T1, T2, randomized benchmarking)"
+      ],
+      "keywords": [
+        "calibration",
+        "Ising Calibration",
+        "NIM",
+        "vision-language model",
+        "QCalEval",
+        "hardware characterization",
+        "instructor resource",
+        "coming soon",
+        "visualization tools",
+        "qubit spectroscopy"
+      ],
+      "summary": "Coming-soon landing notebook for the Calibration track. Points instructors and learners to the calibration/ README for the Ising Calibration NIM playground and QCalEval sample dataset, links the live Qubit Spectroscopy (Intro) visualization, and previews additional Calibration Visualization Tools coming Aug 10 for conceptual understanding plus guided playground exercises.",
+      "metadata_source": "calibration/README.md",
+      "widget_ids": [
+        "qubit-spectroscopy-intro",
+        "calibration-experiment-explorers",
+        "ising-calibration-playground-exercises"
+      ]
     },
     "quantum-ai-project-template-overview": {
       "title": "Quantum AI Project Template",
@@ -1192,6 +1391,7 @@
     "hybrid-system-qmmm",
     "labs-optimization-search",
     "binary-fraction-explorer",
+    "pauli-propagation-visualizer",
     "interactive-qft-visualizer",
     "steane-code-noise-model-explorer",
     "hamming-7-4-3-visualizer",
@@ -1202,7 +1402,10 @@
     "qaoa-optimization-landscape",
     "choosing-the-next-operator-adapt-qaoa",
     "adapt-qaoa-vs-standard-qaoa",
-    "bits-vs-qubits-vertex-coloring"
+    "bits-vs-qubits-vertex-coloring",
+    "qubit-spectroscopy-intro",
+    "calibration-experiment-explorers",
+    "ising-calibration-playground-exercises"
   ],
   "widgets": {
     "bloch-sphere-visualizer": {
@@ -1563,6 +1766,28 @@
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     },
+    "pauli-propagation-visualizer": {
+      "title": "Pauli Propagation Visualizer",
+      "gallery_section": "domain-specific",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/pauli_prop_widget.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/pauli_prop_widget.html",
+      "source_repo_path": "interactive_widgets/pauli_prop_widget.html",
+      "related_content": [
+        "Simulation 101"
+      ],
+      "related_track_ids": [
+        "simulation-101"
+      ],
+      "summary": "Step through the Heisenberg picture of quantum evolution: pick an observable, then watch it propagate backward through H, S, CNOT, and RX gates according to Heisenberg commutation rules.",
+      "keywords": [
+        "Pauli propagation",
+        "Heisenberg picture",
+        "Clifford gates",
+        "observable",
+        "simulation"
+      ],
+      "metadata_source": "widget HTML + notebook scan (widgets-as-html branch)"
+    },
     "labs-optimization-search": {
       "title": "LABS Optimization Search",
       "gallery_section": "domain-specific",
@@ -1838,6 +2063,77 @@
         "superposition",
         "QAOA",
         "graph problems"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "calibration-experiment-explorers": {
+      "title": "Calibration Experiment Explorers",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: interactive visualizations for building conceptual understanding of quantum hardware calibration experiments \u2014 Rabi, Ramsey, T1, T2, randomized benchmarking, and related characterization plots.",
+      "keywords": [
+        "calibration",
+        "Rabi",
+        "Ramsey",
+        "T1",
+        "T2",
+        "randomized benchmarking",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "ising-calibration-playground-exercises": {
+      "title": "Ising Calibration Playground Exercises",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: guided exercises that pair calibration experiment concepts with NVIDIA's Ising Calibration NIM playground \u2014 structured plot analysis practice using the QCalEval sample dataset.",
+      "keywords": [
+        "Ising Calibration",
+        "NIM playground",
+        "QCalEval",
+        "calibration exercises",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "qubit-spectroscopy-intro": {
+      "title": "Qubit Spectroscopy (Intro)",
+      "gallery_section": "calibration",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/qubit-spectroscopy-intro.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/qubit-spectroscopy-intro.html",
+      "source_repo_path": "interactive_widgets/qubit-spectroscopy-intro.html",
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Find the qubit transition frequency \u03c9\u2080\u2081 by sweeping drive frequency \u2014 first at low power (flat spectrum), then after raising drive power so a clean peak can appear.",
+      "keywords": [
+        "calibration",
+        "qubit spectroscopy",
+        "transition frequency",
+        "drive power",
+        "\u03c901",
+        "hardware characterization"
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     }

@@ -89,6 +89,18 @@
       border-bottom: 1px solid var(--nvidia-accent);
   }
   .section-header i { color: var(--nvidia-green); }
+  .section-header .coming-soon-badge {
+      margin-left: 8px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      background: rgba(118, 185, 0, 0.15);
+      color: var(--nvidia-green);
+      border: 1px solid var(--nvidia-green);
+      padding: 2px 8px;
+      border-radius: 999px;
+  }
 
   /* GRID SYSTEM */
   .pathway-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
@@ -162,6 +174,31 @@
       transition: all 0.2s;
   }
   .btn-nvidia-secondary:hover { border-color: var(--nvidia-light); color: var(--nvidia-light); background: rgba(255,255,255,0.05); }
+
+  .btn-coming-soon {
+      background: transparent;
+      color: var(--nvidia-gray);
+      border: 1px dashed var(--nvidia-accent);
+      padding: 10px 16px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 4px;
+      cursor: default;
+      opacity: 0.85;
+  }
+
+  .pathway-card.coming-soon {
+      border-top-color: var(--nvidia-gray);
+      opacity: 0.92;
+  }
+  .pathway-card.coming-soon:hover { transform: none; border-color: var(--nvidia-accent); }
 
   /* ICON BUTTON (Source) */
   .icon-btn {
@@ -243,6 +280,15 @@
           <i class="fas fa-flask"></i> Domain Specific Tools
       </h2>
       <div class="pathway-grid" id="app-grid"></div>
+
+      <h2 class="section-header" style="margin-top: 40px;">
+          <i class="fas fa-sliders-h"></i> Calibration Visualization Tools
+          <span class="coming-soon-badge">More coming Aug 10</span>
+      </h2>
+      <p class="summary-text" style="margin: -4px 0 16px 0; font-size: 0.9rem;">
+          Interactive tools for building conceptual understanding of calibration experiments, plus guided exercises with the Ising Calibration NIM playground. Qubit Spectroscopy (Intro) is available now; more tools ship Aug 10.
+      </p>
+      <div class="pathway-grid" id="calibration-grid"></div>
   </main>
 
   <footer class="page-footer">
@@ -570,6 +616,41 @@
             ],
             link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/drone-delivery-optimizer.html",
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/drone-delivery-optimizer.html"
+        },
+        {
+            title: "Qubit Spectroscopy (Intro)",
+            isCore: false,
+            section: "calibration",
+            desc: "Find the qubit transition frequency ω₀₁ by sweeping drive frequency — first at low power (flat spectrum), then after raising drive power so a clean peak can appear.",
+            notebooks: [
+                { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/qubit-spectroscopy-intro.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/qubit-spectroscopy-intro.html"
+        },
+        {
+            title: "Calibration Experiment Explorers",
+            isCore: false,
+            section: "calibration",
+            comingSoon: true,
+            desc: "Interactive visualizations for building conceptual understanding of quantum hardware calibration experiments — Rabi, Ramsey, T1, T2, randomized benchmarking, and related characterization plots.",
+            notebooks: [
+                { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
+            ],
+            link: "",
+            source: ""
+        },
+        {
+            title: "Ising Calibration Playground Exercises",
+            isCore: false,
+            section: "calibration",
+            comingSoon: true,
+            desc: "Guided exercises that pair calibration experiment concepts with NVIDIA's Ising Calibration NIM playground — structured plot analysis practice using the QCalEval sample dataset.",
+            notebooks: [
+                { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
+            ],
+            link: "",
+            source: ""
         }
     ];
 
@@ -577,14 +658,16 @@
     function renderWidgets() {
         const coreGrid = document.getElementById('core-grid');
         const appGrid = document.getElementById('app-grid');
+        const calibrationGrid = document.getElementById('calibration-grid');
 
         // Clear existing
         coreGrid.innerHTML = '';
         appGrid.innerHTML = '';
+        calibrationGrid.innerHTML = '';
 
         widgets.forEach(w => {
             const card = document.createElement('article');
-            card.className = 'pathway-card';
+            card.className = 'pathway-card' + (w.comingSoon ? ' coming-soon' : '');
             
             // Generate Notebook Links HTML
             const nbHtml = w.notebooks.map(nb => 
@@ -599,15 +682,14 @@
                         </ul>
                     </div>` : '';
 
-            card.innerHTML = `
-                <div class="card-content">
-                    <div class="card-title">
-                        <h3>${w.title}</h3>
-                        <p>${w.desc}</p>
+            const launchFooter = w.comingSoon ? `
+                <div class="launch-footer">
+                    <div class="launch-row">
+                        <span class="btn-coming-soon" aria-disabled="true">
+                            <i class="fas fa-clock"></i> Coming Soon
+                        </span>
                     </div>
-                    ${notebookSection}
-                </div>
-                
+                </div>` : `
                 <div class="launch-footer">
                     <div class="launch-row">
                         <a href="${w.link}" target="_blank" class="btn-nvidia-primary" title="Open in New Tab">
@@ -620,10 +702,21 @@
                             <i class="fab fa-github"></i>
                         </a>
                     </div>
+                </div>`;
+
+            card.innerHTML = `
+                <div class="card-content">
+                    <div class="card-title">
+                        <h3>${w.title}</h3>
+                        <p>${w.desc}</p>
+                    </div>
+                    ${notebookSection}
                 </div>
+                ${launchFooter}
             `;
 
-            if (w.isCore) coreGrid.appendChild(card);
+            if (w.section === 'calibration') calibrationGrid.appendChild(card);
+            else if (w.isCore) coreGrid.appendChild(card);
             else appGrid.appendChild(card);
         });
     }

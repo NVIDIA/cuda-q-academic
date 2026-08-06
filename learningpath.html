@@ -375,6 +375,11 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
   .nb-name:hover::-webkit-scrollbar-thumb { background-color: var(--nvidia-accent); border-radius: 2px; }
 
   .new-badge { font-size: 9px; background: var(--nvidia-green); color: black; padding: 1px 4px; border-radius: 2px; font-weight: 800; flex-shrink: 0; }
+  .notebook-item.coming-soon-item .nb-name {
+      color: var(--nvidia-gray);
+      font-style: italic;
+      opacity: 0.9;
+  }
 
   .action-badges { display: flex; gap: 4px; flex-shrink: 0; }
   .badge-link { display: none; font-size: 9px; padding: 2px 6px; border-radius: 2px; font-weight: 700; text-transform: uppercase; text-decoration: none; }
@@ -667,6 +672,32 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
       color: white;
   }
   .lesson-viz-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .lesson-viz-coming-soon {
+      color: var(--nvidia-gray);
+      border-style: dashed;
+      border-color: var(--nvidia-accent);
+      background: rgba(255, 255, 255, 0.02);
+      cursor: default;
+      pointer-events: none;
+  }
+  .lesson-viz-coming-soon:hover {
+      border-color: var(--nvidia-accent);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--nvidia-gray);
+  }
+  .coming-soon-chip {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--nvidia-green);
+      border: 1px solid var(--nvidia-green);
+      background: rgba(118, 185, 0, 0.1);
+      padding: 2px 6px;
+      border-radius: 999px;
+      flex-shrink: 0;
+  }
 
   @media (max-width: 900px) { .pathway-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 600px) { .pathway-grid { grid-template-columns: 1fr; } .widget-container { padding: 16px; } }
@@ -920,7 +951,13 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
   // source of truth; updating it on main automatically updates this page
   // the next time someone loads it. No local copy is consulted.
   //
-  const CURRICULUM_URL = 'https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/curriculum.json';
+  // Prefer ?curriculum=... override. On localhost, use the sibling curriculum.json
+  // so unpublished track flags (e.g. more_lessons_coming_soon) preview correctly.
+  // On the live site, always load published main.
+  const _curriculumParam = new URLSearchParams(window.location.search).get('curriculum');
+  const _isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const CURRICULUM_URL = _curriculumParam
+      || (_isLocalHost ? './curriculum.json' : 'https://raw.githubusercontent.com/NVIDIA/cuda-q-academic/main/curriculum.json');
 
   // Map curriculum.json track keys → the internal short IDs that v1 used.
   // These short IDs are what `?track=...` deep-links rely on, so we preserve
@@ -934,6 +971,7 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
       'applications-to-finance':      'track-finance',
       'qaoa-for-max-cut':             'track-qaoa',
       'ai-for-quantum':               'track-ai',
+      'quantum-machine-learning-and-data-analysis': 'track-qml',
       'dynamics-101':                 'track-dynamics',
       'hybrid-workflows':             'track-hybrid',
       'calibration':                  'track-calibration',
@@ -1073,7 +1111,11 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
           .map(id => widgets[id])
           .filter(Boolean)
           .filter(w => !isFeaturedWidget(w, trackKey))
-          .map(w => ({ name: stripNum(w.title), url: w.live_url }));
+          .map(w => ({
+              name: stripNum(w.title),
+              url: w.live_url,
+              comingSoon: !!w.coming_soon || !w.live_url
+          }));
   }
 
   // A "README lesson" is one whose canonical artifact is a markdown file
@@ -1103,7 +1145,7 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
               .filter(Boolean);
 
           const lessonEntries = rawLessons.map(lesson => {
-              const colab = githubToColab(lesson.link);
+              const colab = lesson.colab_url || githubToColab(lesson.link);
               return {
                   name: stripNum(lesson.title),
                   difficulty: DIFFICULTY_MAP[lesson.difficulty] || lesson.difficulty || 'intro',
@@ -1126,16 +1168,27 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
           // expression handles the 0-lesson edge case.)
           const isReadmeOnly = rawLessons.every(isReadmeLesson);
 
+          const notebooks = [...widgetEntries, ...lessonEntries];
+          if (track.more_lessons_coming_soon === true) {
+              notebooks.push({
+                  name: track.more_lessons_coming_soon_label || 'More lessons coming soon',
+                  type: 'coming-soon',
+                  difficulty: 'intro',
+                  isNew: false
+              });
+          }
+
           result.push({
               id: internalId,
               curriculumKey: trackKey,
-              levelLabel: '',
+              levelLabel: track.is_new === true ? 'NEW' : '',
               title: stripNum(track.title),
               description: track.summary || '',
               folder: folder,
               isReadmeOnly: isReadmeOnly,
+              isNew: track.is_new === true,
               trackWidgets: supplementaryWidgets,
-              notebooks: [...widgetEntries, ...lessonEntries]
+              notebooks: notebooks
           });
       }
 
@@ -1172,20 +1225,22 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
             </div>
             <ul class="notebook-list" aria-label="${m.title} Notebooks">
                 ${m.notebooks.map(nb => `
-                    <li class="notebook-item" data-difficulty="${nb.difficulty || 'intro'}" data-new="${nb.isNew || false}">
+                    <li class="notebook-item${nb.type === 'coming-soon' ? ' coming-soon-item' : ''}" data-difficulty="${nb.difficulty || 'intro'}" data-new="${nb.isNew || false}">
                         <div class="nb-row">
                             <span class="nb-name" title="${nb.name}">
                                 ${nb.name}
                                 ${nb.isNew ? '<span class="new-badge">NEW</span>' : ''}
                             </span>
-                            ${nb.type === 'tool'
-                                ? `<a class="badge-link badge-tool" href="${nb.url}" target="_blank">Open</a>`
-                                : (nb.isReadme
-                                    ? `<button class="get-started-btn" onclick="openPreview('${m.id}')">View Guide</button>`
-                                    : `<button class="get-started-btn" onclick="toggleLessonActions(this)" aria-expanded="false">Get Started <span class="chev">▾</span></button>`)
+                            ${nb.type === 'coming-soon'
+                                ? ''
+                                : (nb.type === 'tool'
+                                    ? `<a class="badge-link badge-tool" href="${nb.url}" target="_blank">Open</a>`
+                                    : (nb.isReadme
+                                        ? `<button class="get-started-btn" onclick="openPreview('${m.id}')">View Guide</button>`
+                                        : `<button class="get-started-btn" onclick="toggleLessonActions(this)" aria-expanded="false">Get Started <span class="chev">▾</span></button>`))
                             }
                         </div>
-                        ${(nb.type === 'tool' || nb.isReadme) ? '' : `
+                        ${(nb.type === 'tool' || nb.type === 'coming-soon' || nb.isReadme) ? '' : `
                         <div class="lesson-actions">
                             ${nb.colab ? `<a class="lesson-action-btn" href="${nb.colab}" target="_blank" rel="noopener">
                                 <img src="https://colab.research.google.com/assets/colab-badge.svg" alt=""> Open notebook in Colab
@@ -1196,7 +1251,12 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
                             ${(nb.lessonWidgets && nb.lessonWidgets.length) ? `
                             <div class="lesson-viz-section">
                                 <div class="lesson-viz-label">Interactive Visualizations</div>
-                                ${nb.lessonWidgets.map(w => `
+                                ${nb.lessonWidgets.map(w => w.comingSoon ? `
+                                <span class="lesson-viz-btn lesson-viz-coming-soon" aria-disabled="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                    ${w.name}
+                                    <span class="coming-soon-chip">Coming Soon</span>
+                                </span>` : `
                                 <a class="lesson-viz-btn" href="${w.url}" target="_blank" rel="noopener">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                                     ${w.name}
@@ -1350,6 +1410,10 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
                   <span class="meta-pill">Difficulty: <strong>${escapeHtml(difficultyLabel)}</strong></span>
                   <span class="meta-pill"><strong>${lessons.length}</strong> lesson${lessons.length === 1 ? '' : 's'}</span>
                   ${widgets.length ? `<span class="meta-pill"><strong>${widgets.length}</strong> widget${widgets.length === 1 ? '' : 's'}</span>` : ''}
+                  ${track.is_new ? '<span class="new-pill">NEW</span>' : ''}
+                  ${track.more_lessons_coming_soon
+                      ? `<span class="meta-pill"><strong>${escapeHtml(track.more_lessons_coming_soon_label || 'More lessons coming soon')}</strong></span>`
+                      : ''}
               </div>
           </div>
       `;
@@ -1400,7 +1464,11 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
                               ${widget.keywords.map(k => `<span class="keyword-chip">${escapeHtml(k)}</span>`).join('')}
                           </div>
                       ` : ''}
-                      ${widget.live_url ? `<a class="lesson-preview-link" href="${escapeHtml(widget.live_url)}" target="_blank" rel="noopener">Launch widget →</a>` : ''}
+                      ${widget.live_url
+                          ? `<a class="lesson-preview-link" href="${escapeHtml(widget.live_url)}" target="_blank" rel="noopener">Launch widget →</a>`
+                          : (widget.coming_soon
+                              ? `<span class="coming-soon-chip" style="margin-left:0; display:inline-block;">Coming Soon</span>`
+                              : '')}
                   </li>
               `;
           }
