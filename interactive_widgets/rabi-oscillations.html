@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amplitude Rabi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #76b900;
+  --accent-dark: #5e9400;
+  --bg: #1A1A1A;
+  --surface: #2A2A2A;
+  --border: #444444;
+  --fg: #E0E0E0;
+  --muted: #AAAAAA;
+  --gold: #f9c500;
+  --teal: #1dbba4;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 32px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: var(--accent); color: #000;
+  padding: 8px 16px; z-index: 100;
+  text-decoration: none; font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .widget-container { padding: 32px; } }
+.widget-container h1 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.widget-container .summary-text {
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.instructions-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.instructions-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol { margin-top: 12px; padding-left: 1.4rem; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section .kbd {
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+.info-box h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+.context-box {
+  border-color: rgba(118,185,0,0.45);
+  background: rgba(118,185,0,0.06);
+}
+.context-details summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.context-details summary::-webkit-details-marker { display: none; }
+.context-details summary::before {
+  content: '▶';
+  color: var(--accent);
+  font-size: 0.7rem;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.context-details[open] > summary::before { transform: rotate(90deg); }
+.context-details summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.context-details summary h2 {
+  display: inline;
+  margin: 0;
+}
+.context-details[open] > summary { margin-bottom: 12px; }
+.pulse-sequence {
+  margin-top: 4px;
+}
+.pulse-steps {
+  margin: 0 0 14px 0;
+  padding-left: 1.3rem;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.pulse-steps li { margin-bottom: 6px; }
+.pulse-steps strong { color: var(--accent); }
+.pulse-diagram {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  background: #111111;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 4px;
+}
+.pulse-note {
+  margin: 10px 0 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.experiment-flow {
+  display: grid;
+  justify-items: stretch;
+  gap: 8px;
+  margin-top: 16px;
+}
+.flow-step {
+  width: min(100%, 620px);
+  justify-self: center;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  color: var(--fg);
+  text-align: center;
+  font-size: 0.9rem;
+}
+.flow-step strong { color: var(--accent); }
+.flow-step.highlight {
+  border-color: var(--accent);
+  background: rgba(118,185,0,0.08);
+}
+.flow-arrow {
+  justify-self: center;
+  color: var(--accent);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.one-shot-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: #111111;
+}
+.one-shot-card h3 {
+  margin: 0 0 8px 0;
+  color: var(--accent);
+  font-size: 0.95rem;
+  text-align: center;
+}
+.flow-loop-note {
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 4px;
+}
+.context-box p {
+  margin: 0 0 8px 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.context-box p:last-child { margin-bottom: 0; }
+.context-box ul {
+  margin: 8px 0 0 0;
+  padding-left: 1.3rem;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.context-box li { margin-bottom: 4px; }
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.control-group { flex: 1 1 260px; min-width: 200px; }
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.amp-readout {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  margin-left: 8px;
+  font-weight: 700;
+}
+.fixed-params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.fixed-params strong { color: var(--fg); font-weight: 700; }
+.slider-wrap:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; min-height: 44px; }
+input[type=range]:focus { outline: none; }
+input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A;
+}
+input[type=range]::-moz-range-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 14px; width: 14px; border-radius: 50%; background: #76B900;
+  cursor: pointer; border: 2px solid #1A1A1A;
+}
+.btn-primary {
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 18px;
+  min-width: 44px;
+  min-height: 44px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+}
+.btn-primary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .viz-grid { grid-template-columns: 2fr 1fr; }
+}
+.viz-panel {
+  background: #000000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 280px;
+  min-width: 0;
+}
+.viz-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--fg);
+  font-weight: 700;
+}
+.bloch-host {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: #000000;
+  border-radius: 6px;
+  outline: none;
+}
+.bloch-host:focus {
+  outline: 4px solid var(--accent);
+  outline-offset: 2px;
+}
+.bloch-host canvas { display: block; width: 100% !important; height: 100% !important; }
+.formula-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+.formula-row .eq { color: var(--accent); font-weight: 700; }
+.caveat {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.viz-panel canvas.plot-canvas {
+  display: block;
+  width: 100%;
+  height: 320px;
+  background: #000000;
+  border-radius: 4px;
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .results-grid { grid-template-columns: 2fr 1fr; }
+}
+.live-results, .lab-inset, .next-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  min-width: 0;
+}
+.lab-inset {
+  border-color: rgba(29,187,164,0.45);
+  background: rgba(29,187,164,0.06);
+}
+.live-results h3, .lab-inset h3, .next-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+.metric-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.metric-list li {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+.metric-list .label { color: var(--muted); }
+.metric-list .value { color: var(--fg); font-weight: 700; }
+.landmark-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  color: var(--muted);
+}
+.landmark-banner.at-pi {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.status-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.status-banner.found {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(118,185,0,0.12);
+  box-shadow: 0 0 0 1px rgba(118,185,0,0.35);
+}
+.status-banner.near {
+  border-color: #ef9100;
+  color: #ef9100;
+}
+.status-banner.hunting { color: var(--muted); }
+#amp-result-line {
+  margin: 0 0 16px 0;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+#amp-result-line strong { color: var(--accent); }
+.lab-inset p, .next-panel p, .question-box p {
+  margin: 0 0 8px 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.lab-inset p:last-child, .next-panel p:last-child, .question-box p:last-child { margin-bottom: 0; }
+.lab-inset img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  background: #111111;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.question-box {
+  margin-top: 16px;
+  border: 1px solid rgba(249,197,0,0.45);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: rgba(249,197,0,0.06);
+}
+.question-box h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+.question-box .prompt {
+  color: var(--fg);
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+.answer-details {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+}
+.answer-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+  list-style: none;
+}
+.answer-details summary::-webkit-details-marker { display: none; }
+.answer-details summary::before {
+  content: '▶ ';
+  font-size: 0.7rem;
+  color: var(--accent);
+}
+.answer-details[open] > summary::before { content: '▼ '; }
+.answer-details summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.answer-details .answer-body {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.answer-details .answer-body ul {
+  margin: 8px 0 0 0;
+  padding-left: 1.3rem;
+  color: var(--fg);
+}
+.answer-details .answer-body li { margin-bottom: 6px; }
+.next-panel ul {
+  margin: 8px 0 0 0;
+  padding-left: 1.3rem;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.next-panel li { margin-bottom: 4px; }
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.widget-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.widget-footer a {
+  color: #76b900;
+  text-decoration: none;
+  margin-right: 16px;
+}
+.widget-footer a:hover { text-decoration: underline; }
+.widget-footer a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+  <header>
+    <h1>Amplitude Rabi</h1>
+    <p class="summary-text">Find the pulse amplitude that drives |0⟩ → |1⟩ — and see why that amplitude must be measured on hardware, not calculated from theory alone.</p>
+  </header>
+
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol>
+      <li>Read what must already be calibrated, how an amplitude Rabi sequence works, and why pulse amplitude still has to be measured.</li>
+      <li>Sweep pulse amplitude while watching the status banner — hunt for the amplitude that generates the π-pulse.</li>
+      <li>When that amplitude is found, compare the ideal curve with the real Qblox lab data.</li>
+      <li>After finding the π-pulse, check what comes next in the calibration sequence.</li>
+    </ol>
+    <p><strong>Keyboard:</strong>
+      <span class="kbd">Tab</span> reaches the slider, Bloch sphere, and Reset;
+      arrow keys adjust amplitude or rotate the Bloch view when focused;
+      <span class="kbd">Home</span>/<span class="kbd">End</span> jump to min/max amplitude;
+      <span class="kbd">Enter</span> or <span class="kbd">Space</span> activates Reset;
+      <span class="kbd">Esc</span> resets the widget.
+    </p>
+  </details>
+
+  <details class="info-box context-box context-details" aria-labelledby="setup-heading" open>
+    <summary><h2 id="setup-heading">Required setup — already calibrated</h2></summary>
+    <p>These parameters must already be calibrated from earlier experiments. Without them, an amplitude Rabi cannot run successfully:</p>
+    <ul>
+      <li>Resonator frequency from resonator spectroscopy</li>
+      <li>Readout power from resonator punch-out</li>
+      <li>Qubit transition frequency <span aria-label="omega zero one">ω<sub>01</sub></span> from qubit spectroscopy</li>
+    </ul>
+    <p>With those fixed, this experiment holds pulse duration and drive frequency constant and hunts for the amplitude that generates the π-pulse.</p>
+  </details>
+
+  <details class="info-box context-box context-details pulse-sequence" aria-labelledby="sequence-heading">
+    <summary><h2 id="sequence-heading">The experiment — Amplitude Rabi sequence</h2></summary>
+    <ol class="pulse-steps">
+      <li><strong>Choose one pulse amplitude A<sub>i</sub>.</strong></li>
+      <li>
+        <strong>Run the pulse sequence once:</strong> initialize |0⟩, drive at <span aria-label="omega zero one">ω<sub>01</sub></span> using pulse amplitude A<sub>i</sub>, then read out and classify the result as |0⟩ or |1⟩.
+        <svg class="pulse-diagram" viewBox="0 0 900 330" role="img"
+          aria-labelledby="pulse-diagram-title pulse-diagram-desc">
+      <title id="pulse-diagram-title">One Amplitude Rabi shot at fixed amplitude A i</title>
+      <desc id="pulse-diagram-desc">The qubit is initialized in state zero. A resonant qubit-drive carrier plays with fixed duration and the selected amplitude A i. After the drive ends, a resonator readout pulse begins and an integration window records the response. The integrated response is classified as zero or one.</desc>
+
+      <defs>
+        <linearGradient id="drive-fill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#76b900" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="#76b900" stop-opacity="0.04"/>
+        </linearGradient>
+        <linearGradient id="readout-fill" x1="0" x2="1">
+          <stop offset="0%" stop-color="#1dbba4" stop-opacity="0.12"/>
+          <stop offset="45%" stop-color="#1dbba4" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#1dbba4" stop-opacity="0.12"/>
+        </linearGradient>
+        <marker id="time-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#AAAAAA"/>
+        </marker>
+        <marker id="amp-arrow" viewBox="0 0 10 10" refX="5" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#f9c500"/>
+        </marker>
+        <marker id="flow-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#E0E0E0"/>
+        </marker>
+      </defs>
+
+      <text x="18" y="26" fill="#76b900" font-family="Inter, sans-serif"
+        font-size="15" font-weight="700">Pulse sequence at fixed pulse amplitude Aᵢ</text>
+
+      <!-- Steps within one shot -->
+      <g font-family="Inter, sans-serif" text-anchor="middle">
+        <circle cx="155" cy="50" r="16" fill="#2A2A2A" stroke="#76b900" stroke-width="2"/>
+        <text x="155" y="55" fill="#E0E0E0" font-size="12" font-weight="700">I</text>
+        <text x="155" y="73" fill="#AAAAAA" font-size="10">initialize |0⟩</text>
+
+        <circle cx="335" cy="50" r="16" fill="#2A2A2A" stroke="#76b900" stroke-width="2"/>
+        <text x="335" y="55" fill="#E0E0E0" font-size="12" font-weight="700">II</text>
+        <text x="335" y="73" fill="#AAAAAA" font-size="10">drive at pulse amplitude Aᵢ</text>
+
+        <circle cx="620" cy="50" r="16" fill="#2A2A2A" stroke="#1dbba4" stroke-width="2"/>
+        <text x="620" y="55" fill="#E0E0E0" font-size="12" font-weight="700">III</text>
+        <text x="620" y="73" fill="#AAAAAA" font-size="10">read out</text>
+
+        <circle cx="755" cy="50" r="16" fill="#2A2A2A" stroke="#0074df" stroke-width="2"/>
+        <text x="755" y="55" fill="#E0E0E0" font-size="12" font-weight="700">IV</text>
+        <text x="755" y="73" fill="#AAAAAA" font-size="10">integrate &amp; classify</text>
+      </g>
+
+      <!-- Lanes and labels -->
+      <g font-family="Inter, sans-serif" font-size="12">
+        <text x="18" y="119" fill="#E0E0E0" font-weight="700">Qubit drive</text>
+        <text x="18" y="197" fill="#E0E0E0" font-weight="700">Readout resonator</text>
+        <text x="18" y="265" fill="#E0E0E0" font-weight="700">Acquire &amp; classify</text>
+      </g>
+      <g stroke="#444444" stroke-width="2">
+        <line x1="125" y1="115" x2="850" y2="115"/>
+        <line x1="125" y1="193" x2="850" y2="193"/>
+        <line x1="125" y1="261" x2="850" y2="261"/>
+      </g>
+
+      <!-- Initialization marker -->
+      <circle cx="155" cy="115" r="7" fill="#76b900"/>
+      <line x1="155" y1="84" x2="155" y2="108" stroke="#76b900" stroke-width="2"/>
+
+      <!-- Fixed-duration drive envelope with resonant carrier -->
+      <path d="M245 115
+               C255 115 258 90 270 88
+               C300 82 392 82 422 88
+               C434 90 437 115 447 115
+               L447 115 L245 115 Z"
+        fill="url(#drive-fill)" stroke="#76b900" stroke-width="2"/>
+      <path d="M255 115
+               C261 91 267 91 273 115
+               C279 139 285 139 291 115
+               C297 91 303 91 309 115
+               C315 139 321 139 327 115
+               C333 91 339 91 345 115
+               C351 139 357 139 363 115
+               C369 91 375 91 381 115
+               C387 139 393 139 399 115
+               C405 91 411 91 417 115
+               C423 139 429 139 435 115"
+        fill="none" stroke="#E0E0E0" stroke-width="1.6"/>
+      <rect x="297" y="137" width="98" height="17" rx="3"
+        fill="#111111" stroke="#444444" stroke-width="1"/>
+      <text x="346" y="149" text-anchor="middle" fill="#E0E0E0"
+        font-family="Inter, sans-serif" font-size="11" font-weight="700">drive at ω₀₁</text>
+
+      <!-- Selected amplitude and fixed-duration bracket -->
+      <line x1="458" y1="115" x2="458" y2="87" stroke="#f9c500" stroke-width="1.5"
+        marker-start="url(#amp-arrow)" marker-end="url(#amp-arrow)"/>
+      <text x="470" y="101" fill="#f9c500" font-family="Inter, sans-serif"
+        font-size="11" font-weight="700">pulse amplitude Aᵢ fixed</text>
+      <line x1="245" y1="157" x2="447" y2="157" stroke="#AAAAAA" stroke-width="1"/>
+      <line x1="245" y1="151" x2="245" y2="163" stroke="#AAAAAA" stroke-width="1"/>
+      <line x1="447" y1="151" x2="447" y2="163" stroke="#AAAAAA" stroke-width="1"/>
+      <text x="346" y="174" text-anchor="middle" fill="#AAAAAA"
+        font-family="Inter, sans-serif" font-size="11">pulse duration t fixed</text>
+
+      <!-- Readout pulse begins after the drive -->
+      <path d="M535 193
+               C545 193 548 172 560 170
+               L720 170
+               C732 172 735 193 745 193
+               L745 193 L535 193 Z"
+        fill="url(#readout-fill)" stroke="#1dbba4" stroke-width="2"/>
+      <path d="M550 193
+               C557 181 564 181 571 193
+               C578 205 585 205 592 193
+               C599 181 606 181 613 193
+               C620 205 627 205 634 193
+               C641 181 648 181 655 193
+               C662 205 669 205 676 193
+               C683 181 690 181 697 193
+               C704 205 711 205 718 193"
+        fill="none" stroke="#E0E0E0" stroke-width="1.4" opacity="0.75"/>
+      <text x="640" y="187" text-anchor="middle" fill="#E0E0E0"
+        font-family="Inter, sans-serif" font-size="11" font-weight="700">readout pulse</text>
+
+      <!-- Acquisition / integration window during readout -->
+      <rect x="565" y="239" width="150" height="44" rx="5"
+        fill="#0074df" fill-opacity="0.18" stroke="#0074df" stroke-width="2"/>
+      <path d="M575 270 L590 258 L605 267 L620 250 L635 263 L650 252 L665 269 L680 255 L700 264"
+        fill="none" stroke="#E0E0E0" stroke-width="1.5"/>
+      <text x="640" y="232" text-anchor="middle" fill="#0074df"
+        font-family="Inter, sans-serif" font-size="11" font-weight="700">integration window</text>
+
+      <!-- Classification follows integration on the same processing lane -->
+      <line x1="715" y1="261" x2="730" y2="261" stroke="#E0E0E0" stroke-width="1.5"
+        marker-end="url(#flow-arrow)"/>
+      <rect x="735" y="239" width="110" height="44" rx="5"
+        fill="#2A2A2A" stroke="#76b900" stroke-width="2"/>
+      <text x="790" y="256" text-anchor="middle" fill="#E0E0E0"
+        font-family="Inter, sans-serif" font-size="11" font-weight="700">classify result</text>
+      <text x="790" y="274" text-anchor="middle" fill="#76b900"
+        font-family="Inter, sans-serif" font-size="13" font-weight="700">→ |0⟩ or |1⟩</text>
+
+      <!-- Time axis -->
+      <line x1="125" y1="315" x2="850" y2="315" stroke="#AAAAAA" stroke-width="1.5"
+        marker-end="url(#time-arrow)"/>
+      <text x="858" y="320" fill="#AAAAAA" font-family="Inter, sans-serif"
+        font-size="11">time</text>
+        </svg>
+      </li>
+      <li><strong>Repeat at the same pulse amplitude A<sub>i</sub></strong> many times to estimate P(|1⟩) for that pulse amplitude.</li>
+      <li><strong>Move to the next pulse amplitude</strong> and repeat, building the plot of P(|1⟩) versus pulse amplitude.</li>
+    </ol>
+    <p class="pulse-note">A related experiment is a <em>time Rabi</em> (or length Rabi): hold amplitude fixed and sweep pulse duration instead. Here we keep duration fixed and sweep amplitude.</p>
+  </details>
+
+  <details class="info-box context-box context-details" aria-labelledby="why-measure-heading">
+    <summary><h2 id="why-measure-heading">Why measure — you cannot just solve for amplitude</h2></summary>
+    <p>On resonance, after a drive pulse of duration <span aria-label="t">t</span> and pulse amplitude <span aria-label="A">A</span>,</p>
+    <p style="color:var(--accent);font-weight:700;font-size:1rem;margin:8px 0;">P(|1⟩) = sin²(Ω<sub>R</sub>·t / 2), &nbsp; with &nbsp; Ω<sub>R</sub> ≈ (scale factor)·A</p>
+    <p><span aria-label="omega R">Ω<sub>R</sub></span> is the <em>Rabi frequency</em>: the rate at which the drive rotates the qubit on the Bloch sphere (radians per second). It is <em>not</em> the microwave tone frequency <span aria-label="omega zero one">ω<sub>01</sub></span> — that stays fixed on resonance. A larger pulse amplitude makes the state rotate faster, so Ω<sub>R</sub> grows with A. With <span aria-label="t">t</span> held fixed, sweeping A is how you change how far the state rotates, and therefore P(|1⟩). A π-pulse is the first A where P(|1⟩) reaches 1.</p>
+    <p>That rotation angle is <span aria-label="theta equals omega R t">θ = Ω<sub>R</sub>·t</span>, so P(|1⟩) = sin²(θ/2) is just the population view of the same motion.</p>
+    <p>That scale factor depends on the control chain — attenuators, cables, mixers, pulse shaping, and the qubit’s coupling to the drive line — so it cannot be predicted reliably from first principles and drifts with the setup. Theory predicts the curve’s shape; the experiment finds which pulse amplitude A actually gives the first π-pulse on <em>your</em> hardware.</p>
+  </details>
+
+  <section class="info-box" id="controls-section" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+    <div class="controls-row">
+      <div class="control-group">
+        <label for="amp-slider">Pulse amplitude <span class="amp-readout" id="amp-label" aria-hidden="true">0.00</span></label>
+        <div class="slider-wrap">
+          <input type="range" id="amp-slider" min="0" max="1.1" step="0.005" value="0"
+            aria-label="Pulse amplitude from 0 to 1.1"
+            aria-valuemin="0" aria-valuemax="1.1" aria-valuenow="0" aria-valuetext="0.00">
+        </div>
+        <div class="fixed-params">
+          <span>Duration: <strong>fixed</strong></span>
+          <span>Drive frequency: <strong><span aria-label="omega zero one">ω<sub>01</sub></span> (on resonance)</strong></span>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="reset-btn">Reset</button>
+    </div>
+  </section>
+
+  <section class="info-box" id="viz-section" aria-labelledby="viz-heading">
+    <h2 id="viz-heading">Primary visualization</h2>
+    <div class="viz-grid">
+      <div class="viz-panel">
+        <h3 id="bloch-caption">Bloch sphere</h3>
+        <div id="bloch-host" class="bloch-host" tabindex="0" role="img"
+          aria-label="Bloch sphere with state zero at the top, state one at the bottom, plus on positive X, minus on negative X, plus i on positive Y, and minus i on negative Y. A purple arc labeled theta shows the rotation angle from state zero. Use arrow keys to rotate the view when focused."></div>
+        <div class="formula-row" aria-hidden="true">
+          <span><span class="eq" id="prob-eq">P(|1⟩) = sin²(Ω_R·t / 2) = 0.00</span></span>
+          <span><span class="eq" id="theta-eq">θ = Ω_R·t = 0.00 rad (0.00 π)</span></span>
+          <span><span class="eq">Ω_R ≈ (scale factor)·A</span></span>
+        </div>
+        <p class="caveat">On resonance, P(|1⟩) = sin²(Ω<sub>R</sub>·t / 2) with θ = Ω<sub>R</sub>·t on the Bloch sphere, and Ω<sub>R</sub> grows with pulse amplitude A: Ω<sub>R</sub> ≈ (scale factor)·A. Off resonance, the envelope is modified by a detuning factor and the oscillation frequency becomes √(Ω<sub>R</sub>² + Δ²). <strong>What you cannot calculate ahead of time is which pulse amplitude produces the Ω<sub>R</sub> you need — Amplitude Rabi measures that on the device.</strong> Drive phase sets the rotation axis: this visualization uses a Y-rotation (the state moves in the YZ plane); a resonant X-drive would rotate in the XZ plane instead.</p>
+      </div>
+      <div class="viz-panel">
+        <h3 id="curve-caption">Ideal two-level model</h3>
+        <canvas id="rabi-canvas" class="plot-canvas" width="360" height="320"
+          role="img" aria-labelledby="curve-caption"></canvas>
+        <div class="legend">
+          <span><span class="legend-swatch" style="background:#1dbba4;"></span>P(|1⟩)</span>
+          <span><span class="legend-swatch" style="background:#f9c500;"></span>Current amplitude</span>
+          <span><span class="legend-swatch" style="background:#76b900;"></span>π landmark</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-box" id="results-section" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+    <div id="status-banner" class="status-banner hunting" aria-live="polite">Still hunting for the amplitude that generates the π-pulse…</div>
+    <p id="amp-result-line">Looking for the amplitude that generates the π-pulse (full flip |0⟩ → |1⟩).</p>
+    <div class="results-grid">
+      <div class="live-results">
+        <h3>Live readout</h3>
+        <ul class="metric-list">
+          <li><span class="label">Amplitude A = </span><span class="value" id="metric-amp">0.00</span></li>
+          <li><span class="label">P(|1⟩) = </span><span class="value" id="metric-prob">0.00</span></li>
+          <li><span class="label">θ = Ω<sub>R</sub>·t = </span><span class="value" id="metric-theta">0.00 rad (0.00 π)</span></li>
+        </ul>
+      </div>
+      <div class="lab-inset" id="lab-inset" hidden>
+        <h3>Real lab data — compare</h3>
+        <img src="qblox-rabi-lab.png" width="1024" height="665"
+          alt="Qblox Rabi plot: teal scatter and red fit of rotated transmission S21R in microvolts versus pulse amplitude from about -0.5 to 0.5. Signal is lowest near amplitude 0 and peaks near plus or minus 0.35.">
+        <p>Real Qblox amplitude Rabi: teal scatter + red fit. Vertical axis is rotated transmission <span aria-label="S 21 R">S<sub>21</sub><sup>R</sup></span> in µV — not bare P(|1⟩).</p>
+      </div>
+    </div>
+    <div class="question-box" id="question-box" aria-labelledby="compare-question-heading" hidden>
+      <h3 id="compare-question-heading">Compare to real lab data</h3>
+      <p class="prompt">The ideal curve plots P(|1⟩) from 0 to 1. The lab plot shows <span aria-label="S 21 R">S<sub>21</sub><sup>R</sup></span> in µV, with a trough near amplitude 0 and peaks near ±0.35. How does the measured voltage reveal P(|1⟩), and why do the real points scatter around the fitted curve?</p>
+      <details class="answer-details">
+        <summary>Reveal explanation</summary>
+        <div class="answer-body">
+          <p>Both plots show P(|1⟩) rising and falling as pulse amplitude increases. The lab curve reports that through a measured voltage, not a bare probability.</p>
+          <ul>
+            <li><strong>What the lab actually records:</strong> each readout returns a voltage <span aria-label="S 21 R">S<sub>21</sub><sup>R</sup></span> (here in µV) that depends on whether the qubit is in |0⟩ or |1⟩. As P(|1⟩) rises and falls with pulse amplitude, that voltage rises and falls with it — so the lab curve has the same oscillation shape as the ideal P(|1⟩) plot, even though the vertical axis is not probability.</li>
+            <li><strong>Offset and scale:</strong> the electronics set a vertical offset and gain, which stretch or shift the curve up and down. They do not move where the peaks and troughs sit on the amplitude axis — so the π-pulse landmark is still readable from the shape.</li>
+            <li><strong>Scatter:</strong> real points do not sit exactly on the fit. Shot noise, probabilistic measurement outcomes, and setup noise all add scatter around the underlying oscillation.</li>
+            <li><strong>Ideal model vs hardware:</strong> on the ideal curve, each peak reaches all the way to 1 and each trough all the way to 0. On hardware, that full swing often fades as pulse amplitude increases — peaks come in lower, troughs higher. That fading swing is <em>loss of contrast</em>. The wave can also lean or flatten instead of staying a clean sin² shape; that shape change is <em>distortion</em>. That is one reason calibration reads the π-pulse from the first peak, where the data usually still match the ideal model best.</li>
+            <li><strong>In this Qblox plot:</strong> a trough near A ≈ 0 is |0⟩ (P(|1⟩) ≈ 0). The first peaks near ±0.35 are where P(|1⟩) ≈ 1 — the π-pulse.</li>
+            <li><strong>Why ± amplitudes:</strong> positive and negative amplitude reverse the drive phase but produce the same |θ|, so the oscillation is roughly symmetric about zero.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="info-box next-panel" id="next-panel" aria-labelledby="next-heading" hidden>
+    <h2 id="next-heading">What’s next</h2>
+    <p>The amplitude you identify here becomes a building block of later calibration:</p>
+    <ul>
+      <li><strong>π-pulse</strong> → flip to |1⟩ for T<sub>1</sub> energy-relaxation measurements</li>
+      <li><strong>Next sequences</strong> → Ramsey fringes and Hahn echo for precise frequency and coherence</li>
+      <li><strong>Calibrated rotations</strong> → DRAG shaping, error amplification, and randomized benchmarking</li>
+    </ul>
+    <p>As pulse amplitude increases, hardware can also lose contrast or distort the oscillation. Later experiments measure those effects more directly: T<sub>1</sub> for energy loss, Ramsey and Hahn echo for coherence, and DRAG for leakage out of the two-level subspace.</p>
+  </section>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+<div id="aria-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* —— 3D-i: math / state —— */
+const Rabi = {
+  els: {},
+  bloch: null,
+  state: {
+    amplitude: 0,
+    huntBand: 'off',
+    foundOnce: false,
+    foundAmp: null,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    lastAnnounce: '',
+    announceTimer: null
+  }
+};
+
+const A_PI = 0.35; // matches Qblox lab example (first peak near ±0.35)
+const A_MAX = 1.1; // room for a second full flip (3π at 3·A_PI = 1.05)
+const THETA_SCALE = Math.PI / A_PI; // θ = A · THETA_SCALE; θ=π at A=A_PI
+const FOUND_TOL = 0.12; // rad — at the first π-pulse
+const NEAR_TOL = 0.45;  // rad — approaching the first π-pulse
+
+function thetaFromAmplitude(A) {
+  return A * THETA_SCALE;
+}
+
+function probFromTheta(theta) {
+  const s = Math.sin(theta / 2);
+  return s * s;
+}
+
+function blochFromTheta(theta) {
+  // Standard convention: |0⟩ at +Z, |1⟩ at −Z.
+  return { x: 0, y: Math.sin(theta), z: Math.cos(theta) };
+}
+
+function nearestPiTarget(theta) {
+  // Hunt only the first π-pulse. A later flip (3π) is shown on the curve but not marked.
+  const target = Math.PI;
+  return { target, dist: Math.abs(theta - target), A: A_PI };
+}
+
+function huntStatus(theta) {
+  const { target, dist, A } = nearestPiTarget(theta);
+  if (dist <= FOUND_TOL) return { band: 'at', target, A, dist };
+  if (dist <= NEAR_TOL) return { band: 'near', target, A, dist };
+  return { band: 'off', target, A, dist };
+}
+
+function compute(A) {
+  const theta = thetaFromAmplitude(A);
+  const hunt = huntStatus(theta);
+  return {
+    A,
+    theta,
+    prob: probFromTheta(theta),
+    bloch: blochFromTheta(theta),
+    hunt
+  };
+}
+
+function formatTheta(theta) {
+  return `${theta.toFixed(2)} rad (${(theta / Math.PI).toFixed(2)} π)`;
+}
+
+/* —— 3D-ii: rendering —— */
+function makeAxisLabel(text, position, options = {}) {
+  const color = options.color || '#CCCCCC';
+  const fontSize = options.fontSize || 28;
+  const scale = options.scale || [0.45, 0.22, 1];
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = 128 * dpr;
+  canvas.height = 64 * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, 128, 64);
+  ctx.fillStyle = color;
+  ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 64, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(scale[0], scale[1], scale[2]);
+  sprite.position.copy(position);
+  return sprite;
+}
+
+function initBloch(host) {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+  // Z-up keeps |0⟩ visually above |1⟩. From this azimuth, +X
+  // projects slightly left of center while pointing toward the viewer.
+  camera.up.set(0, 0, 1);
+  camera.position.set(2.8, 3.2, 1.6);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: !Rabi.state.reducedMotion, alpha: true });
+  renderer.setClearColor(0x000000, 1);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  host.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = !Rabi.state.reducedMotion;
+  controls.enablePan = false;
+  controls.minDistance = 2;
+  controls.maxDistance = 5;
+  controls.target.set(0, 0, 0);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.45);
+  dir.position.set(2, 3, 4);
+  scene.add(dir);
+
+  const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 32, 24),
+    new THREE.MeshBasicMaterial({
+      color: 0x888888,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.15
+    })
+  );
+  scene.add(sphere);
+
+  const axisMat = new THREE.LineBasicMaterial({ color: 0xcccccc });
+  function axisLine(a, b) {
+    const geo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(...a),
+      new THREE.Vector3(...b)
+    ]);
+    return new THREE.Line(geo, axisMat);
+  }
+  scene.add(axisLine([-1.15, 0, 0], [1.15, 0, 0]));
+  scene.add(axisLine([0, -1.15, 0], [0, 1.15, 0]));
+  scene.add(axisLine([0, 0, -1.15], [0, 0, 1.15]));
+  scene.add(makeAxisLabel('|0⟩', new THREE.Vector3(0, 0, 1.35)));
+  scene.add(makeAxisLabel('|1⟩', new THREE.Vector3(0, 0, -1.35)));
+  scene.add(makeAxisLabel('|+⟩', new THREE.Vector3(1.35, 0, 0)));
+  scene.add(makeAxisLabel('|−⟩', new THREE.Vector3(-1.35, 0, 0)));
+  scene.add(makeAxisLabel('|+i⟩', new THREE.Vector3(0, 1.35, 0)));
+  scene.add(makeAxisLabel('|−i⟩', new THREE.Vector3(0, -1.35, 0)));
+
+  const arrow = new THREE.Group();
+  const shaftLen = 0.78;
+  const headLen = 0.18;
+  const shaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.035, shaftLen, 16),
+    new THREE.MeshStandardMaterial({ color: 0x76b900, metalness: 0.1, roughness: 0.4 })
+  );
+  shaft.rotation.x = Math.PI / 2;
+  shaft.position.z = shaftLen / 2;
+  const head = new THREE.Mesh(
+    new THREE.ConeGeometry(0.1, headLen, 16),
+    new THREE.MeshStandardMaterial({ color: 0x76b900, metalness: 0.1, roughness: 0.4 })
+  );
+  head.rotation.x = Math.PI / 2;
+  head.position.z = shaftLen + headLen / 2;
+  arrow.add(shaft);
+  arrow.add(head);
+  scene.add(arrow);
+
+  // θ arc from |0⟩ along the rotation path, with a live label
+  const thetaArcGeo = new THREE.BufferGeometry();
+  const thetaArc = new THREE.Line(
+    thetaArcGeo,
+    new THREE.LineBasicMaterial({ color: 0xb388ff, linewidth: true })
+  );
+  scene.add(thetaArc);
+  const thetaLabel = makeAxisLabel('θ', new THREE.Vector3(0, 0.55, 1.05), {
+    color: '#b388ff',
+    fontSize: 36,
+    scale: [0.38, 0.2, 1]
+  });
+  thetaLabel.visible = false;
+  scene.add(thetaLabel);
+
+  function resize() {
+    const w = host.clientWidth || 400;
+    const h = host.clientHeight || 320;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+
+  function setStateVector(vec, theta) {
+    const dirV = new THREE.Vector3(vec.x, vec.y, vec.z);
+    if (dirV.lengthSq() < 1e-8) dirV.set(0, 0, 1);
+    dirV.normalize();
+    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirV);
+
+    const th = typeof theta === 'number' ? theta : 0;
+    const showArc = th > 0.08;
+    thetaArc.visible = showArc;
+    thetaLabel.visible = showArc;
+    if (showArc) {
+      const n = Math.max(8, Math.ceil(th * 24));
+      const pts = [];
+      const r = 1.08;
+      for (let i = 0; i <= n; i++) {
+        const a = (th * i) / n;
+        pts.push(new THREE.Vector3(0, r * Math.sin(a), r * Math.cos(a)));
+      }
+      thetaArc.geometry.dispose();
+      thetaArc.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+      const mid = th / 2;
+      thetaLabel.position.set(0.12, 1.22 * Math.sin(mid), 1.22 * Math.cos(mid));
+    }
+  }
+
+  function renderFrame() {
+    if (controls.enableDamping) controls.update();
+    renderer.render(scene, camera);
+  }
+
+  let raf = 0;
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    renderFrame();
+  }
+
+  resize();
+  setStateVector({ x: 0, y: 0, z: 1 }, 0);
+  if (Rabi.state.reducedMotion) {
+    renderFrame();
+  } else {
+    loop();
+  }
+
+  return {
+    camera,
+    controls,
+    resize,
+    setStateVector,
+    renderFrame,
+    dispose() {
+      cancelAnimationFrame(raf);
+      controls.dispose();
+      renderer.dispose();
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+    }
+  };
+}
+
+function drawAxes(ctx, W, H, pad) {
+  const left = pad.l;
+  const right = W - pad.r;
+  const top = pad.t;
+  const bottom = H - pad.b;
+  ctx.strokeStyle = '#666666';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(left, top);
+  ctx.lineTo(left, bottom);
+  ctx.lineTo(right, bottom);
+  ctx.stroke();
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font = '12px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Pulse amplitude A', (left + right) / 2, H - 10);
+  ctx.save();
+  ctx.translate(14, (top + bottom) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('P(|1⟩)', 0, 0);
+  ctx.restore();
+  return { left, right, top, bottom };
+}
+
+function drawRabiCurve(canvas, A, huntBand) {
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = canvas.clientWidth || canvas.width;
+  const H = canvas.clientHeight || 320;
+  canvas.width = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, W, H);
+
+  const box = drawAxes(ctx, W, H, { l: 44, r: 16, t: 16, b: 36 });
+  const { left, right, top, bottom } = box;
+  const xOf = (a) => left + (a / A_MAX) * (right - left);
+  const yOf = (p) => bottom - p * (bottom - top);
+
+  // sine fit curve — two full flips over the amplitude range
+  ctx.strokeStyle = '#1dbba4';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= 240; i++) {
+    const a = (i / 240) * A_MAX;
+    const p = probFromTheta(thetaFromAmplitude(a));
+    const x = xOf(a);
+    const y = yOf(p);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Mark only the first π-pulse (the calibration landmark)
+  const atPi = huntBand === 'at';
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = atPi ? '#76b900' : '#5e9400';
+  ctx.lineWidth = atPi ? 2.5 : 1.5;
+  ctx.beginPath();
+  ctx.moveTo(xOf(A_PI), top);
+  ctx.lineTo(xOf(A_PI), bottom);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#76b900';
+  ctx.font = 'bold 11px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('π', xOf(A_PI), top + 12);
+
+  // current marker
+  const theta = thetaFromAmplitude(A);
+  const p = probFromTheta(theta);
+  const cx = xOf(A);
+  const cy = yOf(p);
+  const markerColor = atPi ? '#76b900' : huntBand === 'near' ? '#ef9100' : '#f9c500';
+  ctx.strokeStyle = markerColor;
+  ctx.lineWidth = atPi ? 3 : 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, top);
+  ctx.lineTo(cx, bottom);
+  ctx.stroke();
+  if (atPi) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  ctx.fillStyle = markerColor;
+  ctx.beginPath();
+  ctx.arc(cx, cy, atPi ? 7 : 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function updateUI(data) {
+  const { A, theta, prob, bloch, hunt } = data;
+  const previousBand = Rabi.state.huntBand;
+  Rabi.state.huntBand = hunt.band;
+  if (hunt.band === 'at') {
+    Rabi.state.foundOnce = true;
+    if (Rabi.state.foundAmp === null) Rabi.state.foundAmp = A;
+  }
+
+  const ampStr = A.toFixed(2);
+  const thetaStr = formatTheta(theta);
+  const probStr = prob.toFixed(2);
+
+  if (Rabi.els.ampLabel) Rabi.els.ampLabel.textContent = ampStr;
+  if (Rabi.els.ampSlider) {
+    Rabi.els.ampSlider.setAttribute('aria-valuenow', String(A));
+    Rabi.els.ampSlider.setAttribute('aria-valuetext', ampStr);
+  }
+  if (Rabi.els.thetaEq) Rabi.els.thetaEq.textContent = `θ = Ω_R·t = ${thetaStr}`;
+  if (Rabi.els.probEq) Rabi.els.probEq.textContent = `P(|1⟩) = sin²(Ω_R·t / 2) = ${probStr}`;
+  if (Rabi.els.metricAmp) Rabi.els.metricAmp.textContent = ampStr;
+  if (Rabi.els.metricTheta) Rabi.els.metricTheta.textContent = thetaStr;
+  if (Rabi.els.metricProb) Rabi.els.metricProb.textContent = probStr;
+
+  if (Rabi.els.statusBanner) {
+    if (hunt.band === 'at') {
+      Rabi.els.statusBanner.innerHTML = '✓ Found the amplitude that generates the π-pulse';
+      Rabi.els.statusBanner.className = 'status-banner found';
+    } else if (hunt.band === 'near') {
+      Rabi.els.statusBanner.textContent = 'Near the amplitude that generates the π-pulse — getting closer';
+      Rabi.els.statusBanner.className = 'status-banner near';
+    } else {
+      Rabi.els.statusBanner.textContent = 'Still hunting for the amplitude that generates the π-pulse…';
+      Rabi.els.statusBanner.className = 'status-banner hunting';
+    }
+  }
+
+  if (Rabi.els.ampResultLine) {
+    if (hunt.band === 'at') {
+      Rabi.els.ampResultLine.innerHTML =
+        'Amplitude that generates the π-pulse: <span aria-label="A pi">A<sub>π</sub></span> ≈ <strong>' + ampStr + '</strong>';
+    } else if (Rabi.state.foundOnce && Rabi.state.foundAmp !== null) {
+      Rabi.els.ampResultLine.innerHTML =
+        'Found earlier: <span aria-label="A pi">A<sub>π</sub></span> ≈ <strong>' +
+        Rabi.state.foundAmp.toFixed(2) +
+        '</strong>. Keep exploring, or return to the green marker.';
+    } else {
+      Rabi.els.ampResultLine.textContent =
+        'Looking for the amplitude that generates the π-pulse (full flip |0⟩ → |1⟩).';
+    }
+  }
+
+  const showUnlocked = Rabi.state.foundOnce;
+  if (Rabi.els.labInset) Rabi.els.labInset.hidden = !showUnlocked;
+  if (Rabi.els.questionBox) Rabi.els.questionBox.hidden = !showUnlocked;
+  if (Rabi.els.nextPanel) Rabi.els.nextPanel.hidden = !showUnlocked;
+
+  if (Rabi.bloch) {
+    Rabi.bloch.setStateVector(bloch, theta);
+    if (Rabi.state.reducedMotion) Rabi.bloch.renderFrame();
+  }
+  if (Rabi.els.rabiCanvas) drawRabiCurve(Rabi.els.rabiCanvas, A, hunt.band);
+
+  if (hunt.band === 'at' && previousBand !== 'at') {
+    announce('Found the amplitude that generates the pi-pulse: ' + ampStr + '.');
+  } else if (hunt.band === 'near' && previousBand !== 'near') {
+    announce('Near the amplitude that generates the pi-pulse. Getting closer.');
+  } else if (hunt.band === 'off' && previousBand !== 'off' && !Rabi.state.foundOnce) {
+    announce('Still hunting for the amplitude that generates the pi-pulse.');
+  }
+}
+
+function announce(msg) {
+  if (msg === Rabi.state.lastAnnounce) return;
+  Rabi.state.lastAnnounce = msg;
+  clearTimeout(Rabi.state.announceTimer);
+  Rabi.state.announceTimer = setTimeout(() => {
+    if (Rabi.els.ariaLive) Rabi.els.ariaLive.textContent = msg;
+  }, 200);
+}
+
+function setAmplitude(A) {
+  const clamped = Math.min(A_MAX, Math.max(0, A));
+  Rabi.state.amplitude = clamped;
+  if (Rabi.els.ampSlider) Rabi.els.ampSlider.value = String(clamped);
+  updateUI(compute(clamped));
+}
+
+function resetWidget() {
+  Rabi.state.foundOnce = false;
+  Rabi.state.foundAmp = null;
+  Rabi.state.huntBand = 'off';
+  setAmplitude(0);
+  announce('Reset. Still hunting for the amplitude that generates the pi-pulse.');
+}
+
+/* —— 3E: events & init —— */
+function onKeyBloch(e) {
+  if (!Rabi.bloch) return;
+  const step = 0.08;
+  const cam = Rabi.bloch.camera;
+  const controls = Rabi.bloch.controls;
+  let handled = true;
+  switch (e.key) {
+    case 'ArrowLeft':
+      cam.position.applyAxisAngle(new THREE.Vector3(0, 0, 1), step);
+      break;
+    case 'ArrowRight':
+      cam.position.applyAxisAngle(new THREE.Vector3(0, 0, 1), -step);
+      break;
+    case 'ArrowUp':
+      cam.position.z += 0.15;
+      break;
+    case 'ArrowDown':
+      cam.position.z -= 0.15;
+      break;
+    default:
+      handled = false;
+  }
+  if (handled) {
+    e.preventDefault();
+    cam.lookAt(controls.target);
+    Rabi.bloch.renderFrame();
+  }
+}
+
+function init() {
+  Rabi.els.ampSlider = document.getElementById('amp-slider');
+  Rabi.els.ampLabel = document.getElementById('amp-label');
+  Rabi.els.resetBtn = document.getElementById('reset-btn');
+  Rabi.els.blochHost = document.getElementById('bloch-host');
+  Rabi.els.thetaEq = document.getElementById('theta-eq');
+  Rabi.els.probEq = document.getElementById('prob-eq');
+  Rabi.els.rabiCanvas = document.getElementById('rabi-canvas');
+  Rabi.els.metricAmp = document.getElementById('metric-amp');
+  Rabi.els.metricTheta = document.getElementById('metric-theta');
+  Rabi.els.metricProb = document.getElementById('metric-prob');
+  Rabi.els.statusBanner = document.getElementById('status-banner');
+  Rabi.els.ampResultLine = document.getElementById('amp-result-line');
+  Rabi.els.labInset = document.getElementById('lab-inset');
+  Rabi.els.questionBox = document.getElementById('question-box');
+  Rabi.els.nextPanel = document.getElementById('next-panel');
+  Rabi.els.ariaLive = document.getElementById('aria-live');
+
+  if (Rabi.els.blochHost) {
+    Rabi.bloch = initBloch(Rabi.els.blochHost);
+    Rabi.els.blochHost.addEventListener('keydown', onKeyBloch);
+  }
+
+  Rabi.els.ampSlider.addEventListener('input', (e) => {
+    setAmplitude(parseFloat(e.target.value));
+  });
+
+  Rabi.els.ampSlider.addEventListener('keydown', (e) => {
+    if (e.key === 'Home') {
+      e.preventDefault();
+      setAmplitude(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setAmplitude(A_MAX);
+    }
+  });
+
+  Rabi.els.resetBtn.addEventListener('click', () => resetWidget());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') resetWidget();
+  });
+
+  window.addEventListener('resize', () => {
+    if (Rabi.bloch) Rabi.bloch.resize();
+    updateUI(compute(Rabi.state.amplitude));
+  });
+
+  resetWidget();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
