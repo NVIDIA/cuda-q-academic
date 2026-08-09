@@ -191,12 +191,11 @@
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Instructor resource: interactive visualizations for superconducting-qubit calibration experiments (resonator spectroscopy through DRAG), plus NVIDIA Ising Calibration for plot analysis via browser playground, environment and API-key setup guide, and notebook. Sample plots from QCalEval. Additional experiment widgets coming soon.",
+      "summary": "Instructor resource: interactive visualizations for superconducting-qubit calibration experiments (resonator spectroscopy through DRAG), plus NVIDIA Ising Calibration for plot analysis via browser playground, API-key setup guide, and notebook. Sample plots from QCalEval. Numbered lesson notebooks coming later; additional experiment widgets coming soon.",
       "more_lessons_coming_soon": true,
       "more_lessons_coming_soon_label": "More calibration widgets coming soon",
       "lesson_ids": [
-        "calibration-start-here",
-        "ising-calibration"
+        "calibration-instructor-guide"
       ],
       "widget_ids": [
         "ising-api-key-setup",
@@ -1322,87 +1321,6 @@
         "adapt-qaoa-vs-standard-qaoa"
       ]
     },
-    "calibration-start-here": {
-      "title": "Start Here — Calibration Track",
-      "primary_track_id": "calibration",
-      "track_ids": [
-        "calibration"
-      ],
-      "source_kind": "notebook",
-      "repo_path": "calibration/00_StartHere.ipynb",
-      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/00_StartHere.ipynb",
-      "is_new": true,
-      "added_date": "2026-05-18",
-      "difficulty": "intermediate",
-      "prerequisites": [
-        "familiarity with reading quantum hardware calibration plots (e.g. Rabi, T1, T2, randomized benchmarking)"
-      ],
-      "keywords": [
-        "calibration",
-        "Ising Calibration",
-        "NIM",
-        "vision-language model",
-        "QCalEval",
-        "hardware characterization",
-        "instructor resource",
-        "visualization tools",
-        "qubit spectroscopy",
-        "API key setup"
-      ],
-      "summary": "Landing notebook for the Calibration track. Maps the bring-up experiment sequence and live visualizations, links the Ising environment and API-key setup guide, the NIM playground, and QCalEval sample plots.",
-      "metadata_source": "calibration/README.md",
-      "widget_ids": [
-        "ising-api-key-setup",
-        "time-of-flight",
-        "resonator-spectroscopy",
-        "resonator-punch-out",
-        "resonator-flux-spectroscopy",
-        "qubit-spectroscopy-intro",
-        "amplitude-rabi",
-        "t1-relaxation",
-        "ramsey",
-        "hahn-echo",
-        "single-shot-readout",
-        "randomized-benchmarking",
-        "drag-pulse-calibration",
-        "error-amplification"
-      ]
-    },
-    "ising-calibration": {
-      "title": "Ising Calibration — Analyze Plots from a Notebook",
-      "primary_track_id": "calibration",
-      "track_ids": [
-        "calibration"
-      ],
-      "source_kind": "notebook",
-      "repo_path": "calibration/01_Ising_Calibration.ipynb",
-      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/01_Ising_Calibration.ipynb",
-      "is_new": true,
-      "added_date": "2026-08-09",
-      "difficulty": "intermediate",
-      "prerequisites": [
-        "Start Here — Calibration Track (or equivalent familiarity with the experiment sequence)",
-        "NVIDIA API key for the integrate API (or use the NIM playground / setup guide instead)"
-      ],
-      "keywords": [
-        "Ising Calibration",
-        "API",
-        "QCalEval",
-        "calibration plots",
-        "vision-language model",
-        "Colab",
-        "Jupyter"
-      ],
-      "summary": "Resource and how-to guide for NVIDIA Ising Calibration. Compares the browser playground, environment/API-key setup guide, and notebook API paths; includes an editable prompt and image-upload interface, data and visualization links, troubleshooting, and references.",
-      "metadata_source": "calibration/01_Ising_Calibration.ipynb",
-      "widget_ids": [
-        "ising-api-key-setup",
-        "resonator-spectroscopy",
-        "qubit-spectroscopy-intro",
-        "amplitude-rabi",
-        "drag-pulse-calibration"
-      ]
-    },
     "quantum-ai-project-template-overview": {
       "title": "Quantum AI Project Template",
       "primary_track_id": "quantum-ai-project-template",
@@ -1428,6 +1346,49 @@
       ],
       "summary": "Role-based group project template for deploying a quantum-GPU computing project in a course. Covers four student roles (Project Lead, Performance Optimization PIC, QA PIC, Technical Marketing PIC), four milestones, AI agent configurations, and a deliverable template. Faculty deployment guide and pedagogical rationale included.",
       "metadata_source": "quantum-ai-project-template/README.md"
+    },
+    "calibration-instructor-guide": {
+      "title": "Calibration — Instructor Guide",
+      "primary_track_id": "calibration",
+      "track_ids": [
+        "calibration"
+      ],
+      "source_kind": "instructor_template",
+      "repo_path": "calibration/Instructor_Guide.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/Instructor_Guide.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-09",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "familiarity with reading scientific plots; basic qubit states and gates helpful"
+      ],
+      "keywords": [
+        "calibration",
+        "Ising Calibration",
+        "instructor resource",
+        "visualization tools",
+        "QCalEval",
+        "API key",
+        "classroom"
+      ],
+      "summary": "Instructor guide for Calibration resources: classroom flow, how to use live experiment visualizations and NVIDIA Ising (playground, API-key setup, or notebook upload-and-run), prompting tips, and troubleshooting. Numbered student path notebooks are not in this folder yet.",
+      "metadata_source": "calibration/Instructor_Guide.ipynb",
+      "widget_ids": [
+        "ising-api-key-setup",
+        "time-of-flight",
+        "resonator-spectroscopy",
+        "resonator-punch-out",
+        "resonator-flux-spectroscopy",
+        "qubit-spectroscopy-intro",
+        "amplitude-rabi",
+        "t1-relaxation",
+        "ramsey",
+        "hahn-echo",
+        "single-shot-readout",
+        "randomized-benchmarking",
+        "drag-pulse-calibration",
+        "error-amplification"
+      ]
     }
   },
   "widget_gallery_order": [
@@ -2224,7 +2185,7 @@
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     },
     "qubit-spectroscopy-intro": {
-      "title": "Qubit Spectroscopy (Intro)",
+      "title": "Qubit Spectroscopy",
       "gallery_section": "calibration",
       "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/qubit-spectroscopy-intro.html",
       "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/qubit-spectroscopy-intro.html",
