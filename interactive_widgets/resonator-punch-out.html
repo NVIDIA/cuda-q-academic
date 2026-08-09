@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resonator Punch Out — CUDA-Q Academic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #76b900;
+  --accent-dark: #5e9400;
+  --bg: #1A1A1A;
+  --surface: #2A2A2A;
+  --border: #444444;
+  --fg: #E0E0E0;
+  --muted: #AAAAAA;
+  --warn: #ef9100;
+  --danger: #e52020;
+  --teal: #1dbba4;
+  --blue: #0074df;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: #000;
+  padding: 8px 16px;
+  z-index: 100;
+  text-decoration: none;
+  font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .widget-container { padding: 32px; }
+}
+.widget-container h1 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.widget-container .summary-text {
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.instructions-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.instructions-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol { margin-top: 12px; padding-left: 1.4em; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section .kbd {
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+.info-box > h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+.info-box h3 {
+  color: var(--fg);
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.control-group {
+  flex: 1 1 280px;
+  min-width: 200px;
+}
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.readout-chip {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.power-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.slider-wrap:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  min-height: 44px;
+}
+input[type=range]:focus { outline: none; }
+input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A;
+}
+input[type=range]::-moz-range-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 14px; width: 14px; border-radius: 50%;
+  background: #76B900; cursor: pointer; border: 2px solid #1A1A1A;
+}
+.btn-primary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+}
+.btn-secondary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+.control-hint {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: rgba(118,185,0,0.08);
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.control-hint strong { color: var(--accent); }
+.control-hint[hidden], [hidden] { display: none !important; }
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 800px) {
+  .viz-grid { grid-template-columns: 1.25fr 0.75fr; }
+}
+.viz-panel {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 280px;
+}
+.viz-panel h3 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.viz-legend .leg-dressed { color: var(--teal); }
+.viz-legend .leg-bare { color: var(--warn); }
+.viz-legend-note {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.viz-callout {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.35);
+  color: var(--fg);
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.viz-panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 700px) {
+  .results-grid { grid-template-columns: 1fr 1fr; }
+}
+.status-banner {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  margin: 0;
+}
+.status-banner.dressed { color: var(--accent); border-color: var(--accent); }
+.status-banner.transitional { color: var(--warn); border-color: var(--warn); }
+.status-banner.punched { color: var(--danger); border-color: var(--danger); }
+.metric-card {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+}
+.metric-card .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.metric-card .value {
+  color: var(--fg);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.metric-card .value.yes { color: var(--accent); }
+.metric-card .value.weakening { color: var(--warn); }
+.metric-card .value.no { color: var(--danger); }
+.metric-why {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.mechanism-line {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 6px;
+  background: rgba(29,187,164,0.08);
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.context-box {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: rgba(118,185,0,0.06);
+}
+.context-box h2 {
+  color: var(--accent);
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.context-box p {
+  margin: 0 0 8px;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.context-box p:last-child { margin-bottom: 0; }
+.context-box strong { color: var(--accent); }
+.readout-choice {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+}
+.readout-choice .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.readout-choice .value {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 6px;
+}
+.readout-choice .value.ok { color: var(--accent); }
+.readout-choice .value.warn { color: var(--warn); }
+.readout-choice .value.bad { color: var(--danger); }
+.readout-choice .why {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.lab-inset {
+  margin-top: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+}
+.lab-primer {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.lab-card {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 14px;
+}
+.lab-card img,
+.lab-card canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  background: #111;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.lab-card p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.diagnose-group {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.diagnose-group legend {
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0 4px;
+}
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.2);
+  flex: 1 1 140px;
+}
+.radio-option:hover { border-color: var(--accent); }
+.radio-option:has(input:checked) {
+  border-color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  background: rgba(118,185,0,0.12);
+}
+.radio-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.radio-option span { color: var(--fg); font-size: 0.9rem; }
+.diagnose-feedback {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+.diagnose-feedback.correct { color: var(--accent); }
+.diagnose-feedback.incorrect { color: var(--warn); }
+.next-panel p {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.next-panel a {
+  color: #76b900;
+  font-weight: 700;
+  text-decoration: none;
+}
+.next-panel a:hover { text-decoration: underline; }
+.next-panel a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.next-panel code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  color: var(--accent);
+}
+.prompt-box {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.prompt-box-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.prompt-box-header strong {
+  display: block;
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.prompt-box .btn-secondary {
+  padding: 6px 12px;
+  min-height: 36px;
+  font-size: 0.85rem;
+}
+.prompt-box #playground-prompt {
+  margin: 0;
+}
+.widget-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.widget-footer a {
+  color: #76b900;
+  text-decoration: none;
+  font-weight: 700;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.widget-footer a:hover { text-decoration: underline; }
+.widget-footer a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+button:focus-visible,
+input:focus-visible,
+.radio-option:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+  <!-- Header -->
+  <header>
+    <h1>Resonator Punch Out</h1>
+    <p class="summary-text">Find a readout power that still “sees” the qubit: raise power and watch the resonator dip walk from dressed to bare — until you punch out and lose |0⟩/|1⟩ discrimination.</p>
+  </header>
+
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol>
+      <li>Start at low readout power. Notice the resonator dip sits at the qubit-shifted (dressed) frequency — evidence the qubit is coupled.</li>
+      <li>Raise the readout power <strong>slowly</strong> (the walk is the experiment). Watch the dip move toward the bare frequency, the resonator fill with photons, and the grip on the qubit weaken; read the regime callout and whether readout can still tell |0⟩ from |1⟩.</li>
+      <li>Keep raising until punched out — readout is blind. Then lower power back into the <strong>dressed</strong> window: that is the power regime you’d use to read the qubit. Unlocking punched out also reveals <strong>Real lab data</strong>.</li>
+      <li>Read the short heatmap primer, diagnose whether the punch-out heatmap is Dressed, Transitional, or Punched out (same labels as the live callout), then open the <strong>Ising Calibration playground</strong> section — ask about anything unclear, or confirm what you think is going on.</li>
+    </ol>
+    <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to reach the power slider and Reset; arrow keys adjust power; <span class="kbd">Enter</span>/<span class="kbd">Space</span> activates Reset; <span class="kbd">Esc</span> resets to low-power dressed start (lab unlock persists once earned).</p>
+  </details>
+
+  <section class="context-box" aria-labelledby="context-heading">
+    <h2 id="context-heading">What this calibration step is for</h2>
+    <p><strong>Already known:</strong> Resonator spectroscopy found the resonator frequency (the dip). You can drive and measure that resonator.</p>
+    <p><strong>This step finds:</strong> The readout power to use when measuring a qubit — low enough to stay <em>dressed</em> (state-sensitive), not so high that you punch out and |0⟩/|1⟩ look the same. It also confirms a qubit is coupled to the resonator.</p>
+  </section>
+
+  <!-- Controls -->
+  <section class="info-box" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+    <p class="control-hint" id="slow-sweep-cue" hidden>
+      <strong>Move slowly</strong> — the walk is the experiment. Watch the dip shift as you raise power.
+    </p>
+    <div class="controls-row">
+      <div class="control-group">
+        <label for="power-slider">Readout power <span class="readout-chip" id="power-value" aria-hidden="true">Low</span></label>
+        <div class="slider-wrap">
+          <input type="range" id="power-slider" min="0" max="100" value="0" step="1"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+            aria-valuetext="Low — dressed"
+            aria-describedby="power-ends">
+        </div>
+        <div class="power-ends" id="power-ends">
+          <span>Low (dressed)</span>
+          <span>High (punched out)</span>
+        </div>
+      </div>
+      <div class="control-group" style="flex: 0 0 auto;">
+        <button type="button" class="btn-secondary" id="reset-btn">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Primary Visualization -->
+  <section class="info-box" aria-labelledby="viz-heading">
+    <h2 id="viz-heading">Primary visualization</h2>
+    <div class="viz-grid">
+      <div class="viz-panel">
+        <h3 id="spectrum-heading">Resonator spectrum</h3>
+        <div class="viz-legend" aria-hidden="true">
+          <span class="leg-dressed">— Dressed (low power)</span>
+          <span class="leg-bare">— Bare (high power)</span>
+        </div>
+        <p class="viz-legend-note">Guides stretched slightly for visibility (~1.2 MHz here; real lab gap is smaller).</p>
+        <canvas id="spectrum-canvas" width="960" height="480" role="img"
+          aria-labelledby="spectrum-heading"
+          aria-describedby="spectrum-desc"></canvas>
+        <p id="spectrum-desc" class="sr-only">Transmission magnitude versus frequency. The dip walks from the qubit-shifted frequency toward the bare frequency as readout power rises.</p>
+        <p class="viz-callout" id="spectrum-callout" aria-live="polite">Dip at 7.3944 GHz</p>
+      </div>
+      <div class="viz-panel">
+        <h3 id="grip-heading">Photon fill &amp; qubit grip</h3>
+        <canvas id="grip-canvas" width="540" height="480" role="img"
+          aria-labelledby="grip-heading"
+          aria-describedby="grip-desc"></canvas>
+        <p id="grip-desc" class="sr-only">Readout resonator cavity filling with photons as power rises, with a coupling grip link to the qubit that thins and breaks at high power.</p>
+        <p class="viz-callout" id="grip-callout" aria-live="polite">Strong grip · 2 photons</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quantitative Results -->
+  <section class="info-box" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+    <p class="status-banner dressed" id="regime-banner" role="status">Dressed — the qubit is in there</p>
+    <div class="readout-choice" id="readout-choice" role="status" aria-live="polite">
+      <span class="label">Readout power for measuring the qubit?</span>
+      <span class="value ok" id="readout-choice-value">Yes — use power in this dressed window</span>
+      <p class="why" id="readout-choice-why">Stay here (or nearby) for qubit readout: the resonator still feels |0⟩ vs |1⟩.</p>
+    </div>
+    <div class="results-grid" style="margin-top: 12px;">
+      <div class="metric-card">
+        <span class="label">Can readout tell |0⟩ from |1⟩?</span>
+        <span class="value yes" id="discrimination-value">Yes</span>
+        <p class="metric-why" id="discrimination-why">
+          Yes — |0⟩ and |1⟩ each pull the resonator to a slightly different frequency, so a measurement can tell them apart.
+        </p>
+      </div>
+      <div class="metric-card">
+        <span class="label">Frequency gap Δf</span>
+        <span class="value" id="deltaf-value">Dip 7.3944 GHz · Bare 7.3932 GHz · Δf ≈ 1.2 MHz</span>
+      </div>
+    </div>
+    <p class="mechanism-line" id="mechanism-line" hidden>
+      High readout power fills the resonator with photons — too many photons break the qubit’s grip on the resonator frequency.
+    </p>
+    <p class="footnote">The power where punch-out occurs depends on the qubit–resonator coupling strength — not on “qubit quality.”</p>
+  </section>
+
+  <!-- Lab inset (gated) -->
+  <section class="info-box" id="lab-panel" aria-labelledby="lab-heading" hidden>
+    <h2 id="lab-heading">Real lab data — compare</h2>
+    <div class="lab-inset">
+      <p class="lab-primer" id="lab-primer">
+        This is a real Qblox punch-out heatmap: frequency on the x-axis, <strong>readout attenuation</strong> on the y-axis
+        (high attenuation at the top = low power; low attenuation at the bottom = high power).
+        On real data the frequency walk is only a few tenths of a megahertz — look for a nearly vertical dark stripe that
+        <strong>shifts slightly and gets much broader</strong> toward the bottom (high power / punched out). Your spectrum above is scaled to that same window.
+      </p>
+      <div class="lab-card">
+        <img id="heatmap-img" src="punchout.png" width="1024" height="665"
+          alt="Real Qblox resonator punch-out heatmap: attenuation-corrected |S21| versus frequency in gigahertz and readout attenuation in decibels. Dark stripe is the resonance dip; it is narrow near high attenuation and broadens toward low attenuation.">
+        <p>Real Qblox punch-out: dark stripe = resonance dip. Top (high attenuation) ≈ low power / dressed (narrow); bottom (low attenuation) ≈ high power / punched out (broader, slightly shifted).</p>
+      </div>
+      <fieldset class="diagnose-group" id="lab-diagnose-group">
+        <legend id="lab-diagnose-legend">Looking at this heatmap: which regime is this device in for typical low-power readout (top of the plot — high attenuation)?</legend>
+        <div class="radio-row" role="radiogroup" aria-labelledby="lab-diagnose-legend">
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="dressed"> <span>Dressed</span></label>
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="transitional"> <span>Transitional</span></label>
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="punched"> <span>Punched out</span></label>
+        </div>
+        <p class="diagnose-feedback" id="diagnose-feedback" hidden></p>
+      </fieldset>
+    </div>
+  </section>
+
+  <!-- Ising Calibration playground -->
+  <section class="info-box next-panel" id="next-panel" aria-labelledby="next-heading" hidden>
+    <h2 id="next-heading">Ising Calibration playground</h2>
+    <p>You’ve walked the punch-out and diagnosed the lab heatmap. Continue in the
+      <a href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Ising Calibration playground</a>:
+      paste the prompt below (or rewrite it in your own words), optionally attach <code>punchout.png</code> or a screenshot, and
+      <strong>ask about anything you still don’t understand</strong> — or <strong>state what you think is going on and ask the agent to confirm or correct you</strong>.</p>
+    <div class="prompt-box" role="region" aria-label="Suggested playground prompt">
+      <div class="prompt-box-header">
+        <strong>Suggested prompt</strong>
+        <button type="button" class="btn-secondary" id="copy-prompt-btn">Copy prompt</button>
+      </div>
+      <p id="playground-prompt">I just finished a resonator punch-out intro. Before this step I already knew the resonator frequency from spectroscopy. In the widget I raised readout power and watched the dip walk from dressed (qubit-shifted) toward bare; when punched out, readout could no longer tell |0⟩ from |1⟩. I think the point of this calibration is to choose a readout power in the dressed window so qubit readout stays state-sensitive — not so high that we punch out. Please confirm or correct that. Also explain briefly: why do too many photons break the qubit’s grip on the resonator, and how should I pick an operating power from a real punch-out heatmap (attenuation vs frequency)?</p>
+    </div>
+    <p>Open the playground, paste the prompt, then add your own follow-up: a confusion (“I don’t get why…”), or a check (“Here’s what I think happens — am I right?”).</p>
+    <div class="controls-row">
+      <a class="btn-primary" href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Open Ising Calibration playground</a>
+    </div>
+  </section>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  // Slightly stretched vs punchout.png for readability (~1.2 MHz gap; lab data is closer)
+  const F_BARE = 7.39320;      // high-power / low-attenuation center
+  const F_DRESSED = 7.39440;   // low-power / high-attenuation center
+  const F_MIN = 7.39150;
+  const F_MAX = 7.39600;
+
+  const state = {
+    power: 0,            // 0..100
+    regime: 'dressed',   // dressed | transitional | punched
+    slowCueShown: false,
+    slowCueDismissed: false,
+    punchedOnce: false,
+    labUnlocked: false,
+    diagnosed: false
+  };
+
+  /** Map power 0..1 → resonance frequency (subtle walk matching Qblox scale). */
+  function dipFrequency(power01) {
+    // As power rises: dressed → bare (slightly lower frequency on this device)
+    const t = Math.pow(power01, 1.2);
+    const walk = 1 - Math.exp(-3.8 * t);
+    return F_DRESSED + (F_BARE - F_DRESSED) * walk;
+  }
+
+  /** Linewidth grows sharply near punch-out — the dominant lab signature. */
+  function dipWidth(power01) {
+    return 0.00008 + 0.00055 * Math.pow(power01, 1.6);
+  }
+
+  function deltaFMHz(fDip) {
+    return Math.abs(F_BARE - fDip) * 1000;
+  }
+
+  function regimeFromPower(power01) {
+    if (power01 < 0.28) return 'dressed';
+    if (power01 < 0.72) return 'transitional';
+    return 'punched';
+  }
+
+  function discriminationFromPower(power01) {
+    if (power01 < 0.28) return { key: 'yes', label: 'Yes' };
+    if (power01 < 0.72) return { key: 'weakening', label: 'Weakening' };
+    return { key: 'no', label: 'No' };
+  }
+
+  function powerLabel(p) {
+    if (p <= 5) return 'Low';
+    if (p >= 95) return 'High';
+    return String(p);
+  }
+
+  function lorentzian(f, f0, amp, width) {
+    const d = (f - f0) / width;
+    return amp / (1 + d * d);
+  }
+
+  function announce(msg) {
+    const el = document.getElementById('status-announce');
+    if (el) el.textContent = msg;
+  }
+
+  // --- Spectrum canvas ---
+  function drawSpectrum(canvas, power01) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    // Legend/callout are HTML — keep canvas plot padding lean
+    const pad = { l: 84, r: 28, t: 28, b: 70 };
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+
+    const fDip = dipFrequency(power01);
+    const width = dipWidth(power01);
+
+    function xOf(f) { return pad.l + ((f - F_MIN) / (F_MAX - F_MIN)) * plotW; }
+    function yOf(s) { return pad.t + (1 - s) * plotH; }
+
+    ctx.strokeStyle = '#444444';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, pad.t + plotH);
+    ctx.lineTo(pad.l + plotW, pad.t + plotH);
+    ctx.stroke();
+
+    // Oversized axis labels so they stay readable after CSS downscale
+    ctx.fillStyle = '#DDDDDD';
+    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Frequency (GHz)', pad.l + plotW / 2, H - 20);
+    ctx.save();
+    ctx.translate(30, pad.t + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('|S₂₁|', 0, 0);
+    ctx.restore();
+
+    function guide(f, color) {
+      const x = xOf(f);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(x, pad.t);
+      ctx.lineTo(x, pad.t + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    guide(F_DRESSED, '#1dbba4');
+    guide(F_BARE, '#ef9100');
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 4;
+    const N = 280;
+    const amp = 0.62;
+    for (let i = 0; i <= N; i++) {
+      const f = F_MIN + (i / N) * (F_MAX - F_MIN);
+      const dip = lorentzian(f, fDip, amp, width);
+      const s = 0.92 - dip;
+      const x = xOf(f);
+      const y = yOf(Math.max(0.05, s));
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    const xd = xOf(fDip);
+    const yd = yOf(Math.max(0.05, 0.92 - amp));
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(xd, yd - 12);
+    ctx.lineTo(xd + 11, yd);
+    ctx.lineTo(xd, yd + 12);
+    ctx.lineTo(xd - 11, yd);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // --- Grip / photon-fill canvas ---
+  function drawGrip(canvas, power01) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+
+    const leftX = 40;
+    const rightX = W - 40;
+    const midY = H / 2 + 8;
+    const cavW = 170;
+    const cavH = 230;
+    const qbW = 120;
+    const qbH = 120;
+
+    const cavX = leftX;
+    const cavY = midY - cavH / 2;
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(cavX, cavY, cavW, cavH);
+    ctx.fillStyle = '#EEEEEE';
+    ctx.font = 'bold 30px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Resonator', cavX + cavW / 2, cavY - 18);
+
+    const nPhotons = Math.round(2 + power01 * 28);
+    const cols = 4;
+    const cellW = cavW / (cols + 1);
+    const cellH = cavH / (Math.ceil(30 / cols) + 1);
+    ctx.fillStyle = '#f9c500';
+    for (let i = 0; i < nPhotons; i++) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const px = cavX + cellW * (col + 0.85);
+      const py = cavY + cavH - cellH * (row + 0.7);
+      ctx.beginPath();
+      ctx.arc(px, py, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const qbX = rightX - qbW;
+    const qbY = midY - qbH / 2;
+    ctx.strokeStyle = '#0074df';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(qbX, qbY, qbW, qbH);
+    ctx.fillStyle = '#EEEEEE';
+    ctx.font = 'bold 30px Inter, sans-serif';
+    ctx.fillText('Qubit', qbX + qbW / 2, qbY - 18);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.fillText('|0⟩/|1⟩', qbX + qbW / 2, midY + 10);
+
+    const gripStrength = Math.max(0, 1 - Math.pow(power01, 1.1));
+    const x1 = cavX + cavW + 12;
+    const x2 = qbX - 12;
+    const y = midY;
+    ctx.lineWidth = 3 + gripStrength * 11;
+    ctx.strokeStyle = gripStrength > 0.15 ? '#1dbba4' : '#e52020';
+    if (gripStrength < 0.2) ctx.setLineDash([5, 8]);
+    else ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(x1, y);
+    ctx.lineTo(x2, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    return {
+      nPhotons: nPhotons,
+      gripLabel: gripStrength < 0.2 ? 'Grip broken' : (gripStrength < 0.55 ? 'Weakening grip' : 'Strong grip')
+    };
+  }
+
+  // Expose for Phase 3E wiring
+  window.PunchOut = {
+    state,
+    F_BARE,
+    dipFrequency,
+    deltaFMHz,
+    regimeFromPower,
+    discriminationFromPower,
+    powerLabel,
+    announce,
+    drawSpectrum,
+    drawGrip,
+    dipWidth
+  };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const P = window.PunchOut;
+  if (!P) return;
+
+  const els = {
+    slider: document.getElementById('power-slider'),
+    powerValue: document.getElementById('power-value'),
+    resetBtn: document.getElementById('reset-btn'),
+    slowCue: document.getElementById('slow-sweep-cue'),
+    regimeBanner: document.getElementById('regime-banner'),
+    discValue: document.getElementById('discrimination-value'),
+    discWhy: document.getElementById('discrimination-why'),
+    deltafValue: document.getElementById('deltaf-value'),
+    readoutChoiceValue: document.getElementById('readout-choice-value'),
+    readoutChoiceWhy: document.getElementById('readout-choice-why'),
+    mechanism: document.getElementById('mechanism-line'),
+    spectrum: document.getElementById('spectrum-canvas'),
+    grip: document.getElementById('grip-canvas'),
+    spectrumCallout: document.getElementById('spectrum-callout'),
+    gripCallout: document.getElementById('grip-callout'),
+    labPanel: document.getElementById('lab-panel'),
+    nextPanel: document.getElementById('next-panel'),
+    diagnoseFeedback: document.getElementById('diagnose-feedback'),
+    diagnoseGroup: document.getElementById('lab-diagnose-group'),
+    copyPromptBtn: document.getElementById('copy-prompt-btn'),
+    playgroundPrompt: document.getElementById('playground-prompt')
+  };
+
+  const READOUT_CHOICE = {
+    dressed: {
+      cls: 'ok',
+      value: 'Yes — use power in this dressed window',
+      why: 'Stay here (or nearby) for qubit readout: the resonator still feels |0⟩ vs |1⟩.'
+    },
+    transitional: {
+      cls: 'warn',
+      value: 'Borderline — lower power for safer qubit readout',
+      why: 'You’re losing the qubit fingerprint. Prefer the dressed (lower-power) side of this transition for readout.'
+    },
+    punched: {
+      cls: 'bad',
+      value: 'No — too high; do not use this power to read the qubit',
+      why: 'Punched out: |0⟩ and |1⟩ look the same. Drop power back into the dressed window for qubit readout.'
+    }
+  };
+
+  const DISC_WHY = {
+    yes: 'Yes — |0⟩ and |1⟩ each pull the resonator to a slightly different frequency, so a measurement can tell them apart.',
+    weakening: 'Getting harder — that state-dependent pull is fading as photons flood the resonator.',
+    no: 'No — the resonator sits at its bare frequency either way. |0⟩ and |1⟩ look the same, so readout is blind.'
+  };
+
+  const REGIME_TEXT = {
+    dressed: 'Dressed — the qubit is in there',
+    transitional: 'Transitional — you’re losing the qubit fingerprint',
+    punched: 'Punched out — blind to qubit state'
+  };
+
+  function render() {
+    const p = P.state.power;
+    const power01 = p / 100;
+    const fDip = P.dipFrequency(power01);
+    const df = P.deltaFMHz(fDip);
+    const regime = P.regimeFromPower(power01);
+    const disc = P.discriminationFromPower(power01);
+    const prevRegime = P.state.regime;
+    P.state.regime = regime;
+
+    els.powerValue.textContent = P.powerLabel(p);
+    els.slider.setAttribute('aria-valuenow', String(p));
+    els.slider.setAttribute('aria-valuetext', P.powerLabel(p) + ' — ' + regime);
+
+    els.regimeBanner.textContent = REGIME_TEXT[regime];
+    els.regimeBanner.className = 'status-banner ' + (regime === 'punched' ? 'punched' : regime);
+
+    els.discValue.textContent = disc.label;
+    els.discValue.className = 'value ' + disc.key;
+    els.discWhy.textContent = DISC_WHY[disc.key];
+
+    const choice = READOUT_CHOICE[regime];
+    if (els.readoutChoiceValue && choice) {
+      els.readoutChoiceValue.textContent = choice.value;
+      els.readoutChoiceValue.className = 'value ' + choice.cls;
+      els.readoutChoiceWhy.textContent = choice.why;
+    }
+
+    els.deltafValue.textContent =
+      'Dip ' + fDip.toFixed(4) + ' GHz · Bare ' + P.F_BARE.toFixed(4) +
+      ' GHz · Δf = ' + df.toFixed(2) + ' MHz';
+
+    if (regime === 'transitional' || regime === 'punched') {
+      els.mechanism.hidden = false;
+    }
+
+    if ((regime === 'transitional' || regime === 'punched') && P.state.slowCueShown && !P.state.slowCueDismissed) {
+      P.state.slowCueDismissed = true;
+      els.slowCue.hidden = true;
+    }
+
+    if (regime === 'punched' && !P.state.punchedOnce) {
+      P.state.punchedOnce = true;
+      P.state.labUnlocked = true;
+      els.labPanel.hidden = false;
+      P.announce('Punched out reached. Real lab data unlocked. Scroll to Real lab data to diagnose the Qblox heatmap.');
+    }
+
+    P.drawSpectrum(els.spectrum, power01);
+    const gripInfo = P.drawGrip(els.grip, power01);
+    if (els.spectrumCallout) {
+      els.spectrumCallout.textContent =
+        'Dip at ' + fDip.toFixed(4) + ' GHz' + (power01 > 0.55 ? ' · broadening' : '');
+    }
+    if (els.gripCallout && gripInfo) {
+      els.gripCallout.textContent = gripInfo.gripLabel + ' · ' + gripInfo.nPhotons + ' photons';
+    }
+
+    if (prevRegime !== regime) {
+      P.announce(REGIME_TEXT[regime] + '. Discrimination: ' + disc.label + '.');
+    }
+  }
+
+  function onPowerInput() {
+    const p = Number(els.slider.value);
+    P.state.power = p;
+
+    if (!P.state.slowCueShown && p > 0 && P.state.regime === 'dressed') {
+      P.state.slowCueShown = true;
+      els.slowCue.hidden = false;
+    }
+
+    render();
+  }
+
+  function reset() {
+    P.state.power = 0;
+    P.state.regime = 'dressed';
+    P.state.slowCueShown = false;
+    P.state.slowCueDismissed = false;
+    els.slider.value = '0';
+    els.slowCue.hidden = true;
+    els.mechanism.hidden = true;
+    render();
+    P.announce('Reset to low-power dressed start.');
+    els.slider.focus();
+  }
+
+  function onCopyPrompt() {
+    const text = (els.playgroundPrompt && els.playgroundPrompt.textContent || '').trim();
+    if (!text) return;
+
+    function done() {
+      if (els.copyPromptBtn) {
+        const prev = els.copyPromptBtn.textContent;
+        els.copyPromptBtn.textContent = 'Copied';
+        window.setTimeout(function () {
+          if (els.copyPromptBtn) els.copyPromptBtn.textContent = prev || 'Copy prompt';
+        }, 1600);
+      }
+      P.announce('Prompt copied to clipboard');
+    }
+
+    function fail() {
+      P.announce('Could not copy automatically — select the prompt text and copy manually.');
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    } else {
+      fail();
+    }
+  }
+
+  function onDiagnoseChange(e) {
+    if (e.target.name !== 'lab-diagnose') return;
+    const val = e.target.value;
+    els.diagnoseFeedback.hidden = false;
+    if (val === 'dressed') {
+      els.diagnoseFeedback.className = 'diagnose-feedback correct';
+      els.diagnoseFeedback.textContent =
+        'Correct — at high attenuation (top of the heatmap = low power) the dark stripe is narrow and qubit-shifted. That dressed regime keeps |0⟩/|1⟩ discrimination.';
+      if (!P.state.diagnosed) {
+        P.state.diagnosed = true;
+        els.nextPanel.hidden = false;
+        P.announce('Diagnosis correct. Ising Calibration playground section unlocked.');
+      }
+    } else {
+      els.diagnoseFeedback.className = 'diagnose-feedback incorrect';
+      els.diagnoseFeedback.textContent =
+        'Not quite — look at the top of the heatmap (high attenuation = low power). The stripe is still narrow and qubit-shifted there, so typical low-power readout is Dressed.';
+    }
+  }
+
+  function init() {
+    els.slider.addEventListener('input', onPowerInput);
+    els.resetBtn.addEventListener('click', reset);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        reset();
+      }
+    });
+    els.diagnoseGroup.addEventListener('change', onDiagnoseChange);
+    if (els.copyPromptBtn) els.copyPromptBtn.addEventListener('click', onCopyPrompt);
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
