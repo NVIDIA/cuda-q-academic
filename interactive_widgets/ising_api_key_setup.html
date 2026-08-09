@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA Ising — Environment and API Key Setup</title>
+<style>
+  :root {
+    --nv-green: #76b900; --nv-green-dark: #5a8f00; --ink: #1a1a1a;
+    --muted: #5c6672; --bg: #f5f7f5; --card: #fff; --border: #e2e6e2;
+    --code-bg: #1e2127; --code-ink: #e6e6e6; --warn-bg: #fff8e6;
+    --warn-border: #f0c419; --info-bg: #eef6e6; --info-border: #76b900;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 20px 80px; }
+  header { background: linear-gradient(120deg, #1a1a1a, #2d2d2d); color: #fff; padding: 40px 20px 34px; border-bottom: 4px solid var(--nv-green); }
+  header .wrap { padding-bottom: 0; }
+  header h1 { margin: 0 0 6px; font-size: 1.9rem; }
+  header .sub { color: var(--nv-green); font-weight: 600; letter-spacing: .3px; }
+  header p { margin: 14px 0 0; color: #c9cfc9; max-width: 680px; }
+  header .learn-more { margin-top: 16px; font-size: .82rem; color: #9aa39a; }
+  header .learn-more a { color: var(--nv-green); text-decoration: none; }
+  header .learn-more a:hover { text-decoration: underline; }
+  .tabs { display: flex; gap: 6px; margin: 26px 0 0; flex-wrap: wrap; }
+  .tab-btn { border: 1px solid var(--border); border-bottom: none; background: #e9ede9; color: var(--muted); padding: 12px 20px; font-size: .98rem; font-weight: 600; border-radius: 10px 10px 0 0; cursor: pointer; }
+  .tab-btn:hover { background: #dfe6df; }
+  .tab-btn.active { background: var(--card); color: var(--nv-green-dark); box-shadow: 0 -2px 0 var(--nv-green) inset; }
+  .panel { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 0 12px 12px 12px; padding: 30px 32px; }
+  .panel.active { display: block; }
+  h2 { font-size: 1.35rem; margin: 0 0 4px; }
+  h3 { font-size: 1.08rem; margin: 30px 0 8px; display: flex; align-items: center; gap: 10px; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: 0 0 26px; background: var(--nv-green); color: #fff; border-radius: 50%; font-size: .85rem; font-weight: 700; }
+  p { margin: 8px 0; }
+  .lead, .muted { color: var(--muted); }
+  .muted { font-size: .9rem; }
+  a { color: var(--nv-green-dark); }
+  code { background: #eef2ee; padding: 1px 6px; border-radius: 4px; font-size: .88em; }
+  .code { position: relative; background: var(--code-bg); border-radius: 8px; margin: 12px 0; }
+  .code pre { margin: 0; padding: 16px 18px; overflow-x: auto; color: var(--code-ink); font-family: "SF Mono", Menlo, Consolas, monospace; font-size: .88rem; line-height: 1.55; }
+  .code .lbl { position: absolute; top: 0; left: 14px; transform: translateY(-50%); background: var(--nv-green); color: #fff; font-size: .68rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; letter-spacing: .4px; text-transform: uppercase; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,.1); color: #cfd3cf; border: 1px solid rgba(255,255,255,.18); border-radius: 6px; padding: 4px 10px; font-size: .74rem; cursor: pointer; }
+  .copy-btn:hover { background: rgba(118,185,0,.25); color: #fff; }
+  .callout { border-radius: 8px; padding: 13px 16px; margin: 16px 0; font-size: .94rem; }
+  .callout .tag { font-weight: 700; display: block; margin-bottom: 2px; }
+  .info { background: var(--info-bg); border-left: 4px solid var(--info-border); }
+  .warn { background: var(--warn-bg); border-left: 4px solid var(--warn-border); }
+  .info .tag { color: var(--nv-green-dark); }
+  .warn .tag { color: #a67c00; }
+  .os-options details { background: #fbfcfb; border: 1px solid var(--border); border-radius: 9px; padding: 3px 16px; margin: 12px 0; }
+  .os-options summary { cursor: pointer; font-weight: 700; padding: 10px 0; }
+  .panel-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .nav-btn { border: 1px solid var(--nv-green); border-radius: 8px; padding: 9px 15px; background: #fff; color: var(--nv-green-dark); font-weight: 700; cursor: pointer; }
+  .nav-btn.primary { background: var(--nv-green); color: #fff; }
+  footer { text-align: center; color: var(--muted); font-size: .82rem; margin-top: 40px; }
+  ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  @media (max-width: 640px) { .panel { padding: 24px 18px; } .tab-btn { padding: 10px 12px; font-size: .88rem; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="sub">QUANTUM TANGIBLE WORKSHOP</div>
+    <h1>NVIDIA Ising Setup</h1>
+    <p>Prepare an isolated Python environment and generate a personal NVIDIA API key for the workshop.</p>
+    <p class="learn-more">Learn more about the <a href="https://developer.nvidia.com/ising" target="_blank" rel="noopener">NVIDIA Ising models</a> and <a href="https://arxiv.org/abs/2604.25884" target="_blank" rel="noopener">QCalEval</a>.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="venv">1. Environment Setup</button>
+    <button class="tab-btn" data-tab="api">2. API Key Setup</button>
+  </div>
+
+  <section class="panel active" id="venv">
+    <h2>Set up a virtual environment</h2>
+    <p class="lead">A virtual environment is a private Python installation inside your workshop folder. Packages installed there do not alter your system Python or Anaconda environment.</p>
+
+    <h3><span class="step-num">0</span> Create your workshop folder</h3>
+    <div class="code"><span class="lbl">Terminal / PowerShell</span><button class="copy-btn">Copy</button><pre>mkdir quantum_tangible_workshop
+cd quantum_tangible_workshop</pre></div>
+
+    <div class="callout warn"><span class="tag">If you have Anaconda installed</span>Anaconda may register its own Jupyter kernel. Complete the kernel-registration steps below so the notebook uses the workshop virtual environment.</div>
+
+    <h3><span class="step-num">1</span> Create and activate the environment</h3>
+    <div class="code"><span class="lbl">macOS / Linux</span><button class="copy-btn">Copy</button><pre>python3 -m venv .venv
+source .venv/bin/activate</pre></div>
+    <div class="code"><span class="lbl">Windows PowerShell</span><button class="copy-btn">Copy</button><pre>python -m venv .venv
+.venv\Scripts\Activate.ps1</pre></div>
+    <p>Your prompt should now begin with <code>(.venv)</code>.</p>
+
+    <h3><span class="step-num">2</span> Install the required packages</h3>
+    <div class="code"><span class="lbl">Terminal / PowerShell</span><button class="copy-btn">Copy</button><pre>pip install --upgrade openai jupyter ipykernel</pre></div>
+
+    <h3><span class="step-num">3</span> Register the environment as a Jupyter kernel</h3>
+    <div class="code"><span class="lbl">Terminal / PowerShell</span><button class="copy-btn">Copy</button><pre>python -m ipykernel install --user --name=ising --display-name "Python (.venv ising)"</pre></div>
+    <p>Launch Jupyter, then choose <strong>Kernel → Change Kernel → Python (.venv ising)</strong>.</p>
+    <div class="code"><span class="lbl">Terminal / PowerShell</span><button class="copy-btn">Copy</button><pre>jupyter notebook</pre></div>
+
+    <h3><span class="step-num">4</span> Verify the active kernel</h3>
+    <div class="code"><span class="lbl">Notebook cell</span><button class="copy-btn">Copy</button><pre>import sys
+print(sys.executable)</pre></div>
+    <div class="callout info"><span class="tag">What you want to see</span>The printed path contains <code>.venv</code>. If it shows <code>/opt/anaconda3/bin/python</code>, change the notebook kernel to <strong>Python (.venv ising)</strong>.</div>
+
+    <div class="panel-nav"><span></span><button class="nav-btn primary" data-go-tab="api">Next: API Key Setup →</button></div>
+  </section>
+
+  <section class="panel" id="api">
+    <h2>Generate and configure your NVIDIA API key</h2>
+    <p class="lead">Each student should use a personal key. Generate it before the workshop if possible.</p>
+
+    <h3><span class="step-num">1</span> Generate the key</h3>
+    <ul>
+      <li>Go to <a href="https://build.nvidia.com" target="_blank" rel="noopener">build.nvidia.com</a> and sign up for a free NVIDIA Developer account.</li>
+      <li>Open <a href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b" target="_blank" rel="noopener">Ising Calibration 1.5 31B</a>.</li>
+      <li>Click <strong>Get API Key</strong>, then copy the key beginning with <code>nvapi-</code>.</li>
+    </ul>
+    <div class="callout warn"><span class="tag">Keep the key private</span>Do not paste it into a notebook cell, upload it with an assignment, or share it with another student.</div>
+
+    <h3><span class="step-num">2</span> Set the key and launch Jupyter</h3>
+    <p>Run these commands from <code>quantum_tangible_workshop</code> in the same terminal window.</p>
+    <div class="os-options">
+      <details open><summary>macOS / Linux</summary>
+        <div class="code"><span class="lbl">Terminal</span><button class="copy-btn">Copy</button><pre>source .venv/bin/activate
+export NVIDIA_API_KEY="nvapi-xxxxxxxxxxxxxxxxxxxxxxxx"
+jupyter notebook</pre></div>
+      </details>
+      <details><summary>Windows PowerShell</summary>
+        <div class="code"><span class="lbl">PowerShell</span><button class="copy-btn">Copy</button><pre>.venv\Scripts\Activate.ps1
+$env:NVIDIA_API_KEY="nvapi-xxxxxxxxxxxxxxxxxxxxxxxx"
+jupyter notebook</pre></div>
+        <p class="muted">If activation is blocked, run <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> once, then retry.</p>
+      </details>
+    </div>
+    <div class="callout warn"><span class="tag">Order matters</span>Set the key before launching Jupyter and use the same terminal window so the notebook inherits <code>NVIDIA_API_KEY</code>.</div>
+
+    <h3><span class="step-num">3</span> Verify the setup</h3>
+    <p>In the workshop notebook, select <strong>Python (.venv ising)</strong> and run:</p>
+    <div class="code"><span class="lbl">Notebook cell</span><button class="copy-btn">Copy</button><pre>import os, sys
+
+assert ".venv" in sys.executable, "Select the Python (.venv ising) kernel."
+assert "NVIDIA_API_KEY" in os.environ, "Restart Jupyter from the terminal where you set the key."
+print("Environment and API key are ready.")</pre></div>
+    <div class="callout info"><span class="tag">Setup complete</span>You are ready when the cell prints <strong>Environment and API key are ready.</strong></div>
+
+    <div class="panel-nav"><button class="nav-btn" data-go-tab="venv">← Previous: Environment Setup</button><span></span></div>
+  </section>
+
+  <footer>Quantum Tangible Workshop · NVIDIA Ising environment and API-key setup</footer>
+</div>
+
+<script>
+  function activateTab(target) {
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.tab === target); });
+    document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('active', p.id === target); });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.tab-btn').forEach(function (btn) { btn.addEventListener('click', function () { activateTab(btn.dataset.tab); }); });
+  document.querySelectorAll('[data-go-tab]').forEach(function (btn) { btn.addEventListener('click', function () { activateTab(btn.dataset.goTab); }); });
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(btn.parentElement.querySelector('pre').innerText).then(function () {
+        var old = btn.textContent; btn.textContent = 'Copied ✓'; setTimeout(function () { btn.textContent = old; }, 1400);
+      });
+    });
+  });
+</script>
+</body>
+</html>
