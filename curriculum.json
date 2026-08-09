@@ -187,20 +187,32 @@
     },
     "calibration": {
       "title": "Calibration",
-      "learning_path_url": null,
+      "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration",
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Instructor resource: classroom guide for NVIDIA's Ising Calibration NIM, an open vision-language model purpose-built for analyzing quantum hardware calibration plots. Browser-based playground with no setup; sample plots from the QCalEval dataset. Includes the Qubit Spectroscopy (Intro) visualization; additional calibration visualization tools and Ising playground exercises are coming soon (more lessons Aug 10). Hands-on tutorial notebooks are in development.",
+      "summary": "Instructor resource: interactive visualizations for superconducting-qubit calibration experiments (resonator spectroscopy through DRAG), plus NVIDIA Ising Calibration for plot analysis via browser playground, environment and API-key setup guide, and notebook. Sample plots from QCalEval. Additional experiment widgets coming soon.",
       "more_lessons_coming_soon": true,
-      "more_lessons_coming_soon_label": "More lessons coming Aug 10",
+      "more_lessons_coming_soon_label": "More calibration widgets coming soon",
       "lesson_ids": [
-        "calibration-start-here"
+        "calibration-start-here",
+        "ising-calibration"
       ],
       "widget_ids": [
+        "ising-api-key-setup",
+        "time-of-flight",
+        "resonator-spectroscopy",
+        "resonator-punch-out",
+        "resonator-flux-spectroscopy",
         "qubit-spectroscopy-intro",
-        "calibration-experiment-explorers",
-        "ising-calibration-playground-exercises"
+        "amplitude-rabi",
+        "t1-relaxation",
+        "ramsey",
+        "hahn-echo",
+        "single-shot-readout",
+        "randomized-benchmarking",
+        "drag-pulse-calibration",
+        "error-amplification"
       ]
     },
     "quantum-ai-project-template": {
@@ -1311,7 +1323,7 @@
       ]
     },
     "calibration-start-here": {
-      "title": "Start Here \u2014 Calibration Track",
+      "title": "Start Here — Calibration Track",
       "primary_track_id": "calibration",
       "track_ids": [
         "calibration"
@@ -1333,16 +1345,62 @@
         "QCalEval",
         "hardware characterization",
         "instructor resource",
-        "coming soon",
         "visualization tools",
-        "qubit spectroscopy"
+        "qubit spectroscopy",
+        "API key setup"
       ],
-      "summary": "Coming-soon landing notebook for the Calibration track. Points instructors and learners to the calibration/ README for the Ising Calibration NIM playground and QCalEval sample dataset, links the live Qubit Spectroscopy (Intro) visualization, and previews additional Calibration Visualization Tools coming Aug 10 for conceptual understanding plus guided playground exercises.",
+      "summary": "Landing notebook for the Calibration track. Maps the bring-up experiment sequence and live visualizations, links the Ising environment and API-key setup guide, the NIM playground, and QCalEval sample plots.",
       "metadata_source": "calibration/README.md",
       "widget_ids": [
+        "ising-api-key-setup",
+        "time-of-flight",
+        "resonator-spectroscopy",
+        "resonator-punch-out",
+        "resonator-flux-spectroscopy",
         "qubit-spectroscopy-intro",
-        "calibration-experiment-explorers",
-        "ising-calibration-playground-exercises"
+        "amplitude-rabi",
+        "t1-relaxation",
+        "ramsey",
+        "hahn-echo",
+        "single-shot-readout",
+        "randomized-benchmarking",
+        "drag-pulse-calibration",
+        "error-amplification"
+      ]
+    },
+    "ising-calibration": {
+      "title": "Ising Calibration — Analyze Plots from a Notebook",
+      "primary_track_id": "calibration",
+      "track_ids": [
+        "calibration"
+      ],
+      "source_kind": "notebook",
+      "repo_path": "calibration/01_Ising_Calibration.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/01_Ising_Calibration.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-09",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "Start Here — Calibration Track (or equivalent familiarity with the experiment sequence)",
+        "NVIDIA API key for the integrate API (or use the NIM playground / setup guide instead)"
+      ],
+      "keywords": [
+        "Ising Calibration",
+        "API",
+        "QCalEval",
+        "calibration plots",
+        "vision-language model",
+        "Colab",
+        "Jupyter"
+      ],
+      "summary": "Resource and how-to guide for NVIDIA Ising Calibration. Compares the browser playground, environment/API-key setup guide, and notebook API paths; includes an editable prompt and image-upload interface, data and visualization links, troubleshooting, and references.",
+      "metadata_source": "calibration/01_Ising_Calibration.ipynb",
+      "widget_ids": [
+        "ising-api-key-setup",
+        "resonator-spectroscopy",
+        "qubit-spectroscopy-intro",
+        "amplitude-rabi",
+        "drag-pulse-calibration"
       ]
     },
     "quantum-ai-project-template-overview": {
@@ -1403,9 +1461,20 @@
     "choosing-the-next-operator-adapt-qaoa",
     "adapt-qaoa-vs-standard-qaoa",
     "bits-vs-qubits-vertex-coloring",
+    "ising-api-key-setup",
+    "time-of-flight",
+    "resonator-spectroscopy",
+    "resonator-punch-out",
+    "resonator-flux-spectroscopy",
     "qubit-spectroscopy-intro",
-    "calibration-experiment-explorers",
-    "ising-calibration-playground-exercises"
+    "amplitude-rabi",
+    "t1-relaxation",
+    "ramsey",
+    "hahn-echo",
+    "single-shot-readout",
+    "randomized-benchmarking",
+    "drag-pulse-calibration",
+    "error-amplification"
   ],
   "widgets": {
     "bloch-sphere-visualizer": {
@@ -1558,7 +1627,7 @@
       "related_track_ids": [
         "ai-for-quantum"
       ],
-      "summary": "Visualizes diffusion, showing how noise is added or removed from data\u2014key in thermodynamics and GenAI.",
+      "summary": "Visualizes diffusion, showing how noise is added or removed from data—key in thermodynamics and GenAI.",
       "keywords": [
         "diffusion models",
         "noise",
@@ -1968,7 +2037,7 @@
       "related_track_ids": [
         "qaoa-for-max-cut"
       ],
-      "summary": "See QAOA working on the simplest interesting graph: a triangle (3 nodes, 3 edges). Play the role of the classical optimizer \u2014 two sliders control the cost angle (\u03b1) and mixer angle (\u03b2) \u2014 and watch quantum interference steer the probability distribution toward the max cut.",
+      "summary": "See QAOA working on the simplest interesting graph: a triangle (3 nodes, 3 edges). Play the role of the classical optimizer — two sliders control the cost angle (α) and mixer angle (β) — and watch quantum interference steer the probability distribution toward the max cut.",
       "keywords": [
         "QAOA",
         "Max Cut",
@@ -1990,7 +2059,7 @@
       "related_track_ids": [
         "qaoa-for-max-cut"
       ],
-      "summary": "Explore the 3-D cost landscape of a 1-layer QAOA circuit, see how tuning parameters helps the optimizer find the optimal Max Cut, and discover why optimization gets harder at scale \u2014 the barren plateau problem.",
+      "summary": "Explore the 3-D cost landscape of a 1-layer QAOA circuit, see how tuning parameters helps the optimizer find the optimal Max Cut, and discover why optimization gets harder at scale — the barren plateau problem.",
       "keywords": [
         "QAOA",
         "optimization landscape",
@@ -2012,7 +2081,7 @@
       "related_track_ids": [
         "qaoa-for-max-cut"
       ],
-      "summary": "One QAOA layer has already been applied to a triangle graph. Now choose which operator to add next. The gradient tells you \u2014 drag the \u03b8 slider to see how each candidate operator changes the cost and which one improves the circuit the most (the core idea behind Adapt-QAOA).",
+      "summary": "One QAOA layer has already been applied to a triangle graph. Now choose which operator to add next. The gradient tells you — drag the θ slider to see how each candidate operator changes the cost and which one improves the circuit the most (the core idea behind Adapt-QAOA).",
       "keywords": [
         "Adapt-QAOA",
         "operator gradients",
@@ -2056,7 +2125,7 @@
       "related_track_ids": [
         "qaoa-for-max-cut"
       ],
-      "summary": "Compare how classical bits and quantum qubits encode 2-colorings of a 7-vertex graph \u2014 one assignment at a time vs. all 128 simultaneously. Toggle bits, measure qubits, and build intuition for superposition and QAOA.",
+      "summary": "Compare how classical bits and quantum qubits encode 2-colorings of a 7-vertex graph — one assignment at a time vs. all 128 simultaneously. Toggle bits, measure qubits, and build intuition for superposition and QAOA.",
       "keywords": [
         "vertex coloring",
         "bits vs qubits",
@@ -2066,8 +2135,8 @@
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     },
-    "calibration-experiment-explorers": {
-      "title": "Calibration Experiment Explorers",
+    "time-of-flight": {
+      "title": "Time of Flight",
       "gallery_section": "calibration",
       "coming_soon": true,
       "live_url": null,
@@ -2079,20 +2148,61 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: interactive visualizations for building conceptual understanding of quantum hardware calibration experiments \u2014 Rabi, Ramsey, T1, T2, randomized benchmarking, and related characterization plots.",
+      "summary": "Coming soon: align the readout acquisition window to when the signal arrives through the cryostat cabling.",
       "keywords": [
         "calibration",
-        "Rabi",
-        "Ramsey",
-        "T1",
-        "T2",
-        "randomized benchmarking",
+        "time of flight",
+        "readout timing",
         "coming soon"
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     },
-    "ising-calibration-playground-exercises": {
-      "title": "Ising Calibration Playground Exercises",
+    "resonator-spectroscopy": {
+      "title": "Resonator Spectroscopy",
+      "gallery_section": "calibration",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/resonator-spectroscopy.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/resonator-spectroscopy.html",
+      "source_repo_path": "interactive_widgets/resonator-spectroscopy.html",
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Find the readout resonator frequency by sweeping a microwave tone and watching for the sharp absorption dip that marks resonance.",
+      "keywords": [
+        "calibration",
+        "resonator spectroscopy",
+        "readout",
+        "S21",
+        "resonance"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "resonator-punch-out": {
+      "title": "Resonator Punch Out",
+      "gallery_section": "calibration",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/resonator-punch-out.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/resonator-punch-out.html",
+      "source_repo_path": "interactive_widgets/resonator-punch-out.html",
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Sweep readout power across resonator spectroscopy to see the shift from bare to qubit-dressed resonance and choose a readout power.",
+      "keywords": [
+        "calibration",
+        "punch out",
+        "dispersive shift",
+        "readout power",
+        "resonator"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "resonator-flux-spectroscopy": {
+      "title": "Resonator Flux Spectroscopy",
       "gallery_section": "calibration",
       "coming_soon": true,
       "live_url": null,
@@ -2104,12 +2214,11 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: guided exercises that pair calibration experiment concepts with NVIDIA's Ising Calibration NIM playground \u2014 structured plot analysis practice using the QCalEval sample dataset.",
+      "summary": "Coming soon: map resonator response vs flux to locate the qubit sweet spot where frequency is least sensitive to flux noise.",
       "keywords": [
-        "Ising Calibration",
-        "NIM playground",
-        "QCalEval",
-        "calibration exercises",
+        "calibration",
+        "flux spectroscopy",
+        "sweet spot",
         "coming soon"
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
@@ -2126,14 +2235,214 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Find the qubit transition frequency \u03c9\u2080\u2081 by sweeping drive frequency \u2014 first at low power (flat spectrum), then after raising drive power so a clean peak can appear.",
+      "summary": "Find the qubit transition frequency ω₀₁ by sweeping drive frequency — first at low power (flat spectrum), then after raising drive power so a clean peak can appear.",
       "keywords": [
         "calibration",
         "qubit spectroscopy",
         "transition frequency",
         "drive power",
-        "\u03c901",
+        "ω01",
         "hardware characterization"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "amplitude-rabi": {
+      "title": "Amplitude Rabi",
+      "gallery_section": "calibration",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/rabi-oscillations.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/rabi-oscillations.html",
+      "source_repo_path": "interactive_widgets/rabi-oscillations.html",
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Sweep microwave pulse amplitude at fixed frequency and duration to find the π-pulse level that fully inverts the qubit population.",
+      "keywords": [
+        "calibration",
+        "Rabi",
+        "amplitude Rabi",
+        "pi pulse",
+        "drive amplitude"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "t1-relaxation": {
+      "title": "T₁ (Energy Relaxation)",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: prepare |1⟩, wait, and measure to extract the energy-relaxation time T₁ from exponential decay.",
+      "keywords": [
+        "calibration",
+        "T1",
+        "energy relaxation",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "ramsey": {
+      "title": "Ramsey",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: use Ramsey fringes to fine-tune the qubit drive frequency and estimate T₂*.",
+      "keywords": [
+        "calibration",
+        "Ramsey",
+        "T2*",
+        "detuning",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "hahn-echo": {
+      "title": "Hahn Echo",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: compare echo decay to Ramsey to separate slow flux noise from faster dephasing.",
+      "keywords": [
+        "calibration",
+        "Hahn echo",
+        "T2",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "single-shot-readout": {
+      "title": "Single-Shot Readout",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: separate |0⟩ and |1⟩ clusters in the IQ plane and set a discriminator for single-shot classification.",
+      "keywords": [
+        "calibration",
+        "single-shot readout",
+        "IQ plane",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "randomized-benchmarking": {
+      "title": "Randomized Benchmarking",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: estimate average single-qubit gate fidelity from the decay of random Clifford sequences.",
+      "keywords": [
+        "calibration",
+        "randomized benchmarking",
+        "gate fidelity",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "drag-pulse-calibration": {
+      "title": "DRAG Pulse Calibration",
+      "gallery_section": "calibration",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/drag-pulse-calibration.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/drag-pulse-calibration.html",
+      "source_repo_path": "interactive_widgets/drag-pulse-calibration.html",
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Tune the DRAG β parameter to cancel leakage to |2⟩ by sweeping the quadrature correction until repeated-pulse curves agree.",
+      "keywords": [
+        "calibration",
+        "DRAG",
+        "leakage",
+        "anharmonicity",
+        "pulse shaping"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "error-amplification": {
+      "title": "Error Amplification",
+      "gallery_section": "calibration",
+      "coming_soon": true,
+      "live_url": null,
+      "source_url": null,
+      "source_repo_path": null,
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Coming soon: repeat π or π/2 pulses to amplify small amplitude errors until they are measurable and correctable.",
+      "keywords": [
+        "calibration",
+        "error amplification",
+        "amplitude error",
+        "coming soon"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "ising-api-key-setup": {
+      "title": "NVIDIA Ising — Environment and API Key Setup",
+      "gallery_section": "calibration",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/ising_api_key_setup.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/ising_api_key_setup.html",
+      "source_repo_path": "interactive_widgets/ising_api_key_setup.html",
+      "related_content": [
+        "Calibration"
+      ],
+      "related_track_ids": [
+        "calibration"
+      ],
+      "summary": "Two-stage setup guide: create an isolated Python virtual environment and Jupyter kernel, then generate and configure a free NVIDIA API key for Ising Calibration.",
+      "keywords": [
+        "Ising Calibration",
+        "API key",
+        "virtual environment",
+        "Jupyter",
+        "workshop setup",
+        "NVIDIA Build"
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     }
