@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DRAG Pulse Calibration — CUDA-Q Academic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #76b900;
+  --accent-dark: #5e9400;
+  --bg: #1A1A1A;
+  --surface: #2A2A2A;
+  --border: #444444;
+  --fg: #E0E0E0;
+  --muted: #AAAAAA;
+  --warn: #ef9100;
+  --danger: #e52020;
+  --teal: #1dbba4;
+  --gold: #f9c500;
+  --blue: #0074df;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: #000;
+  padding: 8px 16px;
+  z-index: 100;
+  text-decoration: none;
+  font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .widget-container { padding: 32px; }
+}
+.widget-container h1 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.widget-container .summary-text {
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.instructions-section {
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.instructions-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol { margin-top: 12px; padding-left: 1.4em; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section .kbd {
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+.info-box > h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+.info-box h3 {
+  color: var(--fg);
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.context-box {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: rgba(118,185,0,0.06);
+}
+.context-box h2 {
+  color: var(--accent);
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.context-box p {
+  margin: 0 0 8px;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.context-box p:last-child { margin-bottom: 0; }
+.context-box strong { color: var(--accent); }
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.control-group {
+  flex: 1 1 280px;
+  min-width: 200px;
+}
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.readout-chip {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.slider-wrap {
+  position: relative;
+}
+.slider-wrap:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.slider-track-annot {
+  position: relative;
+  height: 18px;
+  margin-bottom: 2px;
+  pointer-events: none;
+}
+.theory-marker {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: var(--gold);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.theory-marker::after {
+  content: '';
+  display: block;
+  width: 2px;
+  height: 10px;
+  background: var(--gold);
+  margin: 2px auto 0;
+}
+.calib-band {
+  position: absolute;
+  top: 10px;
+  height: 6px;
+  background: rgba(118,185,0,0.35);
+  border-radius: 3px;
+  border: 1px solid rgba(118,185,0,0.6);
+}
+.beta-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.slider-note {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 6px;
+  background: rgba(29,187,164,0.08);
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.footnote {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-left: 3px solid var(--border);
+  padding-left: 10px;
+}
+.footnote strong { color: var(--fg); }
+details.tip-details {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+details.tip-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+details.tip-details summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+details.tip-details p { margin: 8px 0 0; color: var(--muted); }
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  min-height: 44px;
+}
+input[type=range]:focus { outline: none; }
+input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A;
+}
+input[type=range]::-moz-range-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 14px; width: 14px; border-radius: 50%;
+  background: #76B900; cursor: pointer; border: 2px solid #1A1A1A;
+}
+.btn-primary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+}
+.btn-secondary {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+.primer-box {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.primer-box p { margin: 0 0 8px; }
+.primer-box p:last-child { margin-bottom: 0; }
+.bridge-line {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gold);
+  background: rgba(249,197,0,0.08);
+  border-radius: 0 6px 6px 0;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.viz-live {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 900px) {
+  .viz-grid.mechanism-row { grid-template-columns: 1.2fr 0.8fr; }
+}
+.viz-panel {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  min-height: 0;
+}
+.viz-panel h3 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.viz-panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.viz-callout {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.35);
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.panel-subtitle {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.wave-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.wave-legend .leg-i { color: var(--teal); }
+.wave-legend .leg-q { color: var(--accent); }
+.bridge-line.compact {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+.info-box.tight {
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.primer-box.compact {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+}
+.primer-box.compact p { margin: 0 0 4px; }
+.primer-box.compact p:last-child { margin-bottom: 0; }
+.controls-sticky-anchor {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface);
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 700px) {
+  .results-grid { grid-template-columns: 1fr 1fr; }
+}
+.status-banner {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+.status-banner.disagree { color: var(--warn); border-color: var(--warn); }
+.status-banner.agree { color: var(--accent); border-color: var(--accent); }
+.metric-card {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+}
+.metric-card .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.metric-card .value {
+  color: var(--fg);
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.compromise-line {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue);
+  border-radius: 6px;
+  background: rgba(0,116,223,0.08);
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.lab-inset {
+  margin-top: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+}
+.lab-primer {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.lab-vocab {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  background: rgba(118,185,0,0.08);
+  border-radius: 0 6px 6px 0;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.lab-card {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 14px;
+}
+.lab-card img,
+.lab-card canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  background: #111;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.lab-card p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.diagnose-group {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.diagnose-group legend {
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0 4px;
+}
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.2);
+  flex: 1 1 140px;
+}
+.radio-option:hover { border-color: var(--accent); }
+.radio-option:has(input:checked) {
+  border-color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  background: rgba(118,185,0,0.12);
+}
+.radio-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.radio-option span { color: var(--fg); font-size: 0.9rem; }
+.diagnose-feedback {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+.diagnose-feedback.correct { color: var(--accent); }
+.diagnose-feedback.incorrect { color: var(--warn); }
+.next-panel p {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.next-panel a {
+  color: #76b900;
+  font-weight: 700;
+  text-decoration: none;
+}
+.next-panel a:hover { text-decoration: underline; }
+.next-panel a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.next-panel code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  color: var(--accent);
+}
+.prompt-box {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.prompt-box-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.prompt-box-header strong {
+  display: block;
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.prompt-box .btn-secondary {
+  padding: 6px 12px;
+  min-height: 36px;
+  font-size: 0.85rem;
+}
+.prompt-box #playground-prompt { margin: 0; }
+.widget-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.widget-footer a {
+  color: #76b900;
+  text-decoration: none;
+  font-weight: 700;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.widget-footer a:hover { text-decoration: underline; }
+.widget-footer a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+.radio-option:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+  <!-- Header -->
+  <header>
+    <h1>DRAG Pulse Calibration</h1>
+    <p class="summary-text">Calibrate β so repeated gates agree — I/Q waveforms show what Rabi left flat and what DRAG adds.</p>
+  </header>
+
+  <!-- Instructions -->
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol>
+      <li>Read the short prior-context note: Amplitude Rabi set how hard you push; DRAG sets pulse shape. Note the two-sentence I/Q primer before the waveform panel.</li>
+      <li>Drag β and watch both panels update.</li>
+      <li>Find the β region where the nrep curves meet; the crossing is a region, not a point — pick the center.</li>
+      <li>After gates agree at least once, diagnose the lab β-sweep inset (same vocabulary), then continue in the Ising Calibration playground.</li>
+    </ol>
+    <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to reach the β slider and buttons; arrow keys adjust β; <span class="kbd">Enter</span>/<span class="kbd">Space</span> activates Reset and playground actions; <span class="kbd">Esc</span> resets to the off-optimal start (lab unlock persists once earned).</p>
+  </details>
+
+  <!-- Prior context -->
+  <section class="context-box" aria-labelledby="context-heading">
+    <h2 id="context-heading">What this calibration step is for</h2>
+    <p><strong>Already known:</strong> Amplitude Rabi set the π-pulse strength — how hard you push.</p>
+    <p><strong>This step finds:</strong> The DRAG parameter β that shapes the pulse. A poorly shaped π-pulse can drive population into |2⟩ or accumulate phase errors — both grow with repetition. You calibrate β by finding where repeated gates agree.</p>
+  </section>
+
+  <!-- Controls (sticky so plots stay reachable while adjusting β) -->
+  <div class="controls-sticky-anchor">
+  <section class="info-box tight" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+    <div class="controls-row">
+      <div class="control-group">
+        <label for="beta-slider">DRAG parameter β <span class="readout-chip" id="beta-value" aria-hidden="true">−0.70 ns</span></label>
+        <div class="slider-wrap">
+          <div class="slider-track-annot" aria-hidden="true">
+            <div class="calib-band" id="calib-band"></div>
+            <div class="theory-marker" id="theory-marker">theory ~0.40 ns</div>
+          </div>
+          <input type="range" id="beta-slider" min="-100" max="100" value="-70" step="1"
+            aria-valuemin="-1" aria-valuemax="1" aria-valuenow="-0.7"
+            aria-valuetext="-0.70 nanoseconds"
+            aria-describedby="beta-ends slider-note-text">
+        </div>
+        <div class="beta-ends" id="beta-ends">
+          <span>−1.0 ns</span>
+          <span>+1.0 ns</span>
+        </div>
+      </div>
+      <div class="control-group" style="flex: 0 0 auto;">
+        <button type="button" class="btn-secondary" id="reset-btn">Reset</button>
+      </div>
+    </div>
+    <p class="slider-note" id="slider-note-text">In the lab, you set β, run the gate sequence, then measure agreement.</p>
+  </section>
+  </div>
+
+  <!-- Live view: mechanism + lab result together -->
+  <section class="info-box tight" aria-labelledby="live-heading">
+    <h2 id="live-heading">Live view</h2>
+    <div class="primer-box compact" id="iq-primer">
+      <p>Quantum control hardware generates pulses with two components — I (in-phase) and Q (quadrature). A standard Rabi π-pulse uses only I; DRAG adds a specific Q-channel signal.</p>
+    </div>
+    <div class="viz-live">
+      <div class="viz-grid mechanism-row">
+        <div class="viz-panel">
+          <h3 id="wave-heading">What DRAG does to the pulse — I/Q waveforms</h3>
+          <div class="wave-legend" aria-hidden="true">
+            <span class="leg-i">— I (Gaussian)</span>
+            <span class="leg-q">— Q (derivative × β)</span>
+          </div>
+          <canvas id="wave-canvas" width="720" height="200" role="img"
+            aria-labelledby="wave-heading"
+            aria-describedby="wave-desc"></canvas>
+          <p id="wave-desc" class="sr-only">I and Q on one time axis. I is a Gaussian envelope. Q is its derivative — flat at β equals zero and growing as β increases.</p>
+          <p class="viz-callout" id="wave-callout" aria-live="polite">β = −0.70 ns · Q channel active</p>
+        </div>
+        <div class="viz-panel">
+          <h3 id="levels-heading">Energy levels |0⟩ |1⟩ |2⟩</h3>
+          <p class="bridge-line compact" id="time-freq-bridge">A pulse’s shape in time determines its frequency content — a short Gaussian has broad frequency content that can reach ω<sub>12</sub>.</p>
+          <canvas id="levels-canvas" width="540" height="200" role="img"
+            aria-labelledby="levels-heading"
+            aria-describedby="levels-desc"></canvas>
+          <p id="levels-desc" class="sr-only">Three energy levels with gaps omega 0 1 and omega 1 2. Shaded spectral spill near omega 1 2 shrinks toward optimal β and grows again past it. Qualitative indicator only.</p>
+          <p class="viz-callout" id="levels-callout" aria-live="polite">Spectral spill near ω₁₂</p>
+        </div>
+      </div>
+      <div class="viz-panel">
+        <h3 id="cross-heading">How you find β in the lab — β sweep</h3>
+        <p class="panel-subtitle">Repeated X gates — final |0⟩ population after nrep π-pulses (nrep = 3, 5, 7). Y-axis: P(|0⟩).</p>
+        <canvas id="cross-canvas" width="960" height="260" role="img"
+          aria-labelledby="cross-heading"
+          aria-describedby="cross-desc"></canvas>
+        <p id="cross-desc" class="sr-only">Three slightly noisy curves of P of zero versus β for 3, 5, and 7 repetitions. They meet in a broad region near the calibrated β. A gold marker shows the current β.</p>
+        <p class="viz-callout" id="cross-callout" aria-live="polite">In practice the crossing is a region, not a point — you pick the center.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="info-box" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+    <p class="status-banner disagree" id="agree-banner" role="status">Gates disagree — coherent errors amplify with more repetitions</p>
+    <div class="results-grid">
+      <div class="metric-card">
+        <span class="label">Current β</span>
+        <span class="value" id="beta-metric">−0.70 ns</span>
+      </div>
+      <div class="metric-card">
+        <span class="label">Curve disagreement</span>
+        <span class="value" id="spread-metric">0.42</span>
+        <p class="panel-subtitle" style="margin-top:6px">max |P(|0⟩)<sub>n=3</sub> − P(|0⟩)<sub>n=7</sub>|</p>
+      </div>
+    </div>
+    <p class="footnote" id="phase-tip">
+      <strong>Phase error / AC Stark:</strong> the drive shifts the qubit frequency slightly off resonance during the pulse, rotating it onto the wrong axis.
+    </p>
+  </section>
+
+  <!-- Lab inset (gated) -->
+  <section class="info-box" id="lab-panel" aria-labelledby="lab-heading" hidden>
+    <h2 id="lab-heading">Real lab data — compare</h2>
+    <div class="lab-inset">
+      <p class="lab-primer" id="lab-primer">
+        Real Qblox DRAG β-sweep: Signal vs Beta for nrep = 3, 5, and 7.
+        The three curves meet in a region; the fit marks the calibrated β (≈ −1.52 on this device).
+        Hardware β units and range can differ from the interactive slider above — the signature to recognize is the crossing.
+      </p>
+      <p class="lab-vocab" id="lab-vocab">
+        Under-corrected = gates disagree (β too small); Over-corrected = gates disagree (β too large); Calibrated = gates agree (center of the crossing region).
+      </p>
+      <div class="lab-card">
+        <img id="drag-lab-img" src="DRAG.png" width="1024" height="720"
+          alt="Real Qblox DRAG calibration plot: Signal versus Beta for nrep equals 3, 5, and 7. Three curves with a fit at beta approximately negative 1.52 where the curves agree.">
+        <p>Real Qblox data: nrep = 3 (blue), 5 (orange), 7 (green). Fit β ≈ −1.52 at the crossing.</p>
+      </div>
+      <fieldset class="diagnose-group" id="lab-diagnose-group">
+        <legend id="lab-diagnose-legend">Looking at this β-sweep: what does the fit mark?</legend>
+        <div class="radio-row" role="radiogroup" aria-labelledby="lab-diagnose-legend">
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="under"> <span>Under-corrected</span></label>
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="calibrated"> <span>Calibrated</span></label>
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="over"> <span>Over-corrected</span></label>
+        </div>
+        <p class="diagnose-feedback" id="diagnose-feedback" hidden></p>
+      </fieldset>
+    </div>
+  </section>
+
+  <!-- Ising Calibration playground (gated) -->
+  <section class="info-box next-panel" id="next-panel" aria-labelledby="next-heading" hidden>
+    <h2 id="next-heading">Ising Calibration playground</h2>
+    <p>You’ve found where gates agree and diagnosed the lab β-sweep. Continue in the
+      <a href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Ising Calibration playground</a>:
+      paste the prompt below (or rewrite it in your own words), optionally attach <code>DRAG.png</code>, and
+      <strong>ask about anything you still don’t understand</strong> — or <strong>state what you think is going on and ask the agent to confirm or correct you</strong>.</p>
+    <div class="prompt-box" role="region" aria-label="Suggested playground prompt">
+      <div class="prompt-box-header">
+        <strong>Suggested prompt</strong>
+        <button type="button" class="btn-secondary" id="copy-prompt-btn">Copy prompt</button>
+      </div>
+      <p id="playground-prompt">I just finished a DRAG pulse calibration intro. Before this step I already knew the π-pulse amplitude from Rabi. In the widget I saw that DRAG adds a Q-channel derivative to the I Gaussian, and I calibrate β by finding where repeated X-gate curves (nrep = 3, 5, 7) agree. I also looked at a real Qblox β-sweep (DRAG.png) with a fit near β ≈ −1.52. Please confirm or correct that understanding. Also explain briefly: how phase error / AC Stark during the pulse differs from leakage to |2⟩, and why the analytical β ≈ −1/(2α) is only a starting point.</p>
+    </div>
+    <p>Open the playground, paste the prompt, then add your own follow-up: a confusion (“I don’t get why…”), or a check (“Here’s what I think happens — am I right?”).</p>
+    <div class="controls-row">
+      <a class="btn-primary" href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Open Ising Calibration playground</a>
+    </div>
+  </section>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  // --- Constants (β in nanoseconds) ---
+  const BETA_MIN = -1.0;
+  const BETA_MAX = 1.0;
+  const BETA_THEORY = 0.40;   // ≈ −1/(2α) for α ≈ −200 MHz
+  const BETA_OPT = 0.48;      // empirical compromise (slightly off theory)
+  const CALIB_HALF = 0.12;    // half-width of "gates agree" region
+  const BETA_START = -0.70;   // off-optimal initial state
+  const NREPS = [3, 5, 7];
+  const SPREAD_AGREE = 0.08;  // max |P3−P7| threshold at current β
+
+  const state = {
+    beta: BETA_START,
+    agrees: false,
+    agreedOnce: false,
+    labUnlocked: false,
+    diagnosed: false
+  };
+
+  /** Map slider integer −100…100 → β in ns. */
+  function sliderToBeta(v) {
+    return BETA_MIN + (Number(v) - (-100)) * (BETA_MAX - BETA_MIN) / 200;
+  }
+  function betaToSlider(beta) {
+    return Math.round(-100 + (beta - BETA_MIN) / (BETA_MAX - BETA_MIN) * 200);
+  }
+  function betaToFrac(beta) {
+    return (beta - BETA_MIN) / (BETA_MAX - BETA_MIN);
+  }
+
+  /** Deterministic noise for slightly broad, realistic curves. */
+  function noiseAt(beta, nrep, i) {
+    const x = beta * 17.3 + nrep * 3.1 + i * 0.07;
+    return (Math.sin(x) * 43758.5453 % 1) * 0.035 - 0.0175;
+  }
+
+  /**
+   * Final |0⟩ population after nrep π-pulses vs β.
+   * All curves meet near BETA_OPT (≈0.5); amplitude grows with nrep so errors amplify.
+   * Slight per-point noise keeps the crossing a region, not a knife-edge.
+   */
+  function p0(nrep, beta) {
+    const d = beta - BETA_OPT;
+    const amp = 0.10 + 0.07 * ((nrep - 3) / 2);
+    const osc = Math.sin(3.2 * d);
+    return clamp(0.5 + amp * nrep / 3 * osc + noiseAt(beta, nrep, 0), 0.05, 0.95);
+  }
+
+  /**
+   * Curve disagreement at CURRENT β only (not averaged over the range).
+   * max |P(|0⟩)_{n=3} − P(|0⟩)_{n=7}|
+   */
+  function disagreementAt(beta) {
+    return Math.abs(p0(3, beta) - p0(7, beta));
+  }
+
+  function gatesAgree(beta) {
+    // Calibrated region is spatial on the β axis (broad crossing), not a knife-edge.
+    return Math.abs(beta - BETA_OPT) <= CALIB_HALF;
+  }
+
+  /** Qualitative spectral spill 0…1: shrinks near opt, grows past it. */
+  function spillAmount(beta) {
+    const d = Math.abs(beta - BETA_OPT);
+    return clamp(d / 0.55, 0.08, 1);
+  }
+
+  /** Gaussian I envelope and DRAG Q = β · dI/dt (display units). */
+  function pulseSamples(beta, n) {
+    const I = new Float64Array(n);
+    const Q = new Float64Array(n);
+    const sigma = 0.18;
+    const t0 = 0.5;
+    // Fixed display gain so |β|=1 fills roughly like the I peak; β=0 → Q flat
+    const qGain = 0.22;
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      const u = (t - t0) / sigma;
+      I[i] = Math.exp(-0.5 * u * u);
+      const dIdt = -(t - t0) / (sigma * sigma) * I[i];
+      Q[i] = beta * dIdt * qGain;
+    }
+    return { I, Q };
+  }
+
+  function clamp(x, a, b) {
+    return Math.max(a, Math.min(b, x));
+  }
+
+  function fmtBeta(beta) {
+    const sign = beta >= 0 ? '+' : '−';
+    return sign + Math.abs(beta).toFixed(2) + ' ns';
+  }
+
+  // els + render + wiring filled in 3D-ii / 3E
+  const els = {};
+  const Drag = { state, els, BETA_MIN, BETA_MAX, BETA_THEORY, BETA_OPT, CALIB_HALF, BETA_START,
+    NREPS, SPREAD_AGREE, sliderToBeta, betaToSlider, betaToFrac, p0, disagreementAt,
+    gatesAgree, spillAmount, pulseSamples, fmtBeta, clamp, noiseAt };
+
+  window.DragCal = Drag;
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const D = window.DragCal;
+  if (!D) return;
+
+  function sizeCanvas(canvas, cssW, cssH) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = cssW || canvas.clientWidth || canvas.width;
+    const h = cssH || (w * (canvas.height / canvas.width));
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w, h };
+  }
+
+  function drawWaveforms(beta) {
+    const canvas = D.els.waveCanvas;
+    if (!canvas) return;
+    const { ctx, w, h } = sizeCanvas(canvas, canvas.clientWidth || 720, 200);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    const pad = { l: 44, r: 14, t: 16, b: 28 };
+    const plotW = w - pad.l - pad.r;
+    const plotH = h - pad.t - pad.b;
+    const midY = pad.t + plotH / 2;
+    const n = 180;
+    const { I, Q } = D.pulseSamples(beta, n);
+
+    // Zero line
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, midY);
+    ctx.lineTo(pad.l + plotW, midY);
+    ctx.stroke();
+
+    // Shared vertical scale anchored to I so Q visibly grows/shrinks with |β|
+    // (and flips sign with β). Reference includes |β|=1 peak so nothing clips.
+    const ref = D.pulseSamples(1, n);
+    let maxAbs = 1e-6;
+    for (let i = 0; i < n; i++) {
+      maxAbs = Math.max(maxAbs, Math.abs(I[i]), Math.abs(ref.Q[i]), Math.abs(Q[i]));
+    }
+    const scale = (plotH * 0.42) / maxAbs;
+
+    function strokeSeries(data, color, width) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const x = pad.l + (i / (n - 1)) * plotW;
+        const y = midY - data[i] * scale;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    strokeSeries(I, '#1dbba4', 2.5);
+    strokeSeries(Q, '#76b900', 2.5);
+
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillText('0', pad.l - 14, midY + 4);
+    ctx.fillText('time →', pad.l + plotW - 48, h - 10);
+  }
+
+  function drawLevels(beta) {
+    const canvas = D.els.levelsCanvas;
+    if (!canvas) return;
+    const { ctx, w, h } = sizeCanvas(canvas, canvas.clientWidth || 540, 200);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w * 0.40;
+    const levels = [
+      { y: h * 0.82, label: '|0⟩' },
+      { y: h * 0.52, label: '|1⟩' },
+      { y: h * 0.22, label: '|2⟩' }
+    ];
+
+    ctx.strokeStyle = '#E0E0E0';
+    ctx.lineWidth = 2;
+    levels.forEach(function (L) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 55, L.y);
+      ctx.lineTo(cx + 55, L.y);
+      ctx.stroke();
+      ctx.fillStyle = '#E0E0E0';
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.fillText(L.label, cx + 64, L.y + 4);
+    });
+
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillText('ω₀₁', cx - 92, (levels[0].y + levels[1].y) / 2 + 3);
+    ctx.fillText('ω₁₂', cx - 92, (levels[1].y + levels[2].y) / 2 + 3);
+
+    const spill = D.spillAmount(beta);
+    const midY = (levels[1].y + levels[2].y) / 2;
+    const bandH = 12 + spill * 36;
+    const bandW = 32 + spill * 70;
+    ctx.fillStyle = 'rgba(249,197,0,' + (0.15 + spill * 0.45).toFixed(2) + ')';
+    ctx.fillRect(cx - bandW / 2, midY - bandH / 2, bandW, bandH);
+    ctx.strokeStyle = '#f9c500';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - bandW / 2, midY - bandH / 2, bandW, bandH);
+
+    ctx.fillStyle = '#f9c500';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText('spill', cx - bandW / 2, midY - bandH / 2 - 4);
+  }
+
+  function drawCrossing(beta) {
+    const canvas = D.els.crossCanvas;
+    if (!canvas) return;
+    const { ctx, w, h } = sizeCanvas(canvas, canvas.clientWidth || 960, 260);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    const pad = { l: 52, r: 20, t: 24, b: 36 };
+    const plotW = w - pad.l - pad.r;
+    const plotH = h - pad.t - pad.b;
+
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, pad.t + plotH);
+    ctx.lineTo(pad.l + plotW, pad.t + plotH);
+    ctx.stroke();
+
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillText('P(|0⟩)', 6, pad.t + 8);
+    ctx.fillText('β (ns)', pad.l + plotW / 2 - 18, h - 10);
+    ctx.fillText('−1', pad.l, h - 22);
+    ctx.fillText('+1', pad.l + plotW - 14, h - 22);
+    ctx.fillText('0.5', pad.l - 26, pad.t + plotH / 2 + 3);
+
+    const fLo = D.betaToFrac(D.BETA_OPT - D.CALIB_HALF);
+    const fHi = D.betaToFrac(D.BETA_OPT + D.CALIB_HALF);
+    ctx.fillStyle = 'rgba(118,185,0,0.12)';
+    ctx.fillRect(pad.l + fLo * plotW, pad.t, (fHi - fLo) * plotW, plotH);
+
+    const colors = { 3: '#1dbba4', 5: '#0074df', 7: '#ef9100' };
+    const steps = 80;
+
+    D.NREPS.forEach(function (n) {
+      ctx.strokeStyle = colors[n];
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const b = D.BETA_MIN + (i / steps) * (D.BETA_MAX - D.BETA_MIN);
+        const p = D.p0(n, b);
+        const x = pad.l + D.betaToFrac(b) * plotW;
+        const y = pad.t + (1 - p) * plotH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+
+    let lx = pad.l + 8;
+    D.NREPS.forEach(function (n) {
+      ctx.fillStyle = colors[n];
+      ctx.fillRect(lx, pad.t + 4, 12, 3);
+      ctx.fillStyle = '#E0E0E0';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText('n=' + n, lx + 16, pad.t + 10);
+      lx += 58;
+    });
+
+    const fx = pad.l + D.betaToFrac(beta) * plotW;
+    ctx.strokeStyle = '#f9c500';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(fx, pad.t);
+    ctx.lineTo(fx, pad.t + plotH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f9c500';
+    ctx.beginPath();
+    ctx.arc(fx, pad.t + (1 - D.p0(5, beta)) * plotH, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function updateSliderAnnot() {
+    const track = D.els.sliderAnnot;
+    if (!track) return;
+    const theoryFrac = D.betaToFrac(D.BETA_THEORY);
+    const lo = D.betaToFrac(D.BETA_OPT - D.CALIB_HALF);
+    const hi = D.betaToFrac(D.BETA_OPT + D.CALIB_HALF);
+    if (D.els.theoryMarker) {
+      D.els.theoryMarker.style.left = (theoryFrac * 100) + '%';
+    }
+    if (D.els.calibBand) {
+      D.els.calibBand.style.left = (lo * 100) + '%';
+      D.els.calibBand.style.width = ((hi - lo) * 100) + '%';
+    }
+  }
+
+  function render() {
+    const beta = D.state.beta;
+    drawWaveforms(beta);
+    drawLevels(beta);
+    drawCrossing(beta);
+
+    const agree = D.gatesAgree(beta);
+    D.state.agrees = agree;
+    if (agree) D.state.agreedOnce = true;
+
+    if (D.els.betaValue) D.els.betaValue.textContent = D.fmtBeta(beta);
+    if (D.els.betaMetric) D.els.betaMetric.textContent = D.fmtBeta(beta);
+    if (D.els.spreadMetric) D.els.spreadMetric.textContent = D.disagreementAt(beta).toFixed(2);
+
+    if (D.els.waveCallout) {
+      if (Math.abs(beta) < 0.02) {
+        D.els.waveCallout.textContent = 'β ≈ 0 · Q flat (Rabi-style — I only)';
+      } else {
+        D.els.waveCallout.textContent = D.fmtBeta(beta) + ' · Q amplitude ∝ |β|' + (beta < 0 ? ' (sign flipped)' : '');
+      }
+    }
+    if (D.els.levelsCallout) {
+      const spill = D.spillAmount(beta);
+      D.els.levelsCallout.textContent = spill < 0.25
+        ? 'Spectral spill near ω₁₂ minimized'
+        : 'Spectral spill near ω₁₂ elevated';
+    }
+    if (D.els.crossCallout) {
+      D.els.crossCallout.textContent = 'In practice the crossing is a region, not a point — you pick the center.';
+    }
+    if (D.els.agreeBanner) {
+      if (agree) {
+        D.els.agreeBanner.className = 'status-banner agree';
+        D.els.agreeBanner.textContent = '✓ Gates agree — calibrated β (center of the crossing region)';
+      } else {
+        D.els.agreeBanner.className = 'status-banner disagree';
+        D.els.agreeBanner.textContent = 'Gates disagree — coherent errors amplify with more repetitions';
+      }
+    }
+
+    // Unlock lab after gates-agree at least once
+    if (D.state.agreedOnce && !D.state.labUnlocked) {
+      D.state.labUnlocked = true;
+      if (D.els.labPanel) D.els.labPanel.hidden = false;
+      if (D.els.nextPanel) D.els.nextPanel.hidden = false;
+      announce('Lab diagnose and Ising Calibration playground unlocked.');
+    }
+  }
+
+  function announce(msg) {
+    if (D.els.statusAnnounce) D.els.statusAnnounce.textContent = msg;
+  }
+
+  D.drawWaveforms = drawWaveforms;
+  D.drawLevels = drawLevels;
+  D.drawCrossing = drawCrossing;
+  D.updateSliderAnnot = updateSliderAnnot;
+  D.render = render;
+  D.announce = announce;
+  D.sizeCanvas = sizeCanvas;
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const D = window.DragCal;
+  if (!D) return;
+
+  function cacheEls() {
+    D.els.betaSlider = document.getElementById('beta-slider');
+    D.els.betaValue = document.getElementById('beta-value');
+    D.els.betaMetric = document.getElementById('beta-metric');
+    D.els.spreadMetric = document.getElementById('spread-metric');
+    D.els.resetBtn = document.getElementById('reset-btn');
+    D.els.theoryMarker = document.getElementById('theory-marker');
+    D.els.calibBand = document.getElementById('calib-band');
+    D.els.sliderAnnot = document.querySelector('.slider-track-annot');
+    D.els.waveCanvas = document.getElementById('wave-canvas');
+    D.els.levelsCanvas = document.getElementById('levels-canvas');
+    D.els.crossCanvas = document.getElementById('cross-canvas');
+    D.els.waveCallout = document.getElementById('wave-callout');
+    D.els.levelsCallout = document.getElementById('levels-callout');
+    D.els.crossCallout = document.getElementById('cross-callout');
+    D.els.agreeBanner = document.getElementById('agree-banner');
+    D.els.labPanel = document.getElementById('lab-panel');
+    D.els.nextPanel = document.getElementById('next-panel');
+    D.els.statusAnnounce = document.getElementById('status-announce');
+    D.els.copyPromptBtn = document.getElementById('copy-prompt-btn');
+    D.els.playgroundPrompt = document.getElementById('playground-prompt');
+    D.els.diagnoseFeedback = document.getElementById('diagnose-feedback');
+    D.els.diagnoseRadios = document.querySelectorAll('input[name="lab-diagnose"]');
+  }
+
+  function setBeta(beta, announceChange) {
+    D.state.beta = D.clamp(beta, D.BETA_MIN, D.BETA_MAX);
+    if (D.els.betaSlider) {
+      D.els.betaSlider.value = String(D.betaToSlider(D.state.beta));
+      D.els.betaSlider.setAttribute('aria-valuenow', String(D.state.beta.toFixed(2)));
+      D.els.betaSlider.setAttribute('aria-valuetext', D.fmtBeta(D.state.beta).replace('−', '-') + '');
+    }
+    D.render();
+    if (announceChange) {
+      D.announce(D.state.agrees
+        ? 'Gates agree at ' + D.fmtBeta(D.state.beta)
+        : 'Gates disagree at ' + D.fmtBeta(D.state.beta));
+    }
+  }
+
+  function onSliderInput() {
+    const beta = D.sliderToBeta(D.els.betaSlider.value);
+    setBeta(beta, false);
+  }
+
+  function reset() {
+    setBeta(D.BETA_START, true);
+    D.announce('Reset to off-optimal β. Lab unlock persists if already earned.');
+  }
+
+  function onDiagnose() {
+    const selected = document.querySelector('input[name="lab-diagnose"]:checked');
+    if (!selected || !D.els.diagnoseFeedback) return;
+    const val = selected.value;
+    // Fit on the Qblox plot marks the calibrated crossing
+    const correct = 'calibrated';
+    if (val === correct) {
+      D.els.diagnoseFeedback.hidden = false;
+      D.els.diagnoseFeedback.className = 'diagnose-feedback correct';
+      D.els.diagnoseFeedback.textContent = 'Correct — the fit marks where the nrep curves agree (calibrated β).';
+      D.state.diagnosed = true;
+      D.announce('Diagnosis correct. The fit marks the calibrated crossing.');
+    } else {
+      D.els.diagnoseFeedback.hidden = false;
+      D.els.diagnoseFeedback.className = 'diagnose-feedback incorrect';
+      const hint = val === 'under'
+        ? 'Under-corrected would mean β too small. Look at where the fit sits relative to the curves.'
+        : 'Over-corrected would mean β too large. Look at where the fit sits relative to the curves.';
+      D.els.diagnoseFeedback.textContent = 'Not quite. ' + hint;
+      D.announce('Diagnosis incorrect. ' + hint);
+    }
+  }
+
+  function copyPrompt() {
+    const text = (D.els.playgroundPrompt && D.els.playgroundPrompt.textContent || '').trim();
+    if (!text) return;
+    function done() {
+      D.announce('Playground prompt copied to clipboard.');
+      if (D.els.copyPromptBtn) {
+        const prev = D.els.copyPromptBtn.textContent;
+        D.els.copyPromptBtn.textContent = 'Copied';
+        setTimeout(function () { D.els.copyPromptBtn.textContent = prev; }, 1500);
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () {
+        window.prompt('Copy this prompt:', text);
+      });
+    } else {
+      window.prompt('Copy this prompt:', text);
+    }
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Escape') {
+      reset();
+      e.preventDefault();
+    }
+  }
+
+  function onResize() {
+    D.updateSliderAnnot();
+    D.render();
+  }
+
+  function init() {
+    cacheEls();
+    D.updateSliderAnnot();
+    setBeta(D.BETA_START, false);
+
+    if (D.els.betaSlider) {
+      D.els.betaSlider.addEventListener('input', onSliderInput);
+      D.els.betaSlider.addEventListener('change', function () {
+        D.announce(D.state.agrees
+          ? 'Gates agree at ' + D.fmtBeta(D.state.beta)
+          : 'Gates disagree at ' + D.fmtBeta(D.state.beta));
+      });
+    }
+    if (D.els.resetBtn) D.els.resetBtn.addEventListener('click', reset);
+    if (D.els.copyPromptBtn) D.els.copyPromptBtn.addEventListener('click', copyPrompt);
+    D.els.diagnoseRadios.forEach(function (r) {
+      r.addEventListener('change', onDiagnose);
+    });
+    document.addEventListener('keydown', onKeydown);
+    window.addEventListener('resize', onResize);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
