@@ -989,13 +989,20 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
   // Widgets that should appear as card-level items (Open button inline in the
   // notebook list). Every other widget surfaces only inside the "Get Started"
   // dropdown for lessons in that track.
-  // Match by live_url substring so widget IDs in curriculum.json don't matter.
+  // A track can name its own set via `featured_widget_ids` in curriculum.json.
+  // Tracks that don't fall back to these rules, which match by live_url
+  // substring so widget IDs in curriculum.json don't matter.
   const FEATURED_WIDGET_RULES = [
       { urlMatch: 'cudaq-hello-world',          tracks: ['quick-start-to-quantum', 'qis-foundational-algorithms'] },
       { urlMatch: 'borns-rule-widget-sampling', tracks: ['quick-start-to-quantum'] }
   ];
 
-  function isFeaturedWidget(widget, trackKey) {
+  function isFeaturedWidget(widget, trackKey, curriculum) {
+      const track = ((curriculum || {}).tracks || {})[trackKey] || {};
+      if (Array.isArray(track.featured_widget_ids)) {
+          const widgets = (curriculum || {}).widgets || {};
+          return track.featured_widget_ids.some(id => widgets[id] === widget);
+      }
       for (const rule of FEATURED_WIDGET_RULES) {
           if ((widget.live_url || '').includes(rule.urlMatch)) {
               return rule.tracks.includes(trackKey);
@@ -1081,22 +1088,24 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
   }
 
   // Featured widgets appear as inline Open-button items in the card list.
-  // Only Hello World (Quick Start + QIS) and Born's Rule (Quick Start) qualify.
+  // Widgets without a live URL are skipped so the Open button never dangles.
   function buildWidgetEntriesForTrack(trackKey, curriculum) {
-          return getWidgetsForTrack(trackKey, curriculum)
-          .filter(w => isFeaturedWidget(w, trackKey))
+      const track = (curriculum.tracks || {})[trackKey] || {};
+      const difficulty = DIFFICULTY_MAP[(track.difficulty_range || [])[0]] || 'intro';
+      return getWidgetsForTrack(trackKey, curriculum)
+          .filter(w => isFeaturedWidget(w, trackKey, curriculum) && w.live_url)
           .map(w => ({
               name: 'Interactive: ' + stripNum(w.title),
               type: 'tool',
               url: w.live_url,
-              difficulty: 'intro'
+              difficulty: difficulty
           }));
   }
 
   // Non-featured widgets surface inside the "Get Started" dropdown.
   function buildSupplementaryWidgetsForTrack(trackKey, curriculum) {
       return getWidgetsForTrack(trackKey, curriculum)
-          .filter(w => !isFeaturedWidget(w, trackKey))
+          .filter(w => !isFeaturedWidget(w, trackKey, curriculum))
           .map(w => ({ name: stripNum(w.title), url: w.live_url }));
   }
 
@@ -1110,7 +1119,7 @@ Discover interactive tutorials and visualization tools for quantum GPU supercomp
       return ids
           .map(id => widgets[id])
           .filter(Boolean)
-          .filter(w => !isFeaturedWidget(w, trackKey))
+          .filter(w => !isFeaturedWidget(w, trackKey, curriculum))
           .map(w => ({
               name: stripNum(w.title),
               url: w.live_url,

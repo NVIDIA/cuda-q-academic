@@ -191,11 +191,19 @@
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Instructor resource: interactive visualizations for superconducting-qubit calibration experiments (resonator spectroscopy through DRAG), plus NVIDIA Ising Calibration for plot analysis via browser playground, API-key setup guide, and notebook. Sample plots from QCalEval. Numbered lesson notebooks coming later; additional experiment widgets coming soon.",
+      "summary": "Instructor resources for superconducting-qubit calibration: interactive experiment visualizations and NVIDIA Ising for reading calibration plots.",
       "more_lessons_coming_soon": true,
       "more_lessons_coming_soon_label": "More calibration widgets coming soon",
       "lesson_ids": [
         "calibration-instructor-guide"
+      ],
+      "featured_widget_ids": [
+        "ising-api-key-setup",
+        "resonator-spectroscopy",
+        "resonator-punch-out",
+        "qubit-spectroscopy-intro",
+        "amplitude-rabi",
+        "drag-pulse-calibration"
       ],
       "widget_ids": [
         "ising-api-key-setup",
@@ -2109,7 +2117,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: align the readout acquisition window to when the signal arrives through the cryostat cabling.",
+      "summary": "",
       "keywords": [
         "calibration",
         "time of flight",
@@ -2130,7 +2138,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Find the readout resonator frequency by sweeping a microwave tone and watching for the sharp absorption dip that marks resonance.",
+      "summary": "Locate the readout resonator frequency from the absorption dip in a frequency sweep.",
       "keywords": [
         "calibration",
         "resonator spectroscopy",
@@ -2152,7 +2160,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Sweep readout power across resonator spectroscopy to see the shift from bare to qubit-dressed resonance and choose a readout power.",
+      "summary": "See how readout power shifts the resonator from bare to qubit-dressed resonance.",
       "keywords": [
         "calibration",
         "punch out",
@@ -2175,7 +2183,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: map resonator response vs flux to locate the qubit sweet spot where frequency is least sensitive to flux noise.",
+      "summary": "",
       "keywords": [
         "calibration",
         "flux spectroscopy",
@@ -2196,7 +2204,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Find the qubit transition frequency ω₀₁ by sweeping drive frequency — first at low power (flat spectrum), then after raising drive power so a clean peak can appear.",
+      "summary": "Find the qubit transition frequency by sweeping drive frequency and power.",
       "keywords": [
         "calibration",
         "qubit spectroscopy",
@@ -2219,7 +2227,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Sweep microwave pulse amplitude at fixed frequency and duration to find the π-pulse level that fully inverts the qubit population.",
+      "summary": "Calibrate the π-pulse amplitude from Rabi oscillations.",
       "keywords": [
         "calibration",
         "Rabi",
@@ -2242,7 +2250,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: prepare |1⟩, wait, and measure to extract the energy-relaxation time T₁ from exponential decay.",
+      "summary": "",
       "keywords": [
         "calibration",
         "T1",
@@ -2264,7 +2272,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: use Ramsey fringes to fine-tune the qubit drive frequency and estimate T₂*.",
+      "summary": "",
       "keywords": [
         "calibration",
         "Ramsey",
@@ -2287,7 +2295,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: compare echo decay to Ramsey to separate slow flux noise from faster dephasing.",
+      "summary": "",
       "keywords": [
         "calibration",
         "Hahn echo",
@@ -2309,7 +2317,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: separate |0⟩ and |1⟩ clusters in the IQ plane and set a discriminator for single-shot classification.",
+      "summary": "",
       "keywords": [
         "calibration",
         "single-shot readout",
@@ -2331,7 +2339,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: estimate average single-qubit gate fidelity from the decay of random Clifford sequences.",
+      "summary": "",
       "keywords": [
         "calibration",
         "randomized benchmarking",
@@ -2352,7 +2360,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Tune the DRAG β parameter to cancel leakage to |2⟩ by sweeping the quadrature correction until repeated-pulse curves agree.",
+      "summary": "Tune DRAG β to suppress leakage to |2⟩ during fast pulses.",
       "keywords": [
         "calibration",
         "DRAG",
@@ -2375,7 +2383,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Coming soon: repeat π or π/2 pulses to amplify small amplitude errors until they are measurable and correctable.",
+      "summary": "",
       "keywords": [
         "calibration",
         "error amplification",
@@ -2396,7 +2404,7 @@
       "related_track_ids": [
         "calibration"
       ],
-      "summary": "Two-stage setup guide: create an isolated Python virtual environment and Jupyter kernel, then generate and configure a free NVIDIA API key for Ising Calibration.",
+      "summary": "Set up a local Python/Jupyter environment and NVIDIA API key to call Ising Calibration.",
       "keywords": [
         "Ising Calibration",
         "API key",
