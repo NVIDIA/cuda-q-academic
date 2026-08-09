@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resonator Spectroscopy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #76b900;
+  --accent-dark: #5e9400;
+  --bg: #1A1A1A;
+  --surface: #2A2A2A;
+  --border: #444444;
+  --fg: #E0E0E0;
+  --muted: #AAAAAA;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 32px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: var(--accent); color: #000;
+  padding: 8px 16px; z-index: 100;
+  text-decoration: none; font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .widget-container { padding: 32px; } }
+.widget-container h1 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.widget-container .summary-text {
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.instructions-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.instructions-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol { margin-top: 12px; padding-left: 1.4rem; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section .kbd {
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+.info-box h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.control-group { flex: 1 1 220px; min-width: 200px; }
+.control-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.freq-readout {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  margin-left: 8px;
+  font-weight: 700;
+}
+.slider-wrap:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+input[type=range]:focus { outline: none; }
+input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A;
+}
+input[type=range]::-moz-range-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 14px; width: 14px; border-radius: 50%; background: #76B900;
+  cursor: pointer; border: 2px solid #1A1A1A;
+}
+.btn-primary {
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 18px;
+  min-width: 44px;
+  min-height: 44px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+}
+.btn-primary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .viz-grid { grid-template-columns: 1.1fr 1fr; }
+}
+.viz-panel {
+  background: #000000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 260px;
+}
+.viz-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--fg);
+  font-weight: 700;
+}
+.viz-panel svg, .viz-panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.status-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.status-banner.found {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.status-banner.near {
+  border-color: #ef9100;
+  color: #ef9100;
+}
+.status-banner.hunting { color: var(--muted); }
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .results-grid { grid-template-columns: 1.2fr 1fr; }
+}
+.next-panel, .lab-inset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  min-width: 0;
+}
+.next-panel h3, .lab-inset h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+.next-panel p, .lab-inset p { margin: 0 0 8px 0; color: var(--muted); font-size: 0.9rem; }
+.next-panel p:last-child, .lab-inset p:last-child { margin-bottom: 0; }
+.lab-inset canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.widget-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.widget-footer a {
+  color: #76b900;
+  text-decoration: none;
+  margin-right: 16px;
+}
+.widget-footer a:hover { text-decoration: underline; }
+.widget-footer a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+  <header>
+    <h1>Resonator Spectroscopy</h1>
+    <p class="summary-text">Find the hidden frequency that lets a nearby listening device reveal the qubit’s state.</p>
+  </header>
+
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol>
+      <li>Drag the <strong>Signal frequency</strong> slider slowly across the range.</li>
+      <li>Watch the listening device (left) and the “How much signal comes out?” graph (right). Look for a sharp dip.</li>
+      <li>When the status says the frequency is found, read <strong>What happens next?</strong></li>
+    </ol>
+    <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> moves between the slider and Reset. Arrow keys adjust the focused slider. <span class="kbd">Enter</span> / <span class="kbd">Space</span> activates Reset. <span class="kbd">Esc</span> resets.</p>
+  </details>
+
+  <section class="info-box" id="viz-section" aria-labelledby="viz-heading">
+    <h2 id="viz-heading">Spectroscopy</h2>
+    <div class="viz-grid">
+      <div class="viz-panel" role="img" aria-labelledby="schematic-caption">
+        <h3 id="schematic-caption">Qubit and its listening device</h3>
+        <svg id="schematic-svg" viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="0" y="0" width="520" height="300" fill="#000"/>
+          <text id="response-state" x="260" y="24" text-anchor="middle" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="14" font-weight="700">Off resonance</text>
+          <!-- incoming probe -->
+          <text x="24" y="48" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="13">Incoming signal</text>
+          <path id="incoming-wave" d="" fill="none" stroke="#ef9100" stroke-width="2"/>
+          <!-- listening device (resonator) -->
+          <circle id="energy-glow" cx="260" cy="120" r="48" fill="#76b900" opacity="0.05"/>
+          <rect id="resonator-box" x="200" y="80" width="120" height="80" rx="10" fill="#2A2A2A" stroke="#76b900" stroke-width="2"/>
+          <text x="260" y="113" text-anchor="middle" fill="#E0E0E0" font-family="Inter, sans-serif" font-size="13" font-weight="700">Listening</text>
+          <text x="260" y="131" text-anchor="middle" fill="#E0E0E0" font-family="Inter, sans-serif" font-size="13" font-weight="700">device</text>
+          <text id="resonator-name" x="260" y="176" text-anchor="middle" fill="#76b900" font-family="Inter, sans-serif" font-size="12" font-weight="700" opacity="0">Resonator</text>
+          <text id="energy-label" x="260" y="62" text-anchor="middle" fill="#76b900" font-family="Inter, sans-serif" font-size="11" font-weight="700" opacity="0">Energy builds here</text>
+          <!-- outgoing probe -->
+          <text x="370" y="48" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="13">Outgoing signal</text>
+          <path id="outgoing-wave" d="" fill="none" stroke="#ef9100" stroke-width="2"/>
+          <!-- qubit -->
+          <line x1="260" y1="160" x2="260" y2="215" stroke="#444444" stroke-width="2" stroke-dasharray="4 4"/>
+          <circle cx="260" cy="242" r="27" fill="#2A2A2A" stroke="#0074df" stroke-width="2"/>
+          <text x="260" y="247" text-anchor="middle" fill="#E0E0E0" font-family="Inter, sans-serif" font-size="14" font-weight="700">Qubit</text>
+          <text x="260" y="286" text-anchor="middle" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="11">what you listen to</text>
+        </svg>
+        <div class="legend">
+          <span><span class="legend-swatch" style="background:#ef9100"></span>Probe signal in and out</span>
+          <span><span class="legend-swatch" style="background:#76b900"></span>Listening device (resonator)</span>
+          <span><span class="legend-swatch" style="background:#0074df"></span>Qubit</span>
+        </div>
+      </div>
+      <div class="viz-panel">
+        <h3 id="curve-caption">How much signal comes out?</h3>
+        <canvas id="curve-canvas" width="480" height="280" role="img" aria-labelledby="curve-caption"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-box" id="controls-section" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+    <div class="controls-row">
+      <div class="control-group">
+        <label for="freq-slider">Signal frequency <span class="freq-readout" id="freq-label" aria-hidden="true">6.480 GHz</span></label>
+        <div class="slider-wrap">
+          <input type="range" id="freq-slider" min="0" max="200" value="20" step="1"
+            aria-label="Signal frequency in gigahertz"
+            aria-valuemin="6.47" aria-valuemax="6.49" aria-valuenow="6.472" aria-valuetext="6.472 gigahertz">
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="reset-btn">Reset</button>
+    </div>
+  </section>
+
+  <section class="info-box" id="results-section" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+    <div id="status-banner" class="status-banner hunting" aria-live="polite">Still hunting…</div>
+    <p id="freq-result-line">Probe frequency: <strong id="freq-result">6.472 GHz</strong></p>
+    <div class="results-grid">
+      <div class="next-panel" id="next-panel" hidden>
+        <h3>What happens next?</h3>
+        <p>Finding <span aria-label="omega-r with qubit in ground state">ω<sub>r,|0⟩</sub></span> is only the first part of calibration. Many other checks follow — for example, calibrating how readout distinguishes |0⟩ from |1⟩.</p>
+        <p>Those states change the resonator’s response in opposite ways, so the outgoing probe looks slightly different for each.</p>
+      </div>
+      <div class="lab-inset" id="lab-inset" hidden>
+        <h3>Real lab data</h3>
+        <canvas id="lab-canvas" width="360" height="180" role="img" aria-label="Real lab transmission dip versus frequency"></canvas>
+        <p>A sharp dip in how much signal comes through marks the resonator frequency with the qubit in |0⟩, written <span aria-label="omega-r with qubit in ground state">ω<sub>r,|0⟩</sub></span>, on real hardware.</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  // Frequency axis: slider 0..200 → 6.470..6.490 GHz (~20 MHz span)
+  const F_MIN = 6.470;
+  const F_MAX = 6.490;
+  const F0 = 6.482; // resonator frequency with qubit in |0⟩ (GHz)
+  const GAMMA = 0.00055; // Lorentzian half-width (GHz)
+  const FOUND_TOL = 0.00012; // ~0.12 MHz (~1 slider step)
+  const NEAR_TOL = 0.0012; // ~1.2 MHz
+  const SLIDER_DEFAULT = 18; // off-resonance initial state
+
+  const state = {
+    slider: SLIDER_DEFAULT,
+    exploredMax: SLIDER_DEFAULT,
+    freq: null,
+    transmission: 1,
+    found: false,
+    responseBand: null,
+    namedResonator: false,
+    reducedMotion: false
+  };
+
+  const els = {};
+
+  function sliderToFreq(v) {
+    return F_MIN + (Number(v) / 200) * (F_MAX - F_MIN);
+  }
+
+  function lorentzianTransmission(f) {
+    const x = (f - F0) / GAMMA;
+    const dip = 0.82 / (1 + x * x);
+    return Math.max(0.08, 1 - dip);
+  }
+
+  function formatGHz(f) {
+    return f.toFixed(3) + ' GHz';
+  }
+
+  function announce(msg) {
+    if (els.statusAnnounce) els.statusAnnounce.textContent = msg;
+  }
+
+  function buildWavePath(freqNorm, startX, endX, amplitude) {
+    // Drive power is constant while sweeping, so amplitude is fixed and only
+    // the wavelength tracks the slider: higher frequency, tighter wiggles.
+    const pts = [];
+    const y0 = 120;
+    const k = 0.11 + freqNorm * 0.22;
+    for (let x = startX; x <= endX; x += 2) {
+      const y = y0 + Math.sin((x - 20) * k) * amplitude;
+      pts.push((x === startX ? 'M' : 'L') + x + ' ' + y.toFixed(1));
+    }
+    return pts.join(' ');
+  }
+
+  function updateSchematic() {
+    const depth = 1 - state.transmission; // 0 flat, ~0.9 at dip
+    const glow = Math.pow(depth, 1.2);
+    const freqNorm = state.slider / 200;
+    if (els.energyGlow) {
+      els.energyGlow.setAttribute('opacity', String(0.05 + glow * 0.28));
+      els.energyGlow.setAttribute('r', String(48 + glow * 28));
+    }
+    if (els.incomingWave) {
+      els.incomingWave.setAttribute('d', buildWavePath(freqNorm, 20, 200, 16));
+    }
+    if (els.outgoingWave) {
+      // S21 is drawn as a signal-amplitude ratio, so it directly scales
+      // the outgoing wave amplitude.
+      els.outgoingWave.setAttribute('d', buildWavePath(freqNorm, 320, 500, 16 * state.transmission));
+    }
+    if (els.energyLabel) {
+      els.energyLabel.setAttribute('opacity', state.responseBand === 'off' ? '0' : '1');
+    }
+    if (els.responseState) {
+      const labels = {
+        off: 'Off resonance — signal passes through',
+        near: 'Near resonance — energy is building',
+        at: 'At resonance — least signal passes through'
+      };
+      els.responseState.textContent = labels[state.responseBand];
+      els.responseState.setAttribute(
+        'fill',
+        state.responseBand === 'at' ? '#76b900' : state.responseBand === 'near' ? '#ef9100' : '#AAAAAA'
+      );
+    }
+    if (els.resonatorName) {
+      els.resonatorName.setAttribute('opacity', state.namedResonator || state.found ? '1' : '0');
+      els.resonatorName.textContent = 'Resonator';
+    }
+    if (els.resonatorBox) {
+      els.resonatorBox.setAttribute('stroke-width', state.found ? '3' : '2');
+    }
+  }
+
+  function drawAxes(ctx, w, h, pad) {
+    ctx.strokeStyle = '#444444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t);
+    ctx.lineTo(pad.l, h - pad.b);
+    ctx.lineTo(w - pad.r, h - pad.b);
+    ctx.stroke();
+    ctx.fillStyle = '#AAAAAA';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Frequency', (pad.l + w - pad.r) / 2, h - 8);
+    ctx.save();
+    ctx.translate(14, (pad.t + h - pad.b) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Signal out', 0, 0);
+    ctx.restore();
+  }
+
+  function drawOmegaRMarker(ctx, x0, topY, bottomY) {
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(x0, topY);
+    ctx.lineTo(x0, bottomY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#76b900';
+    ctx.font = 'bold 13px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    // Place the label below the horizontal axis, clear of the marker line.
+    const labelY = bottomY + 17;
+    ctx.fillText('ω_r,|0⟩', x0, labelY);
+  }
+
+  function drawCurve() {
+    const canvas = els.curveCanvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 480;
+    const cssH = 280;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    const pad = { t: 20, r: 16, b: 50, l: 44 };
+    const plotW = cssW - pad.l - pad.r;
+    const plotH = cssH - pad.t - pad.b;
+    drawAxes(ctx, cssW, cssH, pad);
+
+    // explored portion only (do not reveal the full dip in advance)
+    ctx.beginPath();
+    const maxI = state.exploredMax;
+    for (let i = 0; i <= maxI; i++) {
+      const f = sliderToFreq(i);
+      const t = lorentzianTransmission(f);
+      const x = pad.l + (i / 200) * plotW;
+      const y = pad.t + (1 - t) * plotH;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = '#76b900';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // cursor
+    const cx = pad.l + (state.slider / 200) * plotW;
+    const cy = pad.t + (1 - state.transmission) * plotH;
+    ctx.strokeStyle = '#ef9100';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(cx, pad.t);
+    ctx.lineTo(cx, cssH - pad.b);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ef9100';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (state.found) {
+      const u0 = (F0 - F_MIN) / (F_MAX - F_MIN);
+      const x0 = pad.l + u0 * plotW;
+      drawOmegaRMarker(ctx, x0, pad.t, cssH - pad.b);
+    }
+  }
+
+  function drawLabInset() {
+    const canvas = els.labCanvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 360;
+    const cssH = 180;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    const pad = { t: 16, r: 12, b: 46, l: 36 };
+    const plotW = cssW - pad.l - pad.r;
+    const plotH = cssH - pad.t - pad.b;
+    drawAxes(ctx, cssW, cssH, pad);
+
+    // noisy scatter around Lorentzian
+    ctx.fillStyle = '#1dbba4';
+    for (let i = 0; i <= 80; i++) {
+      const u = i / 80;
+      const f = F_MIN + u * (F_MAX - F_MIN);
+      const t = lorentzianTransmission(f) + (Math.sin(i * 12.989) * 0.025);
+      const x = pad.l + u * plotW;
+      const y = pad.t + (1 - Math.min(1, Math.max(0, t))) * plotH;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // fit curve
+    ctx.beginPath();
+    for (let i = 0; i <= 120; i++) {
+      const u = i / 120;
+      const f = F_MIN + u * (F_MAX - F_MIN);
+      const t = lorentzianTransmission(f);
+      const x = pad.l + u * plotW;
+      const y = pad.t + (1 - t) * plotH;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = '#e52020';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // resonance marker — labeled ω_r,|0⟩ once the student finds it in the main viz
+    const u0 = (F0 - F_MIN) / (F_MAX - F_MIN);
+    const x0 = pad.l + u0 * plotW;
+    if (state.found) {
+      drawOmegaRMarker(ctx, x0, pad.t, cssH - pad.b);
+    } else {
+      ctx.strokeStyle = '#e52020';
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x0, pad.t);
+      ctx.lineTo(x0, cssH - pad.b);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  function render() {
+    state.freq = sliderToFreq(state.slider);
+    state.transmission = lorentzianTransmission(state.freq);
+    if (state.slider > state.exploredMax) state.exploredMax = state.slider;
+    const previousBand = state.responseBand;
+    const detuning = Math.abs(state.freq - F0);
+    state.responseBand = detuning <= FOUND_TOL ? 'at' : detuning <= NEAR_TOL ? 'near' : 'off';
+    state.found = state.responseBand === 'at';
+    if (state.found) state.namedResonator = true;
+
+    if (els.freqLabel) els.freqLabel.textContent = formatGHz(state.freq);
+    if (els.freqResult) els.freqResult.textContent = formatGHz(state.freq);
+    if (els.freqResultLine) {
+      if (state.found) {
+        els.freqResultLine.innerHTML =
+          'Resonator frequency with qubit in |0⟩ <span aria-label="omega-r with qubit in ground state">ω<sub>r,|0⟩</sub></span> = <strong id="freq-result">' +
+          formatGHz(state.freq) +
+          '</strong>';
+        els.freqResult = document.getElementById('freq-result');
+      } else {
+        els.freqResultLine.innerHTML =
+          'Probe frequency: <strong id="freq-result">' + formatGHz(state.freq) + '</strong>';
+        els.freqResult = document.getElementById('freq-result');
+      }
+    }
+    if (els.freqSlider) {
+      els.freqSlider.setAttribute('aria-valuenow', state.freq.toFixed(3));
+      els.freqSlider.setAttribute('aria-valuetext', formatGHz(state.freq));
+    }
+
+    if (els.statusBanner) {
+      if (state.responseBand === 'at') {
+        els.statusBanner.innerHTML =
+          '✓ At resonance — <span aria-label="omega-r with qubit in ground state">ω<sub>r,|0⟩</sub></span> found';
+        els.statusBanner.className = 'status-banner found';
+      } else if (state.responseBand === 'near') {
+        els.statusBanner.textContent = 'Near resonance — getting closer';
+        els.statusBanner.className = 'status-banner near';
+      } else {
+        els.statusBanner.textContent = 'Off resonance — keep sweeping';
+        els.statusBanner.className = 'status-banner hunting';
+      }
+    }
+
+    if (els.nextPanel) {
+      els.nextPanel.hidden = !state.found;
+    }
+    if (els.labInset) {
+      els.labInset.hidden = !state.found;
+    }
+
+    updateSchematic();
+    drawCurve();
+    drawLabInset();
+
+    if (state.responseBand === 'at' && previousBand !== 'at') {
+      announce(
+        'Resonator frequency with qubit in ground state, omega-r zero, found at ' +
+          formatGHz(state.freq) +
+          '. This is the response when the qubit is in zero, not the bare resonator frequency.'
+      );
+    } else if (state.responseBand === 'near' && previousBand !== 'near') {
+      announce('Near resonance. Energy is building in the resonator and less signal is passing through.');
+    } else if (state.responseBand === 'off' && previousBand !== 'off') {
+      announce('Off resonance. Most of the signal passes through.');
+    }
+  }
+
+  // expose for Phase 3E wiring
+  window.ResonatorSpectroscopy = {
+    state: state,
+    els: els,
+    SLIDER_DEFAULT: SLIDER_DEFAULT,
+    sliderToFreq: sliderToFreq,
+    render: render,
+    drawLabInset: drawLabInset,
+    announce: announce
+  };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const RS = window.ResonatorSpectroscopy;
+  if (!RS) return;
+
+  function cacheEls() {
+    RS.els.freqSlider = document.getElementById('freq-slider');
+    RS.els.freqLabel = document.getElementById('freq-label');
+    RS.els.freqResult = document.getElementById('freq-result');
+    RS.els.freqResultLine = document.getElementById('freq-result-line');
+    RS.els.resetBtn = document.getElementById('reset-btn');
+    RS.els.statusBanner = document.getElementById('status-banner');
+    RS.els.nextPanel = document.getElementById('next-panel');
+    RS.els.labInset = document.getElementById('lab-inset');
+    RS.els.statusAnnounce = document.getElementById('status-announce');
+    RS.els.incomingWave = document.getElementById('incoming-wave');
+    RS.els.outgoingWave = document.getElementById('outgoing-wave');
+    RS.els.energyGlow = document.getElementById('energy-glow');
+    RS.els.energyLabel = document.getElementById('energy-label');
+    RS.els.responseState = document.getElementById('response-state');
+    RS.els.resonatorName = document.getElementById('resonator-name');
+    RS.els.resonatorBox = document.getElementById('resonator-box');
+    RS.els.curveCanvas = document.getElementById('curve-canvas');
+    RS.els.labCanvas = document.getElementById('lab-canvas');
+  }
+
+  function onSliderInput() {
+    RS.state.slider = Number(RS.els.freqSlider.value);
+    RS.render();
+  }
+
+  function resetAll() {
+    RS.state.slider = RS.SLIDER_DEFAULT;
+    RS.state.exploredMax = RS.SLIDER_DEFAULT;
+    RS.state.namedResonator = false;
+    RS.state.found = false;
+    RS.state.responseBand = 'off';
+    if (RS.els.freqSlider) RS.els.freqSlider.value = String(RS.SLIDER_DEFAULT);
+    RS.render();
+    RS.announce('Reset. Still hunting for the hidden frequency.');
+    if (RS.els.freqSlider) RS.els.freqSlider.focus();
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      resetAll();
+    }
+  }
+
+  function init() {
+    cacheEls();
+    RS.state.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (RS.els.freqSlider) {
+      RS.els.freqSlider.value = String(RS.SLIDER_DEFAULT);
+      RS.els.freqSlider.addEventListener('input', onSliderInput);
+      RS.els.freqSlider.addEventListener('change', onSliderInput);
+    }
+    if (RS.els.resetBtn) RS.els.resetBtn.addEventListener('click', resetAll);
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', function () {
+      RS.render();
+      RS.drawLabInset();
+    });
+    RS.render();
+    RS.drawLabInset();
+    RS.announce('Widget ready. Adjust signal frequency to find the hidden listening frequency.');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

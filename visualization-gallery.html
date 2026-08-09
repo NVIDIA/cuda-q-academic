@@ -283,10 +283,10 @@
 
       <h2 class="section-header" style="margin-top: 40px;">
           <i class="fas fa-sliders-h"></i> Calibration Visualization Tools
-          <span class="coming-soon-badge">More coming Aug 10</span>
+          <span class="coming-soon-badge">More coming soon</span>
       </h2>
       <p class="summary-text" style="margin: -4px 0 16px 0; font-size: 0.9rem;">
-          Interactive tools for building conceptual understanding of calibration experiments, plus guided exercises with the Ising Calibration NIM playground. Qubit Spectroscopy (Intro) is available now; more tools ship Aug 10.
+          Interactive tools for building conceptual understanding of calibration experiments, plus guided exercises with the Ising Calibration NIM playground.
       </p>
       <div class="pathway-grid" id="calibration-grid"></div>
   </main>
@@ -618,7 +618,29 @@
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/drone-delivery-optimizer.html"
         },
         {
-            title: "Qubit Spectroscopy (Intro)",
+            title: "Resonator Spectroscopy",
+            isCore: false,
+            section: "calibration",
+            desc: "Find the readout resonator frequency by sweeping a microwave tone and watching for the sharp absorption dip that marks resonance.",
+            notebooks: [
+                { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/resonator-spectroscopy.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/resonator-spectroscopy.html"
+        },
+        {
+            title: "Resonator Punch Out",
+            isCore: false,
+            section: "calibration",
+            desc: "Sweep readout power across resonator spectroscopy to see the shift from bare to qubit-dressed resonance and choose a readout power.",
+            notebooks: [
+                { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/resonator-punch-out.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/resonator-punch-out.html"
+        },
+        {
+            title: "Qubit Spectroscopy",
             isCore: false,
             section: "calibration",
             desc: "Find the qubit transition frequency ω₀₁ by sweeping drive frequency — first at low power (flat spectrum), then after raising drive power so a clean peak can appear.",
@@ -629,16 +651,26 @@
             source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/qubit-spectroscopy-intro.html"
         },
         {
-            title: "Calibration Experiment Explorers",
+            title: "Amplitude Rabi",
             isCore: false,
             section: "calibration",
-            comingSoon: true,
-            desc: "Interactive visualizations for building conceptual understanding of quantum hardware calibration experiments — Rabi, Ramsey, T1, T2, randomized benchmarking, and related characterization plots.",
+            desc: "Sweep microwave pulse amplitude at fixed frequency and duration to find the π-pulse level that fully inverts the qubit population.",
             notebooks: [
                 { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
             ],
-            link: "",
-            source: ""
+            link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/rabi-oscillations.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/rabi-oscillations.html"
+        },
+        {
+            title: "DRAG Pulse Calibration",
+            isCore: false,
+            section: "calibration",
+            desc: "Tune the DRAG β parameter to cancel leakage to |2⟩ by sweeping the quadrature correction until repeated-pulse curves agree.",
+            notebooks: [
+                { name: "Calibration", link: "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-calibration" }
+            ],
+            link: "https://nvidia.github.io/cuda-q-academic/interactive_widgets/drag-pulse-calibration.html",
+            source: "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/drag-pulse-calibration.html"
         },
         {
             title: "Ising Calibration Playground Exercises",
