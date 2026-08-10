@@ -610,7 +610,7 @@ input[type=range]::-moz-range-thumb {
     <summary><h2 id="instructions-heading">Instructions</h2></summary>
     <ol>
       <li>Sweep <strong>Drive frequency</strong> across the <em>full</em> range at low power (you are sweeping the qubit drive — resonator readout <span aria-label="omega r">ω<sub>r</sub></span> is already calibrated).</li>
-      <li>Press <strong>Raise drive power</strong>, then sweep the same range again.</li>
+      <li>Press <strong>Raise drive power</strong>, then sweep the same range again. Use the same button to lower or raise the power afterward and compare the traces.</li>
       <li>Watch for a clean peak near <span aria-label="omega zero one">ω<sub>01</sub></span>. On the level diagram, population moves to |1⟩ only while the drive is on resonance — it returns to |0⟩ when the drive moves away or is weak.</li>
       <li>After the peak appears, diagnose the <strong>Ambiguous lab trace</strong> (not the clean reference). Then use <strong>What’s next</strong> to continue in the Ising Calibration playground.</li>
       <li>Use <strong>Reset</strong> (or <span class="kbd">Esc</span>) anytime to start over from low power.</li>
@@ -633,7 +633,7 @@ input[type=range]::-moz-range-thumb {
           <span class="btn-hint" id="freq-hint">Full range, low power first.</span>
         </div>
         <div>
-          <button type="button" class="btn-primary" id="raise-power-btn">Raise drive power</button>
+          <button type="button" class="btn-primary" id="raise-power-btn" aria-pressed="false">Raise drive power</button>
           <button type="button" class="btn-secondary" id="reset-btn" style="margin-left:8px">Reset</button>
           <span class="btn-hint" id="raise-hint">Finish a full frequency sweep first.</span>
         </div>
@@ -1169,12 +1169,13 @@ input[type=range]::-moz-range-thumb {
   }
 
   function renderControls() {
-    // Raise only after a full low-power sweep (otherwise Results stay empty)
-    els.raisePowerBtn.disabled = state.introPowerRaised || !state.introFlatSwept;
+    // Unlock the power toggle after the initial low-power sweep.
+    els.raisePowerBtn.disabled = !state.introFlatSwept;
+    els.raisePowerBtn.setAttribute('aria-pressed', state.introPowerRaised ? 'true' : 'false');
     if (state.introPowerRaised) {
-      els.raisePowerBtn.textContent = 'Drive power raised';
+      els.raisePowerBtn.textContent = 'Lower drive power';
       if (els.raiseHint) {
-        els.raiseHint.textContent = 'Re-sweep the same range to reveal the peak.';
+        els.raiseHint.textContent = 'Lower the power to compare this trace with the under-driven result.';
       }
       if (els.freqHint) {
         els.freqHint.textContent = 'Power raised — re-sweep where the low-power trace looked flat.';
@@ -1190,10 +1191,14 @@ input[type=range]::-moz-range-thumb {
     } else {
       els.raisePowerBtn.textContent = 'Raise drive power';
       if (els.raiseHint) {
-        els.raiseHint.textContent = 'Resets the slider so you can re-sweep at higher power.';
+        els.raiseHint.textContent = state.introMilestone
+          ? 'Raise the power to compare with the clean peak again.'
+          : 'Resets the slider so you can re-sweep at higher power.';
       }
       if (els.freqHint) {
-        els.freqHint.textContent = 'Full sweep done — raise power, then re-sweep.';
+        els.freqHint.textContent = state.introMilestone
+          ? 'Low power selected — the under-driven trace is visible again.'
+          : 'Full sweep done — raise power, then re-sweep.';
       }
     }
   }
@@ -1214,7 +1219,7 @@ input[type=range]::-moz-range-thumb {
 
     els.spectrumStatus.hidden = false;
     els.spectrumStatus.className = 'status-banner';
-    if (shape === 'clean' || state.omegaFound) {
+    if (shape === 'clean') {
       els.spectrumStatus.classList.add('clean');
       els.spectrumStatus.textContent = 'You found a clean Lorentzian peak at ω₀₁ ≈ 4.333 GHz.';
     } else if (shape === 'broad') {
@@ -1362,18 +1367,28 @@ input[type=range]::-moz-range-thumb {
     }
   }
 
-  function onRaisePower() {
-    if (state.introPowerRaised || !state.introFlatSwept) return;
-    state.introPowerRaised = true;
-    resetIntroSweep();
+  function onTogglePower() {
+    if (!state.introFlatSwept) return;
+    const raising = !state.introPowerRaised;
+    state.introPowerRaised = raising;
+    // Require a fresh sweep the first time power is raised. Once the peak has
+    // been found, preserve the measured range so the two traces can be compared.
+    if (raising && !state.introMilestone) resetIntroSweep();
     renderAll();
     els.spectrumStatus.hidden = false;
-    els.spectrumStatus.className = 'status-banner flat';
-    els.spectrumStatus.textContent = 'Drive power is raised; re-sweep to reveal the peak that was invisible at low power.';
-    els.calibrationLine.hidden = false;
-    els.calibrationLine.className = 'calibration-line';
-    els.calibrationLine.textContent = 'Calibration change: increased drive amplitude into the spectroscopy window. Frequency slider was reset — re-sweep the same range.';
-    announce('Drive power raised. Re-sweep the same range to reveal the peak.');
+    if (raising) {
+      els.spectrumStatus.className = 'status-banner flat';
+      els.spectrumStatus.textContent = state.introMilestone
+        ? 'Drive power is raised; the clean peak is visible again.'
+        : 'Drive power is raised; re-sweep to reveal the peak that was invisible at low power.';
+      announce(state.introMilestone
+        ? 'Drive power raised. The clean peak is visible again.'
+        : 'Drive power raised. Re-sweep the same range to reveal the peak.');
+    } else {
+      els.spectrumStatus.className = 'status-banner flat';
+      els.spectrumStatus.textContent = 'Drive power lowered; the under-driven flat trace is visible again.';
+      announce('Drive power lowered. The under-driven flat trace is visible again.');
+    }
     els.freqSlider.focus();
   }
 
@@ -1419,7 +1434,7 @@ input[type=range]::-moz-range-thumb {
     state.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     wireRadioGroup('lab-diagnose', onLabDiagnose);
     els.freqSlider.addEventListener('input', onFreqInput);
-    els.raisePowerBtn.addEventListener('click', onRaisePower);
+    els.raisePowerBtn.addEventListener('click', onTogglePower);
     if (els.resetBtn) els.resetBtn.addEventListener('click', resetAll);
     if (els.copyPromptBtn) els.copyPromptBtn.addEventListener('click', onCopyPrompt);
     document.addEventListener('keydown', function (e) {
