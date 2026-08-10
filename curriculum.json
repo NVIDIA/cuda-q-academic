@@ -191,11 +191,11 @@
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Instructor resources for superconducting-qubit calibration: interactive experiment visualizations and NVIDIA Ising for reading calibration plots.",
+      "summary": "Resources for exploring superconducting-qubit calibration: interactive experiment visualizations, sample plots, and NVIDIA Ising for structured plot analysis.",
       "more_lessons_coming_soon": true,
       "more_lessons_coming_soon_label": "More calibration widgets coming soon",
       "lesson_ids": [
-        "calibration-instructor-guide"
+        "calibration-resources-guide"
       ],
       "featured_widget_ids": [
         "ising-api-key-setup",
@@ -1355,15 +1355,15 @@
       "summary": "Role-based group project template for deploying a quantum-GPU computing project in a course. Covers four student roles (Project Lead, Performance Optimization PIC, QA PIC, Technical Marketing PIC), four milestones, AI agent configurations, and a deliverable template. Faculty deployment guide and pedagogical rationale included.",
       "metadata_source": "quantum-ai-project-template/README.md"
     },
-    "calibration-instructor-guide": {
-      "title": "Calibration — Instructor Guide",
+    "calibration-resources-guide": {
+      "title": "Calibration Resources Guide",
       "primary_track_id": "calibration",
       "track_ids": [
         "calibration"
       ],
-      "source_kind": "instructor_template",
-      "repo_path": "calibration/Instructor_Guide.ipynb",
-      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/Instructor_Guide.ipynb",
+      "source_kind": "local_notebook",
+      "repo_path": "calibration/Calibration_Resources_Guide.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/Calibration_Resources_Guide.ipynb",
       "is_new": true,
       "added_date": "2026-08-09",
       "difficulty": "intermediate",
@@ -1373,14 +1373,14 @@
       "keywords": [
         "calibration",
         "Ising Calibration",
-        "instructor resource",
+        "resource guide",
         "visualization tools",
         "QCalEval",
         "API key",
-        "classroom"
+        "plot analysis"
       ],
-      "summary": "Instructor guide for Calibration resources: classroom flow, how to use live experiment visualizations and NVIDIA Ising (playground, API-key setup, or notebook upload-and-run), prompting tips, and troubleshooting. Numbered student path notebooks are not in this folder yet.",
-      "metadata_source": "calibration/Instructor_Guide.ipynb",
+      "summary": "Guide to superconducting-qubit calibration resources: an exploration path through live experiment visualizations and sample plots, options for running NVIDIA Ising, prompting guidance, and troubleshooting.",
+      "metadata_source": "calibration/Calibration_Resources_Guide.ipynb",
       "widget_ids": [
         "ising-api-key-setup",
         "time-of-flight",
