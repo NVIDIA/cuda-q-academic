@@ -1,0 +1,21 @@
+{
+  "benchmark_sha256": "a18d635b1136b00b8135a72fd40012a24e2d2af57df552291ed0578e50c9c16d",
+  "cases": {
+    "qaoa_depth15": {
+      "exact_energy": -5.797,
+      "initial_parameters_sha256": "66f5085d19cdf8016eb6a1eb4e89d8341b3bf665fad5b827736b2d7c81d772a2",
+      "max_calls": 300,
+      "time_budget_seconds": 120,
+      "optimizer_seed": 12029,
+      "energy_delta_tolerance": 1e-6,
+      "energy_delta_patience": 3,
+      "minimum_accepted_iterations": 5,
+      "energy_tie_tolerance": 1e-6
+    }
+  },
+  "circuit_call_definition": "one invocation of cudaq.observe at one 30-parameter depth-15 QAOA vector",
+  "reference_method": "exact brute-force weighted Max-Cut over all 64 bitstrings; diagnostic only",
+  "scoring_method": "lowest energy observed within 300 counted calls; energies within 1e-6 prefer convergence or early completion, then lower elapsed time",
+  "target": "nvidia",
+  "target_option": "fp64"
+}

@@ -1,0 +1,1 @@
+Across 20 rounds, structured layer-mode search, continuous Powell optimization, and selective medium-frequency residuals lowered energy from -5.4467026331080071 to -5.7141910348634983. The winning round 19 used all 300 observations without convergence, so its advantage is valid under the fixed protocol but sensitive to the observe-budget boundary.
