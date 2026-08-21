@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Support vector machine workflow</title>
+  <desc id="desc">A four-step pipeline moves from labeled data to a kernel matrix, fitting a support vector machine, and predicting a label for a new point.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#76B900"/>
+    </marker>
+    <style>
+      .label{font:700 21px Arial,Helvetica,sans-serif;fill:#1F2937;text-anchor:middle}
+      .note{font:15px Arial,Helvetica,sans-serif;fill:#6B7280;text-anchor:middle}
+      .icon-line{fill:none;stroke:#1F2937;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <rect width="1200" height="320" fill="#FFFFFF"/>
+
+  <!-- The thin green path keeps the four ideas visually connected without enclosing them. -->
+  <g fill="none" stroke="#76B900" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)">
+    <path d="M257 116H344"/>
+    <path d="M557 116H644"/>
+    <path d="M857 116H944"/>
+  </g>
+
+  <!-- Labeled data: two visibly distinct classes. -->
+  <g aria-label="Labeled data icon">
+    <path d="M99 159V68M99 159H201" class="icon-line" opacity=".35"/>
+    <g fill="#3B82F6" stroke="#FFFFFF" stroke-width="3">
+      <circle cx="121" cy="137" r="8"/>
+      <circle cx="137" cy="112" r="8"/>
+      <circle cx="157" cy="143" r="8"/>
+    </g>
+    <g fill="#F59E0B" stroke="#FFFFFF" stroke-width="3">
+      <circle cx="159" cy="91" r="8"/>
+      <circle cx="181" cy="76" r="8"/>
+      <circle cx="187" cy="108" r="8"/>
+    </g>
+  </g>
+  <text x="150" y="220" class="label">Labeled data</text>
+  <text x="150" y="248" class="note">(xᵢ, yᵢ)</text>
+
+  <!-- Kernel matrix: symmetry and stronger diagonal entries suggest pairwise similarity. -->
+  <g aria-label="Kernel matrix icon" transform="translate(397 63)">
+    <rect width="106" height="106" rx="10" fill="#F8FAFC" stroke="#1F2937" stroke-width="2.5"/>
+    <g fill="#3B82F6">
+      <rect x="13" y="13" width="24" height="24" rx="4"/>
+      <rect x="41" y="13" width="24" height="24" rx="4" opacity=".55"/>
+      <rect x="69" y="13" width="24" height="24" rx="4" opacity=".16"/>
+      <rect x="13" y="41" width="24" height="24" rx="4" opacity=".55"/>
+      <rect x="41" y="41" width="24" height="24" rx="4"/>
+      <rect x="69" y="41" width="24" height="24" rx="4" opacity=".38"/>
+      <rect x="13" y="69" width="24" height="24" rx="4" opacity=".16"/>
+      <rect x="41" y="69" width="24" height="24" rx="4" opacity=".38"/>
+      <rect x="69" y="69" width="24" height="24" rx="4"/>
+    </g>
+  </g>
+  <text x="450" y="220" class="label">Kernel matrix K</text>
+  <text x="450" y="248" class="note">pairwise comparisons</text>
+
+  <!-- Fit: the ringed examples are the support vectors nearest the margin. -->
+  <g aria-label="Fitted SVM icon">
+    <path d="M713 158L782 69" stroke="#76B900" stroke-width="4" stroke-linecap="round"/>
+    <path d="M696 145L765 56M730 171L799 82" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 6"/>
+    <g fill="#3B82F6" stroke="#FFFFFF" stroke-width="3">
+      <circle cx="701" cy="124" r="8"/>
+      <circle cx="718" cy="143" r="8"/>
+      <circle cx="726" cy="112" r="8"/>
+    </g>
+    <g fill="#F59E0B" stroke="#FFFFFF" stroke-width="3">
+      <circle cx="774" cy="96" r="8"/>
+      <circle cx="786" cy="69" r="8"/>
+      <circle cx="801" cy="91" r="8"/>
+    </g>
+    <circle cx="726" cy="112" r="13" fill="none" stroke="#76B900" stroke-width="3"/>
+    <circle cx="774" cy="96" r="13" fill="none" stroke="#76B900" stroke-width="3"/>
+  </g>
+  <text x="750" y="220" class="label">Fit SVM</text>
+  <text x="750" y="248" class="note">support vectors</text>
+
+  <!-- Predict: a new point is assigned to the orange class. -->
+  <g aria-label="Prediction icon">
+    <circle cx="1041" cy="108" r="40" fill="#FFF7E6" stroke="#F59E0B" stroke-width="3" stroke-dasharray="5 5"/>
+    <circle cx="1041" cy="108" r="10" fill="#F59E0B" stroke="#FFFFFF" stroke-width="3"/>
+    <circle cx="1081" cy="145" r="24" fill="#76B900"/>
+    <path d="M1069 145L1078 154L1094 135" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="1050" y="220" class="label">Predict</text>
+  <text x="1050" y="248" class="note">same kernel</text>
+</svg>
