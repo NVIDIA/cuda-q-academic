@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neutral Atom Leakage and Loss Errors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --accent: #76b900;
+    --accent-dark: #5e9400;
+    --bg: #1A1A1A;
+    --surface: #2A2A2A;
+    --border: #444444;
+    --fg: #E0E0E0;
+    --muted: #AAAAAA;
+    --leak: #ef9100;
+    --loss: #e03c3c;
+    --loss-text: #ff5252;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 24px 16px;
+}
+.widget-container {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 1100px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin: 0 auto;
+}
+@media (min-width: 768px) { .widget-container { padding: 32px; } }
+
+.skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: #000; padding: 8px 16px; z-index: 100; text-decoration: none; font-weight: bold; }
+.skip-link:focus { top: 0; }
+
+.widget-container h1 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    margin-top: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.widget-container .summary-text {
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+.instructions-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.instructions-section summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+    content: '\25B6';
+    font-size: 0.7rem;
+    color: var(--accent);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 { color: var(--accent); font-size: 1.1rem; margin: 0; font-weight: 700; }
+.instructions-section h3 { color: var(--fg); font-size: 0.95rem; margin: 18px 0 6px; font-weight: 700; }
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol, .instructions-section ul { margin-top: 8px; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section .kbd { background: var(--border); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.9em; }
+.tag-ok { color: var(--accent); font-weight: 700; }
+.tag-leak { color: var(--leak); font-weight: 700; }
+.tag-loss { color: var(--loss-text); font-weight: 700; }
+
+.info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+}
+.info-box h2 { color: var(--accent); font-size: 1.1rem; margin: 0 0 12px; font-weight: 700; }
+
+button:focus-visible, a:focus-visible, summary:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+.btn-primary, .btn-secondary {
+    font-family: inherit; font-size: 0.95rem; line-height: 1.2;
+    min-height: 44px; min-width: 44px; padding: 10px 18px;
+    border-radius: 4px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary { background: var(--surface); color: #FFFFFF; border: 1px solid var(--border); border-bottom: 3px solid var(--accent); font-weight: 700; }
+.btn-primary:hover { background: var(--accent); color: #000000; border-color: var(--accent); }
+.btn-primary[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn-primary[disabled]:hover { background: var(--surface); color: #FFFFFF; border-color: var(--border); border-bottom-color: var(--accent); }
+.btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-secondary:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+.btn-primary svg, .btn-secondary svg { width: 16px; height: 16px; flex: none; }
+
+/* ---- sweep slider ---- */
+.sweep-ctl { margin: 0 0 16px; }
+.sweep-ctl .lab { font-size: 0.85rem; color: var(--muted); display: block; margin-bottom: 8px; }
+.sweep-ctl .lab strong { color: var(--fg); }
+input[type=range] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; max-width: 520px; height: 8px; margin: 6px 0 4px;
+    background: var(--border); border-radius: 4px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); border: 2px solid #000; cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); border: 2px solid #000; cursor: pointer;
+}
+input[type=range]:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.tick-row { display: flex; justify-content: space-between; max-width: 520px; font-size: 0.75rem; color: #777; }
+
+.site-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+.bit-btn {
+    font-family: inherit; font-size: 0.95rem;
+    min-width: 44px; min-height: 44px; padding: 4px 6px;
+    background: var(--surface); color: #FFFFFF;
+    border: 1px solid var(--border); border-bottom: 3px solid var(--accent);
+    border-radius: 4px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+}
+.bit-btn:hover { background: var(--accent); color: #000000; border-color: var(--accent); }
+.bit-btn[aria-pressed="true"] { background: var(--accent); color: #000000; border-color: var(--accent); }
+.bit-btn .mark { font-size: 0.8rem; line-height: 1; }
+.bit-btn[aria-pressed="true"] .mark { color: #000000; }
+.mark-ok { color: var(--accent); } .mark-leak { color: var(--leak); } .mark-loss { color: var(--loss-text); } .mark-none { color: var(--muted); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0; padding: 0; list-style: none; font-size: 0.85rem; color: var(--muted); }
+.legend span.g { font-weight: 700; margin-right: 6px; }
+
+.verdict { border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin: 0 0 16px; background: rgba(255,255,255,0.03); }
+.verdict .vmain { font-size: 1.35rem; font-weight: 700; line-height: 1.25; color: var(--muted); }
+.verdict .vsub { font-size: 0.9rem; color: var(--muted); }
+
+/* ---- results verdict box ---- */
+.result-verdict {
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 0 0 20px;
+    background: rgba(255,255,255,0.04);
+}
+.result-verdict .rv-tag {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
+    font-weight: 700; color: var(--muted); margin-bottom: 8px;
+}
+.result-verdict .rv-main { font-size: 1.25rem; font-weight: 700; line-height: 1.35; color: var(--fg); }
+.result-verdict .rv-main em { font-style: normal; color: var(--leak); }
+.result-verdict .rv-main b { color: var(--accent); }
+.result-verdict .rv-sub { font-size: 0.95rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+.result-verdict.pending { border-left-color: var(--muted); }
+.result-verdict.final { border-left-color: var(--leak); background: rgba(239,145,0,0.07); }
+@media (min-width: 768px) { .result-verdict .rv-main { font-size: 1.45rem; } }
+
+.viz { display: block; width: 100%; max-width: 680px; margin: 0 auto; }
+.viz-note { font-size: 0.85rem; color: var(--muted); max-width: 680px; margin: 12px auto 0; }
+
+.stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 20px; }
+.stat { flex: 1 1 130px; }
+.stat .lab { font-size: 0.8rem; color: var(--muted); }
+.stat .val { font-size: 1.5rem; font-weight: 700; }
+.stat .val small { font-size: 0.9rem; font-weight: 400; color: var(--muted); }
+
+.bars { display: flex; align-items: flex-end; gap: 28px; padding: 0 4px; }
+.bar-col { width: 76px; text-align: center; }
+.bar-track { position: relative; height: 140px; border: 1px solid var(--border); border-radius: 4px; background: rgba(255,255,255,0.04); display: flex; align-items: flex-end; overflow: hidden; }
+.bar-fill { width: 100%; background: linear-gradient(to top, #5e9400, #76b900); border-radius: 2px 2px 0 0; transition: height 0.4s; height: 0; }
+.bar-fill.readout { background: linear-gradient(to top, #a86400, #ef9100); }
+.bar-val { font-size: 1.1rem; font-weight: 700; margin-top: 6px; }
+.bar-lab { font-size: 0.8rem; color: var(--fg); line-height: 1.3; }
+.bar-note { font-size: 0.85rem; color: var(--muted); max-width: 380px; }
+.bars-row { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
+
+.widget-footer { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 20px; }
+.widget-footer a { color: #76b900; font-size: 0.9rem; }
+.widget-footer a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.widget-footer .credit { flex-basis: 100%; margin: 0; font-size: 0.8rem; color: #888; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
+
+#dot, #ring, #beam, #beamcore { transition: transform 0.6s cubic-bezier(.4,0,.2,1), opacity 0.5s; }
+#fall { transition: transform 1.1s cubic-bezier(.55,0,1,.6), opacity 1.1s; }
+.gl, .wv, .trail { opacity: 0; transition: opacity 0.45s; }
+.gl.on, .wv.on, .trail.on { opacity: 1; }
+.xg { opacity: 0.3; transition: opacity 0.45s; }
+.xg.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="widget-container" id="main-content">
+
+<header>
+    <h1>Neutral Atom Leakage and Loss Errors</h1>
+    <p class="summary-text">Ten atoms in optical tweezers. Each atom has many energy levels, but only two of them are the qubit. Sweep an X gate across the array, one site at a time, and see which failures the readout catches and which it quietly scores as a success.</p>
+</header>
+
+<details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+
+    <h3>Two levels are the qubit</h3>
+    <ul>
+        <li><span class="tag-ok">Target state 1</span> &nbsp;|0&#10217; = |F&nbsp;=&nbsp;3, m<sub>F</sub>&nbsp;=&nbsp;0&#10217;</li>
+        <li><span class="tag-ok">Target state 2</span> &nbsp;|1&#10217; = |F&nbsp;=&nbsp;4, m<sub>F</sub>&nbsp;=&nbsp;0&#10217;</li>
+    </ul>
+    <p>This pair, the clock states, is the most stable in the atom, so the qubit is stored there. An X gate is a laser pulse tuned to flip the atom from |0&#10217; to |1&#10217;.</p>
+
+    <h3>The levels next door are not</h3>
+    <p>F&nbsp;=&nbsp;3 and F&nbsp;=&nbsp;4 each contain a whole group of closely spaced levels, labeled by m<sub>F</sub>. Only m<sub>F</sub>&nbsp;=&nbsp;0 belongs to the qubit; the diagram shows the four nearest neighbors, m<sub>F</sub>&nbsp;=&nbsp;&plusmn;1 in each group.</p>
+    <p>A stray photon or a slightly imperfect pulse can knock the atom sideways into one of them. That is <span class="tag-leak">leakage</span>: the atom is still there, but it is no longer a 0 or a 1, so ordinary error correction has nothing to work with.</p>
+    <p>To read the qubits, you shine light on the array and see which atoms glow: those in F&nbsp;=&nbsp;4 light up, those in F&nbsp;=&nbsp;3 stay dark. That answers only one question &mdash; which group is the atom in? &mdash; and cannot tell which m<sub>F</sub> level it sits in. So a leaked atom in F&nbsp;=&nbsp;4 is counted as a 1 and one in F&nbsp;=&nbsp;3 as a 0, and the error goes unnoticed. Only <span class="tag-loss">atom loss</span> gives itself away: an empty trap is obvious.</p>
+
+    <h3>Run it</h3>
+    <ol>
+        <li>Every atom starts in |0&#10217;. Nothing has been gated yet.</li>
+        <li>Drag the <strong>sweep slider</strong> to move the X gate across the array, or press <strong>Step</strong> to advance one site at a time. <strong>Play</strong> runs the sweep on its own and can be paused at any point.</li>
+        <li>After each site, the level diagram lights up the level the atom actually ended in and the verdict box explains what readout will make of it.</li>
+        <li>Finish all ten sites and read the <strong>Results</strong> box. Five sites fail every shot: one leaks into each of the four m<sub>F</sub>&nbsp;=&nbsp;&plusmn;1 levels, and one loses its atom.</li>
+    </ol>
+    <p>Keyboard: <span class="kbd">Tab</span> between controls, <span class="kbd">Left</span>/<span class="kbd">Right</span> to move the slider or browse sites, <span class="kbd">Enter</span> to activate, <span class="kbd">ESC</span> for a new shot.</p>
+</details>
+
+<section class="info-box" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Controls</h2>
+
+    <div class="sweep-ctl">
+        <label class="lab" for="stepSlider">Sweep progress: <strong id="stepLabel">0 of 10 sites gated</strong></label>
+        <input type="range" id="stepSlider" min="0" max="10" step="1" value="0"
+               aria-describedby="stepLabel" aria-valuetext="0 of 10 sites gated">
+        <div class="tick-row" aria-hidden="true"><span>start</span><span>all 10 gated</span></div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <button type="button" class="btn-primary" id="bStep">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5l10 7-10 7zM19 5v14"/></svg>
+            Step
+        </button>
+        <button type="button" class="btn-primary" id="bPlay">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>
+            <span id="playLabel">Play sweep</span>
+        </button>
+        <button type="button" class="btn-primary" id="bReset">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>
+            New shot
+        </button>
+    </div>
+
+    <div class="site-row" id="siteRow" role="group" aria-label="Sites in the array. Select a gated site to inspect it."></div>
+
+    <ul class="legend">
+        <li><span class="g mark-none">&#9679;</span>not gated yet</li>
+        <li><span class="g mark-ok">&#10003;</span>no error</li>
+        <li><span class="g mark-leak">&#8776;</span>leaked out of the qubit</li>
+        <li><span class="g mark-loss">&#10005;</span>atom lost</li>
+    </ul>
+</section>
+
+<section class="info-box" aria-labelledby="viz-heading">
+    <h2 id="viz-heading">Level diagram and array</h2>
+
+    <div class="verdict" id="verdict">
+        <div class="vmain" id="vmain">Ready</div>
+        <div class="vsub" id="vsub">Move the slider or press Step to gate the first site.</div>
+    </div>
+
+    <svg class="viz" viewBox="0 0 560 520" role="img" aria-label="A ground-state level diagram above a row of ten optical tweezers. The upper group is the F equals 4 manifold, the lower group the F equals 3 manifold, each drawn as three staggered Zeeman sublevels at m sub F equals minus one, zero, and plus one. The m sub F equals zero sublevel of each manifold is a qubit clock state, marked ket one and ket zero, joined by a vertical X gate arrow. Wavy arrows lead sideways from each clock state into its two neighboring sublevels, which are leakage states, and another arrow leads out of the trap. A beam points down into the site currently being gated.">
+    <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <linearGradient id="bgrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#76b900" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#76b900" stop-opacity="0.55"/>
+        </linearGradient>
+    </defs>
+
+    <rect x="20" y="16" width="520" height="284" rx="8" fill="rgba(255,255,255,0.03)" stroke="#444444"/>
+    <text id="ptitle" x="34" y="38" font-size="13" fill="#AAAAAA">Site 1 &#183; ground-state hyperfine manifolds</text>
+
+    <!-- shared m_F column headers -->
+    <text x="300" y="58" text-anchor="middle" font-size="12" fill="#8a8a8a">m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = &#8722;1</tspan></text>
+    <text x="372" y="58" text-anchor="middle" font-size="12" fill="#8a8a8a">m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = 0</tspan></text>
+    <text x="444" y="58" text-anchor="middle" font-size="12" fill="#8a8a8a">m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = +1</tspan></text>
+
+    <!-- glows -->
+    <line class="gl" id="glo1"  x1="362" y1="106" x2="382" y2="106" stroke="#76b900" stroke-width="15" stroke-linecap="round"/>
+    <line class="gl" id="glo0"  x1="362" y1="228" x2="382" y2="228" stroke="#76b900" stroke-width="15" stroke-linecap="round"/>
+    <line class="gl" id="glo4p" x1="434" y1="94"  x2="454" y2="94"  stroke="#ef9100" stroke-width="15" stroke-linecap="round"/>
+    <line class="gl" id="glo4m" x1="290" y1="118" x2="310" y2="118" stroke="#ef9100" stroke-width="15" stroke-linecap="round"/>
+    <line class="gl" id="glo3p" x1="434" y1="240" x2="454" y2="240" stroke="#ef9100" stroke-width="15" stroke-linecap="round"/>
+    <line class="gl" id="glo3m" x1="290" y1="216" x2="310" y2="216" stroke="#ef9100" stroke-width="15" stroke-linecap="round"/>
+
+    <!-- F = 4 manifold, staggered by the linear Zeeman shift -->
+    <line id="lv4m" x1="268" y1="118" x2="332" y2="118" stroke="#4b4b4b" stroke-width="2.6" stroke-linecap="round"/>
+    <line id="lv1"  x1="340" y1="106" x2="404" y2="106" stroke="#5a5a5a" stroke-width="3.6" stroke-linecap="round"/>
+    <line id="lv4p" x1="412" y1="94"  x2="476" y2="94"  stroke="#4b4b4b" stroke-width="2.6" stroke-linecap="round"/>
+
+    <text x="252" y="100" text-anchor="end" font-size="15" fill="#E0E0E0">F = 4</text>
+    <text x="252" y="120" text-anchor="end" font-size="12" fill="#76b900">|1&#10217; = |F = 4, m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = 0&#10217;</tspan></text>
+    <text x="252" y="136" text-anchor="end" font-size="12" fill="#ef9100">m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = &plusmn;1: leakage</tspan></text>
+
+    <text x="372" y="80" text-anchor="middle" font-size="16" fill="#76b900">|1&#10217;</text>
+
+    <!-- F = 3 manifold, staggered the other way (opposite g-factor sign) -->
+    <line id="lv3m" x1="268" y1="216" x2="332" y2="216" stroke="#4b4b4b" stroke-width="2.6" stroke-linecap="round"/>
+    <line id="lv0"  x1="340" y1="228" x2="404" y2="228" stroke="#5a5a5a" stroke-width="3.6" stroke-linecap="round"/>
+    <line id="lv3p" x1="412" y1="240" x2="476" y2="240" stroke="#4b4b4b" stroke-width="2.6" stroke-linecap="round"/>
+
+    <text x="252" y="222" text-anchor="end" font-size="15" fill="#E0E0E0">F = 3</text>
+    <text x="252" y="242" text-anchor="end" font-size="12" fill="#76b900">|0&#10217; = |F = 3, m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = 0&#10217;</tspan></text>
+    <text x="252" y="258" text-anchor="end" font-size="12" fill="#ef9100">m<tspan font-size="9" dy="3">F</tspan><tspan dy="-3"> = &plusmn;1: leakage</tspan></text>
+
+    <text x="372" y="268" text-anchor="middle" font-size="16" fill="#76b900">|0&#10217;</text>
+
+    <!-- X gate: clock transition -->
+    <g class="xg" id="trUp">
+        <line x1="372" y1="220" x2="372" y2="118" stroke="#76b900" stroke-width="2" marker-end="url(#arw)"/>
+        <text x="386" y="160" font-size="11.5" fill="#76b900">X gate: &#960; pulse</text>
+        <text x="386" y="176" font-size="11" fill="#AAAAAA">clock transition</text>
+    </g>
+
+    <!-- leakage paths within a manifold -->
+    <path class="wv" id="tr4p" d="M408,101 q12,-6 20,-4 q8,2 20,-5" fill="none" stroke="#ef9100" stroke-width="2.2" marker-end="url(#arw)"/>
+    <path class="wv" id="tr4m" d="M336,111 q-12,6 -20,4 q-8,-2 -20,5" fill="none" stroke="#ef9100" stroke-width="2.2" marker-end="url(#arw)"/>
+    <path class="wv" id="tr3p" d="M408,233 q12,6 20,4 q8,-2 20,5" fill="none" stroke="#ef9100" stroke-width="2.2" marker-end="url(#arw)"/>
+    <path class="wv" id="tr3m" d="M336,223 q-12,-6 -20,-4 q-8,2 -20,-5" fill="none" stroke="#ef9100" stroke-width="2.2" marker-end="url(#arw)"/>
+
+    <!-- loss path -->
+    <path class="wv" id="trX" d="M356,240 q-24,20 -50,36" fill="none" stroke="#e03c3c" stroke-width="2.4" marker-end="url(#arw)"/>
+    <text class="wv" id="txX" x="296" y="290" text-anchor="end" font-size="12" fill="#AAAAAA">atom leaves the trap</text>
+
+    <g id="dot">
+        <circle class="halo" r="19" fill="#76b900" opacity="0.14"/>
+        <circle class="halo" r="11" fill="#76b900" opacity="0.30"/>
+        <circle id="core" r="6.5" fill="#B4F02A"/>
+    </g>
+
+    <polygon id="beam" points="-11,308 11,308 4,392 -4,392" fill="url(#bgrad)" opacity="0"/>
+    <line id="beamcore" x1="0" y1="308" x2="0" y2="392" stroke="#B4F02A" stroke-width="1.5" opacity="0"/>
+    <g id="ring"><circle cx="0" cy="394" r="14" fill="none" stroke="#76b900" stroke-dasharray="3 3"/></g>
+    <g id="array"></g>
+    <circle id="fall" r="6" fill="#e03c3c" opacity="0"/>
+    </svg>
+
+    <p class="viz-note">Green = the two levels that are the qubit. Orange = the neighboring levels; an atom that lands there has leaked out of the qubit, but readout still just reports the group it is in.</p>
+</section>
+
+<section class="info-box" aria-labelledby="results-heading">
+    <h2 id="results-heading">Results</h2>
+
+    <div class="result-verdict pending" id="rvBox" role="status" aria-live="polite">
+        <div class="rv-tag" id="rvTag">Sweep not started</div>
+        <div class="rv-main" id="rvMain">Nothing gated yet.</div>
+        <div class="rv-sub" id="rvSub">Move the slider to run the X gate across all ten sites.</div>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><div class="lab">Gates fired</div><div class="val" id="stFired">0<small> / 10</small></div></div>
+        <div class="stat"><div class="lab">Leaked, undetected</div><div class="val" id="stLeak" style="color:var(--leak)">0</div></div>
+        <div class="stat"><div class="lab">Lost, detected</div><div class="val" id="stLoss" style="color:var(--loss-text)">0</div></div>
+    </div>
+
+    <div class="bars-row">
+        <div class="bars">
+            <div class="bar-col">
+                <div class="bar-track"><div class="bar-fill readout" id="barRead"></div></div>
+                <div class="bar-val" id="valRead" style="color:var(--leak)">0</div>
+                <div class="bar-lab">Reported<br>as |1&#10217;</div>
+            </div>
+            <div class="bar-col">
+                <div class="bar-track"><div class="bar-fill" id="barTrue"></div></div>
+                <div class="bar-val" id="valTrue" style="color:var(--accent)">0</div>
+                <div class="bar-lab">Actually<br>in |1&#10217;</div>
+            </div>
+        </div>
+        <p class="bar-note">Left bar: what readout writes down &mdash; every atom that glowed. Right bar: how many of those are really in the qubit state |1&#10217;. The gap is leakage, and nothing in the measurement record reveals it.</p>
+    </div>
+</section>
+
+<footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+    <p class="credit">Co-developed with Victory Omole.</p>
+</footer>
+
+</div>
+
+<div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<script>
+(function () {
+    var N = 10;
+    var X = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
+    var P = { '0': [372, 228], '1': [372, 106], '4p': [444, 94], '4m': [300, 118], '3p': [444, 240], '3m': [300, 216], 'L': [306, 278] };
+    var V = {
+        '1':  ['No error',
+               'The pulse landed the atom in |1⟩ = |F = 4, m_F = 0⟩. It glows, and readout reports 1.',
+               '#76b900'],
+        '4p': ['Leakage',
+               'The atom slipped sideways into |F = 4, m_F = +1⟩, which is not part of the qubit. It still glows, so readout reports 1.',
+               '#ef9100'],
+        '4m': ['Leakage',
+               'The atom slipped sideways into |F = 4, m_F = −1⟩, which is not part of the qubit. It still glows, so readout reports 1.',
+               '#ef9100'],
+        '3p': ['Leakage',
+               'The pulse failed and the atom slipped into |F = 3, m_F = +1⟩, which is not part of the qubit. It stays dark, so readout reports 0.',
+               '#ef9100'],
+        '3m': ['Leakage',
+               'The pulse failed and the atom slipped into |F = 3, m_F = −1⟩, which is not part of the qubit. It stays dark, so readout reports 0.',
+               '#ef9100'],
+        'L':  ['Atom loss',
+               'The atom escaped the trap. The site sits empty, so at least this error is obvious.',
+               '#ff5252']
+    };
+    var LVL = {
+        '1':  ['glo1',  'lv1',  '#76b900', '#5a5a5a'],
+        '0':  ['glo0',  'lv0',  '#76b900', '#5a5a5a'],
+        '4p': ['glo4p', 'lv4p', '#ef9100', '#4b4b4b'],
+        '4m': ['glo4m', 'lv4m', '#ef9100', '#4b4b4b'],
+        '3p': ['glo3p', 'lv3p', '#ef9100', '#4b4b4b'],
+        '3m': ['glo3m', 'lv3m', '#ef9100', '#4b4b4b']
+    };
+    var MARK = {
+        '0':  ['●', 'mark-none', 'not gated yet'],
+        '1':  ['✓', 'mark-ok',   'no error, in the clock state F = 4, m_F = 0'],
+        '4p': ['≈', 'mark-leak', 'leaked to F = 4, m_F = +1'],
+        '4m': ['≈', 'mark-leak', 'leaked to F = 4, m_F = −1'],
+        '3p': ['≈', 'mark-leak', 'leaked to F = 3, m_F = +1'],
+        '3m': ['≈', 'mark-leak', 'leaked to F = 3, m_F = −1'],
+        'L':  ['✕', 'mark-loss', 'atom lost']
+    };
+    var BRIGHT = { '1': 1, '4p': 1, '4m': 1 };
+    var LEAKED = { '4p': 1, '4m': 1, '3p': 1, '3m': 1 };
+    var WORD = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+
+    // step  = how many sites have been gated (0..N), also the slider value
+    // sel   = which site the level diagram is currently showing
+    var step = 0, sel = 0, fate = [], state = [], done = [], busy = false;
+    var timers = [], playTimer = null, playing = false;
+
+    function $(id) { return document.getElementById(id); }
+    function tx(el, x, y) { el.style.transform = 'translate(' + x + 'px,' + y + 'px)'; }
+    function on(id, v) { $(id).classList.toggle('on', !!v); }
+    function announce(t) { $('status-announce').textContent = t; }
+    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    function clearTimers() {
+        timers.forEach(clearTimeout); timers = [];
+        if (playTimer) { clearTimeout(playTimer); playTimer = null; }
+    }
+
+    function lite(k) {
+        ['1', '0', '4p', '4m', '3p', '3m'].forEach(function (s) {
+            var d = LVL[s];
+            on(d[0], s === k);
+            $(d[1]).setAttribute('stroke', s === k ? d[2] : d[3]);
+        });
+    }
+    function trails(k) {
+        on('trUp', !!BRIGHT[k]);
+        on('tr4p', k === '4p'); on('tr4m', k === '4m');
+        on('tr3p', k === '3p'); on('tr3m', k === '3m');
+        on('trX', k === 'L'); on('txX', k === 'L');
+    }
+    function dot(k, fade) {
+        var g = $('dot');
+        tx(g, P[k][0], P[k][1]);
+        g.style.opacity = fade ? 0 : 1;
+        var c = (k === '1' || k === '0') ? ['#B4F02A', '#76b900'] : (k === 'L' ? ['#ff7a7a', '#e03c3c'] : ['#FFB43D', '#ef9100']);
+        $('core').setAttribute('fill', c[0]);
+        Array.prototype.forEach.call(g.querySelectorAll('.halo'), function (h) { h.setAttribute('fill', c[1]); });
+    }
+    function verdict(k) {
+        var box = $('verdict'), a = $('vmain'), b = $('vsub');
+        if (!k) {
+            box.style.borderColor = 'var(--border)';
+            a.style.color = 'var(--muted)';
+            a.textContent = step === 0 ? 'Ready' : 'Site ' + (sel + 1) + ' · not gated yet';
+            b.textContent = step === 0 ? 'Move the slider or press Step to gate the first site.'
+                                       : 'The sweep has not reached this site. Advance the slider to gate it.';
+            return;
+        }
+        var d = V[k];
+        box.style.borderColor = d[2];
+        a.style.color = d[2]; a.textContent = 'Site ' + (sel + 1) + ' · ' + d[0];
+        b.textContent = d[1];
+    }
+    function buildSiteRow() {
+        var h = '';
+        for (var i = 0; i < N; i++) {
+            var s = done[i] ? state[i] : '0', m = MARK[s];
+            h += '<button type="button" class="bit-btn" data-i="' + i + '" aria-pressed="' + (i === sel) + '"' +
+                 ' tabindex="' + (i === sel ? '0' : '-1') + '" aria-label="Site ' + (i + 1) + ', ' + m[2] + '">' +
+                 '<span aria-hidden="true">' + (i + 1) + '</span>' +
+                 '<span class="mark ' + m[1] + '" aria-hidden="true">' + m[0] + '</span></button>';
+        }
+        $('siteRow').innerHTML = h;
+        Array.prototype.forEach.call($('siteRow').querySelectorAll('.bit-btn'), function (b) {
+            b.addEventListener('click', function () { inspect(+b.getAttribute('data-i')); });
+            b.addEventListener('keydown', function (e) {
+                var d = e.key === 'ArrowRight' ? 1 : (e.key === 'ArrowLeft' ? -1 : 0);
+                if (!d) return;
+                e.preventDefault();
+                inspect((sel + d + N) % N);
+                var nx = $('siteRow').querySelector('[data-i="' + sel + '"]');
+                if (nx) nx.focus();
+            });
+        });
+    }
+    function inspect(i) {
+        if (busy) return;
+        sel = i;
+        render();
+    }
+    function drawArray() {
+        var h = '';
+        for (var i = 0; i < N; i++) {
+            var x = X[i], s = done[i] ? state[i] : '0', go = done[i];
+            var tc = i === sel ? '#76b900' : '#4b4b4b';
+            var op = s === 'L' ? 0.35 : 0.9;
+            h += '<line x1="' + (x - 10) + '" y1="364" x2="' + (x + 10) + '" y2="424" stroke="' + tc + '" stroke-width="1.3" opacity="' + op + '"/>';
+            h += '<line x1="' + (x + 10) + '" y1="364" x2="' + (x - 10) + '" y2="424" stroke="' + tc + '" stroke-width="1.3" opacity="' + op + '"/>';
+            var f = '#313131', st = '#757575', sw = 1.4;
+            if (go && s === '1') { f = '#76b900'; st = 'none'; sw = 0; }
+            if (go && LEAKED[s]) { f = '#ef9100'; st = 'none'; sw = 0; }
+            if (s !== 'L') {
+                h += '<circle cx="' + x + '" cy="394" r="6" fill="' + f + '" stroke="' + st + '" stroke-width="' + sw + '"/>';
+            } else {
+                h += '<g stroke="#ff5252" stroke-width="4" stroke-linecap="round">' +
+                     '<line x1="' + (x - 12) + '" y1="382" x2="' + (x + 12) + '" y2="406"/>' +
+                     '<line x1="' + (x + 12) + '" y1="382" x2="' + (x - 12) + '" y2="406"/></g>';
+            }
+            h += '<text x="' + x + '" y="446" text-anchor="middle" font-size="12" fill="' + (i === sel ? '#76b900' : '#757575') + '">' + (i + 1) + '</text>';
+        }
+        $('array').innerHTML = h;
+        $('ptitle').textContent = 'Site ' + (sel + 1) + ' · ground-state hyperfine manifolds';
+        tx($('ring'), X[sel], 0); tx($('beam'), X[sel], 0); tx($('beamcore'), X[sel], 0);
+    }
+
+    function results() {
+        var fired = 0, cam = 0, tru = 0, ls = 0, lk = 0;
+        for (var i = 0; i < N; i++) {
+            if (!done[i]) continue;
+            fired++;
+            if (BRIGHT[state[i]]) cam++;
+            if (state[i] === '1') tru++;
+            if (state[i] === 'L') ls++;
+            if (LEAKED[state[i]]) lk++;
+        }
+        $('stFired').innerHTML = fired + '<small> / ' + N + '</small>';
+        $('stLeak').textContent = lk;
+        $('stLoss').textContent = ls;
+
+        var scale = Math.max(cam, tru, 1);
+        $('barRead').style.height = (cam / scale * 100) + '%';
+        $('barTrue').style.height = (tru / scale * 100) + '%';
+        $('valRead').textContent = cam;
+        $('valTrue').textContent = tru;
+
+        var box = $('rvBox'), tag = $('rvTag'), main = $('rvMain'), sub = $('rvSub');
+        if (fired === 0) {
+            box.className = 'result-verdict pending';
+            tag.textContent = 'Sweep not started';
+            main.innerHTML = 'Nothing gated yet.';
+            sub.textContent = 'Move the slider to run the X gate across all ten sites.';
+        } else if (fired < N) {
+            box.className = 'result-verdict pending';
+            tag.textContent = 'Sweep in progress';
+            main.innerHTML = fired + ' of ' + N + ' sites gated.';
+            sub.textContent = 'Keep going. The comparison that matters only makes sense once the whole array has been gated.';
+        } else {
+            box.className = 'result-verdict final';
+            tag.textContent = 'The verdict';
+            main.innerHTML = 'Readout sees <em>' + cam + ' glowing atoms</em> and reports ' + WORD[cam] +
+                             ' 1s &mdash; but only <b>' + tru + ' atoms</b> are actually in |1&#10217;. ' +
+                             'The ' + WORD[ls] + ' lost ' + (ls === 1 ? 'atom is' : 'atoms are') + ' the only failure it could see.';
+            sub.textContent = lk + ' atoms leaked out of the qubit entirely. Readout scored every one of them as a clean 0 or 1, ' +
+                              'so error correction never learns that anything went wrong. An empty trap is loud; a leaked atom is silent.';
+        }
+    }
+
+    function render() {
+        var gated = done[sel];
+        var s = state[sel];
+        if (!gated) { lite('0'); trails(null); dot('0', false); verdict(null); }
+        else { lite(s === 'L' ? null : s); trails(s); dot(s, s === 'L'); verdict(s); }
+        buildSiteRow(); drawArray(); results(); syncSlider();
+    }
+
+    function syncSlider() {
+        var sl = $('stepSlider');
+        if (+sl.value !== step) sl.value = step;
+        var t = step + ' of ' + N + ' sites gated';
+        $('stepLabel').textContent = t;
+        sl.setAttribute('aria-valuetext', t);
+        $('bStep').disabled = step >= N;
+        $('bPlay').disabled = step >= N && !playing;
+    }
+
+    /* Jump straight to an arbitrary sweep position, no animation. */
+    function snapTo(v) {
+        clearTimers();
+        busy = false;
+        $('main-content').removeAttribute('aria-busy');
+        $('beam').style.opacity = 0; $('beamcore').style.opacity = 0; $('fall').style.opacity = 0;
+        step = Math.max(0, Math.min(N, v));
+        for (var i = 0; i < N; i++) { done[i] = i < step; state[i] = i < step ? fate[i] : '0'; }
+        sel = step > 0 ? step - 1 : 0;
+        render();
+        announce(step === 0 ? 'Sweep rewound to the start.' : step + ' of ' + N + ' sites gated. Site ' + step + ': ' + V[fate[step - 1]][0] + '.');
+    }
+
+    /* Advance exactly one site with the beam animation. */
+    function stepForward() {
+        if (busy || step >= N) return;
+        clearTimers();
+        var idx = step;
+        step = idx + 1;
+        for (var i = 0; i < N; i++) { done[i] = i < idx; state[i] = i < idx ? fate[i] : '0'; }
+        sel = idx;
+        busy = true;
+        $('main-content').setAttribute('aria-busy', 'true');
+        render();
+
+        var b = $('beam'), c = $('beamcore');
+        b.style.opacity = 1; c.style.opacity = 0.9;
+        later(function () { b.style.opacity = 0; c.style.opacity = 0; }, 620);
+        later(function () {
+            var f = fate[idx];
+            state[idx] = f; done[idx] = true;
+            if (f === '1') { trails('1'); lite('1'); dot('1', false); verdict('1'); }
+            else if (f === '4p' || f === '4m') {
+                trails('1'); lite(null); dot('1', false);
+                later(function () { trails(f); lite(f); dot(f, false); verdict(f); }, 480);
+            }
+            else if (f === '3p' || f === '3m') { trails(f); lite(f); dot(f, false); verdict(f); }
+            else {
+                trails('L'); lite(null); dot('L', true); verdict('L');
+                var fl = $('fall');
+                fl.style.transition = 'none'; tx(fl, X[idx], 394); fl.style.opacity = 1;
+                void fl.getBoundingClientRect();
+                fl.style.transition = '';
+                later(function () { tx(fl, X[idx] + 18, 496); fl.style.opacity = 0; }, 70);
+            }
+            buildSiteRow(); drawArray(); results(); syncSlider();
+            announce('Site ' + (idx + 1) + '. ' + V[f][0] + '. ' + V[f][1]);
+            later(function () {
+                busy = false;
+                $('main-content').removeAttribute('aria-busy');
+                results(); syncSlider();
+                if (playing) {
+                    if (step >= N) { setPlaying(false); }
+                    else { playTimer = setTimeout(stepForward, 650); }
+                }
+            }, 780);
+        }, 560);
+    }
+
+    function setPlaying(v) {
+        playing = v;
+        $('playLabel').textContent = v ? 'Pause' : (step >= N ? 'Sweep complete' : (step > 0 ? 'Resume sweep' : 'Play sweep'));
+        $('playIcon').innerHTML = v ? '<path d="M8 4v16M16 4v16"/>' : '<path d="M6 4l14 8-14 8z"/>';
+        $('bPlay').setAttribute('aria-pressed', v ? 'true' : 'false');
+        if (!v && playTimer) { clearTimeout(playTimer); playTimer = null; }
+        if (v && !busy) stepForward();
+        syncSlider();
+    }
+
+    function reset() {
+        clearTimers();
+        playing = false; busy = false;
+        $('main-content').removeAttribute('aria-busy');
+        state = []; fate = []; done = []; var p = [];
+        for (var i = 0; i < N; i++) { state.push('0'); fate.push('1'); done.push(false); p.push(i); }
+        for (var j = N - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)), t = p[j]; p[j] = p[k]; p[k] = t; }
+        fate[p[0]] = '4p'; fate[p[1]] = '4m'; fate[p[2]] = '3p'; fate[p[3]] = '3m'; fate[p[4]] = 'L';
+        step = 0; sel = 0;
+        $('fall').style.opacity = 0;
+        $('beam').style.opacity = 0; $('beamcore').style.opacity = 0;
+        $('playLabel').textContent = 'Play sweep';
+        $('playIcon').innerHTML = '<path d="M6 4l14 8-14 8z"/>';
+        render();
+        announce('New shot dealt. Ten atoms initialized in the clock state |0⟩, F = 3, m_F = 0. Sweep rewound to the start.');
+    }
+
+    $('stepSlider').addEventListener('input', function () {
+        var v = +this.value;
+        if (playing) setPlaying(false);
+        if (v === step + 1 && !busy) { stepForward(); }
+        else { snapTo(v); }
+    });
+    $('bStep').addEventListener('click', function () { if (playing) setPlaying(false); stepForward(); });
+    $('bPlay').addEventListener('click', function () { setPlaying(!playing); });
+    $('bReset').addEventListener('click', reset);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { reset(); }
+    });
+
+    reset();
+})();
+</script>
+</body>
+</html>

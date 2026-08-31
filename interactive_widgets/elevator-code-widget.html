@@ -1,0 +1,1288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elevator Code Syndrome Extraction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#76b900;
+    --accent-dark:#5e9400;
+    --bg:#1A1A1A;
+    --surface:#2A2A2A;
+    --border:#444444;
+    --fg:#E0E0E0;
+    --muted:#AAAAAA;
+
+    /* supporting tokens derived from the palette */
+    --accent-dim:rgba(118,185,0,.16);
+    --accent-line:rgba(118,185,0,.45);
+    --cell-bg:#313131;
+    --cell-border:#4b4b4b;
+    --amber:#ef9100;
+    --amber-dim:rgba(239,145,0,.16);
+    --amber-line:rgba(239,145,0,.55);
+    --teal:#1dbba4;
+    --red:#e52020;
+    --red-text:#ff7b7b;
+    --red-dim:rgba(229,32,32,.18);
+
+    --violet:#a06bff;
+    --violet-dim:rgba(160,107,255,.16);
+
+    --step:52px;
+    --rowh:44px;
+    --ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Roboto Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--ui);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:22px;
+  }
+
+  /* ---------- mandatory shell ---------- */
+  .skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#000;padding:8px 16px;
+    z-index:100;text-decoration:none;font-weight:bold}
+  .skip-link:focus{top:0}
+
+  .widget-container{
+    background-color:var(--surface);
+    border:1px solid var(--border);
+    border-top:4px solid var(--accent);
+    border-radius:8px;
+    padding:24px;
+    width:100%;
+    max-width:1100px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+    margin:0 auto;
+  }
+  @media (min-width: 768px){ .widget-container{padding:32px} }
+
+  .widget-container h1{
+    color:var(--accent);
+    font-size:1.5rem;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:16px;
+    margin-top:0;
+    font-weight:700;
+    line-height:1.2;
+  }
+  .widget-container .summary-text{
+    color:var(--muted);
+    margin-bottom:8px;
+    font-size:1rem;
+    line-height:1.5;
+  }
+
+  .instructions-section{
+    margin-bottom:24px;
+    padding:16px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--border);
+    border-radius:8px;
+  }
+  .instructions-section summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+  .instructions-section summary::-webkit-details-marker{display:none}
+  .instructions-section summary::before{content:'▶';font-size:0.7rem;color:var(--accent);transition:transform 0.15s;flex-shrink:0}
+  .instructions-section[open] > summary::before{transform:rotate(90deg)}
+  .instructions-section summary:focus{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+  .instructions-section summary h2{display:inline}
+  .instructions-section h2{color:var(--accent);font-size:1.1rem;margin:0;font-weight:700}
+  .instructions-section:not([open]){padding-bottom:16px}
+  .instructions-section ol{margin-top:12px}
+  .instructions-section .kbd{background:var(--border);padding:2px 6px;border-radius:4px;font-family:inherit;font-size:0.9em}
+  .keys-line{color:var(--fg);font-size:1rem;line-height:1.5;margin:12px 0 0}
+  .keys-line strong{color:var(--fg)}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+
+  .widget-footer{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);
+    display:flex;flex-wrap:wrap;gap:20px;font-size:.9rem}
+  .widget-footer a{color:#76b900;text-decoration:none;font-weight:600}
+  .widget-footer a:hover{text-decoration:underline}
+  .widget-footer a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+  .credit{margin-top:14px;font-size:.78rem;color:var(--muted);line-height:1.5}
+
+  /* ---------- info boxes ---------- */
+  .info-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px}
+  .info-box > .cap{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    font-weight:700;margin:0 0 12px}
+  .xlink{display:block;margin:12px 0 0;font-size:.76rem;color:var(--muted);line-height:1.5}
+  .xlink a{color:var(--accent);text-decoration:none;font-weight:600}
+  .xlink a:hover{text-decoration:underline}
+  .xlink a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+  /* ---------- step list (inside instructions) ---------- */
+  ol.steps-list{margin:12px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;
+    grid-auto-flow:column;grid-template-rows:repeat(3,auto);gap:6px 26px;counter-reset:s}
+  ol.steps-list li{counter-increment:s;position:relative;padding:5px 5px 5px 32px;font-size:1rem;color:var(--fg);
+    line-height:1.5;border-radius:7px}
+  ol.steps-list li::before{content:counter(s);position:absolute;left:4px;top:7px;width:20px;height:20px;border-radius:50%;
+    display:grid;place-items:center;font-size:.72rem;font-weight:700;font-family:var(--mono);
+    background:var(--cell-bg);color:var(--fg);border:1px solid var(--cell-border)}
+
+  /* ---------- guidance bar ---------- */
+  .guide{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:8px;
+    background:var(--surface);border:1px solid var(--border);margin-bottom:20px;min-height:44px}
+  .guide .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:7px;flex:0 0 auto;
+    box-shadow:0 0 10px var(--accent)}
+  .guide .g-main{font-size:.95rem}
+  .guide .g-hint{font-size:.85rem;color:var(--amber);margin-top:3px;opacity:0;transition:.2s;height:0;overflow:hidden}
+  .guide b.amberw{color:var(--amber)}
+  .guide .g-hint.show{opacity:1;height:auto}
+
+  /* ---------- main layout ---------- */
+  .main{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+  @media (min-width:980px){
+    .main{grid-template-columns:minmax(420px,1fr) minmax(300px,372px)}
+  }
+  .col-side,.col-vis{display:flex;flex-direction:column;gap:18px;min-width:0}
+
+  /* ---------- elevator shaft ---------- */
+  .shaft-wrap{position:relative}
+  .shaft{position:relative;height:calc(var(--step)*8 - 6px);margin:2px 2px 0}
+  .shaft:focus-visible{outline:3px solid var(--accent);outline-offset:6px;border-radius:8px}
+  .shaft::before,.shaft::after{content:"";position:absolute;top:-2px;bottom:-2px;width:2px;
+    background:var(--cell-border);border-radius:2px}
+  .shaft::before{left:-8px}
+  .shaft::after{right:-8px}
+
+  .block{position:absolute;left:0;right:0;height:var(--rowh);border-radius:8px;
+    background:var(--cell-bg);border:1px solid var(--cell-border);
+    display:flex;align-items:center;gap:12px;padding:0 12px;cursor:default;
+    transition:transform .42s cubic-bezier(.4,.9,.3,1), border-color .25s, background .25s, box-shadow .25s}
+  .block:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .block .name{font-size:.78rem;color:var(--muted);width:94px;flex:0 0 auto;font-weight:600;white-space:nowrap}
+  .block .name .idx{color:var(--fg)}
+  .phys{display:flex;gap:5px;flex:1;min-width:0}
+  .cell{flex:1;max-width:22px;height:22px;border-radius:5px;background:var(--surface);
+    border:1px solid var(--cell-border);position:relative;transition:.2s}
+  .cell::after{content:attr(data-sym);position:absolute;inset:0;display:grid;place-items:center;
+    font-family:var(--mono);font-size:12px;font-weight:700;opacity:0;transition:.15s}
+  .cell.flash{transform:scale(1.14)}
+  .cell.flash::after{opacity:1}
+  .cell.g-reset{border-color:var(--teal);box-shadow:0 0 12px rgba(29,187,164,.55);background:rgba(29,187,164,.14)}
+  .cell.g-reset::after{color:var(--teal)}
+  .cell.g-cnot,.cell.g-ctrl{border-color:var(--accent);box-shadow:0 0 12px var(--accent);background:var(--accent-dim)}
+  .cell.g-cnot::after,.cell.g-ctrl::after{color:var(--accent)}
+  .cell.g-meas{border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.55);background:rgba(255,255,255,.1)}
+  .cell.g-meas::after{color:#fff}
+  .cell.cellerr{border-color:var(--red);background:var(--red-dim);box-shadow:0 0 9px rgba(229,32,32,.5)}
+  .cell.cellerr::after{opacity:1;color:var(--red-text);font-family:var(--mono);font-weight:700}
+  .cell.cellerrz{border-color:var(--violet);background:var(--violet-dim);box-shadow:0 0 9px rgba(160,107,255,.5)}
+  .cell.cellerrz::after{opacity:1;color:var(--violet);font-family:var(--mono);font-weight:700}
+  .cell.instab{border-color:var(--violet);box-shadow:0 0 10px rgba(160,107,255,.55);background:var(--violet-dim)}
+
+  /* ancilla car */
+  .block.ancilla{background:var(--cell-bg);border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent-line),0 0 22px rgba(118,185,0,.24),inset 0 0 22px rgba(118,185,0,.05)}
+  .block.ancilla .name{color:var(--accent)}
+  .parity{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    font-family:var(--mono);display:flex;align-items:center;gap:6px;pointer-events:none}
+  .parity b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;
+    background:var(--surface);border:1px solid var(--cell-border);color:var(--fg);font-size:13px;transition:.25s}
+  .parity.one b{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px var(--accent-dim)}
+  .parity.flip b{animation:pflip .5s}
+  @keyframes pflip{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+  .block:not(.ancilla) .parity{display:none}
+
+  /* data block states */
+  .block.preview{border-color:var(--amber);background:var(--cell-bg);
+    box-shadow:0 0 0 1px var(--amber-line),0 0 16px var(--amber-dim)}
+  .block.preview .name{color:var(--amber)}
+  .block.collected{opacity:.9}
+  /* status label lives to the RIGHT of the physical-qubit boxes so nothing is covered */
+  .tag{flex:0 0 auto;width:100px;text-align:right;font-size:.7rem;font-weight:700;
+    white-space:nowrap;letter-spacing:.01em;color:transparent;transition:color .2s}
+  .block.preview .tag{color:var(--amber)}
+  .block.preview .tag::after{content:'▸ in this check'}
+  .block.collected .tag{color:var(--accent)}
+  .block.collected .tag::after{content:'✓ collected'}
+  .block.ancilla .tag{width:100px}
+  .block.target{cursor:pointer;border-color:var(--accent);animation:tpulse 1.1s infinite}
+  @keyframes tpulse{0%,100%{box-shadow:0 0 0 1px var(--accent-line),0 0 10px var(--accent-dim)}
+    50%{box-shadow:0 0 0 2px var(--accent),0 0 22px rgba(118,185,0,.45)}}
+  .errbadge{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);
+    flex:0 0 auto;margin-left:-4px;display:none}
+  .block.haserr .errbadge{display:block}
+  .block.haserrz .errbadge{display:block;background:var(--violet);box-shadow:0 0 8px var(--violet)}
+
+  /* CNOT connector */
+  .conn-svg{position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:5}
+  .conn-svg line{stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;opacity:0;
+    filter:drop-shadow(0 0 4px var(--accent));animation:connLine .5s ease forwards}
+  @keyframes connLine{0%{opacity:0}22%{opacity:1}72%{opacity:1}100%{opacity:.12}}
+  .errdot{position:absolute;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;
+    background:var(--red);box-shadow:0 0 12px var(--red),0 0 3px #fff;z-index:8;pointer-events:none;
+    display:grid;place-items:center;font:700 9px var(--mono);color:#fff;
+    animation:errProp .5s ease forwards}
+  .errdot::after{content:"X"}
+  @keyframes errProp{0%{transform:translate(0,0) scale(.5);opacity:0}
+    18%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1);opacity:1}}
+
+  /* ---------- buttons ---------- */
+  .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+  .btn-primary,.btn-secondary{font-family:var(--ui);font-size:.82rem;font-weight:600;border-radius:8px;
+    padding:11px 8px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;
+    gap:6px;text-align:center;min-height:44px;min-width:44px}
+  .btn-primary{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent)}
+  .btn-primary:hover:not(:disabled){background:var(--accent);color:#000000;border-color:var(--accent)}
+  .btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-secondary:hover:not(:disabled){background:rgba(255,255,255,0.05);color:#fff}
+  .btn-primary:active:not(:disabled),.btn-secondary:active:not(:disabled){transform:translateY(1px)}
+  .btn-primary:disabled,.btn-secondary:disabled{opacity:.45;cursor:not-allowed}
+  .wide{grid-column:1/-1}
+  .btn-primary.suggested{border-color:var(--accent);color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent-line),0 0 16px var(--accent-dim);background:var(--accent-dim)}
+  .btn-primary.suggested::after{content:'◂ next';font-size:.7rem;font-weight:700;color:var(--accent)}
+  .btn-primary.armed{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+  .btn-primary .k{font-family:var(--mono);font-size:14px}
+  .divider{height:1px;background:var(--border);margin:14px 0}
+  .sub-cap{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 8px}
+  .cfg{display:flex;flex-direction:column;gap:10px}
+  .cfg label{font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:5px}
+  select{font-family:var(--mono);font-size:.8rem;color:var(--fg);background:var(--surface);
+    border:1px solid var(--border);border-radius:8px;padding:10px 9px;cursor:pointer;min-height:44px}
+  button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible,.block:focus-visible{
+    outline:3px solid var(--accent);outline-offset:2px}
+
+  .legend{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:12px;height:12px;border-radius:3px;border:1px solid;flex:0 0 auto}
+  .sw.anc{border-color:var(--accent);background:var(--accent-dim)}
+  .sw.prev{border-color:var(--amber);background:var(--amber-dim)}
+  .sw.err{border-color:var(--red);background:var(--red-dim)}
+  .sw.errz{border-color:var(--violet);background:var(--violet-dim)}
+  .sw.par{border-color:var(--cell-border);background:var(--cell-bg)}
+
+  /* ---------- H matrix + syndrome ---------- */
+  .hmat-box{overflow-x:auto}
+  .hmat{display:flex;align-items:stretch;gap:10px;font-family:var(--mono)}
+  .heq{display:flex;align-items:center;font-size:22px;color:var(--muted);padding-right:2px}
+  .brk{font-size:0;position:relative;width:12px}
+  .brk::before{content:"";position:absolute;top:2px;bottom:2px;width:2px;background:var(--muted)}
+  .brk::after{content:"";position:absolute;left:0;width:9px;height:2px;background:var(--muted)}
+  .brk.l::before{left:0}.brk.l::after{top:2px}
+  .brk.r::before{right:0}.brk.r::after{right:0;top:2px}
+  .hgrid{display:grid;grid-template-columns:auto repeat(7,24px);gap:4px 4px;align-items:center}
+  .hgrid .colh{font-size:.62rem;color:var(--muted);text-align:center;line-height:1.05;height:24px;display:flex;
+    flex-direction:column;justify-content:flex-end;padding-bottom:2px}
+  .hgrid .rlab{font-size:.75rem;color:var(--muted);padding-right:10px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .hgrid .rlab .tick{color:var(--accent);font-weight:700;opacity:0;transition:.2s}
+  .hgrid .rlab.current{color:var(--fg)}
+  .hgrid .rlab.current .tick{opacity:1}
+  .hgrid .rlab .done{color:var(--accent);opacity:0;transition:.2s;font-weight:700}
+  .hgrid .rlab.done .done{opacity:1}
+  .hcell{width:24px;height:24px;display:grid;place-items:center;border-radius:5px;font-size:12px;
+    background:var(--cell-bg);border:1px solid var(--border);color:var(--muted);transition:.25s}
+  .hcell.one{color:var(--fg)}
+  .hcell.prev{border-color:var(--amber);color:var(--amber);background:var(--amber-dim);box-shadow:0 0 8px var(--amber-dim)}
+  .hcell.done{border-color:var(--accent-line);color:var(--accent);background:var(--accent-dim)}
+  .colh.corner{grid-column:1;font-size:.6rem;color:var(--muted);text-align:right;padding-right:10px}
+
+  .syn-bits{display:flex;align-items:center;gap:10px;font-family:var(--mono);flex-wrap:wrap}
+  .syn-bits .lab{font-size:13px;color:var(--muted)}
+  .bit{width:30px;height:34px;border-radius:8px;display:grid;place-items:center;font-size:17px;font-weight:700;
+    background:var(--cell-bg);border:1px solid var(--cell-border);color:var(--muted)}
+  .bit.setz{background:var(--violet-dim);border-color:var(--violet);color:var(--violet);
+    box-shadow:0 0 12px var(--violet-dim)}
+  .bitwrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .bitwrap .blab{font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+  .bit.set{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px var(--accent-dim)}
+  .bit.zero{color:var(--fg)}
+  .verdict{margin-top:14px;font-size:.88rem;padding:11px 13px;border-radius:8px;background:var(--cell-bg);
+    border:1px solid var(--border);color:var(--muted);min-height:20px}
+  .verdict.ok{border-color:var(--accent-line);background:var(--accent-dim);color:var(--fg)}
+  .verdict.clean{border-color:var(--cell-border)}
+  .verdict b{color:var(--accent)}
+  .verdict .q{color:var(--amber)}
+  .verdict .fix{margin-left:8px;font-family:var(--ui);font-size:.78rem;font-weight:700;color:#000;
+    background:var(--accent);border:none;border-radius:8px;padding:10px 14px;cursor:pointer;
+    vertical-align:middle;min-height:44px}
+  .verdict .fix:hover{background:var(--accent-dark)}
+  .verdict .fixq{font-family:var(--mono);font-size:.78rem;color:var(--fg);background:var(--surface);
+    border:1px solid var(--border);border-radius:8px;padding:9px 8px;margin-left:6px;min-height:40px;cursor:pointer}
+  .verdict .why{display:block;margin-top:9px;font-size:.82rem;color:var(--muted);line-height:1.5}
+  .verdict .why b{color:var(--fg)}
+  .verdict.zed{border-color:var(--violet);background:var(--violet-dim);color:var(--fg)}
+  .verdict.zed b{color:var(--violet)}
+  .inner-sub{font-size:.8rem;color:var(--muted);margin:0 0 12px;line-height:1.5}
+  .inner-sub b{color:var(--fg)}
+  .stabrow{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin:10px 0 0;line-height:1.6}
+  .stabrow b{color:var(--violet);font-weight:700}
+
+  /* ---------- primer ---------- */
+  details.primer{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:0 0 20px;overflow:hidden}
+  details.primer>summary{cursor:pointer;list-style:none;padding:14px 16px;font-size:.95rem;font-weight:600;color:var(--fg);
+    display:flex;align-items:center;gap:9px;user-select:none;min-height:44px}
+  details.primer>summary::-webkit-details-marker{display:none}
+  details.primer>summary::before{content:"▶";color:var(--accent);font-size:.7rem;transition:transform .2s;flex-shrink:0}
+  details.primer[open]>summary::before{transform:rotate(90deg)}
+  details.primer>summary:hover{background:rgba(255,255,255,.04)}
+  .primer-body{padding:2px 16px 16px;border-top:1px solid var(--border)}
+  .primer-row{display:grid;grid-template-columns:1fr;gap:22px;align-items:center;padding:15px 0}
+  @media (min-width:820px){ .primer-row{grid-template-columns:minmax(0,442px) 1fr} }
+  .primer-row+.primer-row{border-top:1px dashed var(--border)}
+  .fig{margin:0}
+  .fig svg{width:100%;height:auto;display:block;background:var(--cell-bg);border:1px solid var(--border);border-radius:8px}
+  .fig figcaption{font-size:.72rem;color:var(--muted);margin-top:6px;font-family:var(--mono);letter-spacing:.02em}
+  .fig svg text{font-family:'Inter',sans-serif;fill:var(--muted)}
+  .fig svg text.mono{font-family:var(--mono)}
+  .fig svg text.lbl{fill:var(--muted)}
+  .fig svg text.hd{fill:var(--fg);font-weight:600}
+  .fig svg text.grn{fill:var(--accent)}
+  .fig svg text.amb{fill:var(--amber)}
+  .fig svg text.red{fill:var(--red-text)}
+  .primer-txt{font-size:.88rem;color:var(--muted);line-height:1.55}
+  .primer-txt p{margin:0 0 9px}
+  .primer-txt p:last-child{margin:0}
+  .primer-txt b{color:var(--fg);font-weight:600}
+  .primer-txt i{color:var(--accent);font-style:normal;font-weight:600}
+  .primer-txt code{font-family:var(--mono);font-size:.8rem;background:var(--cell-bg);padding:1px 5px;border-radius:4px;color:var(--accent)}
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important}
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="widget-container" id="main-content">
+
+  <header>
+    <h1>Elevator Code Syndrome Extraction</h1>
+    <p class="summary-text">One reusable logical ancilla rides a column of logical data qubits, collecting each outer-code (Hamming) bit-flip check by transversal CNOT.</p>
+  </header>
+
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol class="steps-list">
+      <li>Reset the logical ancilla.</li>
+      <li>Collect the syndrome of a logical qubit with the transversal CNOT.</li>
+      <li>Move the ancilla down the column (SWAP).</li>
+      <li>Keep collecting &amp; moving until the check is complete.</li>
+      <li>Measure the ancilla.</li>
+      <li>Repeat for all three outer-code checks, then decode.</li>
+    </ol>
+    <p class="keys-line"><strong>Keyboard:</strong>
+      <span class="kbd">Tab</span> moves between controls, the register, and the footer.
+      <span class="kbd">Enter</span> or <span class="kbd">Space</span> activates the focused button or highlighted block.
+      <span class="kbd">Left</span> / <span class="kbd">Right</span> arrows move focus along a row of control buttons.
+      <span class="kbd">Up</span> / <span class="kbd">Down</span> arrows swap the ancilla one floor when the register has focus.
+      <span class="kbd">ESC</span> resets the whole widget (the injected error is kept).
+    </p>
+  </details>
+
+  <details class="primer">
+    <summary>Before you start — the two codes, what each block is, and why the ancilla swaps</summary>
+    <div class="primer-body">
+
+      <div class="primer-row">
+        <figure class="fig">
+          <svg viewBox="0 0 470 138" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Concatenation of two classical codes: an outer Hamming code across seven logical qubits, each encoded by an inner repetition code.">
+            <defs><marker id="ah0" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="#AAAAAA"/></marker></defs>
+            <rect x="8" y="10" width="454" height="40" rx="8" fill="#313131" stroke="#4b4b4b"/>
+            <text class="hd" x="235" y="28" text-anchor="middle" font-size="11.5">OUTER · Hamming [7,4,3]</text>
+            <text class="lbl" x="235" y="43" text-anchor="middle" font-size="9.5">corrects bit-flip (X) errors across the 7 logical data qubits — this is the 3 checks you run</text>
+            <line x1="150" y1="52" x2="150" y2="82" stroke="#AAAAAA" stroke-width="1.4" marker-end="url(#ah0)"/>
+            <text class="lbl" x="163" y="71" text-anchor="start" font-size="9">each logical qubit is itself encoded as…</text>
+            <rect x="8" y="86" width="454" height="42" rx="8" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <text class="grn" x="235" y="104" text-anchor="middle" font-size="11.5">INNER · repetition [5,1,5]</text>
+            <text class="lbl" x="235" y="119" text-anchor="middle" font-size="9.5">corrects phase-flip (Z) errors  ·  5 physical qubits per block</text>
+          </svg>
+          <figcaption>fig 0 · two classical codes, concatenated</figcaption>
+        </figure>
+        <div class="primer-txt">
+          <p><b>This is a concatenation of two classical codes.</b> The <i>outer</i> [7,4,3] Hamming code, spread across the 7 logical data qubits, catches a single <b>bit-flip (X)</b> error — those are the three parity checks in this widget. If the classical code itself is new, the <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html">Hamming [7,4,3] Visualizer</a> walks through it on plain bits first.</p>
+          <p>The <i>inner</i> [5,1,5] repetition code, inside every block, separately protects against <b>phase-flip (Z)</b> errors. The two codes guard against the two different error types independently.</p>
+          <p><b>You can exercise both.</b> Set <i>Error type</i> in the controls to <b>Z</b> and run the three checks: the outer syndrome stays <code>(0 0 0)</code> — a phase flip commutes through the CNOTs and is invisible to bit-parity checks. Then run the <b>inner phase-flip check</b> to locate it. Each code is blind to exactly the error the other one catches.</p>
+        </div>
+      </div>
+
+      <div class="primer-row">
+        <figure class="fig">
+          <svg viewBox="0 0 470 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Each block is a five-physical-qubit repetition code; a transversal CNOT is five physical CNOTs between two blocks.">
+            <defs><marker id="ah1" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="#76b900"/></marker></defs>
+            <text class="hd" x="243" y="22" text-anchor="middle" font-size="13">Transversal CNOT  =  5 physical CNOTs</text>
+            <text class="lbl" x="138" y="52" text-anchor="end" font-size="11">Logical Data</text>
+            <text class="lbl" x="138" y="64" text-anchor="end" font-size="9">control  &#9679;</text>
+            <text class="lbl" x="138" y="140" text-anchor="end" font-size="11">Logical Ancilla</text>
+            <text class="lbl" x="138" y="152" text-anchor="end" font-size="9">target |0&#772;&#10217;  &#8853;</text>
+            <rect x="150" y="44" width="26" height="24" rx="4" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="190" y="44" width="26" height="24" rx="4" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="230" y="44" width="26" height="24" rx="4" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="270" y="44" width="26" height="24" rx="4" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="310" y="44" width="26" height="24" rx="4" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="150" y="132" width="26" height="24" rx="4" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <rect x="190" y="132" width="26" height="24" rx="4" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <rect x="230" y="132" width="26" height="24" rx="4" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <rect x="270" y="132" width="26" height="24" rx="4" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <rect x="310" y="132" width="26" height="24" rx="4" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <text class="grn" x="163" y="61" text-anchor="middle" font-size="12">&#9679;</text><text class="grn" x="203" y="61" text-anchor="middle" font-size="12">&#9679;</text><text class="grn" x="243" y="61" text-anchor="middle" font-size="12">&#9679;</text><text class="grn" x="283" y="61" text-anchor="middle" font-size="12">&#9679;</text><text class="grn" x="323" y="61" text-anchor="middle" font-size="12">&#9679;</text>
+            <line x1="163" y1="68" x2="163" y2="130" stroke="#76b900" stroke-width="2" marker-end="url(#ah1)"/>
+            <line x1="203" y1="68" x2="203" y2="130" stroke="#76b900" stroke-width="2" marker-end="url(#ah1)"/>
+            <line x1="243" y1="68" x2="243" y2="130" stroke="#76b900" stroke-width="2" marker-end="url(#ah1)"/>
+            <line x1="283" y1="68" x2="283" y2="130" stroke="#76b900" stroke-width="2" marker-end="url(#ah1)"/>
+            <line x1="323" y1="68" x2="323" y2="130" stroke="#76b900" stroke-width="2" marker-end="url(#ah1)"/>
+            <text class="grn" x="163" y="149" text-anchor="middle" font-size="12">&#8853;</text><text class="grn" x="203" y="149" text-anchor="middle" font-size="12">&#8853;</text><text class="grn" x="243" y="149" text-anchor="middle" font-size="12">&#8853;</text><text class="grn" x="283" y="149" text-anchor="middle" font-size="12">&#8853;</text><text class="grn" x="323" y="149" text-anchor="middle" font-size="12">&#8853;</text>
+            <path d="M150,168 L150,172 L336,172 L336,168" fill="none" stroke="#4b4b4b" stroke-width="1"/>
+            <text class="mono lbl" x="243" y="190" text-anchor="middle" font-size="10">1 logical qubit  ·  repetition [5,1,5]  ·  5 physical qubits</text>
+          </svg>
+          <figcaption>fig 1 · one row in the shaft = one [5,1,5] repetition-coded logical qubit</figcaption>
+        </figure>
+        <div class="primer-txt">
+          <p><b>Every block is a whole logical qubit.</b> Each row in the register — the ancilla <em>and</em> all seven data qubits — is itself a <b>[5,1,5] repetition code</b> of <b>5 physical qubits</b>, protecting against <b>phase-flip (Z)</b> errors. The little squares standing in for a row are those physical qubits.</p>
+          <p><b>The CNOT between two rows is <i>transversal</i>.</b> It isn't one gate — it's <b>5 physical CNOTs firing in parallel</b>, physical qubit <code>i</code> of the data block controlling physical qubit <code>i</code> of the ancilla. That copies the data block's bit value onto the ancilla so the <i>outer</i> Hamming check can read it.</p>
+        </div>
+      </div>
+
+      <div class="primer-row">
+        <figure class="fig">
+          <svg viewBox="0 0 470 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A transversal CNOT only reaches an adjacent block, so the ancilla swaps step by step until it sits next to the target qubit.">
+            <defs><marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="#76b900"/></marker></defs>
+            <text class="lbl" x="80" y="20" text-anchor="middle" font-size="10">ancilla far from target</text>
+            <text class="lbl" x="390" y="20" text-anchor="middle" font-size="10">after swapping down</text>
+            <rect x="28" y="34" width="104" height="20" rx="5" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <rect x="28" y="61" width="104" height="20" rx="5" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="28" y="88" width="104" height="20" rx="5" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="28" y="115" width="104" height="20" rx="5" fill="rgba(239,145,0,.16)" stroke="rgba(239,145,0,.55)"/>
+            <text class="grn" x="80" y="48" text-anchor="middle" font-size="10">Ancilla</text>
+            <text class="lbl" x="80" y="75" text-anchor="middle" font-size="10">Data</text>
+            <text class="lbl" x="80" y="102" text-anchor="middle" font-size="10">Data</text>
+            <text class="amb" x="80" y="129" text-anchor="middle" font-size="10">Data (in check)</text>
+            <text class="red" x="80" y="158" text-anchor="middle" font-size="11">&#10007; not adjacent — can't CNOT</text>
+            <text class="grn" x="219" y="76" text-anchor="middle" font-size="11">SWAP &#8595;</text>
+            <line x1="152" y1="84" x2="286" y2="84" stroke="#76b900" stroke-width="1.8" marker-end="url(#ah2)"/>
+            <text class="lbl" x="219" y="98" text-anchor="middle" font-size="9">one floor at a time</text>
+            <rect x="308" y="34" width="104" height="20" rx="5" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="308" y="61" width="104" height="20" rx="5" fill="#313131" stroke="#4b4b4b"/>
+            <rect x="308" y="88" width="104" height="20" rx="5" fill="rgba(118,185,0,.16)" stroke="rgba(118,185,0,.45)"/>
+            <rect x="308" y="115" width="104" height="20" rx="5" fill="rgba(239,145,0,.16)" stroke="rgba(239,145,0,.55)"/>
+            <text class="lbl" x="360" y="48" text-anchor="middle" font-size="10">Data</text>
+            <text class="lbl" x="360" y="75" text-anchor="middle" font-size="10">Data</text>
+            <text class="grn" x="360" y="102" text-anchor="middle" font-size="10">Ancilla</text>
+            <text class="amb" x="360" y="129" text-anchor="middle" font-size="10">Data (in check)</text>
+            <line x1="303" y1="90" x2="303" y2="133" stroke="#76b900" stroke-width="2.4"/>
+            <text class="grn" x="360" y="158" text-anchor="middle" font-size="11">&#10003; adjacent &#8594; CNOT</text>
+          </svg>
+          <figcaption>fig 2 · the ancilla must sit next to a block to CNOT it</figcaption>
+        </figure>
+        <div class="primer-txt">
+          <p><b>Why swap at all?</b> The hardware here is laid out as a <b>line</b>, and a transversal CNOT can only reach a block that is <b>physically adjacent</b> to the ancilla. It can't reach across the stack to a distant data qubit.</p>
+          <p><b>So the ancilla travels.</b> A <b>SWAP</b> exchanges the ancilla with its neighbour — itself transversal (5 physical swaps) — stepping it one floor at a time until it lands beside the next qubit in the check. Swapping <i>does not disturb the parity already collected</i>; it only moves the car. That's the whole picture: <b>SWAP is the ride between floors; CNOT is what it does when the doors open.</b> (In a real compilation each SWAP is decomposed into 3 CNOTs; kept as a single SWAP here for clarity.)</p>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <div class="guide">
+    <span class="dot" aria-hidden="true"></span>
+    <div>
+      <div class="g-main" id="guideMain">Press <b>Reset Ancilla</b> to begin Check 1. The suggested next control is outlined in green.</div>
+      <div class="g-hint" id="guideHint"></div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- PRIMARY VISUALIZATION -->
+    <div class="col-vis">
+      <section class="info-box shaft-wrap" aria-labelledby="register-heading">
+        <h2 class="cap" id="register-heading">Logical register &middot; inner code = <span id="capCode">[5,1,5] repetition (corrects phase flips)</span></h2>
+        <div class="shaft" id="shaft" tabindex="0" role="group"
+             aria-label="Logical register. Ancilla and seven logical data blocks. Use Up and Down arrow keys to swap the ancilla one floor."></div>
+        <div class="legend">
+          <span><i class="sw anc" aria-hidden="true"></i>Ancilla (active)</span>
+          <span><i class="sw prev" aria-hidden="true"></i>Amber = in this check, parity not yet collected</span>
+          <span><i class="sw err" aria-hidden="true"></i>Physical X (bit flip)</span>
+          <span><i class="sw errz" aria-hidden="true"></i>Physical Z (phase flip)</span>
+          <span><i class="sw par" aria-hidden="true"></i>Ancilla parity bit (right of car)</span>
+        </div>
+      </section>
+
+      <!-- CONTROLS (below the elevator) -->
+      <section class="info-box" aria-labelledby="controls-heading">
+        <h2 class="cap" id="controls-heading">Controls</h2>
+        <div class="btnrow" data-arrowgroup>
+          <button class="btn-primary" id="btnReset">Reset Ancilla</button>
+          <button class="btn-primary" id="btnMeasure">Measure Ancilla</button>
+        </div>
+        <div class="btnrow" data-arrowgroup>
+          <button class="btn-primary" id="btnUp"><span class="k" aria-hidden="true">&uarr;</span> Swap Ancilla Up</button>
+          <button class="btn-primary" id="btnDown"><span class="k" aria-hidden="true">&darr;</span> Swap Ancilla Down</button>
+        </div>
+        <div class="btnrow" data-arrowgroup>
+          <button class="btn-primary wide" id="btnCNOT">CNOT&nbsp; Data <span class="k" aria-hidden="true">&rarr;</span> Ancilla</button>
+        </div>
+
+        <div class="divider"></div>
+        <h3 class="sub-cap">Guided</h3>
+        <div class="btnrow" data-arrowgroup>
+          <button class="btn-secondary" id="btnStep">Next step</button>
+          <button class="btn-secondary" id="btnAuto">Auto-run</button>
+        </div>
+        <div class="btnrow" data-arrowgroup>
+          <button class="btn-secondary wide" id="btnResetAll">Reset all (ESC)</button>
+        </div>
+
+        <div class="divider"></div>
+        <h3 class="sub-cap">Experiment &middot; inject an error</h3>
+        <div class="cfg">
+          <label for="selType">Error type
+            <select id="selType">
+              <option value="X" selected>Bit flip (X) &mdash; the OUTER Hamming code catches it</option>
+              <option value="Z">Phase flip (Z) &mdash; the INNER repetition code catches it</option>
+            </select>
+          </label>
+          <label for="selErr">&hellip;on logical data block
+            <select id="selErr">
+              <option value="0" selected>No error</option>
+              <option value="1">Logical Data 1</option>
+              <option value="2">Logical Data 2</option>
+              <option value="3">Logical Data 3</option>
+              <option value="4">Logical Data 4</option>
+              <option value="5">Logical Data 5</option>
+              <option value="6">Logical Data 6</option>
+              <option value="7">Logical Data 7</option>
+            </select>
+          </label>
+          <label id="qubitRow" for="selQ" style="display:none">&hellip;on physical qubit
+            <select id="selQ"></select>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <!-- QUANTITATIVE RESULTS (beside the elevator) -->
+    <div class="col-side">
+      <section class="info-box hmat-box" aria-labelledby="hmat-heading">
+        <h2 class="cap" id="hmat-heading">Outer parity-check matrix &middot; Hamming [7,4,3]</h2>
+        <div class="hmat">
+          <div class="heq" aria-hidden="true">H =</div>
+          <div class="brk l" aria-hidden="true"></div>
+          <div class="hgrid" id="hgrid"></div>
+          <div class="brk r" aria-hidden="true"></div>
+        </div>
+        <p class="xlink">Same classical code, on ordinary bits: <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html">Hamming [7,4,3] Visualizer</a> &rarr;<br>
+          (that widget orders its seven bits D1&ndash;D4 then P1&ndash;P3, so its columns sit in a different order than the H above)</p>
+      </section>
+
+      <section class="info-box syn-box" aria-labelledby="syn-heading">
+        <h2 class="cap" id="syn-heading">Measured syndrome &middot; outer code (X errors)</h2>
+        <div class="syn-bits" id="synBits">
+          <span class="lab">s =</span>
+        </div>
+        <div class="verdict" id="verdict">Complete all three checks to read the syndrome and decode it.</div>
+      </section>
+
+      <section class="info-box inner-box" aria-labelledby="inner-heading">
+        <h2 class="cap" id="inner-heading">Inner code &middot; [5,1,5] phase-flip checks</h2>
+        <p class="inner-sub" id="innerSub">The outer checks above are blind to phase flips. Inside every block the inner code measures four <b>X<sub>i</sub>X<sub>i+1</sub></b> stabilizers, which locate a single <b>Z</b> on one of the 5 physical qubits.</p>
+        <div class="syn-bits" id="innerBits"><span class="lab">z =</span></div>
+        <p class="stabrow" id="stabRow"><b>z&#8321;</b>=X&#8321;X&#8322; &nbsp; <b>z&#8322;</b>=X&#8322;X&#8323; &nbsp; <b>z&#8323;</b>=X&#8323;X&#8324; &nbsp; <b>z&#8324;</b>=X&#8324;X&#8325;</p>
+        <div class="btnrow" style="margin-top:12px">
+          <button class="btn-primary wide" id="btnInner">Run inner phase-flip check</button>
+        </div>
+        <div class="verdict" id="innerVerdict">Not run yet.</div>
+      </section>
+    </div>
+  </div>
+
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html">Hamming [7,4,3] Visualizer</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+  </footer>
+
+  <p class="credit">Co-developed with Peter Shanahan.</p>
+
+</div>
+
+<script>
+"use strict";
+/* ============ single source of truth ============ */
+const H = [
+  [1,0,0,1,0,1,1],  // Check 1
+  [0,1,0,1,1,0,1],  // Check 2
+  [0,0,1,0,1,1,1],  // Check 3
+];
+const N_CHECKS = 3, N_DATA = 7;
+const CHECKS = H.map(r => r.map((b,i)=> b ? i+1 : 0).filter(Boolean));
+const SYN = {};
+for (let d=0; d<N_DATA; d++){ let v=0; for (let c=0;c<N_CHECKS;c++) v=(v<<1)|H[c][d]; SYN[v]=d+1; }
+
+/* inner [5,1,5] phase-flip repetition code: |0bar> = |+++++>.
+   Stabilizer generators are X_i X_{i+1}; a single Z_q anticommutes with the two
+   generators that touch q, so the 4-bit pattern pinpoints q exactly.          */
+const INNER_STABS = [[1,2],[2,3],[3,4],[4,5]];
+const innerSyndromeFor = q => INNER_STABS.map(([a,b]) => (q===a||q===b) ? 1 : 0);
+function decodeInner(bits){
+  for(let q=1;q<=5;q++){ const p=innerSyndromeFor(q); if(p.every((v,i)=>v===bits[i])) return q; }
+  return 0;
+}
+
+const TOKENS = ['A','D1','D2','D3','D4','D5','D6','D7'];
+const canonical = () => TOKENS.slice();
+const dataNum = t => t[0]==='D' ? parseInt(t.slice(1),10) : null;
+const labelOf = t => t==='A' ? 'Logical Ancilla' : 'Logical Data <span class="idx">'+dataNum(t)+'</span>';
+
+/* ============ state ============ */
+const state = {
+  phys: 5,
+  order: canonical(),
+  cc: 0,
+  collected: new Set(),
+  reset: false,
+  measured: [false,false,false],
+  syndrome: [null,null,null],
+  armed: false,
+  err: 0,
+  errQ: 1,
+  errType: 'X',
+  innerSyn: null,
+  innerBlock: 0,
+  ancErr: 0,
+  parity: 0,
+  busy: false,
+  lastParity: 0,
+};
+let autoStop = false;
+let renderedPhys = 0;
+let fixShown = false;
+
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const T = { move: RM?1:440, flash: RM?1:520, gap: RM?1:130 };
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const slotOf = t => state.order.indexOf(t);
+
+/* ============ DOM refs ============ */
+const $ = id => document.getElementById(id);
+const container = $('main-content');
+const shaft = $('shaft'), hgrid = $('hgrid');
+const guideMain = $('guideMain'), guideHint = $('guideHint');
+const synBits = $('synBits'), verdict = $('verdict'), announcer = $('status-announce');
+const btn = {
+  reset:$('btnReset'), measure:$('btnMeasure'), up:$('btnUp'), down:$('btnDown'),
+  cnot:$('btnCNOT'), step:$('btnStep'), auto:$('btnAuto'), resetAll:$('btnResetAll'),
+};
+const blocks = {};
+
+function announce(msg){ announcer.textContent = msg; }
+function setBusy(v){
+  state.busy = v;
+  container.setAttribute('aria-busy', v ? 'true' : 'false');
+}
+
+/* ============ build shaft ============ */
+function buildShaft(){
+  shaft.innerHTML = '';
+  for (const t of TOKENS){
+    const el = document.createElement('div');
+    el.className = 'block';
+    el.id = 'blk-'+t;
+    el.tabIndex = -1;
+    let cells = '';
+    for (let i=0;i<state.phys;i++) cells += '<div class="cell"></div>';
+    el.innerHTML =
+      '<span class="errbadge" aria-hidden="true"></span>'+
+      '<span class="name">'+labelOf(t)+'</span>'+
+      '<div class="phys">'+cells+'</div>'+
+      '<span class="tag" aria-hidden="true"></span>'+
+      (t==='A' ? '<span class="parity" title="ancilla’s accumulated bit-parity"><b>0</b></span>' : '');
+    el.addEventListener('click', ()=>onBlockClick(t));
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();onBlockClick(t);} });
+    shaft.appendChild(el);
+    blocks[t] = el;
+    el.querySelectorAll('.cell').forEach((c,i)=>{
+      c.addEventListener('click', ev=>{ ev.stopPropagation(); onCellClick(t, i+1); });
+    });
+  }
+  renderedPhys = state.phys;
+}
+
+/* ============ build H matrix ============ */
+function buildHmat(){
+  hgrid.innerHTML='';
+  const corner = document.createElement('div');
+  corner.className='colh corner'; corner.innerHTML='Logical<br>Data →';
+  hgrid.appendChild(corner);
+  for (let d=1;d<=N_DATA;d++){
+    const c=document.createElement('div'); c.className='colh'; c.innerHTML='LD<br>'+d; hgrid.appendChild(c);
+  }
+  for (let r=0;r<N_CHECKS;r++){
+    const lab=document.createElement('div'); lab.className='rlab'; lab.id='rlab-'+r;
+    lab.innerHTML='<span class="tick" aria-hidden="true">▸</span>Check '+(r+1)+'<span class="done"> ✓</span>';
+    hgrid.appendChild(lab);
+    for (let d=0;d<N_DATA;d++){
+      const cell=document.createElement('div');
+      cell.className='hcell'+(H[r][d]?' one':'');
+      cell.id='h-'+r+'-'+d;
+      cell.textContent=H[r][d];
+      hgrid.appendChild(cell);
+    }
+  }
+}
+
+/* ============ helpers ============ */
+function validTargets(){
+  if(!state.reset || state.cc>=3) return [];
+  const a = slotOf('A'), cc = state.cc;
+  return TOKENS.filter(t=>t[0]==='D').filter(t=>{
+    const d=dataNum(t);
+    return CHECKS[cc].includes(d) && !state.collected.has(d) && Math.abs(slotOf(t)-a)===1;
+  });
+}
+function nextAction(){
+  if(state.cc>=3) return null;
+  if(!state.reset) return {type:'reset'};
+  const cc=state.cc;
+  const remaining = CHECKS[cc].filter(d=>!state.collected.has(d));
+  if(remaining.length===0) return {type:'measure'};
+  const a = slotOf('A');
+  const remSlots = remaining.map(d=>({d,s:slotOf('D'+d)}));
+  const adj = remSlots.find(x=>Math.abs(x.s-a)===1);
+  if(adj) return {type:'cnot', data:'D'+adj.d};
+  const below = remSlots.filter(x=>x.s>a);
+  return below.length ? {type:'swapdown'} : {type:'swapup'};
+}
+function hint(msg){
+  guideHint.textContent = msg;
+  guideHint.classList.add('show');
+  announce(msg);
+  clearTimeout(hint._t);
+  hint._t = setTimeout(()=>guideHint.classList.remove('show'), 3200);
+}
+
+/* ============ animation primitives ============ */
+function flashGates(token, symbol, cls){
+  return new Promise(res=>{
+    const cells = blocks[token].querySelectorAll('.cell');
+    cells.forEach(c=>{ c.setAttribute('data-sym',symbol); c.classList.add('flash',cls); });
+    setTimeout(()=>{ cells.forEach(c=>{ c.classList.remove('flash',cls); c.removeAttribute('data-sym'); }); res(); }, T.flash);
+  });
+}
+function cellRelCenter(token, qi){
+  const cell = blocks[token].querySelectorAll('.cell')[qi-1];
+  const cr = cell.getBoundingClientRect(), sr = shaft.getBoundingClientRect();
+  return { x: cr.left - sr.left + cr.width/2, y: cr.top - sr.top + cr.height/2 };
+}
+const SVGNS = 'http://www.w3.org/2000/svg';
+function drawCnotLines(ctrlToken, tgtToken){
+  const sr = shaft.getBoundingClientRect();
+  const svg = document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('class','conn-svg');
+  svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('width', sr.width); svg.setAttribute('height', sr.height);
+  const defs = document.createElementNS(SVGNS,'defs');
+  defs.innerHTML = '<marker id="connarrow" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L6,3 L0,6 Z" fill="#76b900"/></marker>';
+  svg.appendChild(defs);
+  for(let i=1;i<=state.phys;i++){
+    const a = cellRelCenter(ctrlToken,i), b = cellRelCenter(tgtToken,i);
+    const dir = Math.sign(b.y-a.y) || 1;
+    const line = document.createElementNS(SVGNS,'line');
+    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y + dir*13);
+    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y - dir*13);
+    line.setAttribute('marker-end','url(#connarrow)');
+    line.style.animationDelay = (i*22)+'ms';
+    svg.appendChild(line);
+  }
+  shaft.appendChild(svg);
+  setTimeout(()=>svg.remove(), T.flash + 200);
+}
+function propagateError(ctrlToken, qi){
+  const a = cellRelCenter(ctrlToken, qi), b = cellRelCenter('A', qi);
+  const dot = document.createElement('div');
+  dot.className = 'errdot';
+  dot.setAttribute('aria-hidden','true');
+  dot.style.left = a.x+'px'; dot.style.top = a.y+'px';
+  dot.style.setProperty('--dx', (b.x-a.x)+'px');
+  dot.style.setProperty('--dy', (b.y-a.y)+'px');
+  shaft.appendChild(dot);
+  setTimeout(()=>dot.remove(), T.flash + 160);
+}
+
+/* ============ actions ============ */
+async function doReset(){
+  if(state.busy || state.cc>=3) return;
+  setBusy(true); state.armed=false; render();
+  await flashGates('A','R','g-reset');
+  state.reset=true; state.collected=new Set(); state.parity=0; state.lastParity=0; state.ancErr=0;
+  setBusy(false); render();
+  announce('Ancilla reset to logical zero. Check '+(state.cc+1)+' started.');
+}
+
+async function fireCNOT(token){
+  if(state.busy) return;
+  setBusy(true); state.armed=false; render();
+  const d = dataNum(token);
+  /* A CNOT copies X from control to target. A Z on the control commutes with it,
+     so phase flips never reach the ancilla - the outer code cannot see them.   */
+  const isErr = (state.err===d && state.errType==='X');
+  drawCnotLines(token,'A');
+  if(isErr) propagateError(token, state.errQ);
+  await Promise.all([ flashGates(token,'●','g-ctrl'), flashGates('A','⊕','g-cnot') ]);
+  state.collected.add(d);
+  state.lastParity = state.parity;
+  if(isErr){ state.parity ^= 1; state.ancErr = state.errQ; }
+  setBusy(false); render();
+  announce('Transversal CNOT from Logical Data '+d+' into the ancilla. Ancilla parity is now '+state.parity+'.');
+}
+
+async function doSwap(dir){
+  if(state.busy || state.cc>=3) return;
+  const a=slotOf('A'), t=a+dir;
+  if(t<0 || t>7){ hint(dir>0?'The ancilla is already at the bottom of the shaft.':'The ancilla is already at the top of the shaft.'); return; }
+  setBusy(true); state.armed=false;
+  const other=state.order[t];
+  state.order[a]=other; state.order[t]='A';
+  positionBlocks();
+  await sleep(T.move+70);
+  setBusy(false); render();
+  announce('Ancilla swapped '+(dir>0?'down':'up')+' one floor, now at position '+(slotOf('A')+1)+' of 8.');
+}
+
+async function doMeasure(){
+  if(state.busy || state.cc>=3) return;
+  if(!state.reset){ hint('Reset the ancilla before measuring.'); return; }
+  if(CHECKS[state.cc].some(d=>!state.collected.has(d))){
+    hint('Collect every highlighted (amber) qubit for this check before measuring.'); return;
+  }
+  setBusy(true); state.armed=false; render();
+  await flashGates('A','M','g-meas');
+  const bit = state.parity, checkNo = state.cc+1;
+  state.syndrome[state.cc]=state.parity;
+  state.measured[state.cc]=true;
+  state.cc++; state.reset=false; state.collected=new Set(); state.parity=0; state.lastParity=0; state.ancErr=0;
+  setBusy(false); render();
+  announce('Check '+checkNo+' measured. Syndrome bit s'+checkNo+' = '+bit+'.'+
+           (state.cc>=3 ? ' All three checks complete.' : ''));
+}
+
+function armCNOT(){
+  if(state.busy || state.cc>=3) return;
+  if(!state.reset){ hint('Reset the ancilla first, then collect its qubits.'); return; }
+  if(state.armed){ state.armed=false; render(); return; }
+  if(validTargets().length===0){ hint('Swap the ancilla until it sits directly beside an uncollected (amber) qubit, then try again.'); return; }
+  state.armed=true; render();
+  const tg = validTargets();
+  if(tg.length && blocks[tg[0]]) blocks[tg[0]].focus();
+  announce('CNOT armed. Choose the highlighted block next to the ancilla, then press Enter.');
+}
+function onBlockClick(token){
+  if(token==='A' || state.busy) return;
+  if(!state.armed){ if(state.reset && state.cc<3) hint('Press “CNOT Data → Ancilla”, then pick the highlighted block.'); return; }
+  if(validTargets().includes(token)) fireCNOT(token);
+  else { state.armed=false; render(); hint('That block isn’t adjacent to the ancilla or isn’t part of this check.'); }
+}
+function onCellClick(token, qi){
+  if(token==='A' || state.busy) return;
+  if(state.armed){ onBlockClick(token); return; }
+  const d = dataNum(token);
+  state.err = d; state.errQ = qi;
+  syncErrSelectors();
+  resetAll(true);
+  hint(state.errType==='Z'
+    ? 'Placed a physical Z on Logical Data '+d+', qubit '+qi+'. The outer checks will stay trivial — use the inner phase-flip check to find it.'
+    : 'Placed a physical X on Logical Data '+d+', qubit '+qi+'. Run the checks to watch it reach the ancilla.');
+}
+function syncErrSelectors(){
+  const se=$('selErr'), sq=$('selQ'), row=$('qubitRow'), st=$('selType');
+  if(st) st.value=state.errType;
+  if(se) se.value=String(state.err);
+  if(sq) sq.value=String(state.errQ);
+  if(row) row.style.display = state.err ? 'flex' : 'none';
+}
+function applyCorrection(qi){
+  const hit = state.errQ, chosen = qi || state.errQ;
+  state.err=0; state.errQ=1; state.ancErr=0;
+  syncErrSelectors();
+  resetAll(true);
+  hint(chosen===hit
+    ? 'Applied X to qubit '+chosen+' — the error is undone. Re-run the checks; the syndrome should now be trivial.'
+    : 'Applied X to qubit '+chosen+' against an error on qubit '+hit+'. What is left is X'+hit+'X'+chosen+
+      ', a stabilizer of the inner code — the logical state is clean either way. Re-run the checks to confirm.');
+}
+
+async function doNextStep(){
+  if(state.busy) return false;
+  const a=nextAction();
+  if(!a){ hint('All three checks are already complete.'); return false; }
+  if(a.type==='reset') await doReset();
+  else if(a.type==='cnot') await fireCNOT(a.data);
+  else if(a.type==='swapdown') await doSwap(1);
+  else if(a.type==='swapup') await doSwap(-1);
+  else if(a.type==='measure') await doMeasure();
+  return true;
+}
+async function autoRun(){
+  if(state.busy) return;
+  autoStop=false;
+  announce('Auto-run started.');
+  while(state.cc<3 && !autoStop){
+    const ok=await doNextStep();
+    if(!ok) break;
+    await sleep(T.gap+70);
+  }
+}
+function resetAll(keep){
+  autoStop=true;
+  const phys=state.phys, err=state.err, errQ=state.errQ, errType=state.errType;
+  Object.assign(state,{
+    order:canonical(), cc:0, collected:new Set(), reset:false,
+    measured:[false,false,false], syndrome:[null,null,null],
+    armed:false, parity:0, lastParity:0, ancErr:0,
+  });
+  setBusy(false);
+  if(keep){ state.phys=phys; state.err=err; state.errQ=errQ; state.errType=errType; }
+  state.innerSyn=null; state.innerBlock=0;
+  fixShown=false;
+  if(renderedPhys!==state.phys) buildShaft();
+  render();
+}
+
+/* ============ render ============ */
+function positionBlocks(){
+  const step = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--step')) || 52;
+  for (const t of TOKENS){
+    blocks[t].style.transform = 'translateY('+(slotOf(t)*step)+'px)';
+  }
+}
+function render(){
+  if(renderedPhys!==state.phys) buildShaft();
+  positionBlocks();
+  const cc=state.cc;
+  const targets = state.armed ? validTargets() : [];
+
+  for (const t of TOKENS){
+    const el=blocks[t];
+    el.classList.remove('ancilla','preview','collected','target','haserr','haserrz');
+    el.tabIndex=-1;
+    el.removeAttribute('role');
+    el.removeAttribute('aria-label');
+    if(t==='A'){
+      el.classList.add('ancilla');
+      const p = el.querySelector('.parity'), b=el.querySelector('.parity b');
+      if(p&&b){
+        b.textContent = state.reset ? state.parity : '–';
+        p.classList.toggle('one', state.reset && state.parity===1);
+        if(state.reset && state.parity!==state.lastParity){ p.classList.add('flip'); setTimeout(()=>p.classList.remove('flip'),520); }
+      }
+    } else {
+      const d=dataNum(t);
+      if(state.err===d) el.classList.add(state.errType==='Z' ? 'haserrz' : 'haserr');
+      if(state.reset && cc<3 && CHECKS[cc].includes(d) && !state.collected.has(d)) el.classList.add('preview');
+      if(cc<3 && CHECKS[cc].includes(d) && state.collected.has(d)) el.classList.add('collected');
+      if(targets.includes(t)){
+        el.classList.add('target'); el.tabIndex=0;
+        el.setAttribute('role','button');
+        el.setAttribute('aria-label','CNOT Logical Data '+d+' into the ancilla');
+      }
+    }
+  }
+
+  for (const t of TOKENS){
+    blocks[t].querySelectorAll('.cell').forEach(c=>{
+      c.classList.remove('cellerr');
+      if(c.dataset.persist){ c.removeAttribute('data-sym'); delete c.dataset.persist; }
+    });
+  }
+  const markErr = (token, qi, kind)=>{
+    const c = blocks[token].querySelectorAll('.cell')[qi-1];
+    if(c){ c.classList.add(kind==='Z'?'cellerrz':'cellerr'); c.setAttribute('data-sym',kind);
+           c.dataset.persist='1'; }
+  };
+  if(state.err) markErr('D'+state.err, state.errQ, state.errType);
+  if(state.ancErr) markErr('A', state.ancErr, 'X');
+
+  // buttons
+  const na=nextAction();
+  const dis = state.busy;
+  btn.reset.disabled = dis || cc>=3;
+  btn.measure.disabled = dis || cc>=3;
+  btn.up.disabled = dis || cc>=3;
+  btn.down.disabled = dis || cc>=3;
+  btn.cnot.disabled = dis || cc>=3;
+  btn.step.disabled = dis || cc>=3;
+  btn.auto.disabled = dis || cc>=3;
+  [btn.reset,btn.measure,btn.up,btn.down,btn.cnot,btn.step].forEach(b=>b.classList.remove('suggested'));
+  btn.cnot.classList.toggle('armed', state.armed);
+  if(na && !state.busy && !state.armed){
+    ({reset:btn.reset, measure:btn.measure, swapdown:btn.down, swapup:btn.up, cnot:btn.cnot})[na.type]?.classList.add('suggested');
+  }
+  if(state.armed) btn.cnot.classList.remove('suggested');
+
+  // H matrix
+  for(let r=0;r<N_CHECKS;r++){
+    const lab=$('rlab-'+r);
+    lab.classList.toggle('current', r===cc && cc<3);
+    lab.classList.toggle('done', state.measured[r]);
+    for(let d=0;d<N_DATA;d++){
+      const cell=$('h-'+r+'-'+d);
+      cell.classList.remove('prev','done');
+      if(!H[r][d]) continue;
+      const dq=d+1;
+      if(state.measured[r]) cell.classList.add('done');
+      else if(r===cc && state.reset){
+        if(state.collected.has(dq)) cell.classList.add('done');
+        else cell.classList.add('prev');
+      }
+    }
+  }
+
+  guideMain.innerHTML = guidanceHTML();
+  renderSyndrome();
+  renderInner();
+}
+
+function guidanceHTML(){
+  const cc=state.cc;
+  if(state.busy) return 'Working…';
+  if(cc>=3){
+    const val=(state.syndrome[0]<<2)|(state.syndrome[1]<<1)|state.syndrome[2];
+    return val===0 ? 'All three checks measured — the syndrome is <b>trivial</b>, so no error was detected.'
+                   : 'All three checks measured. The syndrome below pinpoints the faulty qubit.';
+  }
+  if(!state.reset) return 'Check '+(cc+1)+': press <b>Reset Ancilla</b> to prepare |0̄⟩. The blocks in this check will turn <b class="amberw">amber</b> — those are the ones whose parity you still have to collect.';
+  const rem=CHECKS[cc].filter(d=>!state.collected.has(d));
+  if(rem.length===0) return 'All contributions for Check '+(cc+1)+' are in the ancilla — <b>Measure</b> it to record s<sub>'+(cc+1)+'</sub>.';
+  if(state.armed) return 'Pick the <b>highlighted block</b> next to the ancilla to CNOT its parity into the ancilla.';
+  const na=nextAction();
+  if(na.type==='cnot') return 'The ancilla is beside <b>Logical Data '+dataNum(na.data)+'</b> (part of Check '+(cc+1)+'). Use <b>CNOT Data → Ancilla</b>.';
+  if(na.type==='swapdown') return 'Swap the ancilla <b>down</b> toward the next Check '+(cc+1)+' qubit — still need '+rem.map(d=>'LD'+d).join(', ')+'.';
+  if(na.type==='swapup') return 'You’ve gone past it — swap the ancilla <b>up</b> to reach the remaining Check '+(cc+1)+' qubit.';
+  return '';
+}
+
+function renderSyndrome(){
+  synBits.innerHTML = '<span class="lab">s =</span>';
+  const names=['s₁ (C1)','s₂ (C2)','s₃ (C3)'];
+  for(let i=0;i<3;i++){
+    const w=document.createElement('div'); w.className='bitwrap';
+    const b=document.createElement('div'); b.className='bit';
+    const v=state.syndrome[i];
+    if(v===null){ b.textContent='·'; b.setAttribute('aria-label', names[i]+' not measured yet'); }
+    else { b.textContent=v; b.classList.add(v===1?'set':'zero'); b.setAttribute('aria-label', names[i]+' equals '+v); }
+    const l=document.createElement('div'); l.className='blab'; l.textContent=names[i];
+    w.appendChild(b); w.appendChild(l); synBits.appendChild(w);
+  }
+
+  if(state.cc<3){
+    verdict.className='verdict';
+    if(state.err===0)
+      verdict.innerHTML = 'No error injected — expect a trivial syndrome (0 0 0).';
+    else if(state.errType==='Z')
+      verdict.innerHTML = 'Injected: a physical <b>Z</b> on <span class="q">Logical Data '+state.err+'</span>, qubit '+state.errQ+
+        '. These three checks read <b>bit</b> parity, and a Z on the control of a CNOT commutes straight through it — so expect a <b>trivial</b> syndrome (0 0 0) here. The phase flip is the <b>inner</b> code\u2019s job; see the panel below.';
+    else
+      verdict.innerHTML = 'Injected: a physical <b>X</b> on <span class="q">Logical Data '+state.err+'</span>, qubit '+state.errQ+
+        '. As that block is collected, its X propagates through the CNOT onto the ancilla and flips the measured bit.';
+    fixShown=false;
+    return;
+  }
+  const s=state.syndrome, val=(s[0]<<2)|(s[1]<<1)|s[2];
+  if(val===0){
+    if(state.err && state.errType==='Z'){
+      verdict.className='verdict zed';
+      verdict.innerHTML='Syndrome <b>(0 0 0)</b> → the outer Hamming code sees <b>nothing</b>, and that is the correct answer: '+
+        'it only checks bit parity. The phase flip on Logical Data '+state.err+' is still there. '+
+        '<span class="why">Run the <b>inner phase-flip check</b> below to locate it. This is the whole point of concatenating the two codes — '+
+        'the outer code handles X, the inner code handles Z.</span>';
+      return;
+    }
+    verdict.className='verdict clean';
+    verdict.innerHTML='Syndrome <b>(0 0 0)</b> → no error detected. The logical state is clean.';
+    return;
+  }
+  const q=SYN[val];
+  verdict.className='verdict ok';
+  let html='Syndrome <b>('+s[0]+' '+s[1]+' '+s[2]+')</b> = binary <b>'+val+'</b> → single-error lookup → <span class="q">Logical Data '+q+'</span>.';
+  let showFix=false;
+  if(state.err===q && state.errType==='X'){
+    html += ' Correct it with one physical <b>X</b> on <em>any single</em> qubit of Logical Data '+q+':';
+    showFix = true;
+  }
+  else if(state.err===0) html+=' (measurement artifact)';
+  if(showFix){
+    let opts='';
+    for(let i=1;i<=state.phys;i++)
+      opts += '<option value="'+i+'"'+(i===state.errQ?' selected':'')+'>qubit '+i+'</option>';
+    html += ' <select class="fixq" id="fixQ" aria-label="physical qubit to apply the correcting X to">'+opts+'</select>'+
+            '<button class="fix" id="btnFix">Apply X</button>'+
+            '<span class="why"><b>Why any qubit, and not qubit '+state.errQ+' specifically?</b> '+
+            'The inner code here is the <b>phase-flip</b> repetition code, |0\u0304\u27E9 = |+++++\u27E9. In that basis a single physical X on '+
+            '<b>any one</b> of the 5 qubits is already the full logical X\u0304. If you correct on a different qubit than the one that was hit — '+
+            'say X on qubit 5 against an error on qubit 3 — what is left behind is X\u2083X\u2085, which is a <b>stabilizer</b> of the inner code '+
+            'and acts as the identity. Harmless. Try it with the dropdown. '+
+            '(Your instinct would be exactly right for a <b>bit-flip</b> repetition code, where you must hit the precise qubit — '+
+            'and that is what the inner Z correction below does.)</span>';
+  }
+  verdict.innerHTML=html;
+  if(showFix){
+    const fb=$('btnFix');
+    if(fb){
+      fb.addEventListener('click', ()=>{
+        const sel=$('fixQ');
+        applyCorrection(sel ? parseInt(sel.value,10) : state.errQ);
+      });
+      if(!fixShown){ fixShown=true; fb.focus(); }
+    }
+  }
+}
+
+/* ============ inner [5,1,5] phase-flip code ============ */
+function renderInner(){
+  const box=$('innerBits'), sub=$('innerSub'), vd=$('innerVerdict'), b=$('btnInner');
+  if(!box) return;
+  const blk = state.innerBlock || state.err || 1;
+  b.disabled = state.busy;
+  b.textContent = 'Run inner phase-flip check on Logical Data '+(state.err||1);
+
+  box.innerHTML='<span class="lab">z =</span>';
+  const names=['z\u2081','z\u2082','z\u2083','z\u2084'];
+  for(let i=0;i<4;i++){
+    const w=document.createElement('div'); w.className='bitwrap';
+    const bt=document.createElement('div'); bt.className='bit';
+    const v=state.innerSyn ? state.innerSyn[i] : null;
+    if(v===null){ bt.textContent='\u00B7'; bt.setAttribute('aria-label', names[i]+' not measured yet'); }
+    else { bt.textContent=v; bt.classList.add(v===1?'setz':'zero'); bt.setAttribute('aria-label', names[i]+' equals '+v); }
+    const l=document.createElement('div'); l.className='blab'; l.textContent=names[i];
+    w.appendChild(bt); w.appendChild(l); box.appendChild(w);
+  }
+
+  sub.innerHTML = 'Inside every block the inner code measures four <b>X<sub>i</sub>X<sub>i+1</sub></b> stabilizers. '+
+    'A single <b>Z</b> anticommutes with exactly the generators that touch it, so the 4-bit pattern names the physical qubit.';
+
+  if(!state.innerSyn){ vd.className='verdict'; vd.innerHTML='Not run yet.'; return; }
+
+  const q = decodeInner(state.innerSyn);
+  if(q===0){
+    vd.className='verdict clean';
+    vd.innerHTML='Inner syndrome <b>(0 0 0 0)</b> on Logical Data '+blk+' → no phase flip in this block.'+
+      (state.err===blk && state.errType==='X'
+        ? '<span class="why">Note the mirror image of the outer result: the injected <b>X</b> is a logical X\u0304 of the inner code, it commutes with every X<sub>i</sub>X<sub>i+1</sub> stabilizer, so the inner code is blind to it — exactly as the outer code was blind to Z. Each code covers the error type the other misses.</span>'
+        : '');
+    return;
+  }
+  vd.className='verdict zed';
+  vd.innerHTML='Inner syndrome <b>('+state.innerSyn.join(' ')+')</b> on Logical Data '+blk+
+    ' → phase flip on <b>physical qubit '+q+'</b>. '+
+    '<button class="fix" id="btnInnerFix">Apply Z to qubit '+q+'</button>'+
+    '<span class="why"><b>Here the qubit does matter.</b> Z errors behave like bit flips in this code\u2019s basis: '+
+    'Z on any single qubit is a genuine error, and Z\u2083Z\u2085 is neither a stabilizer nor a logical operator — it is a weight-2 error the code cannot undo. '+
+    'So the inner correction must land on qubit '+q+' exactly. Contrast the X correction above, where any qubit works.</span>';
+  const fb=$('btnInnerFix');
+  if(fb) fb.addEventListener('click', ()=>applyInnerCorrection(q));
+}
+
+async function runInnerCheck(){
+  if(state.busy) return;
+  const blk = state.err || 1;
+  setBusy(true); render();
+  const cells = blocks['D'+blk].querySelectorAll('.cell');
+  for(const [a,b] of INNER_STABS){
+    cells[a-1].classList.add('instab'); cells[b-1].classList.add('instab');
+    await sleep(RM?1:170);
+    cells[a-1].classList.remove('instab'); cells[b-1].classList.remove('instab');
+    await sleep(RM?1:60);
+  }
+  state.innerBlock = blk;
+  state.innerSyn = (state.err===blk && state.errType==='Z')
+    ? innerSyndromeFor(state.errQ) : [0,0,0,0];
+  setBusy(false); render();
+  announce('Inner phase-flip check on Logical Data '+blk+'. Inner syndrome '+state.innerSyn.join(' ')+'.');
+}
+
+function applyInnerCorrection(q){
+  const wrong = (q!==state.errQ);
+  state.err=0; state.errQ=1; state.ancErr=0;
+  syncErrSelectors();
+  resetAll(true);
+  hint(wrong
+    ? 'Applied Z to qubit '+q+'.'
+    : 'Applied Z to qubit '+q+' — the phase flip is undone and the block is back in the code space.');
+}
+
+/* ============ wire up ============ */
+btn.reset.addEventListener('click', doReset);
+btn.measure.addEventListener('click', doMeasure);
+btn.up.addEventListener('click', ()=>doSwap(-1));
+btn.down.addEventListener('click', ()=>doSwap(1));
+btn.cnot.addEventListener('click', armCNOT);
+btn.step.addEventListener('click', doNextStep);
+btn.auto.addEventListener('click', autoRun);
+btn.resetAll.addEventListener('click', ()=>{ resetAll(true); announce('Widget reset. Injected error kept.'); });
+$('btnInner').addEventListener('click', runInnerCheck);
+$('selType').addEventListener('change', e=>{
+  if(state.busy){ e.target.value=state.errType; return; }
+  state.errType=e.target.value;
+  syncErrSelectors();
+  resetAll(true);
+  announce(state.errType==='Z'
+    ? 'Error type set to phase flip (Z) — the outer checks will not see it.'
+    : 'Error type set to bit flip (X) — the outer checks will locate it.');
+});
+$('selErr').addEventListener('change', e=>{
+  if(state.busy){ e.target.value=String(state.err); return; }
+  state.err=parseInt(e.target.value,10);
+  if(state.err && (state.errQ<1 || state.errQ>state.phys)) state.errQ=1;
+  syncErrSelectors();
+  resetAll(true);
+  announce(state.err ? 'Injected a '+(state.errType==='Z'?'phase-flip (Z)':'bit-flip (X)')+' error on Logical Data '+state.err+', physical qubit '+state.errQ+'.' : 'Error injection cleared.');
+});
+$('selQ').addEventListener('change', e=>{
+  if(state.busy){ e.target.value=String(state.errQ); return; }
+  state.errQ=parseInt(e.target.value,10);
+  resetAll(true);
+  announce('Error moved to physical qubit '+state.errQ+'.');
+});
+
+/* arrow-key navigation between related buttons */
+document.querySelectorAll('[data-arrowgroup]').forEach(group=>{
+  group.addEventListener('keydown', e=>{
+    if(!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+    const items=[...document.querySelectorAll('[data-arrowgroup] button')].filter(b=>!b.disabled);
+    const i=items.indexOf(document.activeElement);
+    if(i<0) return;
+    e.preventDefault();
+    const n=(i+(e.key==='ArrowRight'?1:-1)+items.length)%items.length;
+    items[n].focus();
+  });
+});
+
+/* arrow keys move the ancilla when the register has focus; ESC resets everywhere */
+shaft.addEventListener('keydown', e=>{
+  if(e.key==='ArrowDown'){ e.preventDefault(); doSwap(1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); doSwap(-1); }
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ resetAll(true); announce('Widget reset. Injected error kept.'); }
+});
+
+/* ============ init ============ */
+function buildQubitOptions(){
+  const sq=$('selQ'); sq.innerHTML='';
+  for(let i=1;i<=state.phys;i++){ const o=document.createElement('option'); o.value=String(i); o.textContent='Qubit '+i; sq.appendChild(o); }
+}
+buildShaft();
+buildHmat();
+buildQubitOptions();
+syncErrSelectors();
+render();
+</script>
+</body>
+</html>
