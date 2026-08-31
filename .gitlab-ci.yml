@@ -13,7 +13,7 @@ variables:
 stages:
   - test
  
-test:notebooks:
+.test:notebooks:
   stage: test
   timeout: 90 minutes
   before_script:
@@ -28,37 +28,44 @@ test:notebooks:
         torch
         scikit-learn
         matplotlib-venn
+    # The cudaqx image owns the CUDA-Q installation. Install the replacement
+    # algorithms package without resolving cudaq again and potentially
+    # replacing the image's curated runtime.
+    - pip install --quiet --upgrade --no-deps cudaq-algorithms
+    - python -c 'from importlib.metadata import version; import cudaq_algorithms; print("cudaq-algorithms", version("cudaq-algorithms"))'
+    # Transitional fallback for branches that have not yet migrated every
+    # import. This becomes a no-op once cudaq_solvers is gone from the repo.
+    - |
+      if git grep -q -E '(import|from) cudaq_solvers' -- '*.py' '*.ipynb'; then
+        echo "Legacy cudaq_solvers imports found; installing compatibility package."
+        pip install --quiet --upgrade --no-deps cudaq-solvers
+      fi
   script:
     - |
       set -u
- 
-      # -----------------------------------------------------------------------
-      # Module definitions: "MODULE|SOLUTIONS_PATH|PATTERN"
-      # -----------------------------------------------------------------------
-      MODULES=(
-        "quick-start-to-quantum|quick-start-to-quantum/solutions|*.ipynb"
-        "qis-examples|qis-examples/solutions|*.ipynb"
-        #"chemistry-simulations|chemistry-simulations/solutions|*.ipynb"
-        "hybrid-workflows|hybrid-workflows/solutions|*.ipynb"
-        "qaoa-for-max-cut|qaoa-for-max-cut|*Solution*.ipynb"
-        "qec101|qec101/Solutions|*.ipynb"
-        "dynamics101|dynamics101/Solutions|*.ipynb"
-        "quantum-applications-to-finance|quantum-applications-to-finance/solutions|*.ipynb"
-        "ai-for-quantum|ai-for-quantum/solutions|*.ipynb"
+
+      mapfile -t MODULES < <(
+        printf '%s\n' "$NOTEBOOK_MODULES" | sed '/^[[:space:]]*$/d'
       )
+
+      if [ "${REQUIRE_GPU:-false}" = "true" ]; then
+        if ! command -v nvidia-smi >/dev/null 2>&1; then
+          echo "ERROR: GPU notebook job requires nvidia-smi, but it is not available."
+          exit 1
+        fi
+        nvidia-smi
+      fi
  
       # -----------------------------------------------------------------------
-      # FILTER (optional) — restrict MODULES to those affected by this commit.
-      # Leave commented out to always run every module.
+      # Restrict the job's module list to the directories affected by this
+      # commit. GitLab's rules:changes prevents the job from being created at
+      # all unless a notebook belonging to this CPU/GPU group changed.
       #
-      # When enabled:
-      #   - On default branch / scheduled / manual runs: run everything
+      #   - On default-branch pushes: run this job's group
       #   - On branch pushes / MRs: run only modules whose directory changed,
       #     plus all modules if .gitlab-ci.yml itself changed
       # -----------------------------------------------------------------------
-      if [ "${CI_COMMIT_BRANCH:-}" = "${CI_DEFAULT_BRANCH:-}" ] \
-         || [ "${CI_PIPELINE_SOURCE:-}" = "web" ] \
-         || [ "${CI_PIPELINE_SOURCE:-}" = "schedule" ]; then
+      if [ "${CI_COMMIT_BRANCH:-}" = "${CI_DEFAULT_BRANCH:-}" ]; then
         echo "Running all modules (trigger: ${CI_PIPELINE_SOURCE:-unknown})"
       else
         if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
@@ -147,16 +154,66 @@ test:notebooks:
       fi
   artifacts:
     when: always
+    expire_in: 1 week
+
+test:notebooks:cpu:
+  extends: .test:notebooks
+  variables:
+    NOTEBOOK_MODULES: |
+      quick-start-to-quantum|quick-start-to-quantum/solutions|*.ipynb
+      qis-examples|qis-examples/solutions|*.ipynb
+      hybrid-workflows|hybrid-workflows/solutions|*.ipynb
+      qaoa-for-max-cut|qaoa-for-max-cut|*Solution*.ipynb
+      quantum-applications-to-finance|quantum-applications-to-finance/solutions|*.ipynb
+      dynamics101|dynamics101/Solutions|*.ipynb
+      ai-for-quantum|ai-for-quantum/solutions|*.ipynb
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        paths:
+          - quick-start-to-quantum/**/*.ipynb
+          - qis-examples/**/*.ipynb
+          - hybrid-workflows/**/*.ipynb
+          - qaoa-for-max-cut/**/*.ipynb
+          - quantum-applications-to-finance/**/*.ipynb
+          - dynamics101/**/*.ipynb
+          - ai-for-quantum/**/*.ipynb
+  artifacts:
+    when: always
     paths:
       - "quick-start-to-quantum/solutions/*.ipynb"
       - "qis-examples/solutions/*.ipynb"
-      # - "chemistry-simulations/solutions/*.ipynb"
       - "hybrid-workflows/solutions/*.ipynb"
       - "qaoa-for-max-cut/*Solution*.ipynb"
-      - "qec101/Solutions/*.ipynb"
-      - "dynamics101/Solutions/*.ipynb"
       - "quantum-applications-to-finance/solutions/*.ipynb"
+      - "dynamics101/Solutions/*.ipynb"
       - "ai-for-quantum/solutions/*.ipynb"
+    expire_in: 1 week
+
+test:notebooks:gpu:
+  extends: .test:notebooks
+  variables:
+    REQUIRE_GPU: "true"
+    NOTEBOOK_MODULES: |
+      chemistry-simulations|chemistry-simulations/solutions|*.ipynb
+      qec101|qec101/Solutions|*.ipynb
+      simulation|simulation/solutions|*.ipynb
+      quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        paths:
+          - chemistry-simulations/**/*.ipynb
+          - qec101/**/*.ipynb
+          - simulation/**/*.ipynb
+          - quantum-machine-learning-and-data-analysis/**/*.ipynb
+  artifacts:
+    when: always
+    paths:
+      - "chemistry-simulations/solutions/*.ipynb"
+      - "qec101/Solutions/*.ipynb"
+      - "simulation/solutions/*.ipynb"
+      - "quantum-machine-learning-and-data-analysis/solutions/*.ipynb"
     expire_in: 1 week
 
 include:
