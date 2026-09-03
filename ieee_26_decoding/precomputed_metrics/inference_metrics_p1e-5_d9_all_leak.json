@@ -1,0 +1,32 @@
+{
+  "leakage_probability": 1e-05,
+  "ler": {
+    "avg": {
+      "after_ising_decoder": 0.025392532348632812,
+      "baseline": 0.39891815185546875
+    },
+    "x": {
+      "after_ising_decoder": 0.024810791015625,
+      "baseline": 0.39954376220703125
+    },
+    "z": {
+      "after_ising_decoder": 0.025974273681640625,
+      "baseline": 0.39829254150390625
+    }
+  },
+  "pymatching_latency_us_per_round": {
+    "avg": {
+      "after_ising_decoder": 0.557869357483772,
+      "baseline": 1.8432720946697776
+    },
+    "x": {
+      "after_ising_decoder": 0.5615124698831804,
+      "baseline": 1.844362460865846
+    },
+    "z": {
+      "after_ising_decoder": 0.5542262450843636,
+      "baseline": 1.8421817284737094
+    }
+  },
+  "pymatching_speedup_avg_xz": 3.304256742139006
+}

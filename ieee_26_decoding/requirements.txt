@@ -1,0 +1,20 @@
+# Jupyter runtime
+notebook
+ipykernel
+
+# Shared scientific stack
+numpy
+matplotlib
+scipy
+pandas
+lmfit
+requests
+
+# Elevator-code / CUDA-Q QEC lesson
+# The qLDPC notebook checks for CUDA-Q QEC 0.7.x.
+cudaq-qec>=0.7,<0.8
+stim
+stimbposd
+
+# Leakage-aware Ising-decoder lesson
+git+https://github.com/vtomole/Ising-Decoding.git@loss_decoder
