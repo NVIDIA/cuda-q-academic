@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">A radial feature reveals kernel structure</title>
+  <desc id="desc">Three-step diagram. Blue points form a small inner ring and orange points form a larger outer ring in x-space, where a crossed-out line signals that no straight boundary separates them. Mapping each point to its squared radius creates two compact groups on a one-dimensional axis. The resulting four-by-four kernel matrix has two strong diagonal similarity blocks and pale off-diagonal blocks.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 1 1 L 9 5 L 1 9 Z" fill="#76B900"/>
+    </marker>
+    <style>
+      .label { font: 600 18px Inter, Arial, sans-serif; fill: #27313D; letter-spacing: .2px; }
+      .note { font: 500 14px Inter, Arial, sans-serif; fill: #647184; }
+      .guide { fill: none; stroke: #CBD3DC; stroke-width: 1.5; }
+      .blue { fill: #3B82F6; }
+      .orange { fill: #F59E0B; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="430" rx="20" fill="#FFFFFF"/>
+
+  <!-- 1 · Concentric geometry in the original coordinates -->
+  <text x="205" y="54" class="label" text-anchor="middle">x-space</text>
+  <circle cx="205" cy="224" r="104" class="guide" stroke-dasharray="3 7"/>
+  <circle cx="205" cy="224" r="55" class="guide" stroke-dasharray="3 7"/>
+
+  <g class="orange">
+    <circle cx="205" cy="120" r="8"/>
+    <circle cx="295" cy="172" r="8"/>
+    <circle cx="295" cy="276" r="8"/>
+    <circle cx="205" cy="328" r="8"/>
+    <circle cx="115" cy="276" r="8"/>
+    <circle cx="115" cy="172" r="8"/>
+  </g>
+  <g class="blue">
+    <circle cx="205" cy="169" r="8"/>
+    <circle cx="253" cy="196" r="8"/>
+    <circle cx="253" cy="252" r="8"/>
+    <circle cx="205" cy="279" r="8"/>
+    <circle cx="157" cy="252" r="8"/>
+    <circle cx="157" cy="196" r="8"/>
+  </g>
+
+  <path d="M128 307 L282 141" fill="none" stroke="#27313D" stroke-width="3" stroke-linecap="round" opacity=".72"/>
+  <g fill="none" stroke="#F59E0B" stroke-width="4" stroke-linecap="round">
+    <path d="M277 126 L297 146"/>
+    <path d="M297 126 L277 146"/>
+  </g>
+
+  <!-- Mapping -->
+  <path d="M355 224 H438" fill="none" stroke="#76B900" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- 2 · Squared radius makes the groups one-dimensional -->
+  <text x="602" y="54" class="label" text-anchor="middle">h(x) = ‖x‖²</text>
+  <path d="M478 224 H726" fill="none" stroke="#27313D" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <g class="blue" stroke="#FFFFFF" stroke-width="2">
+    <circle cx="523" cy="217" r="10"/>
+    <circle cx="541" cy="231" r="10"/>
+    <circle cx="550" cy="211" r="10"/>
+  </g>
+  <g class="orange" stroke="#FFFFFF" stroke-width="2">
+    <circle cx="657" cy="214" r="10"/>
+    <circle cx="674" cy="230" r="10"/>
+    <circle cx="687" cy="210" r="10"/>
+  </g>
+
+  <path d="M551 164 H656" fill="none" stroke="#76B900" stroke-width="2" stroke-linecap="round" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="604" y="148" class="note" text-anchor="middle">different radii</text>
+  <path d="M515 274 Q538 290 560 274 M649 274 Q673 290 697 274" fill="none" stroke="#AAB4C0" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="606" y="315" class="note" text-anchor="middle">similar radii</text>
+
+  <!-- Kernel construction -->
+  <path d="M765 224 H848" fill="none" stroke="#76B900" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <!-- 3 · Block structure in pairwise similarities -->
+  <text x="1008" y="54" class="label" text-anchor="middle">kernel K</text>
+  <g transform="translate(916 132)">
+    <rect width="92" height="92" rx="3" fill="#3B82F6" opacity=".88"/>
+    <rect x="92" width="92" height="92" rx="3" fill="#F1F4F7"/>
+    <rect y="92" width="92" height="92" rx="3" fill="#F1F4F7"/>
+    <rect x="92" y="92" width="92" height="92" rx="3" fill="#F59E0B" opacity=".88"/>
+
+    <g fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".9">
+      <path d="M46 0 V184 M92 0 V184 M138 0 V184"/>
+      <path d="M0 46 H184 M0 92 H184 M0 138 H184"/>
+    </g>
+    <rect width="184" height="184" rx="5" fill="none" stroke="#27313D" stroke-width="2"/>
+  </g>
+</svg>

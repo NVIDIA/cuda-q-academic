@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="530" viewBox="0 0 1200 530" role="img" aria-labelledby="title description">
+  <title id="title">The two parts of the quantum stochastic walk master equation</title>
+  <description id="description">The time derivative of rho is a weighted combination of a coherent term and a directed dissipative term. Omega controls their balance.</description>
+  <rect width="1200" height="530" rx="24" fill="#f7f7f7"/>
+  <rect x="2" y="2" width="1196" height="526" rx="22" fill="none" stroke="#d8d8d8" stroke-width="4"/>
+
+  <text x="600" y="55" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#1a1a1a">THE QUANTUM-STOCHASTIC-WALK MASTER EQUATION</text>
+  <text x="600" y="112" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="39" fill="#1a1a1a">
+    <tspan>dρ/dt = </tspan>
+    <tspan fill="#2563b8" font-weight="700">(1 − ω) C</tspan><tspan fill="#2563b8" baseline-shift="sub" font-size="23">H</tspan><tspan fill="#2563b8" font-weight="700">(ρ)</tspan>
+    <tspan fill="#1a1a1a"> + </tspan>
+    <tspan fill="#76b900" font-weight="700">ω D</tspan><tspan fill="#76b900" baseline-shift="sub" font-size="23">P</tspan><tspan fill="#76b900" font-weight="700">(ρ)</tspan>
+  </text>
+  <text x="600" y="149" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#555555">instantaneous change = coherent contribution + directed, dissipative contribution</text>
+
+  <path d="M320 169 L320 196" fill="none" stroke="#2563b8" stroke-width="4"/>
+  <polygon points="320,208 312,194 328,194" fill="#2563b8"/>
+  <path d="M880 169 L880 196" fill="none" stroke="#76b900" stroke-width="4"/>
+  <polygon points="880,208 872,194 888,194" fill="#76b900"/>
+
+  <rect x="70" y="213" width="500" height="190" rx="18" fill="#ffffff" stroke="#2563b8" stroke-width="5"/>
+  <rect x="70" y="213" width="500" height="50" rx="14" fill="#2563b8"/>
+  <rect x="70" y="245" width="500" height="18" fill="#2563b8"/>
+  <text x="320" y="247" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">COHERENT  C<tspan baseline-shift="sub" font-size="15">H</tspan>(ρ)</text>
+  <text x="100" y="298" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#222222">• Keeps relative amplitude and phase information</text>
+  <text x="100" y="337" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#222222">• Reversible when acting by itself</text>
+  <text x="100" y="376" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#222222">• Defined later using the Hamiltonian H</text>
+
+  <rect x="630" y="213" width="500" height="190" rx="18" fill="#ffffff" stroke="#76b900" stroke-width="5"/>
+  <rect x="630" y="213" width="500" height="50" rx="14" fill="#76b900"/>
+  <rect x="630" y="245" width="500" height="18" fill="#76b900"/>
+  <text x="880" y="247" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#101010">DIRECTED, DISSIPATIVE  D<tspan baseline-shift="sub" font-size="15">P</tspan>(ρ)</text>
+  <text x="660" y="298" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#222222">• Directed: P chooses each source and destination</text>
+  <text x="660" y="337" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#222222">• Dissipative: irreversible flow can settle to a rank</text>
+  <text x="660" y="376" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#222222">• Built next from jump operators J<tspan baseline-shift="sub" font-size="14">ij</tspan></text>
+
+  <line x1="255" y1="454" x2="945" y2="454" stroke="#333333" stroke-width="4"/>
+  <circle cx="600" cy="454" r="13" fill="#76b900" stroke="#1a1a1a" stroke-width="3"/>
+  <text x="70" y="462" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#2563b8">ω = 0</text>
+  <text x="1130" y="462" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#76b900">ω = 1</text>
+  <text x="70" y="493" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#555555">coherent only</text>
+  <text x="1130" y="493" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#555555">directed, dissipative only</text>
+  <text x="600" y="500" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#333333">ω controls the balance</text>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">Five-page directed network</title>
+  <desc id="desc">A links to B and C. B links to C. C links to A. D links to C and E. E links to C.</desc>
+  <defs>
+    <marker id="arrowhead" markerWidth="11" markerHeight="9" refX="9" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L11,4.5 L0,9 z" fill="#76b900"/>
+    </marker>
+    <style>
+      .title { font: 700 30px Inter, Arial, sans-serif; fill: #f2f2f2; }
+      .subtitle { font: 17px Inter, Arial, sans-serif; fill: #b9b9b9; }
+      .edge { fill: none; stroke: #c3c3c3; stroke-width: 3.2; marker-end: url(#arrowhead); }
+      .node circle { fill: #202020; stroke: #76b900; stroke-width: 5; }
+      .node text { fill: #ffffff; font: 800 27px Inter, Arial, sans-serif; text-anchor: middle; dominant-baseline: central; }
+      .legend { font: 16px Inter, Arial, sans-serif; fill: #b9b9b9; }
+    </style>
+  </defs>
+
+  <rect width="900" height="520" rx="18" fill="#171717"/>
+  <rect x="18" y="18" width="864" height="484" rx="14" fill="#242424" stroke="#4a4a4a" stroke-width="2"/>
+  <rect x="18" y="18" width="864" height="8" rx="4" fill="#76b900"/>
+
+  <text x="52" y="72" class="title">Five-page directed network</text>
+  <text x="52" y="101" class="subtitle">An arrow points toward the page being linked to.</text>
+
+  <!-- Curved reciprocal links keep A→C and C→A visually distinct. -->
+  <path class="edge" d="M214 248 Q304 141 398 144"/>
+  <path class="edge" d="M213 277 Q304 338 399 379"/>
+  <path class="edge" d="M397 352 Q287 314 212 287"/>
+  <path class="edge" d="M450 185 L450 342"/>
+  <path class="edge" d="M670 379 L503 390"/>
+  <path class="edge" d="M714 342 L714 185"/>
+  <path class="edge" d="M668 158 Q555 218 478 347"/>
+
+  <g class="node" transform="translate(165 265)">
+    <circle r="46"/><text y="2">A</text>
+  </g>
+  <g class="node" transform="translate(450 140)">
+    <circle r="46"/><text y="2">B</text>
+  </g>
+  <g class="node" transform="translate(450 390)">
+    <circle r="46"/><text y="2">C</text>
+  </g>
+  <g class="node" transform="translate(715 390)">
+    <circle r="46"/><text y="2">D</text>
+  </g>
+  <g class="node" transform="translate(715 140)">
+    <circle r="46"/><text y="2">E</text>
+  </g>
+
+  <line x1="52" y1="468" x2="104" y2="468" stroke="#c3c3c3" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <text x="122" y="474" class="legend">Direction of a link</text>
+</svg>
