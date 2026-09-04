@@ -28,6 +28,7 @@ stages:
         torch
         scikit-learn
         matplotlib-venn
+        pandas
     # The cudaqx image owns the CUDA-Q installation. Install the replacement
     # algorithms package without resolving cudaq again and potentially
     # replacing the image's curated runtime.
