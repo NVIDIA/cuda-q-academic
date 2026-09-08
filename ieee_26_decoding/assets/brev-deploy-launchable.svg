@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1321" height="328" viewBox="0 0 1321 328" role="img" aria-labelledby="title desc">
+  <title id="title">Brev launchable deployment screen</title>
+  <desc id="desc">The accelerated decoding IEEE CUDA-Q launchable page with the Deploy Launchable button circled in red.</desc>
+  <rect width="1321" height="328" fill="#171717"/>
+  <text x="30" y="65" fill="#f6f6f6" font-family="Arial, sans-serif" font-size="29" font-weight="700">accelerated_decoding_ieee_cudaq</text>
+  <text x="30" y="99" fill="#c8c8c8" font-family="Arial, sans-serif" font-size="15">For IEEE quantum week workshop on accelerated decoding.</text>
+  <text x="850" y="59" fill="#f6f6f6" font-family="Arial, sans-serif" font-size="18" font-weight="700">$0.46/hr</text>
+  <circle cx="937" cy="55" r="6" fill="none" stroke="#949494" stroke-width="1.5"/>
+  <rect x="978" y="33" width="249" height="43" rx="22" fill="#6d9f11"/>
+  <text x="1039" y="60" fill="#080808" font-family="Arial, sans-serif" font-size="14">Deploy Launchable</text>
+  <path d="M963 16 C1024 4 1172 2 1229 17 C1263 26 1267 76 1234 89 C1173 107 1021 103 974 89 C942 78 936 30 963 16Z" fill="none" stroke="#ff211e" stroke-width="5" stroke-linecap="round"/>
+  <path d="M966 20 C975 17 976 15 983 14" fill="none" stroke="#ff211e" stroke-width="5" stroke-linecap="round"/>
+  <text x="945" y="106" fill="#bdbdbd" font-family="Arial, sans-serif" font-size="12">By deploying, you consent to sharing personal and</text>
+  <text x="969" y="126" fill="#bdbdbd" font-family="Arial, sans-serif" font-size="12">deployment data with GCP as described here.</text>
+  <rect x="31" y="164" width="894" height="126" rx="7" fill="#121212" stroke="#505050"/>
+  <line x1="31" y1="236" x2="925" y2="236" stroke="#363636"/>
+  <text x="51" y="207" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="14" font-weight="700">Instance name</text>
+  <circle cx="161" cy="201" r="6" fill="none" stroke="#969696" stroke-width="1.5"/>
+  <rect x="185" y="181" width="384" height="38" rx="5" fill="#0c0c0c" stroke="#313131"/>
+  <text x="198" y="205" fill="#f2f2f2" font-family="Arial, sans-serif" font-size="14">accelerated-decoding-ieee-cudaq-3461be</text>
+  <text x="51" y="268" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="14" font-weight="700">Compute</text>
+  <text x="126" y="268" fill="#78b812" font-family="Arial, sans-serif" font-size="14">1 × T4</text>
+  <text x="175" y="268" fill="#d9d9d9" font-family="Arial, sans-serif" font-size="14">· 16 GB VRAM · GCP</text>
+  <text x="832" y="268" fill="#78b812" font-family="Arial, sans-serif" font-size="13" font-weight="700">Change</text>
+  <path d="M891 258l5 5 5-5" fill="none" stroke="#a7a7a7" stroke-width="1.5"/>
+  <text x="952" y="182" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="14" font-weight="700">About</text>
+  <circle cx="961" cy="209" r="5" fill="none" stroke="#8d8d8d" stroke-width="1.5"/>
+  <path d="M954 218c2-5 12-5 14 0" fill="none" stroke="#8d8d8d" stroke-width="1.5"/>
+  <text x="977" y="215" fill="#dfdfdf" font-family="Arial, sans-serif" font-size="14">Created by mawolf-0</text>
+  <circle cx="961" cy="245" r="6" fill="none" stroke="#8d8d8d" stroke-width="1.5"/>
+  <path d="M961 241v5l4 2" fill="none" stroke="#8d8d8d" stroke-width="1.5"/>
+  <text x="977" y="250" fill="#dfdfdf" font-family="Arial, sans-serif" font-size="14">Last updated Sep 4, 2026</text>
+  <path d="M954 277c4-5 10-5 14 0-4 5-10 5-14 0Z" fill="none" stroke="#8d8d8d" stroke-width="1.5"/>
+  <circle cx="961" cy="277" r="2" fill="#8d8d8d"/>
+  <text x="977" y="282" fill="#dfdfdf" font-family="Arial, sans-serif" font-size="14">60 views</text>
+</svg>

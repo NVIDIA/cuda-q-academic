@@ -24,6 +24,32 @@ This hands-on tutorial consists of two 90-minute sessions combining short presen
 | 60–80 min | [Advanced AI decoding using models trained on leakage noise models](leakage_aware_neutral_atom_decoding.ipynb) |
 | 80–90 min | Questions, wrap-up, and additional resources |
 
+## Setup: Get Started with Brev
+
+1. Go to [brev.nvidia.com](https://brev.nvidia.com) and enter your email to create an account.
+
+2. Create a new Brev organization by clicking the building icon in the top-right corner and selecting **+Create a new organization**.
+
+   <img src="assets/brev-organization-icon.svg" alt="Brev building icon used to create a new organization" width="64">
+
+3. Go to the **Billing** tab, scroll down, and click **Redeem Code**. Enter your coupon code in lowercase, then click **Redeem**.
+
+   <img src="assets/brev-billing-coupon.svg" alt="Brev billing tab with the Redeem Code button and coupon-code entry area highlighted" width="520">
+
+4. Open the [workshop launchable](https://brev.nvidia.com/launchable/deploy/now?launchableID=env-3HHRwelktNmiJ8GJxMDR9v8YJSi) and click **Deploy Launchable**.
+
+   <img src="assets/brev-deploy-launchable.svg" alt="Brev launchable page with the Deploy Launchable button circled" width="720">
+
+5. Brev will take you to the deployment page. Preparing the environment can take about 10 minutes; this is expected, as the workshop needs the environment to remain available for some time.
+
+6. When the instance status shows **Built** and **Running**, click the endpoint link under **Secure Links**. You may need to sign in to Brev again.
+
+   <img src="assets/brev-instance-access.svg" alt="Brev deployment page with the Built and Running statuses and Secure Links endpoint circled" width="720">
+
+7. If the connection is successful, JupyterLab opens in your browser. The workshop notebooks are listed in the file browser on the left; double-click a notebook to open it.
+
+   <img src="assets/jupyterlab-notebooks.svg" alt="JupyterLab showing the workshop notebooks in the left file browser" width="720">
+
 ## Notebook Lessons
 
 ### CUDA-Q QEC qLDPC Decoder Methods

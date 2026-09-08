@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1321" height="613" viewBox="0 0 1321 613" role="img" aria-labelledby="title desc">
+  <title id="title">Brev deployment page with instance access link</title>
+  <desc id="desc">A Brev instance page showing Built and Running status indicators and the Secure Links endpoint, all highlighted in red.</desc>
+  <rect width="1321" height="613" fill="#171717"/>
+  <text x="35" y="28" fill="#e2e2e2" font-family="Arial, sans-serif" font-size="13" font-weight="700">IEEE_QEC_Tutorial</text>
+  <path d="M181 17l7 7-7 7" fill="none" stroke="#949494" stroke-width="1.5"/>
+  <text x="210" y="28" fill="#d9d9d9" font-family="Arial, sans-serif" font-size="14" font-weight="700">accelerated-decoding-ieee-cudaq-3461be</text>
+  <text x="35" y="68" fill="#f7f7f7" font-family="Arial, sans-serif" font-size="25" font-weight="700">accelerated-decoding-ieee-cudaq-3461be</text>
+  <text x="508" y="67" fill="#d1d1d1" font-family="Arial, sans-serif" font-size="13">Created 9/8/2026, 10:10:02 AM</text>
+  <text x="61" y="98" fill="#f7f7f7" font-family="Arial, sans-serif" font-size="14" font-weight="700">NVIDIA T4 (16 GB)</text>
+  <text x="61" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">1 GPUs x 1 CPUs</text>
+  <text x="59" y="138" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">3.75 GiB RAM</text>
+  <text x="193" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">x86_64</text>
+  <text x="277" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">275 GB</text>
+  <text x="360" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">34.170.83.95</text>
+  <text x="507" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">Council Bluffs, IA, USA</text>
+  <text x="695" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">gcp</text>
+  <text x="761" y="118" fill="#d3d3d3" font-family="Arial, sans-serif" font-size="13">$0.52/hr</text>
+  <rect x="830" y="101" width="77" height="24" rx="12" fill="#17813b"/>
+  <circle cx="846" cy="113" r="4" fill="#72d97d"/>
+  <text x="857" y="117" fill="#ebf8ec" font-family="Arial, sans-serif" font-size="12" font-weight="700">Running</text>
+  <path d="M823 79 C846 74 884 74 904 90 C925 106 918 130 895 132 C858 135 827 126 817 110 C810 97 811 84 823 79Z" fill="none" stroke="#ff211e" stroke-width="4" stroke-linecap="round"/>
+  <rect x="1080" y="74" width="76" height="39" rx="6" fill="#171717"/>
+  <text x="1111" y="99" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="14" font-weight="700">Stop</text>
+  <rect x="1173" y="74" width="78" height="39" rx="6" fill="#e62d4b"/>
+  <text x="1191" y="99" fill="#fff" font-family="Arial, sans-serif" font-size="14" font-weight="700">Delete</text>
+  <text x="64" y="173" fill="#e7e7e7" font-family="Arial, sans-serif" font-size="13" font-weight="700">Docker Compose YAML</text>
+  <rect x="59" y="155" width="151" height="28" fill="none" stroke="#f4f4f4" stroke-width="1.5" stroke-dasharray="2 2"/>
+  <rect x="227" y="157" width="64" height="24" rx="12" fill="#16813a"/>
+  <circle cx="243" cy="169" r="4" fill="#76db80"/>
+  <text x="253" y="173" fill="#edf8ed" font-family="Arial, sans-serif" font-size="12" font-weight="700">Built</text>
+  <path d="M221 135 C243 124 276 127 286 148 C297 171 281 197 257 199 C232 201 216 188 215 168 C214 154 214 143 221 135Z" fill="none" stroke="#ff211e" stroke-width="4" stroke-linecap="round"/>
+  <text x="331" y="173" fill="#f2f2f2" font-family="Arial, sans-serif" font-size="14" text-decoration="underline">View Launchable</text>
+  <rect x="35" y="208" width="1216" height="54" rx="6" fill="#151515" stroke="#343434"/>
+  <text x="222" y="240" fill="#82bb17" font-family="Arial, sans-serif" font-size="14" font-weight="700">Access</text>
+  <text x="640" y="240" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="14" font-weight="700">Logs</text>
+  <text x="1041" y="240" fill="#f5f5f5" font-family="Arial, sans-serif" font-size="14" font-weight="700">History</text>
+  <text x="35" y="320" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="25" font-weight="700">Secure Links</text>
+  <line x1="35" y1="340" x2="1251" y2="340" stroke="#363636"/>
+  <text x="35" y="386" fill="#f4f4f4" font-family="Arial, sans-serif" font-size="16">Access any HTTP application protected with your login; share it with teammates or the public.</text>
+  <rect x="1132" y="361" width="119" height="39" rx="6" fill="#78b812"/>
+  <text x="1147" y="386" fill="#0b0b0b" font-family="Arial, sans-serif" font-size="14" font-weight="700">＋ HTTP port</text>
+  <rect x="51" y="439" width="1183" height="149" rx="8" fill="#26262a"/>
+  <text x="62" y="478" fill="#fff" font-family="Arial, sans-serif" font-size="14" font-weight="700">Endpoint</text>
+  <text x="646" y="478" fill="#fff" font-family="Arial, sans-serif" font-size="14" font-weight="700">IP Restrictions</text>
+  <text x="838" y="468" fill="#fff" font-family="Arial, sans-serif" font-size="13" font-weight="700">Public</text>
+  <text x="838" y="486" fill="#fff" font-family="Arial, sans-serif" font-size="13" font-weight="700">Port</text>
+  <text x="902" y="468" fill="#fff" font-family="Arial, sans-serif" font-size="13" font-weight="700">Destination</text>
+  <text x="902" y="486" fill="#fff" font-family="Arial, sans-serif" font-size="13" font-weight="700">Port</text>
+  <text x="1005" y="478" fill="#fff" font-family="Arial, sans-serif" font-size="14" font-weight="700">Protocol</text>
+  <line x1="51" y1="507" x2="1234" y2="507" stroke="#343438"/>
+  <text x="62" y="536" fill="#9ede16" font-family="monospace" font-size="14">https://cudaqx-1-rjv26dl6t.gobrev.dev</text>
+  <text x="62" y="565" fill="#a8a8a8" font-family="Arial, sans-serif" font-size="12">Authorization</text>
+  <text x="148" y="565" fill="#f1f1f1" font-family="Arial, sans-serif" font-size="12">mawolf@nvidia.com</text>
+  <rect x="645" y="536" width="74" height="24" rx="5" fill="#303035"/>
+  <text x="657" y="552" fill="#fff" font-family="Arial, sans-serif" font-size="12">Anywhere</text>
+  <text x="838" y="552" fill="#fff" font-family="Arial, sans-serif" font-size="14">443</text>
+  <text x="902" y="552" fill="#fff" font-family="Arial, sans-serif" font-size="14">8888</text>
+  <text x="1006" y="552" fill="#fff" font-family="Arial, sans-serif" font-size="14">HTTP</text>
+  <rect x="1122" y="532" width="65" height="33" rx="6" fill="#78b812"/>
+  <text x="1138" y="554" fill="#101010" font-family="Arial, sans-serif" font-size="13" font-weight="700">Share</text>
+  <path d="M45 494 C75 481 306 484 370 502 C403 511 400 541 376 552 C305 571 75 569 34 545 C15 532 21 505 45 494Z" fill="none" stroke="#ff211e" stroke-width="4" stroke-linecap="round"/>
+</svg>

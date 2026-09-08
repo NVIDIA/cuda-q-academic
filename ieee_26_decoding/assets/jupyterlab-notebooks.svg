@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="903" height="685" viewBox="0 0 903 685" role="img" aria-labelledby="title desc">
+  <title id="title">JupyterLab with workshop notebooks</title>
+  <desc id="desc">The JupyterLab launcher with accelerated decoder workshop notebooks visible in the file browser on the left.</desc>
+  <rect width="903" height="685" fill="#fff"/>
+  <rect width="903" height="37" fill="#fafafa" stroke="#d5d5d5"/>
+  <circle cx="16" cy="22" r="8" fill="none" stroke="#f37726" stroke-width="2"/>
+  <path d="M8 22h16" stroke="#f37726" stroke-width="2"/>
+  <text x="41" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">File</text>
+  <text x="78" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">Edit</text>
+  <text x="113" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">View</text>
+  <text x="164" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">Run</text>
+  <text x="202" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">Kernel</text>
+  <text x="259" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">Tabs</text>
+  <text x="301" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">Settings</text>
+  <text x="367" y="28" fill="#111" font-family="Arial, sans-serif" font-size="13">Help</text>
+  <rect y="37" width="32" height="648" fill="#efefef"/>
+  <rect x="32" y="37" width="251" height="648" fill="#f8f8f8"/>
+  <rect x="283" y="37" width="8" height="648" fill="#b6b6b6"/>
+  <rect x="8" y="57" width="16" height="13" rx="2" fill="#555"/>
+  <circle cx="16" cy="117" r="9" fill="#666"/>
+  <path d="M11 117h10" stroke="#efefef" stroke-width="2"/>
+  <text x="9" y="176" fill="#555" font-family="Arial, sans-serif" font-size="20">☷</text>
+  <text x="7" y="232" fill="#555" font-family="Arial, sans-serif" font-size="20">✣</text>
+  <rect x="49" y="52" width="72" height="21" rx="1" fill="#3576d3"/>
+  <text x="80" y="68" fill="#fff" font-family="Arial, sans-serif" font-size="18">+</text>
+  <text x="136" y="68" fill="#555" font-family="Arial, sans-serif" font-size="16">▣</text>
+  <text x="174" y="68" fill="#555" font-family="Arial, sans-serif" font-size="17">↥</text>
+  <text x="209" y="68" fill="#555" font-family="Arial, sans-serif" font-size="17">⟳</text>
+  <text x="246" y="68" fill="#555" font-family="Arial, sans-serif" font-size="16">▼</text>
+  <text x="48" y="101" fill="#555" font-family="Arial, sans-serif" font-size="16">■</text>
+  <text x="68" y="101" fill="#222" font-family="Arial, sans-serif" font-size="13">/</text>
+  <text x="49" y="131" fill="#111" font-family="Arial, sans-serif" font-size="13" font-weight="700">Name</text>
+  <text x="218" y="131" fill="#111" font-family="Arial, sans-serif" font-size="13" font-weight="700">Modified</text>
+  <text x="48" y="155" fill="#777" font-family="Arial, sans-serif" font-size="15">■</text>
+  <text x="69" y="155" fill="#111" font-family="Arial, sans-serif" font-size="13">precomputed_met...</text>
+  <text x="219" y="155" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <text x="48" y="180" fill="#3978b9" font-family="Arial, sans-serif" font-size="16" font-weight="700">Py</text>
+  <text x="69" y="180" fill="#222" font-family="Arial, sans-serif" font-size="13">Circuit_builder_ad...</text>
+  <text x="219" y="180" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <text x="48" y="205" fill="#3978b9" font-family="Arial, sans-serif" font-size="16" font-weight="700">Py</text>
+  <text x="69" y="205" fill="#222" font-family="Arial, sans-serif" font-size="13">Circuit_builder.py</text>
+  <text x="219" y="205" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <rect x="33" y="213" width="250" height="25" fill="#3878d1"/>
+  <text x="48" y="231" fill="#fff" font-family="Arial, sans-serif" font-size="15">▣</text>
+  <text x="69" y="231" fill="#fff" font-family="Arial, sans-serif" font-size="13">elevator_code_me...</text>
+  <text x="219" y="231" fill="#fff" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <text x="48" y="255" fill="#f47721" font-family="Arial, sans-serif" font-size="15">▣</text>
+  <text x="69" y="255" fill="#222" font-family="Arial, sans-serif" font-size="13">leakage_aware_ne...</text>
+  <text x="219" y="255" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <text x="48" y="280" fill="#f47721" font-family="Arial, sans-serif" font-size="15">▣</text>
+  <text x="69" y="280" fill="#222" font-family="Arial, sans-serif" font-size="13">qLDPC_decoder.ip...</text>
+  <text x="219" y="280" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <text x="49" y="305" fill="#a032a8" font-family="Arial, sans-serif" font-size="17" font-weight="700">M</text>
+  <text x="69" y="305" fill="#222" font-family="Arial, sans-serif" font-size="13">README.md</text>
+  <text x="219" y="305" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <text x="49" y="330" fill="#777" font-family="Arial, sans-serif" font-size="16">□</text>
+  <text x="69" y="330" fill="#222" font-family="Arial, sans-serif" font-size="13">requirements.txt</text>
+  <text x="219" y="330" fill="#555" font-family="Arial, sans-serif" font-size="12">16m ago</text>
+  <rect x="291" y="37" width="612" height="39" fill="#bdbdbd"/>
+  <rect x="291" y="44" width="213" height="31" fill="#fff" stroke="#3576d3" stroke-width="2"/>
+  <text x="300" y="62" fill="#333" font-family="Arial, sans-serif" font-size="13">↗ Launcher</text>
+  <rect x="504" y="44" width="25" height="25" fill="#eee" stroke="#bbb"/>
+  <text x="512" y="63" fill="#555" font-family="Arial, sans-serif" font-size="18">+</text>
+  <text x="496" y="143" fill="#f47721" font-family="Arial, sans-serif" font-size="25" font-weight="700">▣</text>
+  <text x="538" y="140" fill="#111" font-family="Arial, sans-serif" font-size="17">Notebook</text>
+  <line x1="496" y1="157" x2="903" y2="157" stroke="#ddd"/>
+  <rect x="497" y="172" width="102" height="102" fill="#fff" stroke="#d7d7d7"/>
+  <path d="M550 181c20 0 24 14 18 25 10 16 0 35-17 33-19 0-27-17-19-31-7-15 0-27 18-27Z" fill="#3978b9"/>
+  <text x="539" y="215" fill="#ffd443" font-family="Arial, sans-serif" font-size="27" font-weight="700">Py</text>
+  <text x="522" y="253" fill="#111" font-family="Arial, sans-serif" font-size="13">Python 3</text>
+  <text x="519" y="267" fill="#111" font-family="Arial, sans-serif" font-size="12">(ipykernel)</text>
+  <rect x="615" y="172" width="102" height="102" fill="#fff" stroke="#d7d7d7"/>
+  <path d="M668 181c20 0 24 14 18 25 10 16 0 35-17 33-19 0-27-17-19-31-7-15 0-27 18-27Z" fill="#3978b9"/>
+  <text x="657" y="215" fill="#ffd443" font-family="Arial, sans-serif" font-size="27" font-weight="700">Py</text>
+  <text x="621" y="253" fill="#111" font-family="Arial, sans-serif" font-size="12">Python (CUDA-Q</text>
+  <text x="630" y="267" fill="#111" font-family="Arial, sans-serif" font-size="12">workshop)</text>
+  <text x="496" y="327" fill="#3576d3" font-family="Arial, sans-serif" font-size="25" font-weight="700">›_</text>
+  <text x="538" y="324" fill="#111" font-family="Arial, sans-serif" font-size="17">Console</text>
+  <line x1="496" y1="342" x2="903" y2="342" stroke="#ddd"/>
+  <rect x="497" y="359" width="102" height="102" fill="#fff" stroke="#d7d7d7"/>
+  <path d="M550 368c20 0 24 14 18 25 10 16 0 35-17 33-19 0-27-17-19-31-7-15 0-27 18-27Z" fill="#3978b9"/>
+  <text x="539" y="402" fill="#ffd443" font-family="Arial, sans-serif" font-size="27" font-weight="700">Py</text>
+  <text x="522" y="440" fill="#111" font-family="Arial, sans-serif" font-size="13">Python 3</text>
+  <text x="519" y="454" fill="#111" font-family="Arial, sans-serif" font-size="12">(ipykernel)</text>
+  <text x="496" y="514" fill="#444" font-family="Arial, sans-serif" font-size="29" font-weight="700">$_</text>
+  <text x="538" y="510" fill="#111" font-family="Arial, sans-serif" font-size="17">Other</text>
+  <line x1="496" y1="527" x2="903" y2="527" stroke="#ddd"/>
+  <rect x="497" y="544" width="102" height="102" fill="#fff" stroke="#d7d7d7"/>
+  <rect x="526" y="558" width="44" height="44" fill="#555"/>
+  <text x="532" y="589" fill="#fff" font-family="Arial, sans-serif" font-size="29" font-weight="700">$_</text>
+  <text x="521" y="625" fill="#111" font-family="Arial, sans-serif" font-size="13">Terminal</text>
+  <rect x="615" y="544" width="102" height="102" fill="#fff" stroke="#d7d7d7"/>
+  <text x="646" y="597" fill="#666" font-family="Arial, sans-serif" font-size="48">≡</text>
+  <text x="641" y="625" fill="#111" font-family="Arial, sans-serif" font-size="13">Text File</text>
+  <rect x="733" y="544" width="102" height="102" fill="#fff" stroke="#d7d7d7"/>
+  <text x="768" y="597" fill="#9c27b0" font-family="Arial, sans-serif" font-size="53" font-weight="700">M</text>
+  <text x="746" y="625" fill="#111" font-family="Arial, sans-serif" font-size="13">Markdown File</text>
+</svg>

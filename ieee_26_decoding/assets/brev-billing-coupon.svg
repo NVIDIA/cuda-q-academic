@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="title desc">
+  <title id="title">Brev billing coupon screen</title>
+  <desc id="desc">A dark billing page mockup showing the Redeem Code button and coupon code input area.</desc>
+  <rect width="960" height="340" fill="#0b0b0b"/>
+  <rect x="34" y="36" width="892" height="268" fill="#111" stroke="#333" stroke-width="2"/>
+  <text x="56" y="74" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="18" font-weight="700">Pay For Compute</text>
+  <text x="56" y="122" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">1. Connect Card</text>
+  <rect x="56" y="142" width="388" height="34" rx="4" fill="#171717" stroke="#444"/>
+  <text x="78" y="164" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">Connect Card</text>
+  <text x="56" y="204" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">No payment method attached</text>
+  <text x="488" y="122" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">2. Credits</text>
+  <text x="760" y="122" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="15">Current Balance: $0.00</text>
+  <text x="488" y="164" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">Enable auto recharge to ensure uninterrupted service</text>
+  <text x="818" y="164" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">Auto Recharge:</text>
+  <circle cx="908" cy="160" r="9" fill="none" stroke="#737373" stroke-width="2"/>
+  <rect x="488" y="202" width="132" height="34" rx="4" fill="#171717" stroke="#444"/>
+  <text x="506" y="224" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="13">Purchase Credits</text>
+  <rect x="632" y="202" width="108" height="34" rx="4" fill="#141414" stroke="#16a34a"/>
+  <text x="650" y="224" fill="#86efac" font-family="Arial, sans-serif" font-size="13" font-weight="700">Redeem Code</text>
+  <rect x="752" y="202" width="154" height="34" rx="4" fill="#171717" stroke="#444"/>
+  <text x="770" y="224" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="13">Edit Auto-Recharge</text>
+  <text x="488" y="266" fill="#f4f4f5" font-family="Arial, sans-serif" font-size="16" font-weight="700">Redeem Code</text>
+  <text x="488" y="292" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">Enter Code</text>
+  <rect x="488" y="304" width="170" height="30" rx="4" fill="#090909" stroke="#444"/>
+  <rect x="668" y="304" width="90" height="30" rx="4" fill="#171717" stroke="#333"/>
+  <text x="692" y="325" fill="#737373" font-family="Arial, sans-serif" font-size="13">Redeem</text>
+  <path d="M70 40L430 300M430 40L70 300" fill="none" stroke="#ef1d18" stroke-width="16" stroke-linecap="square"/>
+</svg>
