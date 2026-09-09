@@ -2,8 +2,7 @@
  
 default:
   image:
-    # name: ghcr.io/nvidia/cudaqx
-    name: ghcr.io/nvidia/private/cuda-quantum@sha256:3be84ec06c163b4650e370f9d2f571f898f3862287f3a83ebf3b1d6ea93169bc
+    name: ghcr.io/nvidia/cudaqx
     entrypoint: [""]
  
 variables:
