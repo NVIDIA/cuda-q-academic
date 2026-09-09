@@ -55,6 +55,13 @@ stages:
           exit 1
         fi
         nvidia-smi
+        # Select the GPU with the most free memory so notebooks don't
+        # collide with other processes on a shared runner.
+        FREE_GPU=$(nvidia-smi --query-gpu=index,memory.free \
+          --format=csv,noheader,nounits \
+          | sort -t, -k2 -nr | head -1 | cut -d, -f1 | tr -d ' ')
+        export CUDA_VISIBLE_DEVICES=$FREE_GPU
+        echo "Selected GPU $FREE_GPU (most free memory)"
       fi
  
       # -----------------------------------------------------------------------
