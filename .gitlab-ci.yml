@@ -9,6 +9,9 @@ variables:
   PIP_ROOT_USER_ACTION: ignore
   PYTHONUNBUFFERED: "1"
   GIT_DEPTH: "0"
+  # Kernels spawned by nbconvert inherit this. Without it a native crash
+  # (segfault, abort) shows up only as "Kernel died" with no traceback.
+  PYTHONFAULTHANDLER: "1"
  
 stages:
   - test
@@ -41,6 +44,39 @@ stages:
         echo "Legacy cudaq_solvers imports found; installing compatibility package."
         pip install --quiet --upgrade --no-deps cudaq-solvers
       fi
+    # Record the CUDA-adjacent wheel set so version drift is visible in the log.
+    - pip list 2>/dev/null | grep -Ei '^(torch|numpy|scipy|cudaq|cuquantum|custatevec|cutensornet|nvidia-)' || true
+    # Fail fast, with a Python traceback, if the torch + CUDA-Q combination
+    # cannot coexist in one process. Both import orders are exercised because
+    # notebooks import torch first; a difference between the two pins the cause.
+    - |
+      if [ "${REQUIRE_GPU:-false}" = "true" ]; then
+        echo "--- smoke (fatal): import torch, then cudaq, select nvidia target"
+        python -X faulthandler -c '
+      import torch, cudaq
+      print("torch", torch.__version__, "cuda", torch.version.cuda, "available", torch.cuda.is_available())
+      print("cudaq", cudaq.__version__, "gpus", cudaq.num_available_gpus())
+      cudaq.set_target("nvidia")
+      print("torch-first import order ok")
+      '
+        echo "--- smoke (fatal): import cudaq, then torch"
+        python -X faulthandler -c '
+      import cudaq, torch
+      cudaq.set_target("nvidia")
+      print("cudaq-first import order ok")
+      '
+        # Diagnostic only: repeated nvidia <-> tensornet switching is the
+        # pattern in simulation/01. A crash here is reported but does not
+        # block the module runs.
+        echo "--- probe (non-fatal): nvidia -> tensornet -> nvidia -> tensornet"
+        python -X faulthandler -c '
+      import cudaq
+      for t in ("nvidia", "tensornet", "nvidia", "tensornet"):
+          cudaq.reset_target(); cudaq.set_target(t)
+          print("  switched to", cudaq.get_target().name)
+      print("target switching ok")
+      ' || echo "WARN: repeated target switching crashed (see traceback above)"
+      fi
   script:
     - |
       set -u
@@ -55,13 +91,17 @@ stages:
           exit 1
         fi
         nvidia-smi
-        # Select the GPU with the most free memory so notebooks don't
-        # collide with other processes on a shared runner.
-        FREE_GPU=$(nvidia-smi --query-gpu=index,memory.free \
+        # Select the GPUs with the most free memory so notebooks don't
+        # collide with other processes on a shared runner. Expose the top
+        # NOTEBOOK_GPU_COUNT (default 2): the mqpu notebooks dispatch to
+        # qpu_id 0 and 1 and fail with a single visible device.
+        NOTEBOOK_GPU_COUNT="${NOTEBOOK_GPU_COUNT:-2}"
+        FREE_GPUS=$(nvidia-smi --query-gpu=index,memory.free \
           --format=csv,noheader,nounits \
-          | sort -t, -k2 -nr | head -1 | cut -d, -f1 | tr -d ' ')
-        export CUDA_VISIBLE_DEVICES=$FREE_GPU
-        echo "Selected GPU $FREE_GPU (most free memory)"
+          | sort -t, -k2 -nr | head -n "$NOTEBOOK_GPU_COUNT" \
+          | cut -d, -f1 | tr -d ' ' | paste -sd,)
+        export CUDA_VISIBLE_DEVICES=$FREE_GPUS
+        echo "Selected GPUs $FREE_GPUS (most free memory, ${NOTEBOOK_GPU_COUNT} requested)"
       fi
  
       # -----------------------------------------------------------------------
@@ -73,7 +113,8 @@ stages:
       #   - On branch pushes / MRs: run only modules whose directory changed,
       #     plus all modules if .gitlab-ci.yml itself changed
       # -----------------------------------------------------------------------
-      if [ "${CI_COMMIT_BRANCH:-}" = "${CI_DEFAULT_BRANCH:-}" ]; then
+      echo "CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH:-<unset>} CI_DEFAULT_BRANCH=${CI_DEFAULT_BRANCH:-<unset>} CI_PIPELINE_SOURCE=${CI_PIPELINE_SOURCE:-<unset>}"
+      if [ -n "${CI_COMMIT_BRANCH:-}" ] && [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH:-main}" ]; then
         echo "Running all modules (trigger: ${CI_PIPELINE_SOURCE:-unknown})"
       else
         if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
