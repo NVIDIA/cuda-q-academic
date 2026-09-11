@@ -49,6 +49,43 @@ stages:
     # Fail fast, with a Python traceback, if the torch + CUDA-Q combination
     # cannot coexist in one process. Both import orders are exercised because
     # notebooks import torch first; a difference between the two pins the cause.
+    # -----------------------------------------------------------------------
+    # GPU selection happens HERE, not in `script:`, so that every probe below
+    # runs against exactly the same set of visible devices the notebooks get.
+    # before_script and script share one shell, so the export carries over.
+    # Previously the probes saw all 8 GPUs while the notebooks saw 2, which
+    # meant a passing probe said nothing about the notebook environment.
+    # -----------------------------------------------------------------------
+    - |
+      if [ "${REQUIRE_GPU:-false}" = "true" ]; then
+        if ! command -v nvidia-smi >/dev/null 2>&1; then
+          echo "ERROR: GPU notebook job requires nvidia-smi, but it is not available."
+          exit 1
+        fi
+        nvidia-smi
+        # Expose the top NOTEBOOK_GPU_COUNT (default 2) GPUs by free memory:
+        # the mqpu notebooks dispatch to qpu_id 0 and 1 and fail with a single
+        # visible device.
+        NOTEBOOK_GPU_COUNT="${NOTEBOOK_GPU_COUNT:-2}"
+        FREE_GPUS=$(nvidia-smi --query-gpu=index,memory.free \
+          --format=csv,noheader,nounits \
+          | sort -t, -k2 -nr | head -n "$NOTEBOOK_GPU_COUNT" \
+          | cut -d, -f1 | tr -d ' ' | paste -sd,)
+        export CUDA_VISIBLE_DEVICES=$FREE_GPUS
+        echo "Selected GPUs $FREE_GPUS (most free memory, ${NOTEBOOK_GPU_COUNT} requested)"
+      fi
+    # -----------------------------------------------------------------------
+    # Container limits. A silent "Kernel died" with no faulthandler traceback
+    # is the signature of an external SIGKILL (cgroup OOM), not a segfault,
+    # so record the memory ceiling the kernels are actually running under.
+    # -----------------------------------------------------------------------
+    - |
+      echo "--- container memory limits"
+      for f in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.high \
+               /sys/fs/cgroup/memory/memory.limit_in_bytes; do
+        [ -r "$f" ] && echo "  $f = $(cat "$f")"
+      done
+      free -g 2>/dev/null || true
     - |
       if [ "${REQUIRE_GPU:-false}" = "true" ]; then
         echo "--- smoke (fatal): import torch, then cudaq, select nvidia target"
@@ -65,17 +102,91 @@ stages:
       cudaq.set_target("nvidia")
       print("cudaq-first import order ok")
       '
-        # Diagnostic only: repeated nvidia <-> tensornet switching is the
-        # pattern in simulation/01. A crash here is reported but does not
-        # block the module runs.
-        echo "--- probe (non-fatal): nvidia -> tensornet -> nvidia -> tensornet"
+        # -------------------------------------------------------------------
+        # The probes below are non-fatal: they are here to pin the crash, not
+        # to gate the job. Each one mirrors something a failing notebook does
+        # that the earlier bare import probes did NOT cover.
+        # -------------------------------------------------------------------
+
+        # simulation/01 does not merely switch targets, it runs a circuit on
+        # each one. Switching with live simulator state is the untested path.
+        echo "--- probe (non-fatal): switch targets WITH a circuit on each"
         python -X faulthandler -c '
       import cudaq
-      for t in ("nvidia", "tensornet", "nvidia", "tensornet"):
+      @cudaq.kernel
+      def ghz(n: int):
+          reg = cudaq.qvector(n)
+          h(reg[0])
+          for i in range(n - 1):
+              x.ctrl(reg[i], reg[i + 1])
+      for t in ("nvidia", "tensornet", "nvidia", "tensornet", "stim"):
           cudaq.reset_target(); cudaq.set_target(t)
-          print("  switched to", cudaq.get_target().name)
-      print("target switching ok")
-      ' || echo "WARN: repeated target switching crashed (see traceback above)"
+          cudaq.sample(ghz, 12)
+          print("  ran a circuit on", cudaq.get_target().name, flush=True)
+      print("target switching with circuits ok")
+      ' || echo "WARN: target switching with live circuits crashed (see above)"
+
+        # The two failing QML notebooks are the only ones importing torch.
+        # Exercise torch on the GPU and cudaq on the GPU in one process, which
+        # the import-only probes never did.
+        echo "--- probe (non-fatal): torch CUDA tensor + cudaq nvidia in one process"
+        python -X faulthandler -c '
+      import torch, cudaq
+      dev = torch.device("cuda:0")
+      t = torch.randn(1024, 1024, device=dev) @ torch.randn(1024, 1024, device=dev)
+      torch.cuda.synchronize()
+      print("  torch CUDA matmul ok, sum", float(t.sum()), flush=True)
+      cudaq.set_target("nvidia")
+      @cudaq.kernel
+      def bell():
+          q = cudaq.qvector(2)
+          h(q[0])
+          x.ctrl(q[0], q[1])
+      print("  cudaq sample after torch CUDA:", cudaq.sample(bell, shots_count=100).most_probable(), flush=True)
+      print("  cudaq observe after torch CUDA:", cudaq.observe(bell, cudaq.spin.z(0) * cudaq.spin.z(1)).expectation(), flush=True)
+      t2 = torch.randn(512, 512, device=dev).sum()
+      torch.cuda.synchronize()
+      print("  torch CUDA still alive after cudaq:", float(t2), flush=True)
+      print("torch + cudaq GPU interop ok")
+      ' || echo "WARN: torch + cudaq GPU interop crashed (see above)"
+
+        # Same interop, but inside a real ipykernel under nbconvert. If this
+        # crashes while the plain-python probe above passes, the trigger is
+        # the kernel process itself (ZMQ/stdio/threading), not the libraries.
+        echo "--- probe (non-fatal): same interop inside an ipykernel"
+        python -c '
+      import json, pathlib
+      src = "\n".join([
+          "import torch, cudaq",
+          "print(\"torch cuda\", torch.cuda.is_available(), flush=True)",
+          "acc = torch.randn(512, 512, device=\"cuda:0\").sum()",
+          "torch.cuda.synchronize()",
+          "cudaq.set_target(\"nvidia\")",
+          "@cudaq.kernel",
+          "def bell():",
+          "    q = cudaq.qvector(2)",
+          "    h(q[0])",
+          "    x.ctrl(q[0], q[1])",
+          "print(\"sample\", cudaq.sample(bell, shots_count=100).most_probable(), flush=True)",
+          "print(\"kernel-mode interop ok\", float(acc), flush=True)",
+      ])
+      nb = {
+          "cells": [{"cell_type": "code", "id": "probe", "metadata": {},
+                     "source": src, "outputs": [], "execution_count": None}],
+          "metadata": {
+              "kernelspec": {"name": "python3", "display_name": "python3",
+                             "language": "python"},
+              "language_info": {"name": "python"},
+          },
+          "nbformat": 4, "nbformat_minor": 5,
+      }
+      pathlib.Path("/tmp/_interop_probe.ipynb").write_text(json.dumps(nb))
+      '
+        jupyter nbconvert --to notebook --execute --inplace \
+          --ExecutePreprocessor.timeout=300 \
+          /tmp/_interop_probe.ipynb \
+          && echo "ipykernel interop probe ok" \
+          || echo "WARN: ipykernel interop probe crashed (see above)"
       fi
   script:
     - |
@@ -85,25 +196,75 @@ stages:
         printf '%s\n' "$NOTEBOOK_MODULES" | sed '/^[[:space:]]*$/d'
       )
 
+      # GPU selection and CUDA_VISIBLE_DEVICES now happen in before_script,
+      # so the smoke probes and the notebooks share one device configuration.
       if [ "${REQUIRE_GPU:-false}" = "true" ]; then
-        if ! command -v nvidia-smi >/dev/null 2>&1; then
-          echo "ERROR: GPU notebook job requires nvidia-smi, but it is not available."
-          exit 1
-        fi
-        nvidia-smi
-        # Select the GPUs with the most free memory so notebooks don't
-        # collide with other processes on a shared runner. Expose the top
-        # NOTEBOOK_GPU_COUNT (default 2): the mqpu notebooks dispatch to
-        # qpu_id 0 and 1 and fail with a single visible device.
-        NOTEBOOK_GPU_COUNT="${NOTEBOOK_GPU_COUNT:-2}"
-        FREE_GPUS=$(nvidia-smi --query-gpu=index,memory.free \
-          --format=csv,noheader,nounits \
-          | sort -t, -k2 -nr | head -n "$NOTEBOOK_GPU_COUNT" \
-          | cut -d, -f1 | tr -d ' ' | paste -sd,)
-        export CUDA_VISIBLE_DEVICES=$FREE_GPUS
-        echo "Selected GPUs $FREE_GPUS (most free memory, ${NOTEBOOK_GPU_COUNT} requested)"
+        echo "Notebooks will run with CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-<unset>}"
       fi
- 
+
+      mkdir -p "$CI_PROJECT_DIR/nb-logs"
+
+      # -----------------------------------------------------------------------
+      # post_mortem <notebook> <module>
+      #
+      # nbconvert reports a dead kernel as a bare DeadKernelError: the kernel's
+      # own crash output is lost because nbclient tears the process down before
+      # anything is flushed. Re-run the same code as a plain script under
+      # `python -X faulthandler` (no ZMQ, no kernel indirection) so a native
+      # crash prints a real traceback pointing at the offending line, and
+      # record whether the kernel was killed from outside instead.
+      # -----------------------------------------------------------------------
+      post_mortem() {
+        local nb="$1" mod="$2"
+        local base; base=$(basename "$nb" .ipynb)
+        echo "--- post-mortem: $nb"
+
+        echo "  cgroup memory events (non-zero oom_kill == the kernel was OOM-killed):"
+        for f in /sys/fs/cgroup/memory.events /sys/fs/cgroup/memory.peak \
+                 /sys/fs/cgroup/memory/memory.failcnt; do
+          [ -r "$f" ] && sed 's/^/    /' "$f"
+        done
+        if dmesg -T >/dev/null 2>&1; then
+          dmesg -T | grep -iE 'oom|killed process' | tail -20 | sed 's/^/    /'
+        else
+          echo "    (dmesg unavailable in this container)"
+        fi
+
+        echo "  GPU state after the crash:"
+        nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv 2>/dev/null \
+          | sed 's/^/    /' || true
+
+        echo "  re-running as a plain script with faulthandler enabled:"
+        local script="$CI_PROJECT_DIR/nb-logs/${base}.py"
+        if jupyter nbconvert --to script --output-dir "$CI_PROJECT_DIR/nb-logs" \
+             --output "$base" "$nb" >/dev/null 2>&1; then
+          # nbconvert renders notebook magics as get_ipython() calls, which do
+          # not exist outside a kernel. Stub it so the script fails at the real
+          # crash rather than at a NameError.
+          printf '%s\n' \
+            'import faulthandler, sys; faulthandler.enable(all_threads=True)' \
+            'def get_ipython():' \
+            '    class _Shim:' \
+            '        def __getattr__(self, _): return lambda *a, **k: None' \
+            '    return _Shim()' \
+            | cat - "$script" > "${script}.tmp" && mv "${script}.tmp" "$script"
+          ( cd "$(dirname "$nb")" \
+            && PYTHONPATH="$CI_PROJECT_DIR/$mod:${PYTHONPATH:-}" \
+               timeout 1800 python -X faulthandler -u "$script" ) \
+            > "$CI_PROJECT_DIR/nb-logs/${base}.postmortem.log" 2>&1
+          local rc=$?
+          echo "  plain-script exit code: $rc"
+          if [ "$rc" -gt 128 ]; then
+            echo "  -> killed by signal $((rc - 128)) (137=SIGKILL/OOM, 139=SIGSEGV, 134=SIGABRT)"
+          fi
+          echo "  last 60 lines of plain-script output:"
+          tail -n 60 "$CI_PROJECT_DIR/nb-logs/${base}.postmortem.log" | sed 's/^/    /'
+        else
+          echo "  (could not convert notebook to script)"
+        fi
+        echo "--- end post-mortem: $nb"
+      }
+
       # -----------------------------------------------------------------------
       # Restrict the job's module list to the directories affected by this
       # commit. GitLab's rules:changes prevents the job from being created at
@@ -187,6 +348,7 @@ stages:
             echo "FAIL: $nb"
             TOTAL_FAILED=$((TOTAL_FAILED + 1))
             ALL_FAILED+=("$nb")
+            post_mortem "$nb" "$MODULE" || true
           fi
         done
       done
@@ -237,6 +399,8 @@ test:notebooks:cpu:
       - "quantum-applications-to-finance/solutions/*.ipynb"
       - "dynamics101/Solutions/*.ipynb"
       - "ai-for-quantum/solutions/*.ipynb"
+      # Crash post-mortems for notebooks whose kernel died.
+      - "nb-logs/"
     expire_in: 1 week
 
 test:notebooks:gpu:
@@ -263,6 +427,8 @@ test:notebooks:gpu:
       - "qec101/Solutions/*.ipynb"
       - "simulation/solutions/*.ipynb"
       - "quantum-machine-learning-and-data-analysis/solutions/*.ipynb"
+      # Crash post-mortems for notebooks whose kernel died.
+      - "nb-logs/"
     expire_in: 1 week
 
 include:
