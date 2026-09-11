@@ -1,7 +1,7 @@
 {
   "metadata": {
     "schema_version": 1,
-    "last_updated": "2026-08-05",
+    "last_updated": "2026-08-21",
     "source_of_truth": "This file is the canonical machine-readable inventory for CUDA-Q Academic lessons, learning track membership, and live visualization-gallery widgets.",
     "lesson_policy": "Use lessons for content discovery and learning track routing. For deeper notebook detail or when updating a lesson, consult the notebook intro cell when it exists.",
     "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory.",
@@ -95,7 +95,6 @@
       ],
       "summary": "Quantum chemistry lessons covering VQE, ADAPT-VQE, QPE, Krylov methods, and QM/MM workflows.",
       "lesson_ids": [
-        "vqe-and-gqe",
         "adapt-vqe",
         "quantum-phase-estimation",
         "krylov-subspace-diagonalization",
@@ -134,14 +133,17 @@
       "title": "Quantum Machine Learning and Data Analysis",
       "learning_path_url": "https://nvidia.github.io/cuda-q-academic/learningpath.html?track=track-qml",
       "difficulty_range": [
-        "intermediate"
+        "intermediate",
+        "advanced"
       ],
-      "summary": "Explores quantum and hybrid approaches to machine learning and data analysis, including data encoding, model training, evaluation, and comparison with classical baselines.",
+      "summary": "Develops hybrid quantum neural networks, quantum-kernel classification, and quantum graph inference with CUDA-Q, emphasizing classical baselines, scalability, and careful interpretation.",
       "is_new": true,
       "added_date": "2026-08-05",
-      "more_lessons_coming_soon": true,
       "lesson_ids": [
-        "introduction-to-hybrid-quantum-neural-networks"
+        "introduction-to-hybrid-quantum-neural-networks",
+        "advanced-hybrid-quantum-neural-networks",
+        "quantum-support-vector-machines",
+        "quantum-pagerank"
       ]
     },
     "ai-for-quantum": {
@@ -150,9 +152,8 @@
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Uses AI models to tackle bottlenecks in unitary compilation, error correction, and eigensolver workflows.",
+      "summary": "Uses AI models to tackle bottlenecks in unitary compilation, error correction, and QAOA workflows.",
       "lesson_ids": [
-        "vqe-and-gqe",
         "compiling-unitaries-with-diffusion-models",
         "qec-04-ai-decoders",
         "qaoa-max-cut-and-gpt-qaoa-workshop"
@@ -176,12 +177,11 @@
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Cross-cutting hybrid classical-quantum workflows spanning LABS optimization, QAOA, quantum walks, and VQE/GQE.",
+      "summary": "Cross-cutting hybrid classical-quantum workflows spanning LABS optimization, QAOA, and quantum walks.",
       "lesson_ids": [
         "labs-optimization",
         "max-cut-with-qaoa",
         "quantum-walks-for-finance-part-1",
-        "vqe-and-gqe",
         "qaoa-max-cut-and-gpt-qaoa-workshop"
       ]
     },
@@ -191,11 +191,12 @@
       "difficulty_range": [
         "intermediate"
       ],
-      "summary": "Resources for exploring superconducting-qubit calibration: interactive experiment visualizations, sample plots, and NVIDIA Ising for structured plot analysis.",
+      "summary": "Resources and a hands-on notebook for superconducting-qubit calibration: interactive visualizations, sample plots, and NVIDIA Ising for zero-shot and in-context plot analysis.",
       "more_lessons_coming_soon": true,
       "more_lessons_coming_soon_label": "More calibration widgets coming soon",
       "lesson_ids": [
-        "calibration-resources-guide"
+        "calibration-resources-guide",
+        "ising-calibration-intro"
       ],
       "featured_widget_ids": [
         "ising-api-key-setup",
@@ -834,37 +835,6 @@
         "steane-code-noise-model-explorer"
       ]
     },
-    "vqe-and-gqe": {
-      "title": "VQE and GQE",
-      "primary_track_id": "chemistry-simulations",
-      "track_ids": [
-        "chemistry-simulations",
-        "ai-for-quantum",
-        "hybrid-workflows"
-      ],
-      "source_kind": "local_notebook",
-      "repo_path": "chemistry-simulations/vqe_and_gqe.ipynb",
-      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/vqe_and_gqe.ipynb",
-      "is_new": true,
-      "added_date": "2026-01-29",
-      "difficulty": "intermediate",
-      "prerequisites": [
-        "Python and Jupyter familiarity",
-        "basic quantum computing concepts",
-        "variational-algorithm intuition",
-        "basic quantum chemistry terminology is helpful"
-      ],
-      "keywords": [
-        "VQE",
-        "GQE",
-        "ground states",
-        "ansatz",
-        "barren plateaus"
-      ],
-      "summary": "Introduces variational and generative quantum eigensolvers for molecular ground-state preparation.",
-      "metadata_source": "notebook intro cell + llms.txt",
-      "widget_ids": []
-    },
     "adapt-vqe": {
       "title": "ADAPT-VQE",
       "primary_track_id": "chemistry-simulations",
@@ -1178,6 +1148,100 @@
       "metadata_source": "notebook intro cell + module README",
       "widget_ids": []
     },
+    "advanced-hybrid-quantum-neural-networks": {
+      "title": "Advanced Hybrid Quantum Neural Networks",
+      "primary_track_id": "quantum-machine-learning-and-data-analysis",
+      "track_ids": [
+        "quantum-machine-learning-and-data-analysis"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "quantum-machine-learning-and-data-analysis/02_advanced_hqnns.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/02_advanced_hqnns.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/02_advanced_hqnns.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-21",
+      "difficulty": "advanced",
+      "prerequisites": [
+        "Python, Jupyter, NumPy, and introductory PyTorch training loops",
+        "parameterized quantum circuits and expectation values",
+        "Introduction to Hybrid Quantum Neural Networks"
+      ],
+      "keywords": [
+        "quantum machine learning",
+        "hybrid quantum neural network",
+        "PyTorch",
+        "cuDNN",
+        "SPSA",
+        "multi-QPU",
+        "performance scaling"
+      ],
+      "summary": "Optimizes and scales a hybrid quantum neural network through cuDNN acceleration, batch and learning-rate studies, SPSA gradients, multi-QPU dispatch, and multi-output forecasting.",
+      "metadata_source": "notebook intro cell + module README",
+      "widget_ids": []
+    },
+    "quantum-support-vector-machines": {
+      "title": "Quantum Support Vector Machines",
+      "primary_track_id": "quantum-machine-learning-and-data-analysis",
+      "track_ids": [
+        "quantum-machine-learning-and-data-analysis"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "quantum-machine-learning-and-data-analysis/03_quantum_svm.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/03_quantum_svm.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/03_quantum_svm.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-21",
+      "difficulty": "advanced",
+      "prerequisites": [
+        "Python, NumPy, and Jupyter familiarity",
+        "vectors and dot products",
+        "basic quantum computing concepts"
+      ],
+      "keywords": [
+        "quantum machine learning",
+        "support vector machine",
+        "quantum support vector machine",
+        "quantum feature map",
+        "kernel method",
+        "tensornet",
+        "CUDA-Q"
+      ],
+      "summary": "Compares classical SVM kernels with CUDA-Q quantum-fidelity kernels, then examines feature-map choices and tensor-network scaling for a 36-qubit QSVM example.",
+      "metadata_source": "notebook intro cell + module README",
+      "widget_ids": []
+    },
+    "quantum-pagerank": {
+      "title": "Quantum PageRank",
+      "primary_track_id": "quantum-machine-learning-and-data-analysis",
+      "track_ids": [
+        "quantum-machine-learning-and-data-analysis"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "quantum-machine-learning-and-data-analysis/04_quantum_pagerank.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/04_quantum_pagerank.ipynb",
+      "colab_url": "https://colab.research.google.com/github/NVIDIA/cuda-q-academic/blob/main/quantum-machine-learning-and-data-analysis/04_quantum_pagerank.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-21",
+      "difficulty": "advanced",
+      "prerequisites": [
+        "Python, NumPy, and basic matrix multiplication",
+        "probability distributions and eigenvector intuition",
+        "quantum states and density matrices",
+        "quantum walks"
+      ],
+      "keywords": [
+        "quantum machine learning",
+        "PageRank",
+        "quantum stochastic walk",
+        "graph inference",
+        "Lindblad evolution",
+        "CUDA-Q Dynamics",
+        "density matrix"
+      ],
+      "summary": "Builds classical and continuous-time PageRank, then uses CUDA-Q Dynamics to model a quantum stochastic walk and compare rankings on small and Karate Club graphs.",
+      "metadata_source": "notebook intro cell + module README",
+      "widget_ids": []
+    },
     "compiling-unitaries-with-diffusion-models": {
       "title": "Compiling Unitaries with Diffusion Models",
       "primary_track_id": "ai-for-quantum",
@@ -1396,6 +1460,39 @@
         "randomized-benchmarking",
         "drag-pulse-calibration",
         "error-amplification"
+      ]
+    },
+    "ising-calibration-intro": {
+      "title": "Ising Calibration Introductory Demo",
+      "primary_track_id": "calibration",
+      "track_ids": [
+        "calibration"
+      ],
+      "source_kind": "local_notebook",
+      "repo_path": "calibration/ising_calibration_intro.ipynb",
+      "link": "https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/ising_calibration_intro.ipynb",
+      "is_new": true,
+      "added_date": "2026-08-10",
+      "difficulty": "intermediate",
+      "prerequisites": [
+        "Python and Jupyter familiarity",
+        "NVIDIA API key in NVIDIA_API_KEY",
+        "basic familiarity with superconducting-qubit calibration experiments",
+        "extracted calibration_images folder beside the notebook"
+      ],
+      "keywords": [
+        "Ising Calibration",
+        "zero-shot",
+        "in-context learning",
+        "calibration plots",
+        "vision-language model",
+        "API key",
+        "Ramsey"
+      ],
+      "summary": "Hands-on intro to NVIDIA Ising Calibration: connect to the hosted API, structure zero-shot prompts, analyze one or more plots, then compare zero-shot and ICL on a Ramsey example with a synthetic calibration error.",
+      "metadata_source": "calibration/ising_calibration_intro.ipynb",
+      "widget_ids": [
+        "ising-api-key-setup"
       ]
     }
   },

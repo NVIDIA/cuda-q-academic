@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quantum PageRank</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;650;700;750&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --accent: #76b900;
+      --accent-dark: #5e9400;
+      --bg: #1A1A1A;
+      --surface: #2A2A2A;
+      --border: #444444;
+      --fg: #E0E0E0;
+      --muted: #AAAAAA;
+      --green: var(--accent);
+      --green-bright: var(--accent);
+      --background: var(--bg);
+      --raised: var(--surface);
+      --text: var(--fg);
+      --focus: var(--accent);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      color: var(--text);
+      background: var(--background);
+      font: 16px/1.5 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        Roboto, sans-serif;
+    }
+
+    button, select { font: inherit; }
+
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      z-index: 100;
+      padding: 8px 16px;
+      color: #000;
+      background: var(--accent);
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .skip-link:focus { top: 0; }
+
+    .widget-container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      overflow: hidden;
+      padding: 24px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    header { padding: 0; }
+
+    .widget-container h1 {
+      margin: 0 0 16px;
+      color: var(--accent);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .widget-container .summary-text {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .instructions-section {
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .instructions-section summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .instructions-section summary::-webkit-details-marker { display: none; }
+
+    .instructions-section summary::before {
+      content: '▶';
+      flex-shrink: 0;
+      color: var(--accent);
+      font-size: 0.7rem;
+      transition: transform 0.15s;
+    }
+
+    .instructions-section[open] > summary::before { transform: rotate(90deg); }
+
+    .instructions-section summary:focus {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .instructions-section summary h2 { display: inline; }
+
+    .instructions-section h2 {
+      margin: 0;
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .instructions-section:not([open]) { padding-bottom: 16px; }
+    .instructions-section ol { margin-top: 12px; }
+    .instructions-section .kbd {
+      padding: 2px 6px;
+      background: var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9em;
+    }
+
+    h2 {
+      margin: 0 0 0.7rem;
+      color: var(--green-bright);
+      font-size: 1.08rem;
+    }
+
+    h3 {
+      margin: 0 0 0.35rem;
+      color: var(--green-bright);
+      font-size: 1rem;
+    }
+
+    p { margin: 0.45rem 0; }
+    .muted { color: var(--muted); }
+
+    main {
+      display: grid;
+      gap: 1.25rem;
+      padding: 0;
+    }
+
+    .panel {
+      padding: 16px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .evolution-grid {
+      display: grid;
+      grid-template-columns: minmax(20rem, 1.15fr) minmax(17rem, 0.85fr);
+      gap: 1.1rem;
+      align-items: start;
+    }
+
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(14rem, 1fr));
+      gap: 0.8rem;
+      margin: 0.8rem 0;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .feedback {
+      min-height: 1.5rem;
+      margin-top: 0.7rem;
+      padding: 0.75rem 0.85rem;
+      color: var(--muted);
+      background: #202020;
+      border-left: 0.28rem solid #777;
+      border-radius: 0.25rem;
+    }
+
+    .feedback.revealed {
+      color: #111;
+      background: #cfea9e;
+      border-left-color: var(--green);
+    }
+
+    .graph-frame {
+      border: 1px solid #555;
+      border-radius: 0.45rem;
+      background: #1c1c1c;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 17rem;
+    }
+
+    .edge {
+      fill: none;
+      stroke: #bdbdbd;
+      stroke-width: 2.3;
+      marker-end: url(#arrowhead);
+      transition: stroke 180ms, stroke-width 180ms, opacity 180ms;
+    }
+
+    .edge.selected {
+      stroke: var(--green-bright);
+      stroke-width: 4;
+    }
+
+    .node circle {
+      stroke: var(--green-bright);
+      stroke-width: 3.5;
+      transition: fill 180ms, filter 180ms;
+    }
+
+    .node.selected-source circle { stroke-width: 6; }
+
+    .node text {
+      fill: #fff;
+      font-size: 21px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .brightness-key {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-top: 0.7rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .gradient {
+      width: 7rem;
+      height: 0.8rem;
+      background: linear-gradient(90deg, hsl(84 75% 14%), hsl(84 100% 56%));
+      border: 1px solid #777;
+      border-radius: 999px;
+    }
+
+    .formula {
+      margin: 0 0 0.75rem;
+      padding: 0.75rem;
+      text-align: center;
+      background: #1c1c1c;
+      border: 1px solid #555;
+      border-radius: 0.4rem;
+      font: 650 1.05rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin: 0.7rem 0;
+    }
+
+    .status-item {
+      padding: 0.55rem 0.65rem;
+      background: #202020;
+      border-radius: 0.35rem;
+    }
+
+    .status-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-value {
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin: 0.8rem 0;
+    }
+
+    button, select {
+      min-height: 44px;
+      border-radius: 0.35rem;
+    }
+
+    button {
+      padding: 0.55rem 0.9rem;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .btn-primary {
+      color: #FFFFFF;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: 3px solid var(--accent);
+    }
+
+    .btn-secondary {
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+
+    .btn-primary:hover {
+      color: #000000;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-secondary:hover {
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.05);
+    }
+
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
+    button:focus-visible, select:focus-visible, a:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .score-list { display: grid; gap: 0.36rem; }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 1.4rem 1fr 4.5rem;
+      gap: 0.5rem;
+      align-items: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .track {
+      height: 0.7rem;
+      overflow: hidden;
+      background: #171717;
+      border-radius: 999px;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to top, var(--accent-dark), var(--accent));
+      border-radius: inherit;
+      transition: width 180ms;
+    }
+
+    .column-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      align-items: center;
+      margin: 0.85rem 0;
+    }
+
+    label { font-weight: 700; }
+    select {
+      padding: 0.45rem 2.1rem 0.45rem 0.65rem;
+      color: var(--text);
+      background: #1c1c1c;
+      border: 1px solid #777;
+    }
+
+    .column-formula {
+      padding: 0.65rem 0.8rem;
+      color: #111;
+      background: #cfea9e;
+      border-radius: 0.35rem;
+      font-weight: 750;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(14rem, 1fr));
+      gap: 0.8rem;
+    }
+
+    .matrix-card {
+      padding: 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .matrix-card .description {
+      min-height: 4.5rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .matrix-order {
+      margin: 0.55rem 0 0;
+      color: var(--fg);
+      font-size: 0.86rem;
+    }
+
+    .matrix-equation {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+      overflow-x: auto;
+      padding: 0.35rem 0.15rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matrix-symbol {
+      flex: 0 0 auto;
+      color: var(--fg);
+      font-size: 1.05rem;
+      font-weight: 750;
+    }
+
+    .matrix-brackets {
+      position: relative;
+      flex: 0 0 auto;
+      padding: 0.25rem 0.5rem;
+      border-left: 2px solid var(--fg);
+      border-right: 2px solid var(--fg);
+    }
+
+    .matrix-brackets::before,
+    .matrix-brackets::after {
+      position: absolute;
+      inset-block: 0;
+      width: 0.45rem;
+      border-top: 2px solid var(--fg);
+      border-bottom: 2px solid var(--fg);
+      content: '';
+      pointer-events: none;
+    }
+
+    .matrix-brackets::before { left: 0; }
+    .matrix-brackets::after { right: 0; }
+
+    .matrix-table {
+      border-collapse: separate;
+      border-spacing: 0.16rem 0;
+      color: var(--fg);
+      font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .matrix-table td {
+      min-width: 2.35rem;
+      padding: 0.3rem 0.2rem;
+      border: 1px solid transparent;
+      text-align: center;
+    }
+
+    .matrix-table td.selected-column {
+      background: rgba(118, 185, 0, 0.2);
+      border-inline-color: var(--accent);
+      font-weight: 750;
+    }
+
+    .matrix-table tr:first-child td.selected-column { border-top-color: var(--accent); }
+    .matrix-table tr:last-child td.selected-column { border-bottom-color: var(--accent); }
+
+    .selected-column-note {
+      min-height: 1.4rem;
+      margin-top: 0.55rem;
+      color: var(--accent);
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .takeaway {
+      margin-top: 0.9rem;
+      padding: 0.8rem 0.9rem;
+      border-left: 0.28rem solid var(--green);
+      background: #202020;
+    }
+
+    .widget-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .widget-footer a { color: #76b900; }
+    .widget-footer a:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 0.35rem; }
+      .widget-container { padding: 24px; }
+      .evolution-grid, .matrix-grid, .prediction-grid { grid-template-columns: 1fr; }
+      .matrix-card .description { min-height: auto; }
+    }
+
+    @media (min-width: 768px) {
+      .widget-container { padding: 32px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <article class="widget-container" id="main-content">
+    <header>
+      <h1>Quantum PageRank</h1>
+      <p class="summary-text">
+        Start with an equal population on all five pages. Apply <strong>P</strong> once,
+        or let it run until the population stops changing. Then inspect one column to
+        see how link-following and teleportation make that update.
+      </p>
+    </header>
+
+    <details class="instructions-section" aria-labelledby="instructions-heading" open>
+      <summary><h2 id="instructions-heading">Instructions</h2></summary>
+      <ol>
+        <li>Predict the highest- and lowest-ranked pages, then check your answer.</li>
+        <li>Apply <strong>P</strong> once or run repeatedly to watch the population converge.</li>
+        <li>Choose a source page to highlight its complete column in the <strong>L</strong>, <strong>T</strong>, and <strong>P</strong> matrix equations.</li>
+      </ol>
+      <p>
+        Keyboard: use <span class="kbd">Tab</span> to move between controls,
+        <span class="kbd">Enter</span> or <span class="kbd">Space</span> to activate buttons,
+        <span class="kbd">Arrow keys</span> to change a selected menu, and
+        <span class="kbd">Esc</span> to reset the evolution.
+      </p>
+    </details>
+
+    <main>
+      <section class="panel info-box" aria-labelledby="predict-heading">
+        <h2 id="predict-heading">First, predict the ranking</h2>
+        <p class="muted">
+          Use only the arrows in the network. Which page will receive the most long-run
+          population, and which will receive the least? Commit to both guesses before revealing.
+        </p>
+        <div class="prediction-grid">
+          <div class="field">
+            <label for="highest-guess">Highest-ranked page</label>
+            <select id="highest-guess">
+              <option value="">Choose a page</option>
+              <option value="A">Page A</option>
+              <option value="B">Page B</option>
+              <option value="C">Page C</option>
+              <option value="D">Page D</option>
+              <option value="E">Page E</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="lowest-guess">Lowest-ranked page</label>
+            <select id="lowest-guess">
+              <option value="">Choose a page</option>
+              <option value="A">Page A</option>
+              <option value="B">Page B</option>
+              <option value="C">Page C</option>
+              <option value="D">Page D</option>
+              <option value="E">Page E</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn-primary" id="reveal">Check and reveal</button>
+        <p id="prediction-feedback" class="feedback" aria-live="polite">
+          Prediction is optional. You can also explore the convergence controls immediately.
+        </p>
+      </section>
+
+      <section class="panel info-box" aria-labelledby="evolve-heading">
+        <h2 id="evolve-heading">From an initial guess to the PageRank distribution</h2>
+        <div class="evolution-grid">
+          <div>
+            <div class="graph-frame">
+              <svg viewBox="0 0 560 325" role="img"
+                aria-label="Directed graph of pages A through E. Brighter nodes have more PageRank population.">
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4"
+                    orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L10,4 L0,8 z" fill="context-stroke"></path>
+                  </marker>
+                </defs>
+
+                <path class="edge" data-source="A" data-target="B" d="M126 143 Q190 75 256 80"></path>
+                <path class="edge" data-source="A" data-target="C" d="M125 166 Q190 205 256 235"></path>
+                <path class="edge" data-source="C" data-target="A" d="M255 218 Q176 185 124 177"></path>
+                <path class="edge" data-source="B" data-target="C" d="M292 111 L292 210"></path>
+                <path class="edge" data-source="D" data-target="C" d="M434 236 L330 246"></path>
+                <path class="edge" data-source="D" data-target="E" d="M461 210 L461 113"></path>
+                <path class="edge" data-source="E" data-target="C" d="M430 92 Q356 131 313 211"></path>
+
+                <g class="node" data-node="A" transform="translate(95 155)">
+                  <circle r="30"></circle><text>A</text>
+                </g>
+                <g class="node" data-node="B" transform="translate(292 79)">
+                  <circle r="30"></circle><text>B</text>
+                </g>
+                <g class="node" data-node="C" transform="translate(292 247)">
+                  <circle r="30"></circle><text>C</text>
+                </g>
+                <g class="node" data-node="D" transform="translate(462 247)">
+                  <circle r="30"></circle><text>D</text>
+                </g>
+                <g class="node" data-node="E" transform="translate(462 79)">
+                  <circle r="30"></circle><text>E</text>
+                </g>
+              </svg>
+            </div>
+            <div class="brightness-key" aria-hidden="true">
+              less population <span class="gradient"></span> more population
+            </div>
+          </div>
+
+          <div>
+            <div class="formula">p<sup>(k+1)</sup> = P p<sup>(k)</sup></div>
+            <p class="muted">
+              We use the neutral starting guess
+              <strong>p<sup>(0)</sup> = (0.2, 0.2, 0.2, 0.2, 0.2)</strong>.
+              Watch the brightness redistribute as each matrix multiplication moves population.
+            </p>
+            <div class="status-grid" aria-live="polite">
+              <div class="status-item">
+                <span class="status-label">Iteration k</span>
+                <span class="status-value" id="iteration">0</span>
+              </div>
+              <div class="status-item">
+                <span class="status-label">Change ||p(k+1)-p(k)||₁</span>
+                <span class="status-value" id="change">not applied yet</span>
+              </div>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn-primary" id="reset">Reset uniform</button>
+              <button type="button" class="btn-secondary" id="step">Apply P once</button>
+              <button type="button" class="btn-primary" id="run">Run to convergence</button>
+            </div>
+            <p id="convergence-message" class="muted" aria-live="polite">
+              The initial distribution is uniform; every node therefore begins equally bright.
+            </p>
+            <div id="score-list" class="score-list" aria-label="Current page populations"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel info-box" aria-labelledby="column-heading">
+        <h2 id="column-heading">Read a PageRank update from the full matrices</h2>
+        <p class="muted">
+          Choose a page where the reader is currently located. Column <em>j</em> lists
+          the probabilities of arriving at every destination page next.
+          The same source column is outlined in each complete matrix, while highlighted
+          arrows leave that source page in the network above.
+        </p>
+        <div class="column-controls">
+          <label for="source-page">Current source page:</label>
+          <select id="source-page" aria-label="Current source page for the highlighted matrix column">
+            <option value="0">Page A</option>
+            <option value="1">Page B</option>
+            <option value="2">Page C</option>
+            <option value="3">Page D</option>
+            <option value="4">Page E</option>
+          </select>
+          <span class="column-formula" id="column-formula">P[:, A] = 0.85 L[:, A] + 0.15 T[:, A]</span>
+        </div>
+
+        <p class="matrix-order">
+          In every matrix, rows and columns are ordered <strong>A, B, C, D, E</strong>.
+          Rows are destinations; columns are sources.
+        </p>
+
+        <div class="matrix-grid">
+          <article class="matrix-card matrix-L">
+            <h3>L — follow a link</h3>
+            <p class="description" id="link-description"></p>
+            <div class="matrix-equation" id="matrix-L"></div>
+            <p class="selected-column-note" id="note-L"></p>
+          </article>
+          <article class="matrix-card matrix-T">
+            <h3>T — teleport</h3>
+            <p class="description">
+              The next page is chosen independently of the current page—like using a
+              new tab, bookmark, search, or address bar. Here all five pages are equally likely.
+            </p>
+            <div class="matrix-equation" id="matrix-T"></div>
+            <p class="selected-column-note" id="note-T"></p>
+          </article>
+          <article class="matrix-card matrix-P">
+            <h3>P — combine both behaviors</h3>
+            <p class="description">
+              With probability 0.85 the reader follows a link; with probability 0.15
+              they teleport. This is the column used in the PageRank update.
+            </p>
+            <div class="matrix-equation" id="matrix-P"></div>
+            <p class="selected-column-note" id="note-P"></p>
+          </article>
+        </div>
+
+        <p class="takeaway">
+          <strong>Why both?</strong> L preserves the web's link structure, while T prevents
+          readers from becoming trapped on pages with no exits or inside closed groups of pages.
+          Together they produce a stable ranking while keeping every page reachable.
+        </p>
+      </section>
+    </main>
+
+    <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    <footer class="widget-footer">
+      <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+      <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+    </footer>
+  </article>
+
+  <script>
+    "use strict";
+
+    const pages = ["A", "B", "C", "D", "E"];
+    const alpha = 0.85;
+    const tolerance = 1e-10;
+
+    // Matrices use rows as destinations and columns as source pages.
+    const L = [
+      [0,   0, 1,   0,   0],
+      [0.5, 0, 0,   0,   0],
+      [0.5, 1, 0,   0.5, 1],
+      [0,   0, 0,   0,   0],
+      [0,   0, 0,   0.5, 0]
+    ];
+    const T = Array.from({ length: 5 }, () => Array(5).fill(0.2));
+    const P = L.map((row, i) => row.map((value, j) =>
+      alpha * value + (1 - alpha) * T[i][j]
+    ));
+
+    const outgoingText = [
+      "A has links to B and C, so link-following splits the population equally between them.",
+      "B has one link, to C, so all link-following population goes to C.",
+      "C has one link, to A, so all link-following population goes to A.",
+      "D has links to C and E, so link-following splits the population equally between them.",
+      "E has one link, to C, so all link-following population goes to C."
+    ];
+
+    let population = Array(5).fill(0.2);
+    let iteration = 0;
+    let lastChange = null;
+    let timer = null;
+
+    const iterationElement = document.getElementById("iteration");
+    const changeElement = document.getElementById("change");
+    const messageElement = document.getElementById("convergence-message");
+    const scoreList = document.getElementById("score-list");
+    const runButton = document.getElementById("run");
+    const stepButton = document.getElementById("step");
+    const sourceSelect = document.getElementById("source-page");
+    const highestGuess = document.getElementById("highest-guess");
+    const lowestGuess = document.getElementById("lowest-guess");
+    const predictionFeedback = document.getElementById("prediction-feedback");
+    const statusAnnounce = document.getElementById("status-announce");
+
+    function multiply(matrix, vector) {
+      return matrix.map(row => row.reduce(
+        (sum, value, column) => sum + value * vector[column], 0
+      ));
+    }
+
+    function stopRunning() {
+      if (timer !== null) window.clearInterval(timer);
+      timer = null;
+      runButton.textContent = "Run to convergence";
+      stepButton.disabled = false;
+      runButton.disabled = false;
+    }
+
+    function applyOnce() {
+      const next = multiply(P, population);
+      lastChange = next.reduce((sum, value, i) => sum + Math.abs(value - population[i]), 0);
+      population = next;
+      iteration += 1;
+      renderEvolution();
+
+      if (lastChange < tolerance) {
+        stopRunning();
+        messageElement.innerHTML =
+          "<strong>Converged:</strong> another application of P no longer changes p " +
+          "at the displayed precision. Page C ranks highest; page D ranks lowest.";
+        statusAnnounce.textContent =
+          `PageRank converged after ${iteration} iterations. Page C ranks highest and page D ranks lowest.`;
+        return true;
+      }
+      return false;
+    }
+
+    function renderEvolution() {
+      iterationElement.textContent = String(iteration);
+      changeElement.textContent = lastChange === null ? "not applied yet" : lastChange.toExponential(2);
+
+      const maximum = Math.max(...population);
+      document.querySelectorAll(".node").forEach((node, i) => {
+        const relative = population[i] / maximum;
+        const lightness = 13 + 43 * relative;
+        const circle = node.querySelector("circle");
+        circle.style.fill = `hsl(84 100% ${lightness}%)`;
+        circle.style.filter = relative > 0.9 ? "drop-shadow(0 0 7px #76b900)" : "none";
+        node.querySelector("text").style.fill = relative > 0.72 ? "#111" : "#fff";
+      });
+
+      scoreList.innerHTML = population.map((value, i) => `
+        <div class="score-row" role="img" aria-label="Page ${pages[i]} population ${value.toFixed(4)}">
+          <strong>${pages[i]}</strong>
+          <div class="track" aria-hidden="true"><div class="fill" style="width:${100 * value / maximum}%"></div></div>
+          <span>${value.toFixed(4)}</span>
+        </div>
+      `).join("");
+    }
+
+    function reset() {
+      stopRunning();
+      population = Array(5).fill(0.2);
+      iteration = 0;
+      lastChange = null;
+      messageElement.textContent =
+        "The initial distribution is uniform; every node therefore begins equally bright.";
+      renderEvolution();
+      statusAnnounce.textContent = "Evolution reset to the uniform population.";
+    }
+
+    function runToConvergence() {
+      if (timer !== null) {
+        stopRunning();
+        messageElement.textContent = "Animation paused. Apply one step or resume the run.";
+        statusAnnounce.textContent = `Animation paused at iteration ${iteration}.`;
+        return;
+      }
+      runButton.textContent = "Pause";
+      stepButton.disabled = true;
+      messageElement.textContent = "Applying P repeatedly…";
+      statusAnnounce.textContent = "Running PageRank iterations to convergence.";
+      timer = window.setInterval(applyOnce, 120);
+    }
+
+    function revealPrediction() {
+      const highest = highestGuess.value;
+      const lowest = lowestGuess.value;
+      predictionFeedback.classList.remove("revealed");
+
+      if (!highest || !lowest) {
+        predictionFeedback.textContent = "Please choose both a highest- and a lowest-ranked page.";
+        return;
+      }
+      if (highest === lowest) {
+        predictionFeedback.textContent = "The highest and lowest pages must be different.";
+        return;
+      }
+
+      const bothCorrect = highest === "C" && lowest === "D";
+      const oneCorrect = highest === "C" || lowest === "D";
+      const opening = bothCorrect
+        ? "Both predictions are correct."
+        : oneCorrect
+          ? "One of your two predictions is correct."
+          : "Neither prediction matches the computed ranking—and that is useful evidence.";
+      predictionFeedback.innerHTML =
+        "<strong>" + opening + "</strong> The PageRank solution is C &gt; A &gt; B &gt; E &gt; D, " +
+        "so C is highest and D is lowest. Now apply P to see how that ranking emerges.";
+      predictionFeedback.classList.add("revealed");
+      statusAnnounce.textContent =
+        `${opening} The computed ranking is C, A, B, E, D from highest to lowest.`;
+    }
+
+    function formatMatrixValue(value) {
+      if (Number.isInteger(value)) return String(value);
+      return value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function column(matrix, source) {
+      return matrix.map(row => row[source]);
+    }
+
+    function renderMatrix(containerId, noteId, symbol, matrix, source) {
+      const sourcePage = pages[source];
+      const rows = matrix.map((row, destination) => `
+        <tr>
+          ${row.map((value, sourceIndex) => {
+            const selectedClass = sourceIndex === source ? " class=\"selected-column\"" : "";
+            const selectedText = sourceIndex === source ? ", selected column" : "";
+            return `<td${selectedClass} aria-label="Destination ${pages[destination]}, source ${pages[sourceIndex]}, value ${formatMatrixValue(value)}${selectedText}">${formatMatrixValue(value)}</td>`;
+          }).join("")}
+        </tr>
+      `).join("");
+
+      document.getElementById(containerId).innerHTML = `
+        <span class="matrix-symbol" aria-hidden="true">${symbol} =</span>
+        <div class="matrix-brackets">
+          <table class="matrix-table">
+            <caption class="sr-only">
+              Matrix ${symbol}. Destination rows and source columns are ordered A through E.
+              Source column ${sourcePage} is selected.
+            </caption>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+
+      const selectedValues = column(matrix, source).map(formatMatrixValue).join(", ");
+      document.getElementById(noteId).textContent =
+        `Outlined source column ${sourcePage}: (${selectedValues})ᵀ`;
+    }
+
+    function renderColumn() {
+      const source = Number(sourceSelect.value);
+      document.getElementById("column-formula").textContent =
+        `P[:, ${pages[source]}] = 0.85 L[:, ${pages[source]}] + 0.15 T[:, ${pages[source]}]`;
+      document.getElementById("link-description").textContent = outgoingText[source];
+      renderMatrix("matrix-L", "note-L", "L", L, source);
+      renderMatrix("matrix-T", "note-T", "T", T, source);
+      renderMatrix("matrix-P", "note-P", "P", P, source);
+
+      document.querySelectorAll(".edge").forEach(edge => {
+        edge.classList.toggle("selected", edge.dataset.source === pages[source]);
+      });
+      document.querySelectorAll(".node").forEach(node => {
+        node.classList.toggle("selected-source", node.dataset.node === pages[source]);
+      });
+
+      statusAnnounce.textContent =
+        `Source page ${pages[source]} selected. Column ${pages[source]} is outlined in matrices L, T, and P.`;
+    }
+
+    document.getElementById("reset").addEventListener("click", reset);
+    document.getElementById("step").addEventListener("click", applyOnce);
+    document.getElementById("run").addEventListener("click", runToConvergence);
+    document.getElementById("reveal").addEventListener("click", revealPrediction);
+    sourceSelect.addEventListener("change", renderColumn);
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") reset();
+    });
+
+    renderEvolution();
+    renderColumn();
+  </script>
+</body>
+</html>

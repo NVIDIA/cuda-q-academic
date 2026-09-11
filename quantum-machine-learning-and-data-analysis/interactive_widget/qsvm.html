@@ -1,0 +1,1452 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QSVM Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --accent: #76b900;
+      --accent-dark: #5e9400;
+      --bg: #1A1A1A;
+      --surface: #2A2A2A;
+      --border: #444444;
+      --fg: #E0E0E0;
+      --muted: #AAAAAA;
+      --green: var(--accent);
+      --green-bright: var(--accent);
+      --raised: var(--surface);
+      --plot: #1A1A1A;
+      --text: var(--fg);
+      --blue: #0074df;
+      --orange: #ef9100;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1rem;
+      color: var(--fg);
+      background: var(--bg);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+
+    button:focus-visible,
+    input:focus-visible,
+    summary:focus-visible,
+    a:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      z-index: 100;
+      padding: 8px 16px;
+      color: #000;
+      background: var(--accent);
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .skip-link:focus { top: 0; }
+
+    .widget-container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    .widget-container h1 {
+      color: var(--accent);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 0 16px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .widget-container .summary-text {
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .instructions-section {
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .instructions-section h2 {
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+
+    .instructions-section ol { margin: 0 0 10px; padding-left: 1.4rem; }
+    .instructions-section p { margin: 0; color: var(--muted); }
+    .instructions-section .kbd {
+      padding: 2px 6px;
+      background: var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9em;
+    }
+
+    .widget-body {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.55rem;
+    }
+
+    .step {
+      min-height: 3.6rem;
+      padding: 0.58rem 0.72rem;
+      color: var(--text);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 0.48rem;
+      cursor: pointer;
+      font-weight: 780;
+      text-align: left;
+    }
+
+    .step span {
+      display: block;
+      color: var(--green-bright);
+      font-size: 0.7rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .step[aria-pressed="true"] {
+      color: #111;
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .step[aria-pressed="true"] span { color: #111; }
+
+    .stage-message {
+      margin: 0;
+      padding: 0.8rem 1rem;
+      color: var(--muted);
+      background: #f8fafc;
+      border-left: 4px solid var(--green);
+      border-radius: 0.4rem;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(34rem, 1.15fr) minmax(28rem, 0.85fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .card {
+      padding: 1rem;
+      background: var(--raised);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+    }
+
+    .card h2 {
+      margin-bottom: 0.28rem;
+      color: var(--green-bright);
+      font-size: 1.1rem;
+    }
+
+    .intro {
+      margin-bottom: 0.78rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .plot-frame {
+      overflow: hidden;
+      background: var(--plot);
+      border: 1px solid var(--border);
+      border-radius: 0.45rem;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1.35 / 1;
+      cursor: default;
+    }
+
+    canvas.selectable { cursor: crosshair; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.95rem;
+      margin-top: 0.7rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .global-status {
+      margin-top: 0.7rem;
+      padding: 0.62rem 0.75rem;
+      color: var(--text);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--green);
+      border-radius: 0.4rem;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .dot {
+      width: 0.78rem;
+      height: 0.78rem;
+      border-radius: 50%;
+    }
+
+    .line {
+      width: 1.35rem;
+      border-top: 3px solid var(--text);
+    }
+
+    .line.margin { border-top: 2px dashed var(--green-bright); }
+
+    .support-symbol {
+      display: inline-grid;
+      place-items: center;
+      width: 1rem;
+      height: 1rem;
+      border: 3px double var(--green);
+      border-radius: 50%;
+      color: var(--green);
+      font-size: 0.6rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+    }
+
+    .control {
+      padding: 0.68rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 0.45rem;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.32rem;
+      font-size: 0.82rem;
+      font-weight: 750;
+    }
+
+    .control output {
+      color: var(--green-bright);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--green);
+      cursor: pointer;
+    }
+
+    .actions,
+    .presets,
+    .vector-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.7rem;
+    }
+
+    button.action,
+    button.preset,
+    button.vector-button {
+      padding: 0.46rem 0.7rem;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      font-weight: 780;
+    }
+
+    button.action {
+      color: #111;
+      background: var(--green);
+      border: 1px solid var(--green);
+    }
+
+    button.action.secondary,
+    button.preset,
+    button.vector-button {
+      color: var(--text);
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+    }
+
+    button.vector-button {
+      min-width: 2.25rem;
+      padding: 0.28rem 0.48rem;
+      border-radius: 999px;
+      font-size: 0.77rem;
+    }
+
+    button.vector-button[aria-pressed="true"] {
+      color: #111;
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+      margin: 0.7rem 0;
+    }
+
+    .metric {
+      min-height: 4.4rem;
+      padding: 0.62rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.045em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 0.15rem;
+      color: var(--text);
+      font-size: 1.02rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .formula {
+      overflow-x: auto;
+      margin: 0.65rem 0;
+      padding: 0.7rem;
+      color: var(--text);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      font: 0.88rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: nowrap;
+    }
+
+    .explanation {
+      padding: 0.75rem;
+      background: #f8fafc;
+      border-left: 4px solid var(--green);
+      border-radius: 0.4rem;
+    }
+
+    .explanation h3 {
+      margin-bottom: 0.3rem;
+      color: var(--green-bright);
+      font-size: 0.98rem;
+    }
+
+    .explanation p {
+      margin-bottom: 0.48rem;
+      color: var(--muted);
+      font-size: 0.87rem;
+    }
+
+    .explanation p:last-child { margin-bottom: 0; }
+
+    .vector-readout,
+    .support-list,
+    .violations {
+      margin: 0.65rem 0 0;
+      padding: 0.68rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .vector-readout strong,
+    .support-list strong,
+    .violations strong { color: var(--text); }
+
+    .support-list {
+      border: 2px solid var(--green);
+      background: rgba(118, 185, 0, 0.06);
+    }
+
+    .support-list h3 {
+      margin-bottom: 0.3rem;
+      color: var(--green-bright);
+      font-size: 1rem;
+    }
+
+    .support-list ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.25rem;
+    }
+
+    .support-list li { margin-bottom: 0.2rem; }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.28rem 0.65rem;
+      margin-top: 0.55rem;
+      padding: 0.65rem;
+      background: #f8fafc;
+      border-radius: 0.4rem;
+      font-size: 0.84rem;
+    }
+
+    .rule-grid strong { color: var(--text); }
+    .rule-grid span { color: var(--muted); }
+
+    .idea-flow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin: 0.7rem 0;
+    }
+
+    .idea-step {
+      min-height: 6rem;
+      padding: 0.65rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--green);
+      border-radius: 0.45rem;
+    }
+
+    .idea-step strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--text);
+      font-size: 0.83rem;
+    }
+
+    .idea-step span {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
+    .optimization {
+      padding: 0.72rem;
+      background: rgba(118, 185, 0, 0.07);
+      border: 1px solid var(--green);
+      border-radius: 0.42rem;
+    }
+
+    .optimization h3 {
+      margin-bottom: 0.35rem;
+      color: var(--green-bright);
+      font-size: 1rem;
+    }
+
+    .optimization p {
+      margin-bottom: 0.48rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .optimization p:last-child { margin-bottom: 0; }
+
+    .scope-note {
+      padding: 0.85rem 1rem;
+      color: var(--muted);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.86rem;
+    }
+
+    .scope-note strong { color: var(--green-bright); }
+
+    .scope-note summary {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+      color: var(--green-bright);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .scope-note p {
+      max-width: 105ch;
+      margin: 0.65rem 0 0;
+    }
+
+    .info-box,
+    .card {
+      padding: 16px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .controls-section h2,
+    .card h2 {
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+
+    .step,
+    .control,
+    .metric,
+    .formula,
+    .explanation,
+    .vector-readout,
+    .violations,
+    .rule-grid,
+    .idea-step,
+    .scope-note,
+    .global-status,
+    .stage-message {
+      color: var(--fg);
+      background: var(--surface);
+      border-color: var(--border);
+    }
+
+    .plot-frame { background: var(--bg); border-color: var(--border); }
+    .support-list { background: rgba(118,185,0,0.07); }
+    .stage-message,
+    .explanation {
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+    }
+    .rule-grid { border: 1px solid var(--border); }
+
+    .slider-wrap {
+      padding: 4px 2px;
+    }
+
+    .slider-wrap:focus-within {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+
+    input[type=range]:focus { outline: none; }
+    input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+    input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #444;
+      border-radius: 5px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: -7px;
+      cursor: pointer;
+      background: #76B900;
+      border: 2px solid #1A1A1A;
+      border-radius: 50%;
+    }
+    input[type=range]::-moz-range-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #444;
+      border-radius: 5px;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      background: #76B900;
+      border: 2px solid #1A1A1A;
+      border-radius: 50%;
+    }
+
+    button.btn-primary,
+    button.bit-btn {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 8px 14px;
+      color: #FFFFFF;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: 3px solid var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button.btn-primary:hover,
+    button.bit-btn:hover,
+    button.bit-btn[aria-pressed="true"] {
+      color: #000000;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    button.btn-secondary {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 8px 14px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button.btn-secondary:hover { color: #FFFFFF; background: rgba(255,255,255,0.05); }
+
+    .widget-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .widget-footer a { color: #76b900; }
+    .widget-footer a:focus-visible { outline: 3px solid #76b900; outline-offset: 2px; }
+
+    [hidden] { display: none !important; }
+
+    .visually-hidden,
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (min-width: 768px) {
+      .widget-container { padding: 32px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      body { padding: 0.4rem; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .controls { grid-template-columns: 1fr; }
+      .info-box, .card { padding: 16px; }
+    }
+
+    @media (max-width: 430px) {
+      .steps, .metric-grid, .idea-flow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <main class="widget-container" id="main-content">
+    <header>
+      <h1>QSVM Explorer</h1>
+      <p class="summary-text">Explore how a hard-margin SVM compares valid boundaries, identifies support vectors, and expresses the widest-margin goal as an optimization problem.</p>
+    </header>
+
+    <section class="instructions-section" aria-labelledby="instructions-heading">
+      <h2 id="instructions-heading">Instructions</h2>
+      <ol>
+        <li>Move through the four panels to inspect vectors, candidate boundaries, margins, and the fitted solution.</li>
+        <li>Use the sliders or presets to test a boundary, then compare its closest examples.</li>
+        <li>In Panel 4, find the widest margin and connect it to the hard-margin objective.</li>
+      </ol>
+      <p>Keyboard: use <span class="kbd">Tab</span> to reach controls, <span class="kbd">Enter</span> or <span class="kbd">Space</span> to activate buttons, <span class="kbd">Arrow keys</span> within panel and vector choices, and <span class="kbd">Esc</span> to reset. Focused sliders have a green ring.</p>
+    </section>
+
+    <div class="widget-body" id="explorer">
+      <section class="info-box controls-section" aria-labelledby="controls-heading">
+        <h2 id="controls-heading">Controls</h2>
+        <nav class="steps" aria-label="Learning sequence">
+          <button class="step bit-btn" type="button" data-stage="1" aria-pressed="true" tabindex="0">
+            <span>Panel 1</span>
+            Points are vectors
+          </button>
+          <button class="step bit-btn" type="button" data-stage="2" aria-pressed="false" tabindex="-1">
+            <span>Panel 2</span>
+            Test a boundary
+          </button>
+          <button class="step bit-btn" type="button" data-stage="3" aria-pressed="false" tabindex="-1">
+            <span>Panel 3</span>
+            Margin and closest vectors
+          </button>
+          <button class="step bit-btn" type="button" data-stage="4" aria-pressed="false" tabindex="-1">
+            <span>Panel 4</span>
+            Solve the SVM problem
+          </button>
+        </nav>
+
+        <p class="stage-message" id="stage-message" aria-live="polite"></p>
+
+        <div id="vector-picker">
+          <div class="vector-buttons" id="vector-buttons" aria-label="Choose a training example"></div>
+        </div>
+
+        <div class="controls" id="boundary-controls" hidden>
+          <div class="control">
+            <label for="angle">Weight-vector angle <output id="angle-value" for="angle">0.00°</output></label>
+            <div class="slider-wrap">
+              <input id="angle" type="range" min="-55" max="55" step="0.25" value="0" aria-label="Weight-vector angle">
+            </div>
+          </div>
+          <div class="control">
+            <label for="bias">Bias b <output id="bias-value" for="bias">0.00</output></label>
+            <div class="slider-wrap">
+              <input id="bias" type="range" min="-1.4" max="1.4" step="0.01" value="0" aria-label="Bias b">
+            </div>
+          </div>
+        </div>
+
+        <div class="presets" id="presets" hidden>
+          <button class="preset btn-secondary" type="button" data-angle="0" data-bias="0">Vertical separator</button>
+          <button class="preset btn-secondary" type="button" data-angle="-8" data-bias="-0.15">Another separator</button>
+          <button class="preset btn-secondary" type="button" data-angle="30" data-bias="-0.55">Poor candidate</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="next" type="button">Continue to a boundary</button>
+          <button class="btn-secondary" id="reset" type="button">Reset</button>
+          <button class="btn-primary" id="optimize" type="button" hidden>Find widest margin</button>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <section class="card info-box" aria-labelledby="plot-heading">
+          <h2 id="plot-heading">Training examples in feature space</h2>
+          <p class="intro" id="plot-intro"></p>
+
+          <div class="plot-frame">
+            <canvas id="plot" width="780" height="575"
+              role="img"
+              aria-label="Eight labeled training examples in two-dimensional feature space">
+            </canvas>
+          </div>
+
+          <div class="legend" aria-label="Plot legend">
+            <span class="legend-item"><span class="dot" style="background:var(--blue)"></span>Known label y=−1</span>
+            <span class="legend-item"><span class="dot" style="background:var(--orange)"></span>Known label y=+1</span>
+            <span class="legend-item boundary-legend" hidden><span class="line"></span>Decision boundary</span>
+            <span class="legend-item margin-legend" hidden><span class="line margin"></span>Margin boundary</span>
+            <span class="legend-item support-legend" hidden><span class="support-symbol"></span>Margin-defining vector</span>
+          </div>
+
+          <div class="global-status" id="global-status" hidden aria-live="polite"></div>
+        </section>
+
+        <aside class="card info-box" aria-labelledby="concept-heading">
+          <h2 id="concept-heading">What this panel establishes</h2>
+
+          <section id="panel-vectors">
+            <div class="explanation">
+              <h3>Each dot is a feature vector</h3>
+              <p>
+                Its coordinates are the values in <strong>x<sub>i</sub></strong>.
+                The known label <strong>y<sub>i</sub></strong> is stored separately—it
+                is not another coordinate.
+              </p>
+            </div>
+            <div class="vector-readout" id="vector-readout"></div>
+          </section>
+
+          <section id="panel-boundary" hidden>
+            <div class="formula" id="boundary-formula"></div>
+            <div class="explanation">
+              <h3>First ask: does the line separate every example?</h3>
+              <p>
+                The weight vector <strong>w</strong> is perpendicular to the line;
+                <strong>b</strong> shifts it. The sign of g(x)=w·x+b predicts the side.
+              </p>
+              <div class="rule-grid">
+                <strong>Known class +1</strong><span>must lie where g(x) &gt; 0</span>
+                <strong>Known class −1</strong><span>must lie where g(x) &lt; 0</span>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric"><span>Correct side</span><strong id="correct-count">8 of 8</strong></div>
+              <div class="metric"><span>Wrong side / on line</span><strong id="wrong-count">0</strong></div>
+              <div class="metric"><span>Separates all vectors?</span><strong id="separates">Yes</strong></div>
+              <div class="metric"><span>Weight-vector angle</span><strong id="orientation">0.00°</strong></div>
+            </div>
+            <div class="violations" id="violations"></div>
+          </section>
+
+          <section id="panel-margin" hidden>
+            <div class="explanation">
+              <h3>When does the margin matter?</h3>
+              <p>
+                Once a line separates every example, compare valid candidates by the
+                distance to their closest example.
+              </p>
+            </div>
+            <div class="metric-grid">
+              <div class="metric"><span>Nearest distance</span><strong id="half-margin">1.000</strong></div>
+              <div class="metric"><span>Full margin width</span><strong id="full-margin">2.000</strong></div>
+            </div>
+            <div class="support-list" id="support-list"></div>
+            <details class="scope-note optional-math">
+              <summary>Optional: signed-distance formula</summary>
+              <div class="formula">dᵢ = yᵢ(w·xᵢ+b)/‖w‖ &nbsp; and &nbsp; m = minᵢ dᵢ</div>
+              <p>Here dᵢ is the signed geometric distance and m is the half-margin; the full margin width is 2m.</p>
+            </details>
+          </section>
+
+          <section id="panel-optimize" hidden>
+            <div class="optimization">
+              <h3>The hard-margin optimization</h3>
+              <p>Fix the score scale so the nearest signed score is 1, then minimize the weight norm.</p>
+              <div class="formula">minimize ½‖w‖² &nbsp; subject to &nbsp; yᵢ(w·xᵢ+b) ≥ 1</div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric"><span>Current full margin</span><strong id="current-objective">2.000</strong></div>
+              <div class="metric"><span>Widest for this dataset</span><strong id="best-objective">2.119</strong></div>
+            </div>
+            <div class="support-list" id="fitted-support-list"></div>
+            <div class="explanation" style="margin-top:0.7rem">
+              <h3>From a wide boundary to the objective</h3>
+              <div class="idea-flow" aria-label="Three steps connecting margin width to the SVM objective">
+                <div class="idea-step">
+                  <strong>1 · Fix score units</strong>
+                  <span>Set the nearest correctly classified examples to signed score 1.</span>
+                </div>
+                <div class="idea-step">
+                  <strong>2 · Measure width</strong>
+                  <span>On that common scale, a wider margin has a smaller ‖w‖.</span>
+                </div>
+                <div class="idea-step">
+                  <strong>3 · Optimize</strong>
+                  <span>Minimize ½‖w‖² while keeping every signed score at least 1.</span>
+                </div>
+              </div>
+              <p>Here C and G satisfy equality and are the fitted support vectors.</p>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <details class="scope-note">
+        <summary>Hard margin, soft margin, and feature scaling</summary>
+        <p>
+          This explorer uses separable hard-margin geometry. Soft-margin SVMs allow
+          violations through slack and penalize them with C, so their minimum signed
+          score need not be 1. Feature scaling is different again: it changes x and
+          can change the fitted model. Later notebook examples use soft-margin C=1.
+        </p>
+      </details>
+
+      <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    </div>
+
+    <footer class="widget-footer">
+      <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+      <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var points = [
+        { id: "A", x: -2.70, y: -1.45, label: -1 },
+        { id: "B", x: -2.35, y: 1.35, label: -1 },
+        { id: "C", x: -1.00, y: 0.40, label: -1 },
+        { id: "D", x: -1.75, y: -0.35, label: -1 },
+        { id: "E", x: 2.55, y: -1.25, label: 1 },
+        { id: "F", x: 2.25, y: 1.40, label: 1 },
+        { id: "G", x: 1.00, y: -0.30, label: 1 },
+        { id: "H", x: 1.65, y: 0.65, label: 1 }
+      ];
+
+      var optimum = {
+        angle: -19.29,
+        bias: 0.0165,
+        halfMargin: 1.05948,
+        supportIds: ["C", "G"]
+      };
+
+      var stage = 1;
+      var selectedIndex = 2;
+      var showingOptimum = false;
+      var canvas = document.getElementById("plot");
+      var context = canvas.getContext("2d");
+      var angleInput = document.getElementById("angle");
+      var biasInput = document.getElementById("bias");
+      var world = { minX: -4, maxX: 4, minY: -3, maxY: 3 };
+
+      function element(id) {
+        return document.getElementById(id);
+      }
+
+      function pretty(number, digits) {
+        var places = typeof digits === "number" ? digits : 2;
+        var safe = Math.abs(number) < Math.pow(10, -places) / 2 ? 0 : number;
+        return safe.toFixed(places).replace("-", "−");
+      }
+
+      function geometry() {
+        var angle = Number(angleInput.value);
+        var radians = angle * Math.PI / 180;
+        var bias = Number(biasInput.value);
+        return {
+          angle: angle,
+          nx: Math.cos(radians),
+          ny: Math.sin(radians),
+          bias: bias,
+          offset: -bias
+        };
+      }
+
+      function analyze(geo) {
+        var rows = points.map(function (point) {
+          var raw = geo.nx * point.x + geo.ny * point.y - geo.offset;
+          var signed = point.label * raw;
+          return { point: point, raw: raw, signed: signed, correct: signed > 1e-8 };
+        });
+        var minimum = Math.min.apply(null, rows.map(function (row) { return row.signed; }));
+        var separates = minimum > 1e-8;
+        var tolerance = showingOptimum ? 0.004 : 0.018;
+        var closest = separates ? rows.filter(function (row) {
+          return Math.abs(row.signed - minimum) <= tolerance;
+        }) : [];
+        return {
+          rows: rows,
+          minimum: minimum,
+          separates: separates,
+          correctCount: rows.filter(function (row) { return row.correct; }).length,
+          violations: rows.filter(function (row) { return !row.correct; }),
+          closest: closest
+        };
+      }
+
+      function toPixelX(x) {
+        return (x - world.minX) / (world.maxX - world.minX) * canvas.width;
+      }
+
+      function toPixelY(y) {
+        return canvas.height -
+          (y - world.minY) / (world.maxY - world.minY) * canvas.height;
+      }
+
+      function drawLine(level, geo, color, width, dashed) {
+        var centerX = geo.nx * level;
+        var centerY = geo.ny * level;
+        var dx = -geo.ny;
+        var dy = geo.nx;
+        context.save();
+        context.beginPath();
+        context.moveTo(toPixelX(centerX - dx * 12), toPixelY(centerY - dy * 12));
+        context.lineTo(toPixelX(centerX + dx * 12), toPixelY(centerY + dy * 12));
+        context.strokeStyle = color;
+        context.lineWidth = width;
+        context.setLineDash(dashed ? [10, 8] : []);
+        context.stroke();
+        context.restore();
+      }
+
+      function drawNormal(geo) {
+        var sx = toPixelX(geo.nx * geo.offset);
+        var sy = toPixelY(geo.ny * geo.offset);
+        var ex = toPixelX(geo.nx * geo.offset + geo.nx * 0.85);
+        var ey = toPixelY(geo.ny * geo.offset + geo.ny * 0.85);
+        var arrowAngle = Math.atan2(ey - sy, ex - sx);
+        context.save();
+        context.strokeStyle = "#76b900";
+        context.fillStyle = "#76b900";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(sx, sy);
+        context.lineTo(ex, ey);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(ex, ey);
+        context.lineTo(ex - 10 * Math.cos(arrowAngle - Math.PI / 6),
+          ey - 10 * Math.sin(arrowAngle - Math.PI / 6));
+        context.lineTo(ex - 10 * Math.cos(arrowAngle + Math.PI / 6),
+          ey - 10 * Math.sin(arrowAngle + Math.PI / 6));
+        context.closePath();
+        context.fill();
+        context.font = "700 16px Inter, sans-serif";
+        context.fillText("w", ex + 7, ey - 7);
+        context.restore();
+      }
+
+      function drawVectorArrow(point) {
+        var sx = toPixelX(0);
+        var sy = toPixelY(0);
+        var ex = toPixelX(point.x);
+        var ey = toPixelY(point.y);
+        var arrowAngle = Math.atan2(ey - sy, ex - sx);
+        context.save();
+        context.strokeStyle = "#76b900";
+        context.fillStyle = "#76b900";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(sx, sy);
+        context.lineTo(ex, ey);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(ex, ey);
+        context.lineTo(ex - 11 * Math.cos(arrowAngle - Math.PI / 7),
+          ey - 11 * Math.sin(arrowAngle - Math.PI / 7));
+        context.lineTo(ex - 11 * Math.cos(arrowAngle + Math.PI / 7),
+          ey - 11 * Math.sin(arrowAngle + Math.PI / 7));
+        context.closePath();
+        context.fill();
+        context.restore();
+      }
+
+      function drawViolationMark(px, py) {
+        context.save();
+        context.strokeStyle = "#e52020";
+        context.lineWidth = 4;
+        context.beginPath();
+        context.moveTo(px - 8, py - 8);
+        context.lineTo(px + 8, py + 8);
+        context.moveTo(px + 8, py - 8);
+        context.lineTo(px - 8, py + 8);
+        context.stroke();
+        context.restore();
+      }
+
+      function draw() {
+        var geo = geometry();
+        var analysis = analyze(geo);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#1A1A1A";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.save();
+        context.strokeStyle = "#444444";
+        context.lineWidth = 1;
+        for (var x = -3; x <= 3; x += 1) {
+          context.beginPath();
+          context.moveTo(toPixelX(x), 0);
+          context.lineTo(toPixelX(x), canvas.height);
+          context.stroke();
+        }
+        for (var y = -2; y <= 2; y += 1) {
+          context.beginPath();
+          context.moveTo(0, toPixelY(y));
+          context.lineTo(canvas.width, toPixelY(y));
+          context.stroke();
+        }
+        context.strokeStyle = "#757575";
+        context.beginPath();
+        context.moveTo(toPixelX(0), 0);
+        context.lineTo(toPixelX(0), canvas.height);
+        context.moveTo(0, toPixelY(0));
+        context.lineTo(canvas.width, toPixelY(0));
+        context.stroke();
+        context.restore();
+
+        if (stage >= 2) {
+          if (stage >= 3 && analysis.separates) {
+            drawLine(geo.offset - analysis.minimum, geo, "#76b900", 2, true);
+            drawLine(geo.offset + analysis.minimum, geo, "#76b900", 2, true);
+          }
+          drawLine(geo.offset, geo, "#E0E0E0", 4, false);
+          drawNormal(geo);
+        }
+
+        if (stage === 1) {
+          drawVectorArrow(points[selectedIndex]);
+        }
+
+        points.forEach(function (point, index) {
+          var px = toPixelX(point.x);
+          var py = toPixelY(point.y);
+          var isClosest = stage >= 3 && analysis.closest.some(function (row) {
+            return row.point.id === point.id;
+          });
+          context.save();
+          if (isClosest) {
+            context.beginPath();
+            context.arc(px, py, 18, 0, Math.PI * 2);
+            context.strokeStyle = "#76b900";
+            context.lineWidth = 4;
+            context.stroke();
+            context.beginPath();
+            context.arc(px, py, 14, 0, Math.PI * 2);
+            context.strokeStyle = "#76b900";
+            context.lineWidth = 2;
+            context.stroke();
+          }
+          context.beginPath();
+          context.arc(px, py, stage === 1 && index === selectedIndex ? 11 : 9,
+            0, Math.PI * 2);
+          context.fillStyle = point.label === 1 ? "#ef9100" : "#0074df";
+          context.fill();
+          context.strokeStyle = stage === 1 && index === selectedIndex
+            ? "#76b900" : "#E0E0E0";
+          context.lineWidth = stage === 1 && index === selectedIndex ? 4 : 2;
+          context.stroke();
+          context.fillStyle = "#E0E0E0";
+          context.font = "700 15px Inter, sans-serif";
+          context.fillText(point.id, px + 14, py - 11);
+          if (isClosest) {
+            context.fillStyle = "#76b900";
+            context.font = "800 12px Inter, sans-serif";
+            context.fillText(showingOptimum ? "SUPPORT" : "CLOSEST", px + 15, py + 22);
+          }
+          context.restore();
+        });
+
+        if (stage >= 2) {
+          analysis.violations.forEach(function (row) {
+            drawViolationMark(toPixelX(row.point.x), toPixelY(row.point.y));
+          });
+          var minusX = geo.nx * geo.offset - geo.nx * 2.3;
+          var minusY = geo.ny * geo.offset - geo.ny * 2.3;
+          var plusX = geo.nx * geo.offset + geo.nx * 2.3;
+          var plusY = geo.ny * geo.offset + geo.ny * 2.3;
+          context.save();
+          context.fillStyle = "#E0E0E0";
+          context.font = "700 13px Inter, sans-serif";
+          context.textAlign = "center";
+          context.fillText("predicted −1", toPixelX(minusX), toPixelY(minusY));
+          context.fillText("predicted +1", toPixelX(plusX), toPixelY(plusY));
+          context.restore();
+        }
+
+        var description = "Eight labeled training examples";
+        if (stage >= 2) {
+          description += ", a candidate decision boundary, and " +
+            analysis.violations.length + " examples on the wrong side or boundary";
+        }
+        if (stage >= 3 && analysis.separates) {
+          description += ". Dashed margin boundaries touch " +
+            analysis.closest.map(function (row) { return row.point.id; }).join(", ");
+        }
+        canvas.setAttribute("aria-label", description + ".");
+      }
+
+      function updateVectorPanel() {
+        var point = points[selectedIndex];
+        element("vector-readout").innerHTML =
+          "<strong>Selected vector " + point.id + "</strong><br>" +
+          "x<sub>" + point.id + "</sub> = [" + pretty(point.x) + ", " +
+          pretty(point.y) + "]<sup>T</sup><br>" +
+          "y<sub>" + point.id + "</sub> = " +
+          (point.label === 1 ? "+1" : "−1") +
+          " &nbsp;·&nbsp; arrow and dot show the same x";
+      }
+
+      function supportListMarkup(analysis, fitted) {
+        if (!analysis.separates) {
+          return "<h3>No positive margin yet</h3>" +
+            "<p>Fix the boundary before comparing margins.</p>";
+        }
+        var title = fitted ? "Fitted support vectors" : "Closest vectors for this candidate";
+        var intro = fitted
+          ? "These examples touch the fitted margins."
+          : "These examples attain the smallest signed distance.";
+        var items = analysis.closest.map(function (row) {
+          var point = row.point;
+          return "<li><strong>" + point.id + "</strong> &nbsp; y=" +
+            (point.label === 1 ? "+1" : "−1") +
+            " &nbsp; d=" + pretty(row.signed, 3) + "</li>";
+        }).join("");
+        return "<h3>" + title + "</h3><p>" + intro + "</p><ul>" + items + "</ul>";
+      }
+
+      function updateGlobalReadouts() {
+        var geo = geometry();
+        var analysis = analyze(geo);
+        element("angle-value").textContent = pretty(geo.angle) + "°";
+        element("bias-value").textContent = pretty(geo.bias);
+        element("boundary-formula").textContent =
+          "w = [" + pretty(geo.nx) + ", " + pretty(geo.ny) +
+          "]ᵀ,  b = " + pretty(geo.bias) +
+          "  →  boundary: g(x) = w·x + b = 0";
+        element("correct-count").textContent = analysis.correctCount + " of " + points.length;
+        element("wrong-count").textContent = String(points.length - analysis.correctCount);
+        element("separates").textContent = analysis.separates ? "Yes" : "No";
+        element("orientation").textContent = pretty(geo.angle) + "°";
+        element("violations").innerHTML = analysis.violations.length
+          ? "<strong>Vectors marked ×:</strong> " +
+            analysis.violations.map(function (row) { return row.point.id; }).join(", ") +
+            ". The current line is not a valid hard-margin separator."
+          : "<strong>All vectors are on their required sides.</strong> This is a valid separator; now margin width can distinguish it from other valid lines.";
+        element("global-status").textContent = analysis.separates
+          ? "Dataset-wide result: YES — all " + points.length +
+            " training examples are separated (0 on the wrong side or boundary)."
+          : "Dataset-wide result: NO — " + analysis.correctCount + " of " +
+            points.length + " are on the required side; " +
+            (points.length - analysis.correctCount) + " are wrong or on the boundary.";
+
+        element("half-margin").textContent = analysis.separates
+          ? pretty(analysis.minimum, 3) : "Not defined";
+        element("full-margin").textContent = analysis.separates
+          ? pretty(2 * analysis.minimum, 3) : "Not defined";
+        element("support-list").innerHTML = supportListMarkup(analysis, false);
+        element("current-objective").textContent = analysis.separates
+          ? pretty(2 * analysis.minimum, 3) : "Invalid line";
+        element("fitted-support-list").innerHTML =
+          supportListMarkup(analysis, showingOptimum);
+        element("status-announce").textContent =
+          analysis.correctCount + " of " + points.length +
+          " training examples are on the correct side. " +
+          (analysis.separates
+            ? "Full margin " + (2 * analysis.minimum).toFixed(3) + "."
+            : "No positive hard margin.");
+      }
+
+      function setStage(nextStage) {
+        stage = nextStage;
+        document.querySelectorAll(".step").forEach(function (button) {
+          var active = Number(button.getAttribute("data-stage")) === stage;
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+          button.tabIndex = active ? 0 : -1;
+        });
+
+        element("panel-vectors").hidden = stage !== 1;
+        element("panel-boundary").hidden = stage !== 2;
+        element("panel-margin").hidden = stage !== 3;
+        element("panel-optimize").hidden = stage !== 4;
+        element("vector-picker").hidden = stage !== 1;
+        element("boundary-controls").hidden = stage === 1;
+        element("presets").hidden = stage === 1;
+        element("global-status").hidden = stage === 1;
+        element("optimize").hidden = stage !== 4;
+        document.querySelectorAll(".boundary-legend").forEach(function (item) {
+          item.hidden = stage < 2;
+        });
+        document.querySelectorAll(".margin-legend, .support-legend").forEach(function (item) {
+          item.hidden = stage < 3;
+        });
+
+        var messages = {
+          1: "Your task: Select a data point to observe its feature vector xᵢ and separate class label yᵢ.",
+          2: "Your task: Adjust the weight-vector angle and bias, then predict whether the boundary classifies all eight examples correctly.",
+          3: "Your task: Try at least two valid separators, identify their closest examples, and compare the full margin widths.",
+          4: "Your task: Select Find widest margin, identify the fitted support vectors, and read the optimization problem the SVM solves."
+        };
+        var intros = {
+          1: "Choose any dot. The green arrow shows that its two coordinates form a feature vector.",
+          2: "Move or rotate the line. Red × marks show every training example on the wrong side or boundary; the summary evaluates the whole dataset.",
+          3: "For a valid separator, dashed lines mark the largest symmetric gap around that candidate. Double-ringed vectors set that gap.",
+          4: "The fitted support vectors touch the margin and satisfy the score constraint with equality."
+        };
+        element("stage-message").textContent = messages[stage];
+        element("plot-intro").textContent = intros[stage];
+        element("next").textContent =
+          stage === 1 ? "Continue to a boundary" :
+          stage === 2 ? "Why margin matters" :
+          stage === 3 ? "Solve the SVM problem" : "Review from Panel 1";
+        canvas.classList.toggle("selectable", stage === 1);
+        draw();
+        updateVectorPanel();
+        updateGlobalReadouts();
+      }
+
+      function chooseVector(index) {
+        selectedIndex = index;
+        document.querySelectorAll(".vector-button").forEach(function (button, i) {
+          button.setAttribute("aria-pressed", i === selectedIndex ? "true" : "false");
+          button.tabIndex = i === selectedIndex ? 0 : -1;
+        });
+        draw();
+        updateVectorPanel();
+      }
+
+      function buildVectorButtons() {
+        points.forEach(function (point, index) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "vector-button bit-btn";
+          button.textContent = point.id;
+          button.setAttribute("aria-label",
+            "Select vector " + point.id + ", known class " + point.label);
+          button.setAttribute("aria-pressed", index === selectedIndex ? "true" : "false");
+          button.tabIndex = index === selectedIndex ? 0 : -1;
+          button.addEventListener("click", function () { chooseVector(index); });
+          button.addEventListener("keydown", function (event) {
+            moveWithinGroup(event, ".vector-button", index, chooseVector);
+          });
+          element("vector-buttons").appendChild(button);
+        });
+      }
+
+      function moveWithinGroup(event, selector, currentIndex, activate) {
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+          return;
+        }
+        event.preventDefault();
+        var buttons = Array.from(document.querySelectorAll(selector));
+        var delta = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+        var nextIndex = (currentIndex + delta + buttons.length) % buttons.length;
+        activate(nextIndex);
+        buttons[nextIndex].focus();
+      }
+
+      function resizeCanvas() {
+        var width = Math.max(320, Math.round(canvas.getBoundingClientRect().width));
+        var height = Math.round(width / 1.35);
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+          draw();
+        }
+      }
+
+      function selectFromCanvas(event) {
+        if (stage !== 1) { return; }
+        var rect = canvas.getBoundingClientRect();
+        var clickX = (event.clientX - rect.left) * canvas.width / rect.width;
+        var clickY = (event.clientY - rect.top) * canvas.height / rect.height;
+        var nearest = -1;
+        var distanceLimit = 30;
+        points.forEach(function (point, index) {
+          var dx = toPixelX(point.x) - clickX;
+          var dy = toPixelY(point.y) - clickY;
+          var distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < distanceLimit) {
+            nearest = index;
+            distanceLimit = distance;
+          }
+        });
+        if (nearest >= 0) { chooseVector(nearest); }
+      }
+
+      function boundaryChanged() {
+        showingOptimum = false;
+        draw();
+        updateGlobalReadouts();
+      }
+
+      function showOptimum() {
+        angleInput.value = String(optimum.angle);
+        biasInput.value = String(optimum.bias);
+        showingOptimum = true;
+        draw();
+        updateGlobalReadouts();
+        element("status-announce").textContent =
+          "Widest-margin boundary shown. Support vectors C and G touch the margin.";
+      }
+
+      function reset() {
+        angleInput.value = "0";
+        biasInput.value = "0";
+        showingOptimum = false;
+        selectedIndex = 2;
+        document.querySelectorAll(".vector-button").forEach(function (button, i) {
+          button.setAttribute("aria-pressed", i === selectedIndex ? "true" : "false");
+          button.tabIndex = i === selectedIndex ? 0 : -1;
+        });
+        setStage(1);
+        document.querySelector('.step[data-stage="1"]').focus();
+      }
+
+      document.querySelectorAll(".step").forEach(function (button, index) {
+        button.addEventListener("click", function () {
+          setStage(Number(button.getAttribute("data-stage")));
+        });
+        button.addEventListener("keydown", function (event) {
+          moveWithinGroup(event, ".step", index, function (nextIndex) {
+            setStage(nextIndex + 1);
+          });
+        });
+      });
+
+      document.querySelectorAll(".preset").forEach(function (button) {
+        button.addEventListener("click", function () {
+          angleInput.value = button.getAttribute("data-angle");
+          biasInput.value = button.getAttribute("data-bias");
+          boundaryChanged();
+        });
+      });
+
+      angleInput.addEventListener("input", boundaryChanged);
+      biasInput.addEventListener("input", boundaryChanged);
+      canvas.addEventListener("click", selectFromCanvas);
+      element("next").addEventListener("click", function () {
+        setStage(stage === 4 ? 1 : stage + 1);
+      });
+      element("reset").addEventListener("click", reset);
+      element("optimize").addEventListener("click", showOptimum);
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          reset();
+        }
+      });
+      window.addEventListener("resize", resizeCanvas);
+
+      buildVectorButtons();
+      resizeCanvas();
+      setStage(1);
+    }());
+  </script>
+</body>
+</html>
