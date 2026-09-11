@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T₁ Energy Lifetime — CUDA-Q Academic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #76b900;
+  --accent-dark: #5e9400;
+  --bg: #1A1A1A;
+  --surface: #2A2A2A;
+  --border: #444444;
+  --fg: #E0E0E0;
+  --muted: #AAAAAA;
+  --warn: #ef9100;
+  --danger: #e52020;
+  --gold: #f9c500;
+  --teal: #1dbba4;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 32px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: var(--accent); color: #000;
+  padding: 8px 16px; z-index: 100;
+  text-decoration: none; font-weight: bold;
+}
+.skip-link:focus { top: 0; }
+.widget-container {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  margin: 0 auto;
+}
+@media (min-width: 768px) { .widget-container { padding: 32px; } }
+.widget-container h1 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  margin-top: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.widget-container .summary-text {
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.instructions-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.instructions-section summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions-section summary::-webkit-details-marker { display: none; }
+.instructions-section summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.instructions-section[open] > summary::before { transform: rotate(90deg); }
+.instructions-section summary:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.instructions-section summary h2 { display: inline; }
+.instructions-section h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+.instructions-section:not([open]) { padding-bottom: 16px; }
+.instructions-section ol,
+.instructions-section ul { margin-top: 12px; padding-left: 1.4rem; }
+.instructions-section li { margin-bottom: 6px; }
+.instructions-section p {
+  margin: 12px 0 0;
+  color: var(--fg);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.instructions-section .kbd {
+  background: var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+}
+.info-box h2 {
+  color: var(--accent);
+  font-size: 1.1rem;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+.info-box h3 {
+  color: var(--fg);
+  font-size: 0.95rem;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+.context-box {
+  border-color: rgba(118,185,0,0.45);
+  background: rgba(118,185,0,0.06);
+}
+.context-box summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.context-box summary::-webkit-details-marker { display: none; }
+.context-box summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.context-box[open] > summary::before { transform: rotate(90deg); }
+.context-box summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.context-box summary h2 { display: inline; margin: 0; }
+.context-box[open] summary h2 { margin-bottom: 4px; }
+.context-box p {
+  margin: 8px 0 0 0;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.context-box p:last-child { margin-bottom: 0; }
+.context-box strong { color: var(--accent); }
+.control-group label,
+.control-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.readout-chip {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.step-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 700px) {
+  .step-rail { grid-template-columns: 1fr 1fr; }
+}
+.step-pill {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.25);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-pill .n {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.step-pill.active {
+  color: var(--fg);
+  border-color: var(--accent);
+  background: rgba(118,185,0,0.12);
+}
+.step-pill.active .n {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.step-pill.done {
+  color: var(--fg);
+  border-color: rgba(118,185,0,0.55);
+}
+.chip-panel {
+  background: #111;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.chip-panel .panel-head .control-label,
+.sequence-box .panel-head h3 {
+  margin: 0;
+}
+.cue-flag {
+  display: none;
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.panel-cue {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(118,185,0,0.35), 0 0 18px rgba(118,185,0,0.18);
+}
+.panel-cue .cue-flag { display: inline-block; }
+.chip-panel,
+.sequence-box {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.chip-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 420px;
+  margin: 0 auto;
+}
+.chip-link {
+  stroke: #666;
+  stroke-width: 4;
+  fill: none;
+}
+.qubit-node {
+  cursor: pointer;
+}
+.qubit-node:focus {
+  outline: none;
+}
+.qubit-focus {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 3;
+}
+.qubit-node:focus-visible .qubit-focus,
+.qubit-node:focus .qubit-focus {
+  stroke: #ffffff;
+}
+.qubit-hit {
+  fill: #1a1a1a;
+  stroke: var(--border);
+  stroke-width: 2;
+}
+.qubit-node:hover .qubit-hit {
+  stroke: #888;
+}
+.qubit-node[aria-pressed="true"] .qubit-hit {
+  fill: rgba(118,185,0,0.18);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.qubit-node[aria-pressed="true"] .qubit-ring {
+  stroke: var(--accent);
+  stroke-dasharray: 4 3;
+}
+.qubit-ring {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 1.5;
+}
+.qubit-id {
+  fill: var(--fg);
+  font-family: Inter, sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+.qubit-t1 {
+  fill: var(--muted);
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+.qubit-node[aria-pressed="true"] .qubit-id,
+.qubit-node[aria-pressed="true"] .qubit-t1 {
+  fill: var(--accent);
+}
+.chip-caption {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.day-row {
+  margin-top: 10px;
+}
+.day-hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.drift-note {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--teal);
+  background: rgba(29,187,164,0.08);
+  border-radius: 0 6px 6px 0;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.drift-note[hidden] { display: none !important; }
+.sequence-box {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.2);
+}
+.sequence-box h3 {
+  margin: 0 0 10px;
+}
+.sequence-note {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary:disabled:hover {
+  background: var(--surface);
+  color: #FFFFFF;
+  border-color: var(--border);
+  border-bottom-color: var(--accent);
+}
+.control-block {
+  margin-top: 12px;
+}
+.control-block[hidden] { display: none !important; }
+.bloch-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 240px;
+  padding: 16px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.slider-wrap:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  min-height: 44px;
+}
+input[type=range]:focus { outline: none; }
+input[type=range]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px var(--accent); }
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+  background: #76B900; cursor: pointer; margin-top: -7px; border: 2px solid #1A1A1A;
+}
+input[type=range]::-moz-range-track {
+  width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 5px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 14px; width: 14px; border-radius: 50%;
+  background: #76B900; cursor: pointer; border: 2px solid #1A1A1A;
+}
+.btn-primary {
+  background: var(--surface);
+  color: #FFFFFF;
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 18px;
+  min-width: 44px;
+  min-height: 44px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000000;
+  border-color: var(--accent);
+}
+.btn-primary:focus, .btn-secondary:focus, .radio-option:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 18px;
+  min-width: 44px;
+  min-height: 44px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  color: white;
+}
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.2);
+  flex: 1 1 140px;
+}
+.radio-option:hover { border-color: var(--accent); }
+.radio-option:has(input:checked) {
+  border-color: var(--accent);
+  border-bottom: 3px solid var(--accent);
+  background: rgba(118,185,0,0.12);
+}
+.radio-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.radio-option span { color: var(--fg); font-size: 0.9rem; }
+.bench-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .bench-grid {
+    grid-template-columns: minmax(330px, 380px) 1fr;
+    grid-template-areas:
+      "controls viz"
+      "controls results";
+    align-items: start;
+  }
+  .bench-controls { grid-area: controls; }
+  .bench-viz { grid-area: viz; }
+  .bench-results { grid-area: results; }
+}
+.bench-controls {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+.bench-viz { min-width: 0; }
+.bench-results { min-width: 0; }
+.bench-results h3 {
+  margin: 0 0 6px 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 1000px) {
+  .viz-grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+}
+.viz-panel {
+  background: #000000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 0;
+}
+.curve-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--fg);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.curve-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.curve-toggle input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.viz-note {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.viz-note summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.viz-note summary::-webkit-details-marker { display: none; }
+.viz-note summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.viz-note[open] > summary::before { transform: rotate(90deg); }
+.viz-note summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.viz-note p {
+  margin: 6px 0 0;
+  line-height: 1.45;
+}
+.viz-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: var(--fg);
+  font-weight: 700;
+}
+.bloch-host {
+  position: relative;
+  width: 100%;
+  height: 215px;
+  background: #000000;
+  border-radius: 6px;
+  outline: none;
+}
+.bloch-host:focus {
+  outline: 4px solid var(--accent);
+  outline-offset: 2px;
+}
+.bloch-host canvas { display: block; width: 100% !important; height: 100% !important; }
+.viz-panel canvas.plot-canvas {
+  display: block;
+  width: 100%;
+  height: 215px;
+  background: #000000;
+  border-radius: 4px;
+}
+.caveat {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.fit-progress {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.fit-progress[hidden] { display: none !important; }
+.sample-log {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sample-log[hidden] { display: none !important; }
+.sample-log li {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  animation: sample-log-in 0.22s ease-out;
+}
+.sample-log li:last-child { margin-bottom: 0; }
+.sample-log li[hidden] { display: none !important; }
+.sample-log .sample-log-next {
+  color: var(--accent);
+  font-weight: 700;
+}
+@keyframes sample-log-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 700px) {
+  .metrics-grid { grid-template-columns: 1fr; }
+}
+.metric-card {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+}
+.metric-card .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.metric-card .value {
+  color: var(--fg);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.fit-card {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(118,185,0,0.5);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: rgba(118,185,0,0.08);
+  animation: fit-card-in 0.28s ease-out;
+}
+.fit-card[hidden] { display: none !important; }
+.fit-card .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.fit-card .value {
+  display: block;
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.fit-card p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--fg);
+}
+.fit-card .fit-note {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.fit-history-wrap { margin-top: 10px; }
+.fit-history-wrap[hidden] { display: none !important; }
+.fit-history-wrap .sub-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.fit-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fit-history li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.fit-history li:last-child { border-bottom: none; }
+.fit-history .t1 {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.fit-history li.today { color: var(--fg); }
+.fit-history li.today .t1 { color: var(--accent); }
+.fit-how {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.25);
+  font-size: 0.85rem;
+  color: var(--fg);
+}
+.fit-how[hidden] { display: none !important; }
+.fit-how summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.fit-how summary::-webkit-details-marker { display: none; }
+.fit-how summary::before {
+  content: '▶';
+  font-size: 0.7rem;
+  color: var(--accent);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.fit-how[open] > summary::before { transform: rotate(90deg); }
+.fit-how summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.fit-how p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+@keyframes fit-card-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.lab-compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+@media (min-width: 700px) {
+  .lab-compare { grid-template-columns: 1fr 1fr; }
+}
+.lab-primer {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.lab-card {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 14px;
+}
+.lab-card img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  background: #111;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.lab-card p {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.diagnose-group {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.diagnose-group legend {
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0 4px;
+}
+.diagnose-feedback {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+.diagnose-feedback.correct { color: var(--accent); }
+.diagnose-feedback.incorrect { color: var(--warn); }
+.next-panel p {
+  margin: 0 0 12px;
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.next-panel a {
+  color: #76b900;
+  font-weight: 700;
+  text-decoration: none;
+}
+.next-panel a:hover { text-decoration: underline; }
+.next-panel a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.widget-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.widget-footer a {
+  color: #76b900;
+  text-decoration: none;
+  margin-right: 16px;
+}
+.widget-footer a:hover { text-decoration: underline; }
+.widget-footer a:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.widget-updated {
+  display: block;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="widget-container" id="main-content">
+  <header>
+    <h1>T₁ Energy Lifetime</h1>
+    <p class="summary-text">Leave a qubit in |1⟩ and it will not stay there — it relaxes back down to |0⟩ on its own. T<sub>1</sub> is the timescale of that relaxation, and this experiment is how you measure it: excite the qubit with an X gate, wait a delay τ, then measure. Repeat that over many shots and many delays, and the decay you fit gives you the T<sub>1</sub> of that physical qubit.</p>
+  </header>
+  <details class="instructions-section" aria-labelledby="learn-heading">
+    <summary><h2 id="learn-heading">What you'll learn</h2></summary>
+    <ul>
+      <li><strong>Explain T<sub>1</sub> decay:</strong> why a qubit in |1⟩ returns to |0⟩, and what the timescale T<sub>1</sub> is.</li>
+      <li><strong>Read a fitted exponential:</strong> get T<sub>1</sub> from a P(|1⟩) vs. delay plot — why you need several delays, and what 37% ≈ 1/e marks on the curve.</li>
+      <li><strong>Treat T<sub>1</sub> as a snapshot:</strong> the same qubit can fit to a different value on a later day, so the measurement is repeated.</li>
+      <li><strong>Pick a qubit from T<sub>1</sub>:</strong> given T<sub>1</sub> values and a circuit duration, choose which physical qubit can hold the job.</li>
+    </ul>
+  </details>
+  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
+    <ol>
+      <li><strong>Select a qubit</strong> on the device layout. Every qubit has its own T<sub>1</sub>, so the value you fit here belongs to the one you picked.</li>
+      <li>Press <strong>Apply X</strong> to flip that qubit from |0⟩ to |1⟩ (a π-pulse).</li>
+      <li>Choose a <strong>delay τ</strong> — how long you leave the qubit alone in |1⟩ after the X pulse, before you measure it. In the lab this delay is stepped across many values; here you pick one delay to inspect.</li>
+      <li>Press <strong>Sample</strong>. That repeats the excite–delay–measure cycle 100 times. Each shot comes back 1 or 0, and their average becomes one point on the plot. A real T<sub>1</sub> experiment sweeps dozens of delays; three is only the fewest this widget needs before it can fit a curve, and every extra point sharpens the result.</li>
+      <li>Once you have a fitted T<sub>1</sub>, press <strong>Advance one day</strong> to jump the simulated device forward. A day of hardware drift has passed, so your fit is out of date and the qubit has to be measured again.</li>
+      <li>Then look at the real lab traces and decide which qubit you would send a 50 µs circuit to.</li>
+    </ol>
+    <p><span class="kbd">Tab</span> reaches the chip qubits, Advance one day, Apply X, delay slider, Sample, Bloch sphere, Reset, and lab radios. Arrow keys move between qubits on the chip, change the focused slider, and rotate the Bloch view. <span class="kbd">Enter</span> / <span class="kbd">Space</span> activate buttons and qubits. <span class="kbd">ESC</span> resets.</p>
+  </details>
+  <details class="info-box context-box" id="context-section" aria-labelledby="context-heading">
+    <summary><h2 id="context-heading">What this calibration step is for</h2></summary>
+    <p>The T<sub>1</sub> experiment asks: after I put the qubit in |1⟩, how long does that excitation last? The sequence is simple — start in |0⟩, apply X, wait a delay τ, measure — and you repeat it many times at many delays to fit P(|1⟩) = e<sup>−τ/T<sub>1</sub></sup>.</p>
+    <p>T<sub>1</sub> is <strong>not a fixed number printed on the chip</strong>. Every physical qubit has its own T<sub>1</sub>, and each of those values moves over hours and days as the qubit's surroundings change — temperature, stray magnetic fields, and microscopic defects in the materials that drift in and out of resonance with the qubit. The same qubit can fit to 80 µs this morning and 60 µs tonight, which is why labs re-run this experiment regularly and work from the most recent measurement rather than a number from last month.</p>
+    <p>That measured T<sub>1</sub> then matters when you decide <strong>which physical qubit to run on</strong>. A circuit that occupies a qubit for longer than that qubit's T<sub>1</sub> will not keep the excitation it started with.</p>
+    <p>T<sub>1</sub> is one of several numbers that go into picking which qubit to use, alongside T<sub>2</sub> and T<sub>2</sub>*, readout error, and two-qubit gate error. Here you are looking at how long the excited state lasts, by itself.</p>
+  </details>
+  <section class="info-box" id="controls-section" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Run the experiment</h2>
+    <ol class="step-rail" aria-label="Experiment steps">
+      <li class="step-pill active" id="step-1" data-step="1" aria-current="step"><span class="n">1</span> Select qubit</li>
+      <li class="step-pill" id="step-2" data-step="2"><span class="n">2</span> Excite to |1⟩</li>
+      <li class="step-pill" id="step-3" data-step="3"><span class="n">3</span> Choose delay</li>
+      <li class="step-pill" id="step-4" data-step="4"><span class="n">4</span> Sample</li>
+    </ol>
+    <div class="bench-grid">
+      <div class="bench-controls">
+      <div class="chip-panel" id="chip-panel">
+        <div class="panel-head">
+          <p id="chip-legend" class="control-label">Device layout <span id="day-chip" class="readout-chip">Day 1</span></p>
+          <span class="cue-flag">Start here</span>
+        </div>
+        <svg class="chip-svg" viewBox="0 0 420 180" role="group" aria-labelledby="chip-legend">
+          <line class="chip-link" x1="90" y1="90" x2="210" y2="90"></line>
+          <line class="chip-link" x1="210" y1="90" x2="330" y2="90"></line>
+          <g class="qubit-node" id="node-A" role="button" tabindex="0" aria-pressed="false" data-qubit="A" aria-label="Qubit Q0, T1 not yet measured">
+            <circle class="qubit-hit" cx="90" cy="90" r="38"></circle>
+            <circle class="qubit-ring" cx="90" cy="90" r="44"></circle>
+            <circle class="qubit-focus" cx="90" cy="90" r="51"></circle>
+            <text class="qubit-id" x="90" y="84">Q0</text>
+            <text class="qubit-t1" x="90" y="104">T₁ ?</text>
+          </g>
+          <g class="qubit-node" id="node-B" role="button" tabindex="0" aria-pressed="false" data-qubit="B" aria-label="Qubit Q1, T1 not yet measured">
+            <circle class="qubit-hit" cx="210" cy="90" r="38"></circle>
+            <circle class="qubit-ring" cx="210" cy="90" r="44"></circle>
+            <circle class="qubit-focus" cx="210" cy="90" r="51"></circle>
+            <text class="qubit-id" x="210" y="84">Q1</text>
+            <text class="qubit-t1" x="210" y="104">T₁ ?</text>
+          </g>
+          <g class="qubit-node" id="node-C" role="button" tabindex="0" aria-pressed="false" data-qubit="C" aria-label="Qubit Q2, T1 not yet measured">
+            <circle class="qubit-hit" cx="330" cy="90" r="38"></circle>
+            <circle class="qubit-ring" cx="330" cy="90" r="44"></circle>
+            <circle class="qubit-focus" cx="330" cy="90" r="51"></circle>
+            <text class="qubit-id" x="330" y="84">Q2</text>
+            <text class="qubit-t1" x="330" y="104">T₁ ?</text>
+          </g>
+        </svg>
+        <p class="chip-caption" id="chip-status">No qubit selected. Click a node to begin.</p>
+        <div class="button-row day-row">
+          <button type="button" class="btn-secondary" id="day-btn" aria-describedby="day-hint" disabled>Advance one day</button>
+        </div>
+        <p class="day-hint" id="day-hint">Available once you have fitted T<sub>1</sub> on a qubit. Jumps this simulated device forward one day: every qubit's T<sub>1</sub> has shifted overnight and has to be measured again.</p>
+        <p class="drift-note" id="drift-note" hidden></p>
+      </div>
+      <div class="sequence-box" id="sequence-box">
+        <div class="panel-head">
+          <h3>Pulse sequence</h3>
+          <span class="cue-flag">You are here</span>
+        </div>
+        <p class="sequence-note" id="sequence-note">Select a qubit first. Then apply X to excite it.</p>
+        <div class="button-row">
+          <button type="button" class="btn-primary" id="x-btn" disabled>Apply X</button>
+          <button type="button" class="btn-secondary" id="reset-btn">Reset</button>
+        </div>
+        <div class="control-block" id="wait-block" hidden>
+          <label for="duration-slider">Delay τ <span id="t-chip" class="readout-chip">40 µs</span></label>
+          <div class="slider-wrap">
+            <input type="range" id="duration-slider" min="2" max="400" step="1" value="40" aria-label="Delay tau in microseconds" disabled>
+          </div>
+          <p class="caveat">This is one delay τ in the T<sub>1</sub> experiment.</p>
+        </div>
+        <div class="control-block" id="measure-block" hidden>
+          <button type="button" class="btn-primary" id="measure-btn" disabled>Sample</button>
+          <ol class="sample-log" id="sample-log" hidden>
+            <li id="sample-log-wait">Waiting out the delay τ before readout…</li>
+            <li id="sample-log-shots">Measuring 100 shots. Each one comes back 1 or 0; their average is the point.</li>
+            <li id="sample-log-next" class="sample-log-next">Choose a new delay time and sample again.</li>
+          </ol>
+          <p class="fit-progress" id="fit-progress" hidden>0 of 3 usable delays</p>
+        </div>
+      </div>
+      </div>
+      <div class="bench-viz">
+        <h3 class="sr-only" id="viz-heading">Primary visualization</h3>
+        <div class="viz-grid" aria-labelledby="viz-heading">
+          <div class="viz-panel">
+            <h3 id="bloch-caption">Bloch sphere</h3>
+            <div id="bloch-host" class="bloch-host" tabindex="0" role="img"
+              aria-label="Bloch sphere with state zero at the top and state one at the bottom. Starts at zero. After Apply X the arrow points to one. During the delay the arrow stays on the vertical axis, shrinks through the centre, then grows back toward zero. Use arrow keys to rotate the view when focused."></div>
+            <details class="viz-note">
+              <summary>About this view</summary>
+              <p>The arrow starts at |0⟩. Apply X flips it to |1⟩. During the delay it stays on the vertical axis and shortens: that shortening is the average over many shots, not one qubit visibly sliding. At P(|1⟩) = 0.5 the arrow vanishes at the centre; then it grows again toward |0⟩.</p>
+            </details>
+          </div>
+          <div class="viz-panel">
+            <h3 id="curve-caption">P(|1⟩) versus delay τ</h3>
+            <canvas id="decay-canvas" class="plot-canvas" width="480" height="320"
+              role="img" aria-labelledby="curve-caption"></canvas>
+            <label class="curve-toggle">
+              <input type="checkbox" id="curve-toggle">
+              <span>Reveal the true curve</span>
+            </label>
+            <details class="viz-note">
+              <summary>About this plot</summary>
+              <p>Each Sample fires 100 shots. A shot can only come back 1 or 0, which is why they pile up along the top and bottom of the plot; their fraction is the big gold point — the <strong>sampled P(|1⟩)</strong>. Because 100 shots is a finite number, that sampled average lands near the true curve but rarely exactly on it.</p>
+              <p>Collect points at <strong>three different delays</strong> and an exponential P(|1⟩) = e<sup>−τ/T<sub>1</sub></sup> is fitted through them, which is how T<sub>1</sub> is actually determined. Three points is the bare minimum and the fitted value will be off by several percent; add more points at well-spaced delays — some short, some long — to tighten it. Once the third point lands, the individual shots clear and the curve is fitted through your averaged points a moment later. The green markings then show where T<sub>1</sub> sits on the plot, and the <strong>How this T<sub>1</sub> was found</strong> box under Results spells out how that reading is made. T<sub>1</sub> is a property of the fitted curve, not of your gold sampled average. Checking <em>Reveal the true curve</em> draws the true decay — the ensemble expectation — even if you have not yet fitted T<sub>1</sub> from samples. A successful fit checks the box for you; you can uncheck it to hide the true curve.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+      <div class="bench-results">
+        <h3 id="results-heading">Results</h3>
+        <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="label">Sampled P(|1⟩)</span>
+        <span class="value" id="p1-value">—</span>
+      </div>
+    </div>
+        <div class="fit-card" id="fit-card" hidden>
+          <span class="label" id="fit-card-label">Fitted result</span>
+          <span class="value" id="fit-card-value">—</span>
+          <div class="fit-history-wrap" id="fit-history-wrap" hidden>
+            <span class="sub-label">This qubit's T<sub>1</sub>, day by day</span>
+            <ol class="fit-history" id="fit-history"></ol>
+          </div>
+          <p class="fit-note" id="fit-card-note"></p>
+        </div>
+        <details class="fit-how" id="fit-how" hidden>
+          <summary><span>How this T<sub>1</sub> was found</span></summary>
+          <p>An exponential P(|1⟩) = e<sup>−τ/T<sub>1</sub></sup> was fitted through <span id="fit-card-points">your points</span>. T<sub>1</sub> is the delay at which that fitted curve has fallen to 37% — that is 1/e — of the population it started with.</p>
+          <p>To read it off the plot yourself: find 37% on the vertical axis, follow the dashed green line across until it meets the curve, then look straight down from that meeting point to the delay axis. The delay you land on is <span id="fit-card-cross">the fitted value</span>, marked τ = T<sub>1</sub>.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+  <section class="info-box" id="lab-panel" aria-labelledby="lab-heading">
+    <h2 id="lab-heading">Real lab data</h2>
+    <p class="lab-primer">These Quantum Machines and Qblox traces were built the same way you just built yours: many shots at one delay make a single point, then the delay is stepped and an exponential is fitted through the whole set. What differs is scale — a real sweep uses dozens of delays and far more shots per point, which is why these curves sit so much tighter than a three-point fit.</p>
+    <div class="lab-compare">
+      <div class="lab-card">
+        <h3>Quantum Machines</h3>
+        <img src="quantum-machines-t1-lab.jpg" width="1024" height="609" alt="Quantum Machines T1 relaxation measurement for qubit qA1. Transmitted amplitude in millivolts decays over 30 microseconds; a red exponential fit reports T1 equals 29.1 plus or minus 2.2 microseconds.">
+        <p>Delay axis in nanoseconds (30,000 ns = 30 µs); vertical axis is amplitude in millivolts.</p>
+      </div>
+      <div class="lab-card">
+        <h3>Qblox</h3>
+        <img src="t1-v1.png" width="1152" height="864" alt="Qblox T1 relaxation plot: magnitude S21 in microvolts versus delay in microseconds, blue data points and a red exponential fit levelling off well above zero.">
+        <p>Delay axis in microseconds; vertical axis is magnitude S<sub>21</sub> in microvolts.</p>
+      </div>
+    </div>
+    <p class="lab-primer">The Qblox trace above is a measured voltage, not a probability. A qubit in |0⟩ still returns a signal, so the curve levels off above zero instead of falling to the axis. The two traces below convert that same kind of measurement to the probability of sampling a 1, with the fitted T<sub>1</sub> shown on each:</p>
+    <div class="lab-compare">
+      <div class="lab-card">
+        <img src="t1-v2.png" width="640" height="480" alt="Qblox T1 relaxation measurement with exponential fit T1 equals 297.6 microseconds.">
+        <p>Fitted T<sub>1</sub> ≈ 297.6 µs.</p>
+      </div>
+      <div class="lab-card">
+        <img src="t1-v3.png" width="640" height="480" alt="Qblox T1 relaxation measurement with exponential fit T1 equals 3.4 microseconds.">
+        <p>Fitted T<sub>1</sub> ≈ 3.4 µs.</p>
+      </div>
+    </div>
+    <p class="lab-primer">These two traces are two different qubits, measured on the same day — one with a long T<sub>1</sub>, one with a short T<sub>1</sub>.</p>
+    <p class="lab-primer">Now put the fitted T<sub>1</sub> to work. Suppose you have a <strong>one-qubit</strong> circuit — no two-qubit gates — that takes about 50 µs from start to finish. The qubit has to stay in |1⟩ for that whole duration, so you pick the physical qubit whose T<sub>1</sub> is long enough for the job — judged against a recent measurement of that qubit.</p>
+    <fieldset class="diagnose-group" id="lab-diagnose-group">
+      <legend id="lab-diagnose-legend">That 50 µs, one-qubit circuit: which of these two qubits would you run it on?</legend>
+      <div class="radio-row" role="radiogroup" aria-labelledby="lab-diagnose-legend">
+        <label class="radio-option"><input type="radio" name="lab-diagnose" value="short"> <span>Short T<sub>1</sub> (3.4 µs)</span></label>
+        <label class="radio-option"><input type="radio" name="lab-diagnose" value="long"> <span>Long T<sub>1</sub> (297.6 µs)</span></label>
+        <label class="radio-option"><input type="radio" name="lab-diagnose" value="either"> <span>Either is fine</span></label>
+      </div>
+      <p class="diagnose-feedback" id="diagnose-feedback" hidden></p>
+    </fieldset>
+  </section>
+  <section class="info-box next-panel" id="next-panel" aria-labelledby="next-heading">
+    <h2 id="next-heading">What’s next</h2>
+    <p>The next calibration is a <strong>Ramsey experiment</strong>, which measures <strong>T<sub>2</sub>*</strong> (the Ramsey dephasing time): how long the <strong>relative phase</strong> of a superposition survives, including low-frequency noise.</p>
+  </section>
+  <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+  <footer class="widget-footer">
+    <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+    <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+    <p class="widget-updated">Last updated <time datetime="2026-09-10">10 September 2026</time></p>
+  </footer>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const QUBITS = {
+  A: { id: 'Q0', t1: 20, label: 'short' },
+  B: { id: 'Q1', t1: 80, label: 'typical' },
+  C: { id: 'Q2', t1: 200, label: 'long' }
+};
+const QUBIT_ORDER = ['A', 'B', 'C'];
+const T_DEFAULT = 40;
+// Distinct delays needed before an exponential fit is meaningful.
+const MIN_FIT_POINTS = 3;
+// Shots per sample. Each is a single 0/1 measurement outcome.
+const SHOTS = 100;
+// Wall-clock wait animation: long enough to see the Bloch arrow move,
+// independent of the physical delay τ (µs is not milliseconds).
+const WAIT_ANIM_MIN_MS = 1200;
+const WAIT_ANIM_MAX_MS = 2500;
+const WAIT_ANIM_BEAT_MS = 450;
+// Beat between the last point landing and the curve being fitted through it.
+const FIT_HOLD_MS = 1000;
+const LAB_CIRCUIT_US = 50;
+const LAB_LONG_T1 = 297.6;
+
+const T1App = {
+  els: {},
+  bloch: null,
+  anim: { raf: null, start: 0, from: 0, to: 0, duration: 900, onDone: null },
+  state: {
+    qubit: null,
+    phase: 'idle', // idle | selected | excited | waiting | sampling | measured
+    wait: T_DEFAULT,
+    tView: 0,
+    p1: 0,
+    day: 1,
+    // Multiplier on each qubit's base T₁: hardware drift between days.
+    drift: { A: 1, B: 1, C: 1 },
+    // Last fit the user earned on each qubit, kept as a stale reference.
+    prevFits: { A: null, B: null, C: null },
+    // Every fit the user has banked on each qubit, one entry per closed day.
+    fitHistory: { A: [], B: [], C: [] },
+    // The fit walkthrough auto-opens once, then stays collapsed by default.
+    fitHowSeen: false,
+    samples: { A: [], B: [], C: [] },
+    shots: [],
+    shotsShown: 0,
+    shotWait: null,
+    // Tally of the last completed sample, kept after its shots are cleared.
+    lastTally: null,
+    // A completed fit waiting out FIT_HOLD_MS before it is drawn.
+    fitPending: false,
+    fitHold: null,
+    showCurve: false,
+    lastWasResample: false,
+    // How many of the under-Sample sentences are visible this cycle (0–3).
+    sampleLogLevel: 0,
+    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    lastAnnounce: ''
+  }
+};
+
+// The T₁ this qubit actually has today, base value times accumulated drift.
+function trueT1(q) {
+  return q ? QUBITS[q].t1 * T1App.state.drift[q] : null;
+}
+
+function t1Now() {
+  return trueT1(T1App.state.qubit);
+}
+
+function samplesFor(q) {
+  return q ? T1App.state.samples[q] || [] : [];
+}
+
+// A sample of 0% carries no information for a log-linear fit.
+function usableSamples(q) {
+  return samplesFor(q).filter((s) => s.p > 1e-6 && s.t > 0);
+}
+
+function distinctDelays(pts) {
+  return new Set(pts.map((s) => Math.round(s.t * 10))).size;
+}
+
+function clearShots() {
+  T1App.state.shots = [];
+  T1App.state.shotsShown = 0;
+  T1App.state.shotWait = null;
+}
+
+function shotsMean(n) {
+  const shots = T1App.state.shots;
+  const count = Math.min(n == null ? shots.length : n, shots.length);
+  if (count === 0) return null;
+  let ones = 0;
+  for (let i = 0; i < count; i++) ones += shots[i].v;
+  return { ones, count, mean: ones / count };
+}
+
+// Least-squares fit of ln P = −τ/T₁ through the origin.
+function fitT1(points) {
+  let sTT = 0;
+  let sTL = 0;
+  let used = 0;
+  points.forEach(({ t, p }) => {
+    if (p <= 1e-6 || t <= 0) return;
+    sTT += t * t;
+    sTL += t * Math.log(p);
+    used += 1;
+  });
+  if (used < MIN_FIT_POINTS || sTL >= 0) return null;
+  return -sTT / sTL;
+}
+
+function fittedT1(q) {
+  const pts = usableSamples(q);
+  if (distinctDelays(pts) < MIN_FIT_POINTS) return null;
+  return fitT1(pts);
+}
+
+// A finished fit is withheld for a beat so the last sample's shots can clear
+// before the curve is drawn; everything student-facing reads through this.
+function shownFit(q) {
+  return T1App.state.fitPending ? null : fittedT1(q);
+}
+
+// One row per day this qubit has been measured, so an earlier day's T₁ stays
+// on screen next to today's instead of only living in a sentence.
+function renderFitHistory(history, todayFit) {
+  const wrap = T1App.els.fitHistoryWrap;
+  const list = T1App.els.fitHistory;
+  if (!wrap || !list) return;
+  list.textContent = '';
+  if (!history.length) {
+    wrap.hidden = true;
+    return;
+  }
+  wrap.hidden = false;
+  const rows = history.concat([{ day: T1App.state.day, t1: todayFit }]);
+  rows.forEach((row, i) => {
+    const li = document.createElement('li');
+    const isToday = i === rows.length - 1;
+    if (isToday) li.className = 'today';
+    const day = document.createElement('span');
+    day.textContent = isToday ? `Day ${row.day} (today)` : `Day ${row.day}`;
+    const val = document.createElement('span');
+    val.className = 't1';
+    val.textContent = formatUs(row.t1);
+    li.append(day, val);
+    list.append(li);
+  });
+}
+
+// Results card: appears with the fitted curve, carries the day-by-day record,
+// and reveals the walkthrough box the first time a fit lands.
+function renderFitCard() {
+  const card = T1App.els.fitCard;
+  if (!card) return;
+  const how = T1App.els.fitHow;
+  const q = T1App.state.qubit;
+  const fit = shownFit(q);
+  if (fit == null) {
+    card.hidden = true;
+    if (how) how.hidden = true;
+    return;
+  }
+
+  const wasHidden = card.hidden;
+  const pts = usableSamples(q).length;
+  const delays = usableDelayCount(q);
+  const history = T1App.state.fitHistory[q];
+  card.hidden = false;
+  T1App.els.fitCardLabel.textContent = `Fitted result — ${QUBITS[q].id}, day ${T1App.state.day}`;
+  T1App.els.fitCardValue.textContent = `T₁ = ${formatUs(fit)}`;
+  T1App.els.fitCardPoints.textContent = pts === delays
+    ? `your ${pts} points, each at a different delay`
+    : `your ${pts} points, spread over ${delays} different delays`;
+  T1App.els.fitCardCross.textContent = formatUs(fit);
+  renderFitHistory(history, fit);
+
+  let note;
+  if (delays <= MIN_FIT_POINTS) {
+    note = `Three delays is the bare minimum for a fit, so expect this to be off by a few percent. Sample more delays, mixing short and long, and the estimate tightens.`;
+  } else {
+    note = `${delays} delays went into this fit. Adding more, mixing short and long, tightens it further.`;
+  }
+  if (history.length) {
+    const prev = history[history.length - 1];
+    const dir = fit >= prev.t1 ? 'longer' : 'shorter';
+    note += ` Today's value is ${dir} than day ${prev.day}'s: same qubit, same experiment, different answer. That drift is why a T₁ is only good for the day it was measured.`;
+  }
+  T1App.els.fitCardNote.textContent = note;
+
+  // Open the walkthrough the first time a fit lands, then leave it collapsed so
+  // it need not be re-read; only touched on appearance, so manual toggles stick.
+  if (how) {
+    how.hidden = false;
+    if (wasHidden) {
+      how.open = !T1App.state.fitHowSeen;
+      T1App.state.fitHowSeen = true;
+    }
+  }
+}
+
+function clearFitHold() {
+  if (T1App.state.fitHold) {
+    clearTimeout(T1App.state.fitHold);
+    T1App.state.fitHold = null;
+  }
+  T1App.state.fitPending = false;
+}
+
+function usableDelayCount(q) {
+  return distinctDelays(usableSamples(q));
+}
+
+// Plain-language gate status: how many distinct usable delays we have, and
+// why a fit is not showing yet (same delay, 0% readout, or degenerate slope).
+function fitGate(q) {
+  const samples = samplesFor(q);
+  const usable = usableSamples(q);
+  const n = distinctDelays(usable);
+  const progress = `${n} of ${MIN_FIT_POINTS} usable delays`;
+  const last = samples.length ? samples[samples.length - 1] : null;
+  if (n >= MIN_FIT_POINTS) {
+    const fit = fitT1(usable);
+    if (fit != null) return { n, fit, progress, reason: '' };
+    return {
+      n,
+      fit: null,
+      progress,
+      reason: 'Those delays are too short for a fit — P(|1⟩) barely dropped. Try a longer delay τ.'
+    };
+  }
+  let reason;
+  if (last && last.p <= 1e-6) {
+    reason = 'That sample read 0%, which can\'t be used in the fit. Try a shorter delay.';
+  } else if (T1App.state.lastWasResample || samples.length > n) {
+    reason = 'Try a different delay time — the fit needs at least three different delays.';
+  } else if (MIN_FIT_POINTS - n === 2) {
+    reason = 'Two more delays needed';
+  } else if (MIN_FIT_POINTS - n === 1) {
+    reason = 'One more delay needed';
+  } else {
+    reason = `${MIN_FIT_POINTS - n} more delays needed`;
+  }
+  return { n, fit: null, progress, reason };
+}
+
+function waitAnimDuration(wait, t1) {
+  if (!(wait > 0) || t1 == null) return WAIT_ANIM_BEAT_MS;
+  const drop = 1 - Math.exp(-wait / t1);
+  if (drop < 0.05) return WAIT_ANIM_BEAT_MS;
+  return WAIT_ANIM_MIN_MS + (WAIT_ANIM_MAX_MS - WAIT_ANIM_MIN_MS) * Math.min(1, drop);
+}
+
+function revealTrueCurve() {
+  T1App.state.showCurve = true;
+  if (T1App.els.curveToggle) T1App.els.curveToggle.checked = true;
+}
+
+function hideTrueCurve() {
+  T1App.state.showCurve = false;
+  if (T1App.els.curveToggle) T1App.els.curveToggle.checked = false;
+}
+
+function pop1(t, t1) {
+  return Math.exp(-t / t1);
+}
+
+function blochZ(p1) {
+  return 1 - 2 * p1;
+}
+
+function formatUs(x) {
+  if (x >= 100) return `${Math.round(x)} µs`;
+  return `${x.toFixed(1).replace(/\.0$/, '')} µs`;
+}
+
+function formatPct(p) {
+  return `${(p * 100).toFixed(1)}%`;
+}
+
+function makeAxisLabel(text, position, options = {}) {
+  const color = options.color || '#CCCCCC';
+  const fontSize = options.fontSize || 28;
+  const scale = options.scale || [0.45, 0.22, 1];
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = 128 * dpr;
+  canvas.height = 64 * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, 128, 64);
+  ctx.fillStyle = color;
+  ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 64, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(scale[0], scale[1], scale[2]);
+  sprite.position.copy(position);
+  return sprite;
+}
+
+function initBloch(host) {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+  camera.up.set(0, 0, 1);
+  camera.position.set(2.8, 3.2, 1.6);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: !T1App.state.reducedMotion, alpha: true });
+  renderer.setClearColor(0x000000, 1);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  host.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = !T1App.state.reducedMotion;
+  controls.enablePan = false;
+  controls.minDistance = 2;
+  controls.maxDistance = 5;
+  controls.target.set(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.45);
+  dir.position.set(2, 3, 4);
+  scene.add(dir);
+
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(1, 32, 24),
+    new THREE.MeshBasicMaterial({ color: 0x888888, wireframe: true, transparent: true, opacity: 0.15 })
+  ));
+
+  const axisMat = new THREE.LineBasicMaterial({ color: 0xcccccc });
+  function axisLine(a, b) {
+    const geo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(...a),
+      new THREE.Vector3(...b)
+    ]);
+    return new THREE.Line(geo, axisMat);
+  }
+  scene.add(axisLine([-1.15, 0, 0], [1.15, 0, 0]));
+  scene.add(axisLine([0, -1.15, 0], [0, 1.15, 0]));
+  scene.add(axisLine([0, 0, -1.15], [0, 0, 1.15]));
+  scene.add(makeAxisLabel('|0⟩', new THREE.Vector3(0, 0, 1.35)));
+  scene.add(makeAxisLabel('|1⟩', new THREE.Vector3(0, 0, -1.35)));
+  scene.add(makeAxisLabel('|+⟩', new THREE.Vector3(1.35, 0, 0)));
+  scene.add(makeAxisLabel('|−⟩', new THREE.Vector3(-1.35, 0, 0)));
+
+  const arrow = new THREE.Group();
+  const shaftLen = 0.78;
+  const headLen = 0.18;
+  const shaft = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.035, shaftLen, 16),
+    new THREE.MeshStandardMaterial({ color: 0x76b900, metalness: 0.1, roughness: 0.4 })
+  );
+  shaft.rotation.x = Math.PI / 2;
+  shaft.position.z = shaftLen / 2;
+  const head = new THREE.Mesh(
+    new THREE.ConeGeometry(0.1, headLen, 16),
+    new THREE.MeshStandardMaterial({ color: 0x76b900, metalness: 0.1, roughness: 0.4 })
+  );
+  head.rotation.x = Math.PI / 2;
+  head.position.z = shaftLen + headLen / 2;
+  arrow.add(shaft);
+  arrow.add(head);
+  scene.add(arrow);
+
+  function resize() {
+    const w = host.clientWidth || 400;
+    const h = host.clientHeight || 320;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+
+  function setBlochP1(p1) {
+    const z = blochZ(p1);
+    const len = Math.abs(z);
+    const dirV = new THREE.Vector3(0, 0, z >= 0 ? 1 : -1);
+    arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirV);
+    const s = Math.max(len, 0.04);
+    arrow.scale.set(s, s, s);
+    arrow.visible = len > 0.02;
+  }
+
+  function renderFrame() {
+    if (controls.enableDamping) controls.update();
+    renderer.render(scene, camera);
+  }
+
+  let raf = 0;
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    renderFrame();
+  }
+
+  resize();
+  setBlochP1(0);
+  if (T1App.state.reducedMotion) renderFrame();
+  else loop();
+
+  return {
+    camera,
+    controls,
+    resize,
+    setBlochP1,
+    renderFrame,
+    dispose() {
+      cancelAnimationFrame(raf);
+      controls.dispose();
+      renderer.dispose();
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+    }
+  };
+}
+
+// Boxed annotation joined by a leader line to the point it explains. First
+// line is the heading; the rest is body copy.
+function drawCallout(ctx, lines, target, bounds) {
+  const padX = 9;
+  const padY = 8;
+  const lineH = 15;
+  const titleFont = 'bold 12px Inter, sans-serif';
+  const bodyFont = '11px Inter, sans-serif';
+
+  let textW = 0;
+  lines.forEach((text, i) => {
+    ctx.font = i === 0 ? titleFont : bodyFont;
+    textW = Math.max(textW, ctx.measureText(text).width);
+  });
+  const boxW = textW + padX * 2;
+  const boxH = lines.length * lineH + padY * 2;
+
+  // Above and right of the target is clear: the curve has already dropped below.
+  let bx = target.x + 16;
+  let by = target.y - boxH - 14;
+  if (bx + boxW > bounds.right) bx = target.x - boxW - 16;
+  if (bx < bounds.left) bx = Math.max(bounds.left + 2, bounds.right - boxW - 2);
+  if (by < bounds.top) by = Math.min(target.y + 16, bounds.bottom - boxH - 2);
+  if (by < bounds.top) by = bounds.top + 2;
+
+  ctx.save();
+  const ax = Math.max(bx, Math.min(target.x, bx + boxW));
+  const ay = target.y > by + boxH ? by + boxH : (target.y < by ? by : target.y);
+  ctx.strokeStyle = '#76b900';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.lineTo(target.x, target.y);
+  ctx.stroke();
+
+  const r = 5;
+  ctx.beginPath();
+  ctx.moveTo(bx + r, by);
+  ctx.lineTo(bx + boxW - r, by);
+  ctx.quadraticCurveTo(bx + boxW, by, bx + boxW, by + r);
+  ctx.lineTo(bx + boxW, by + boxH - r);
+  ctx.quadraticCurveTo(bx + boxW, by + boxH, bx + boxW - r, by + boxH);
+  ctx.lineTo(bx + r, by + boxH);
+  ctx.quadraticCurveTo(bx, by + boxH, bx, by + boxH - r);
+  ctx.lineTo(bx, by + r);
+  ctx.quadraticCurveTo(bx, by, bx + r, by);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(0,0,0,0.88)';
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.textAlign = 'left';
+  lines.forEach((text, i) => {
+    ctx.font = i === 0 ? titleFont : bodyFont;
+    ctx.fillStyle = i === 0 ? '#76b900' : '#E0E0E0';
+    ctx.fillText(text, bx + padX, by + padY + lineH * i + 11);
+  });
+
+  ctx.fillStyle = '#76b900';
+  ctx.beginPath();
+  ctx.arc(target.x, target.y, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawDecay(canvas, t1, tMark, tView, showCurve) {
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = canvas.clientWidth || canvas.width;
+  const H = canvas.clientHeight || 320;
+  canvas.width = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = { l: 82, r: 18, t: 18, b: 40 };
+  const left = pad.l;
+  const right = W - pad.r;
+  const top = pad.t;
+  const bottom = H - pad.b;
+  const tMax = 400;
+  const xOf = (t) => left + (t / tMax) * (right - left);
+  const yOf = (p) => bottom - p * (bottom - top);
+
+  ctx.strokeStyle = '#666666';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(left, top);
+  ctx.lineTo(left, bottom);
+  ctx.lineTo(right, bottom);
+  ctx.stroke();
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font = '12px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Delay τ (µs)', (left + right) / 2, H - 10);
+  ctx.save();
+  ctx.translate(13, (top + bottom) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('P(|1⟩)', 0, 0);
+  ctx.restore();
+
+  const P_1E = 1 / Math.E;
+  ctx.textAlign = 'right';
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillStyle = '#888888';
+  ctx.strokeStyle = '#666666';
+  [0, 0.5, 1].forEach((p) => {
+    const y = yOf(p);
+    ctx.beginPath();
+    ctx.moveTo(left - 4, y);
+    ctx.lineTo(left, y);
+    ctx.stroke();
+    ctx.fillText(Math.round(p * 100) + '%', left - 8, y + 4);
+  });
+
+  const phase = T1App.state.phase;
+  const pts = samplesFor(T1App.state.qubit);
+  const fitted = shownFit(T1App.state.qubit);
+  const curveT1 = fitted != null ? fitted : (showCurve ? t1 : null);
+
+  if (t1 == null) {
+    ctx.fillStyle = '#666666';
+    ctx.font = '13px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Select a qubit to begin', (left + right) / 2, (top + bottom) / 2);
+    return;
+  }
+
+  // An earlier day's fit for this qubit, left on the plot as a stale reference.
+  const prev = T1App.state.qubit ? T1App.state.prevFits[T1App.state.qubit] : null;
+  if (prev && prev.t1 > 0 && prev.day < T1App.state.day) {
+    ctx.save();
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = 'rgba(170,170,170,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i <= 240; i++) {
+      const t = (i / 240) * tMax;
+      const x = xOf(t);
+      const y = yOf(pop1(t, prev.t1));
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+    const lx = xOf(tMax * 0.58);
+    ctx.fillStyle = 'rgba(170,170,170,0.85)';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Day ${prev.day} fit`, lx + 6, yOf(pop1(tMax * 0.58, prev.t1)) - 6);
+  }
+
+  if (curveT1 != null) {
+    const y1e = yOf(P_1E);
+    const offScale = curveT1 > tMax;
+    const t1x = offScale ? right : xOf(curveT1);
+
+    // How T₁ is read off the curve: across at 37% ≈ 1/e, then down to the τ axis.
+    ctx.save();
+    ctx.strokeStyle = '#76b900';
+    ctx.fillStyle = '#76b900';
+    ctx.lineWidth = 1;
+    ctx.font = '11px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.beginPath();
+    ctx.moveTo(left - 5, y1e);
+    ctx.lineTo(left, y1e);
+    ctx.stroke();
+    ctx.fillText('37% ≈ 1/e', left - 8, y1e + 4);
+
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.25;
+    ctx.beginPath();
+    ctx.moveTo(left, y1e);
+    ctx.lineTo(t1x, y1e);
+    ctx.stroke();
+    if (!offScale) {
+      ctx.beginPath();
+      ctx.moveTo(t1x, y1e);
+      ctx.lineTo(t1x, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(t1x, bottom);
+      ctx.lineTo(t1x, bottom + 5);
+      ctx.stroke();
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('τ = T₁', t1x, bottom + 17);
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    ctx.strokeStyle = '#1dbba4';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= 240; i++) {
+      const t = (i / 240) * tMax;
+      const y = yOf(pop1(t, curveT1));
+      const x = xOf(t);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    const heading = `${fitted != null ? 'Fitted' : 'True'} T₁ = ${formatUs(curveT1)}`;
+    drawCallout(
+      ctx,
+      offScale
+        ? [heading, 'the 37% crossing sits past', 'the right edge of this plot']
+        : [heading, 'the curve reaches 37% here'],
+      { x: t1x, y: y1e },
+      { left, right, top, bottom }
+    );
+  }
+
+  if (phase === 'excited' || phase === 'waiting' || phase === 'measured') {
+    const cx = xOf(tMark);
+    ctx.strokeStyle = '#f9c500';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, top);
+    ctx.lineTo(cx, bottom);
+    ctx.stroke();
+  }
+
+  // Individual shot outcomes for the sample in progress: each lands on 1 or on 0.
+  const shots = T1App.state.shots;
+  const shotWait = T1App.state.shotWait;
+  const showShots = (phase === 'sampling' || phase === 'measured') && shots.length > 0 && shotWait != null;
+  if (showShots) {
+    const sx = xOf(shotWait);
+    const shown = Math.min(T1App.state.shotsShown, shots.length);
+    const spread = Math.min(15, (right - left) * 0.05);
+    for (let i = 0; i < shown; i++) {
+      const s = shots[i];
+      const base = yOf(s.v) + (s.v === 1 ? 11 : -11);
+      ctx.fillStyle = s.v === 1 ? 'rgba(249,197,0,0.8)' : 'rgba(125,170,215,0.7)';
+      ctx.beginPath();
+      ctx.arc(sx + s.jx * spread, base + s.jy * 8, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Points the user has collected, oldest dimmed so the newest reads as "just now".
+  pts.forEach((s, i) => {
+    const isLast = i === pts.length - 1;
+    ctx.fillStyle = isLast ? '#f9c500' : 'rgba(249,197,0,0.45)';
+    ctx.beginPath();
+    ctx.arc(xOf(s.t), yOf(s.p), isLast ? 5.5 : 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // The running average of the shots shown so far — this is the point being built.
+  if (showShots && T1App.state.shotsShown > 0) {
+    const agg = shotsMean(T1App.state.shotsShown);
+    const my = yOf(agg.mean);
+    const sx = xOf(shotWait);
+    ctx.strokeStyle = '#f9c500';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    ctx.moveTo(left, my);
+    ctx.lineTo(sx, my);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f9c500';
+    ctx.beginPath();
+    ctx.arc(sx, my, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  if (pts.length === 0 && !showShots && phase !== 'waiting') {
+    ctx.fillStyle = '#666666';
+    ctx.font = '13px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No points yet — sample at a delay to collect one', (left + right) / 2, top + 40);
+  }
+}
+
+function updateStepRail() {
+  const phase = T1App.state.phase;
+  const map = {
+    idle: 1,
+    selected: 2,
+    excited: 3,
+    waiting: 3,
+    sampling: 4,
+    measured: 4
+  };
+  const active = map[phase] || 1;
+  document.querySelectorAll('.step-pill').forEach((el) => {
+    const n = Number(el.dataset.step);
+    el.classList.toggle('active', n === active);
+    el.classList.toggle('done', n < active);
+    if (n === active) el.setAttribute('aria-current', 'step');
+    else el.removeAttribute('aria-current');
+  });
+}
+
+// Tells the student what their fit is worth: today's value for this qubit,
+// and how it compares with the one they measured on an earlier day.
+function updateDriftNote() {
+  const el = T1App.els.driftNote;
+  if (!el) return;
+  const q = T1App.state.qubit;
+  const day = T1App.state.day;
+  const fit = q ? shownFit(q) : null;
+  const prev = q ? T1App.state.prevFits[q] : null;
+  const stale = prev && prev.day < day ? prev : null;
+  let text = '';
+
+  if (fit != null && stale) {
+    const dir = fit > stale.t1 ? 'longer' : 'shorter';
+    text = `Day ${day}: ${QUBITS[q].id} now fits to ${formatUs(fit)}, ${dir} than the ${formatUs(stale.t1)} you measured on day ${stale.day}. Same qubit, same experiment, different answer — the dashed grey curve is that older fit.`;
+  } else if (stale) {
+    text = `Day ${day}: your day ${stale.day} fit for ${QUBITS[q].id} was ${formatUs(stale.t1)} (dashed grey). Its T₁ has drifted overnight, so that value is out of date — run the experiment again to find today's.`;
+  } else if (fit != null) {
+    text = `${QUBITS[q].id} fits to ${formatUs(fit)} today. That is this qubit's T₁ now, not a permanent spec — measure it again another day and the fit lands somewhere else.`;
+  }
+
+  el.textContent = text;
+  el.hidden = text === '';
+}
+
+function updateControls() {
+  const { phase, qubit, wait } = T1App.state;
+  const q = qubit ? QUBITS[qubit] : null;
+
+  document.querySelectorAll('.qubit-node').forEach((node) => {
+    const key = node.dataset.qubit;
+    const info = QUBITS[key];
+    node.setAttribute('aria-pressed', key === qubit ? 'true' : 'false');
+    const fit = shownFit(key);
+    const label = node.querySelector('.qubit-t1');
+    const n = usableDelayCount(key);
+    let readout;
+    if (fit != null) readout = `T₁ ${formatUs(fit)}`;
+    else if (n > 0) readout = `T₁ ? (${n}/${MIN_FIT_POINTS})`;
+    else readout = 'T₁ ?';
+    if (label) label.textContent = readout;
+    node.setAttribute('aria-label', fit != null
+      ? `Qubit ${info.id}, fitted T1 ${formatUs(fit)}`
+      : `Qubit ${info.id}, T1 not yet measured, ${n} of ${MIN_FIT_POINTS} usable delays`);
+  });
+
+  if (T1App.els.chipStatus) {
+    const fit = shownFit(qubit);
+    if (!q) {
+      T1App.els.chipStatus.textContent = 'No qubit selected. Click a node to begin.';
+    } else if (fit != null) {
+      T1App.els.chipStatus.textContent = `${q.id} selected · fitted T₁ = ${formatUs(fit)}`;
+    } else {
+      const gate = fitGate(qubit);
+      T1App.els.chipStatus.textContent = `${q.id} selected · ${gate.progress}`;
+    }
+  }
+
+  if (T1App.els.sequenceNote) {
+    if (phase === 'idle') T1App.els.sequenceNote.textContent = 'Select a qubit first. Then apply X to excite it.';
+    else if (phase === 'selected') T1App.els.sequenceNote.textContent = `${q.id} starts in |0⟩. Apply X to flip it to |1⟩.`;
+    else T1App.els.sequenceNote.textContent = 'Qubit is in |1⟩. Choose a delay τ, then sample.';
+  }
+
+  if (T1App.els.sampleLog) {
+    const level = T1App.state.sampleLogLevel;
+    T1App.els.sampleLog.hidden = level < 1;
+    if (T1App.els.sampleLogWait) T1App.els.sampleLogWait.hidden = level < 1;
+    if (T1App.els.sampleLogShots) {
+      T1App.els.sampleLogShots.hidden = level < 2;
+      T1App.els.sampleLogShots.textContent = `Measuring ${SHOTS} shots. Each one comes back 1 or 0; their average is the point.`;
+    }
+    if (T1App.els.sampleLogNext) {
+      T1App.els.sampleLogNext.hidden = level < 3;
+      if (level >= 3) {
+        // Once a fit is in, sampling another delay is optional; the next
+        // move is a different qubit or a later-day re-measure of this one.
+        T1App.els.sampleLogNext.textContent = fittedT1(qubit) != null
+          ? 'You\'ve fitted this qubit. Try another qubit, or press Advance one day and re-measure this one.'
+          : 'Choose a new delay time and sample again.';
+      }
+    }
+  }
+
+  if (T1App.els.fitProgress) {
+    const show = !!(q && (phase === 'excited' || phase === 'waiting' || phase === 'sampling' || phase === 'measured'));
+    T1App.els.fitProgress.hidden = !show;
+    if (show) {
+      const gate = fitGate(qubit);
+      if (T1App.state.fitPending) {
+        T1App.els.fitProgress.textContent = `${gate.progress} · fitting the curve…`;
+      } else {
+        T1App.els.fitProgress.textContent = gate.fit != null
+          ? `${gate.progress} · fitted T₁ = ${formatUs(gate.fit)}`
+          : (gate.reason ? `${gate.progress}. ${gate.reason}` : gate.progress);
+      }
+    }
+  }
+
+  if (T1App.els.xBtn) T1App.els.xBtn.disabled = phase !== 'selected';
+  if (T1App.els.waitBlock) T1App.els.waitBlock.hidden = !(phase === 'excited' || phase === 'waiting' || phase === 'sampling' || phase === 'measured');
+  if (T1App.els.measureBlock) T1App.els.measureBlock.hidden = !(phase === 'excited' || phase === 'waiting' || phase === 'sampling' || phase === 'measured');
+  if (T1App.els.slider) {
+    T1App.els.slider.disabled = !(phase === 'excited' || phase === 'measured');
+    T1App.els.slider.value = String(wait);
+  }
+  if (T1App.els.measureBtn) {
+    T1App.els.measureBtn.disabled = !(phase === 'excited' || phase === 'measured');
+    T1App.els.measureBtn.textContent = 'Sample';
+  }
+  if (T1App.els.tChip) T1App.els.tChip.textContent = formatUs(wait);
+
+  if (T1App.els.dayChip) T1App.els.dayChip.textContent = `Day ${T1App.state.day}`;
+  if (T1App.els.dayBtn) {
+    const anyFit = QUBIT_ORDER.some((key) => fittedT1(key) != null);
+    T1App.els.dayBtn.disabled = !anyFit || phase === 'waiting' || phase === 'sampling';
+  }
+  updateDriftNote();
+
+  if (T1App.els.chipPanel) {
+    T1App.els.chipPanel.classList.toggle('panel-cue', phase === 'idle');
+  }
+  if (T1App.els.sequenceBox) {
+    T1App.els.sequenceBox.classList.toggle('panel-cue', phase === 'selected' || phase === 'excited');
+  }
+
+  updateStepRail();
+  renderFitCard();
+}
+
+function renderAll() {
+  const t1 = t1Now();
+  const { phase, wait, tView, p1, showCurve } = T1App.state;
+  const paint = (tv) => {
+    if (T1App.els.canvas) drawDecay(T1App.els.canvas, t1, wait, tv, showCurve);
+  };
+
+  if (phase === 'idle') {
+    if (T1App.els.p1Value) T1App.els.p1Value.textContent = '—';
+    if (T1App.bloch) T1App.bloch.setBlochP1(0);
+    paint(tView);
+    updateControls();
+    return;
+  }
+
+  if (phase === 'selected') {
+    if (T1App.els.p1Value) T1App.els.p1Value.textContent = '0% (|0⟩)';
+    if (T1App.bloch) T1App.bloch.setBlochP1(0);
+    paint(0);
+    updateControls();
+    return;
+  }
+
+  if (phase === 'excited') {
+    if (T1App.els.p1Value) T1App.els.p1Value.textContent = '100% (|1⟩)';
+    if (T1App.bloch) T1App.bloch.setBlochP1(1);
+    paint(0);
+    updateControls();
+    return;
+  }
+
+  // waiting, sampling, or measured
+  const p = phase === 'waiting' ? pop1(tView, t1) : pop1(wait, t1);
+  if (T1App.els.p1Value) {
+    if (phase === 'waiting') {
+      T1App.els.p1Value.textContent = 'Waiting…';
+    } else {
+      const agg = shotsMean(T1App.state.shotsShown) || T1App.state.lastTally;
+      T1App.els.p1Value.textContent = agg
+        ? `${formatPct(agg.mean)} (${agg.ones} of ${agg.count} shots)`
+        : formatPct(p1);
+    }
+  }
+  if (T1App.bloch) T1App.bloch.setBlochP1(p);
+  paint(phase === 'waiting' ? tView : wait);
+  updateControls();
+}
+
+function announce(msg) {
+  if (!msg || msg === T1App.state.lastAnnounce) return;
+  T1App.state.lastAnnounce = msg;
+  if (T1App.els.status) T1App.els.status.textContent = msg;
+}
+
+function cancelAnim() {
+  if (T1App.anim.raf) {
+    cancelAnimationFrame(T1App.anim.raf);
+    T1App.anim.raf = null;
+  }
+  T1App.anim.onDone = null;
+  clearFitHold();
+}
+
+// The fit lands a beat after the point does: the sample's individual shots
+// clear, then the curve is drawn through the averaged points with T₁ called out.
+function revealFit(q, isNewFit) {
+  T1App.state.fitPending = false;
+  clearShots();
+  if (isNewFit) revealTrueCurve();
+  renderAll();
+  const fit = fittedT1(q);
+  if (fit == null) return;
+  const lead = isNewFit
+    ? `Three delays collected, so T 1 can now be fitted: about ${formatUs(fit)}.`
+    : `Fit updated: T 1 is about ${formatUs(fit)}.`;
+  announce(`${lead} On the plot, T 1 is the delay where the fitted curve falls to 37 percent, about 1 over e, of its starting value.`);
+}
+
+function tickWait(now) {
+  const a = T1App.anim;
+  const u = Math.min(1, (now - a.start) / a.duration);
+  const eased = 1 - (1 - u) * (1 - u);
+  T1App.state.tView = a.from + (a.to - a.from) * eased;
+  renderAll();
+  if (u < 1) {
+    a.raf = requestAnimationFrame(tickWait);
+  } else {
+    a.raf = null;
+    const done = a.onDone;
+    a.onDone = null;
+    if (done) done();
+  }
+}
+
+function tickShots(now) {
+  const a = T1App.anim;
+  const u = Math.min(1, (now - a.start) / a.duration);
+  T1App.state.shotsShown = Math.max(1, Math.round(u * T1App.state.shots.length));
+  renderAll();
+  if (u < 1) {
+    a.raf = requestAnimationFrame(tickShots);
+  } else {
+    a.raf = null;
+    const done = a.onDone;
+    a.onDone = null;
+    if (done) done();
+  }
+}
+
+function selectQubit(id) {
+  cancelAnim();
+  clearShots();
+  const prevWait = T1App.state.wait;
+  T1App.state.qubit = id;
+  T1App.state.phase = 'selected';
+  T1App.state.tView = 0;
+  T1App.state.p1 = 0;
+  T1App.state.wait = prevWait || T_DEFAULT;
+  T1App.state.sampleLogLevel = 0;
+  renderAll();
+  const q = QUBITS[id];
+  announce(`Selected ${q.id}. Its T 1 is not known yet. Apply X to excite it.`);
+}
+
+function applyX() {
+  if (T1App.state.phase !== 'selected') return;
+  cancelAnim();
+  clearShots();
+  T1App.state.phase = 'excited';
+  T1App.state.tView = 0;
+  T1App.state.p1 = 1;
+  T1App.state.sampleLogLevel = 0;
+  renderAll();
+  announce(`Applied X on ${QUBITS[T1App.state.qubit].id}. The qubit is in state 1. Choose a delay, then sample.`);
+  if (T1App.els.slider) T1App.els.slider.focus();
+}
+
+function setWait(t) {
+  T1App.state.wait = t;
+  if (T1App.state.phase === 'measured') {
+    // Changing wait after a measurement requires measuring again
+    T1App.state.phase = 'excited';
+    T1App.state.p1 = 1;
+    T1App.state.tView = 0;
+    clearShots();
+    clearFitHold();
+  }
+  if (T1App.els.slider) T1App.els.slider.value = String(t);
+  renderAll();
+}
+
+function measure() {
+  if (T1App.state.phase !== 'excited' && T1App.state.phase !== 'measured') return;
+  cancelAnim();
+  const t1 = t1Now();
+  const wait = T1App.state.wait;
+  const q = T1App.state.qubit;
+  const p = pop1(wait, t1);
+
+  // Every shot is its own excite-wait-measure cycle, so each returns 1 or 0.
+  const shots = [];
+  for (let i = 0; i < SHOTS; i++) {
+    shots.push({
+      v: Math.random() < p ? 1 : 0,
+      jx: Math.random() * 2 - 1,
+      jy: Math.random() * 2 - 1
+    });
+  }
+  T1App.state.shots = shots;
+  T1App.state.shotWait = wait;
+  T1App.state.shotsShown = 0;
+  T1App.state.phase = 'waiting';
+  T1App.state.tView = 0;
+  T1App.state.sampleLogLevel = 1;
+  renderAll();
+
+  const record = () => {
+    const agg = shotsMean(shots.length);
+    const before = fittedT1(q) != null;
+    const list = T1App.state.samples[q];
+    const at = list.findIndex((s) => Math.abs(s.t - wait) < 0.05);
+    T1App.state.lastWasResample = at >= 0;
+    if (at >= 0) list.splice(at, 1);
+    list.push({ t: wait, p: agg.mean });
+    T1App.state.phase = 'measured';
+    T1App.state.tView = wait;
+    T1App.state.p1 = agg.mean;
+    T1App.state.shotsShown = shots.length;
+    T1App.state.lastTally = agg;
+    T1App.state.sampleLogLevel = 3;
+
+    const fit = fittedT1(q);
+    const isNewFit = fit != null && !before;
+    // Hold the fit back so the point is seen landing before the curve appears.
+    const holdFit = fit != null && !T1App.state.reducedMotion;
+    T1App.state.fitPending = holdFit;
+    renderAll();
+
+    const gate = fitGate(q);
+    let msg = `Sampled ${QUBITS[q].id} after ${formatUs(wait)}. ${agg.ones} of ${agg.count} shots came back 1, so sampled P of 1 is ${formatPct(agg.mean)}.`;
+    if (fit == null) msg += ` ${gate.progress}. ${gate.reason}`;
+    announce(msg);
+
+    if (fit == null) return;
+    if (!holdFit) {
+      revealFit(q, isNewFit);
+      return;
+    }
+    T1App.state.fitHold = window.setTimeout(() => {
+      T1App.state.fitHold = null;
+      revealFit(q, isNewFit);
+    }, FIT_HOLD_MS);
+  };
+
+  const collectShots = () => {
+    T1App.state.phase = 'sampling';
+    T1App.state.shotsShown = 0;
+    T1App.state.sampleLogLevel = 2;
+    renderAll();
+    T1App.anim.start = performance.now();
+    T1App.anim.duration = 1100;
+    T1App.anim.onDone = record;
+    T1App.anim.raf = requestAnimationFrame(tickShots);
+  };
+
+  if (T1App.state.reducedMotion) {
+    record();
+    return;
+  }
+
+  T1App.anim.from = 0;
+  T1App.anim.to = wait;
+  T1App.anim.start = performance.now();
+  T1App.anim.duration = waitAnimDuration(wait, t1);
+  T1App.anim.onDone = collectShots;
+  T1App.anim.raf = requestAnimationFrame(tickWait);
+}
+
+// Let a day of hardware drift pass: every qubit's true T₁ takes a modest
+// random step, bounded so a short qubit stays short, and the collected
+// points are cleared because they describe yesterday's device.
+function advanceDay() {
+  if (T1App.els.dayBtn && T1App.els.dayBtn.disabled) return;
+  cancelAnim();
+  clearShots();
+  const day = T1App.state.day;
+  QUBIT_ORDER.forEach((q) => {
+    const fit = fittedT1(q);
+    if (fit != null) {
+      T1App.state.prevFits[q] = { t1: fit, day };
+      T1App.state.fitHistory[q].push({ day, t1: fit });
+    }
+    const step = 0.78 + Math.random() * 0.44;
+    T1App.state.drift[q] = Math.min(1.5, Math.max(0.6, T1App.state.drift[q] * step));
+    T1App.state.samples[q] = [];
+  });
+  T1App.state.lastTally = null;
+  T1App.state.lastWasResample = false;
+  // Yesterday's reveal must not carry over: today's T₁ has to be earned again.
+  hideTrueCurve();
+  T1App.state.day = day + 1;
+  T1App.state.phase = T1App.state.qubit ? 'selected' : 'idle';
+  T1App.state.tView = 0;
+  T1App.state.p1 = 0;
+  T1App.state.sampleLogLevel = 0;
+  renderAll();
+
+  const q = T1App.state.qubit;
+  const stale = q ? T1App.state.prevFits[q] : null;
+  let msg = `Day ${T1App.state.day}. Every qubit's T 1 has drifted overnight, so the points you collected no longer describe the device.`;
+  if (stale) {
+    msg += ` Your day ${stale.day} fit for ${QUBITS[q].id} was ${formatUs(stale.t1)} and is now out of date. Apply X, choose a delay, and sample to measure today's value.`;
+  } else {
+    msg += ' Select a qubit and run the experiment again.';
+  }
+  announce(msg);
+
+  // The day button disables itself once the fits are cleared, so hand focus
+  // to whatever the student needs to press next.
+  if (q && T1App.els.xBtn) T1App.els.xBtn.focus();
+  else {
+    const first = document.getElementById('node-' + QUBIT_ORDER[0]);
+    if (first) first.focus();
+  }
+}
+
+function resetWidget() {
+  cancelAnim();
+  T1App.state.qubit = null;
+  T1App.state.phase = 'idle';
+  T1App.state.wait = T_DEFAULT;
+  T1App.state.tView = 0;
+  T1App.state.p1 = 0;
+  T1App.state.samples = { A: [], B: [], C: [] };
+  T1App.state.day = 1;
+  T1App.state.drift = { A: 1, B: 1, C: 1 };
+  T1App.state.prevFits = { A: null, B: null, C: null };
+  T1App.state.fitHistory = { A: [], B: [], C: [] };
+  T1App.state.fitHowSeen = false;
+  T1App.state.lastTally = null;
+  T1App.state.lastWasResample = false;
+  T1App.state.sampleLogLevel = 0;
+  clearShots();
+  hideTrueCurve();
+  document.querySelectorAll('input[name="lab-diagnose"]').forEach((el) => { el.checked = false; });
+  if (T1App.els.feedback) {
+    T1App.els.feedback.hidden = true;
+    T1App.els.feedback.textContent = '';
+    T1App.els.feedback.className = 'diagnose-feedback';
+  }
+  renderAll();
+  announce('Reset. Select a qubit on the device to begin.');
+}
+
+function onLabDiagnose(value) {
+  const left = formatPct(pop1(LAB_CIRCUIT_US, LAB_LONG_T1));
+  const fb = T1App.els.feedback;
+  if (!fb) return;
+  fb.hidden = false;
+  if (value === 'long') {
+    fb.className = 'diagnose-feedback correct';
+    fb.textContent = `Correct. 50 µs is well inside the long qubit's 297.6 µs T₁, so about ${left} of the excitation is still there when the circuit ends. On the short qubit the same 50 µs is far longer than 3.4 µs, and essentially nothing is left.`;
+    announce('Lab check correct: run on the long T1 qubit.');
+  } else if (value === 'short') {
+    fb.className = 'diagnose-feedback incorrect';
+    fb.textContent = `On the short qubit 50 µs is far longer than 3.4 µs, so the excitation is gone long before the circuit ends. The long qubit's 297.6 µs T₁ covers the same 50 µs and keeps roughly ${left}.`;
+    announce('Lab check: the short T1 qubit cannot hold a 50 microsecond circuit.');
+  } else {
+    fb.className = 'diagnose-feedback incorrect';
+    fb.textContent = `50 µs is far longer than 3.4 µs and well inside 297.6 µs. Only the long-T₁ qubit can hold the state that long, which is exactly why the choice matters.`;
+    announce('Lab check: the two qubits are not equally safe for a 50 microsecond circuit.');
+  }
+}
+
+function onKeyBloch(e) {
+  if (!T1App.bloch) return;
+  const step = 0.08;
+  const cam = T1App.bloch.camera;
+  const controls = T1App.bloch.controls;
+  let handled = true;
+  switch (e.key) {
+    case 'ArrowLeft':
+      cam.position.applyAxisAngle(new THREE.Vector3(0, 0, 1), step);
+      break;
+    case 'ArrowRight':
+      cam.position.applyAxisAngle(new THREE.Vector3(0, 0, 1), -step);
+      break;
+    case 'ArrowUp':
+      cam.position.z += 0.15;
+      break;
+    case 'ArrowDown':
+      cam.position.z -= 0.15;
+      break;
+    default:
+      handled = false;
+  }
+  if (handled) {
+    e.preventDefault();
+    cam.lookAt(controls.target);
+    T1App.bloch.renderFrame();
+  }
+}
+
+function onQubitKey(e, id) {
+  const idx = QUBIT_ORDER.indexOf(id);
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    selectQubit(id);
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = QUBIT_ORDER[(idx + 1) % QUBIT_ORDER.length];
+    document.getElementById('node-' + next).focus();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = QUBIT_ORDER[(idx - 1 + QUBIT_ORDER.length) % QUBIT_ORDER.length];
+    document.getElementById('node-' + prev).focus();
+  }
+}
+
+function init() {
+  T1App.els.tChip = document.getElementById('t-chip');
+  T1App.els.slider = document.getElementById('duration-slider');
+  T1App.els.xBtn = document.getElementById('x-btn');
+  T1App.els.measureBtn = document.getElementById('measure-btn');
+  T1App.els.resetBtn = document.getElementById('reset-btn');
+  T1App.els.waitBlock = document.getElementById('wait-block');
+  T1App.els.measureBlock = document.getElementById('measure-block');
+  T1App.els.fitProgress = document.getElementById('fit-progress');
+  T1App.els.sampleLog = document.getElementById('sample-log');
+  T1App.els.sampleLogWait = document.getElementById('sample-log-wait');
+  T1App.els.sampleLogShots = document.getElementById('sample-log-shots');
+  T1App.els.sampleLogNext = document.getElementById('sample-log-next');
+  T1App.els.chipStatus = document.getElementById('chip-status');
+  T1App.els.chipPanel = document.getElementById('chip-panel');
+  T1App.els.sequenceBox = document.getElementById('sequence-box');
+  T1App.els.curveToggle = document.getElementById('curve-toggle');
+  T1App.els.sequenceNote = document.getElementById('sequence-note');
+  T1App.els.dayBtn = document.getElementById('day-btn');
+  T1App.els.dayChip = document.getElementById('day-chip');
+  T1App.els.driftNote = document.getElementById('drift-note');
+  T1App.els.blochHost = document.getElementById('bloch-host');
+  T1App.els.canvas = document.getElementById('decay-canvas');
+  T1App.els.p1Value = document.getElementById('p1-value');
+  T1App.els.fitCard = document.getElementById('fit-card');
+  T1App.els.fitCardLabel = document.getElementById('fit-card-label');
+  T1App.els.fitCardValue = document.getElementById('fit-card-value');
+  T1App.els.fitHistoryWrap = document.getElementById('fit-history-wrap');
+  T1App.els.fitHistory = document.getElementById('fit-history');
+  T1App.els.fitHow = document.getElementById('fit-how');
+  T1App.els.fitCardPoints = document.getElementById('fit-card-points');
+  T1App.els.fitCardCross = document.getElementById('fit-card-cross');
+  T1App.els.fitCardNote = document.getElementById('fit-card-note');
+  T1App.els.feedback = document.getElementById('diagnose-feedback');
+  T1App.els.status = document.getElementById('status-announce');
+
+  if (T1App.els.blochHost) {
+    try {
+      T1App.bloch = initBloch(T1App.els.blochHost);
+      T1App.els.blochHost.addEventListener('keydown', onKeyBloch);
+    } catch (err) {
+      // No WebGL: keep the plot, readouts, and controls usable without the 3D view.
+      T1App.bloch = null;
+      T1App.els.blochHost.removeAttribute('tabindex');
+      T1App.els.blochHost.removeAttribute('role');
+      T1App.els.blochHost.innerHTML = '<p class="bloch-fallback">The 3D Bloch sphere needs WebGL, which this browser did not provide. The decay curve and readouts below still work.</p>';
+    }
+  }
+
+  document.querySelectorAll('.qubit-node').forEach((node) => {
+    const id = node.dataset.qubit;
+    node.addEventListener('click', () => selectQubit(id));
+    node.addEventListener('keydown', (e) => onQubitKey(e, id));
+  });
+
+  T1App.els.xBtn.addEventListener('click', () => applyX());
+  T1App.els.measureBtn.addEventListener('click', () => measure());
+  T1App.els.resetBtn.addEventListener('click', () => resetWidget());
+  if (T1App.els.dayBtn) T1App.els.dayBtn.addEventListener('click', () => advanceDay());
+
+  T1App.els.slider.addEventListener('input', (e) => {
+    setWait(parseFloat(e.target.value));
+  });
+
+  if (T1App.els.curveToggle) {
+    T1App.els.curveToggle.addEventListener('change', (e) => {
+      T1App.state.showCurve = e.target.checked;
+      renderAll();
+      announce(e.target.checked
+        ? 'True decay curve revealed.'
+        : 'True decay curve hidden. Only your sampled points remain.');
+    });
+  }
+
+  document.querySelectorAll('input[name="lab-diagnose"]').forEach((el) => {
+    el.addEventListener('change', () => onLabDiagnose(el.value));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      resetWidget();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (T1App.bloch) T1App.bloch.resize();
+    renderAll();
+  });
+
+  renderAll();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
