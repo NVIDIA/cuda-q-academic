@@ -56,7 +56,7 @@ Widgets follow a typical superconducting-qubit bring-up order. Live items also a
 | 3   | Resonator Flux Spectroscopy | *Coming soon* | —                                                                                                    |
 | 4   | Qubit Spectroscopy          | Live          | [Open →](https://nvidia.github.io/cuda-q-academic/interactive_widgets/qubit-spectroscopy-intro.html) |
 | 5   | Amplitude Rabi              | Live          | [Open →](https://nvidia.github.io/cuda-q-academic/interactive_widgets/rabi-oscillations.html)        |
-| 6   | T₁ (Energy Relaxation)      | *Coming soon* | —                                                                                                    |
+| 6   | T₁ (Energy Relaxation)      | Live | [Open ](https://nvidia.github.io/cuda-q-academic/interactive_widgets/t1-energy-lifetime.html)                                                                            |
 | 7   | Ramsey                      | *Coming soon* | —                                                                                                    |
 | 8   | Hahn Echo                   | *Coming soon* | —                                                                                                    |
 | 9   | Single-Shot Readout         | *Coming soon* | —                                                                                                    |
