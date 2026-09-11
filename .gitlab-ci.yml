@@ -407,9 +407,6 @@ test:notebooks:cpu:
       dynamics101|dynamics101/Solutions|*.ipynb
       ai-for-quantum|ai-for-quantum/solutions|*.ipynb
   rules:
-    # TEMPORARY (MR !56 debugging): CPU job disabled while iterating on the
-    # 4 failing GPU notebooks. Remove this line to re-enable.
-    - when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
       changes:
         paths:
@@ -438,18 +435,11 @@ test:notebooks:gpu:
   extends: .test:notebooks
   variables:
     REQUIRE_GPU: "true"
-    # TEMPORARY (MR !56 debugging): run ONLY the 3 notebooks whose kernel died
-    # in pipeline 67279501 so the job finishes quickly. qmmm_solutions.ipynb
-    # (a 1800s timeout, not a crash) is excluded for now. Restore the full
-    # list (uncomment below) before merging.
     NOTEBOOK_MODULES: |
-      simulation|simulation/solutions|01_simulation101_solutions.ipynb
-      quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|0[12]_*_solutions.ipynb
-    # NOTEBOOK_MODULES: |
-    #   chemistry-simulations|chemistry-simulations/solutions|*.ipynb
-    #   qec101|qec101/Solutions|*.ipynb
-    #   simulation|simulation/solutions|*.ipynb
-    #   quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
+      chemistry-simulations|chemistry-simulations/solutions|*.ipynb
+      qec101|qec101/Solutions|*.ipynb
+      simulation|simulation/solutions|*.ipynb
+      quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
       changes:
