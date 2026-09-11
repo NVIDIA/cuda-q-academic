@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">Two bending data bands compared with three candidate decision boundaries</title>
+  <desc id="desc">Three panels repeat the same irregular blue and orange wave-like data bands. A straight line is marked incorrect because it crosses both classes. Two nonlinear boundaries follow the channel between the bands, with the smoother curve presented as the clearer model of the broad pattern.</desc>
+  <defs>
+    <style>
+      .heading{font:700 24px Arial,Helvetica,sans-serif;fill:#202020}.subheading{font:15px Arial,Helvetica,sans-serif;fill:#585858}
+      .panel-title{font:700 16px Arial,Helvetica,sans-serif;fill:#202020}.small{font:12px Arial,Helvetica,sans-serif;fill:#686868}
+      .bad{font:700 13px Arial,Helvetica,sans-serif;fill:#b3261e}.okay{font:700 13px Arial,Helvetica,sans-serif;fill:#8a5a00}.good{font:700 13px Arial,Helvetica,sans-serif;fill:#315600}
+    </style>
+    <g id="scatter-points" stroke="#fff" stroke-width="1.7">
+      <!-- Class A: a noisy upper wave. -->
+      <g fill="#4c93df">
+        <circle cx="42" cy="122" r="7"/><circle cx="67" cy="151" r="7"/><circle cx="91" cy="171" r="7"/>
+        <circle cx="118" cy="183" r="7"/><circle cx="143" cy="165" r="7"/><circle cx="169" cy="146" r="7"/>
+        <circle cx="194" cy="109" r="7"/><circle cx="219" cy="89" r="7"/><circle cx="244" cy="70" r="7"/>
+        <circle cx="269" cy="77" r="7"/><circle cx="296" cy="94" r="7"/><circle cx="320" cy="120" r="7"/>
+      </g>
+      <!-- Class B: a noisy lower wave that bends with Class A. -->
+      <g fill="#ed9748">
+        <circle cx="48" cy="194" r="7"/><circle cx="72" cy="221" r="7"/><circle cx="98" cy="236" r="7"/>
+        <circle cx="123" cy="247" r="7"/><circle cx="149" cy="230" r="7"/><circle cx="174" cy="205" r="7"/>
+        <circle cx="201" cy="179" r="7"/><circle cx="225" cy="154" r="7"/><circle cx="250" cy="134" r="7"/>
+        <circle cx="274" cy="140" r="7"/><circle cx="300" cy="158" r="7"/><circle cx="326" cy="184" r="7"/>
+      </g>
+    </g>
+    <g id="red-x">
+      <circle cx="0" cy="0" r="18" fill="#c62828"/>
+      <path d="M-8-8L8 8M8-8L-8 8" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g id="green-check">
+      <circle cx="0" cy="0" r="18" fill="#76b900"/>
+      <path d="M-9 0L-3 7L10-8" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </defs>
+
+  <rect width="1200" height="420" rx="16" fill="#f7f7f7"/>
+  <rect width="1200" height="7" rx="3.5" fill="#76b900"/>
+  <text x="30" y="43" class="heading">Boundary shape matters when the classes bend through feature space</text>
+  <text x="30" y="67" class="subheading">The two noisy bands curve together: a straight line crosses them, while nonlinear boundaries can follow the channel between them.</text>
+
+  <!-- Linear boundary fails. -->
+  <g transform="translate(30,82)">
+    <rect width="354" height="296" rx="12" fill="#fff" stroke="#ccc"/>
+    <text x="18" y="30" class="panel-title">Straight boundary</text>
+    <rect x="14" y="41" width="326" height="220" rx="7" fill="#f3f3f3" stroke="#ddd"/>
+    <path d="M30 206L330 115" fill="none" stroke="#202020" stroke-width="3.5"/>
+    <use href="#scatter-points"/>
+    <use href="#red-x" transform="translate(315,64)"/>
+    <text x="177" y="284" class="bad" text-anchor="middle">Crosses both bending classes</text>
+  </g>
+
+  <!-- Overly flexible curve succeeds. -->
+  <g transform="translate(423,82)">
+    <rect width="354" height="296" rx="12" fill="#fff" stroke="#d6bd83"/>
+    <text x="18" y="30" class="panel-title">Overly flexible curve</text>
+    <rect x="14" y="41" width="326" height="220" rx="7" fill="#f3f3f3" stroke="#ddd"/>
+    <path d="M30 158C50 140 60 202 78 188S96 220 115 211S135 180 154 197S174 155 193 149S212 135 231 116S249 88 267 113S286 115 304 132S323 137 335 158" fill="none" stroke="#d28b16" stroke-width="3.5"/>
+    <use href="#scatter-points"/>
+    <use href="#green-check" transform="translate(315,64)"/>
+    <text x="177" y="284" class="okay" text-anchor="middle">Works, but reacts to small point-to-point changes</text>
+  </g>
+
+  <!-- Smooth curve succeeds with the simpler trend. -->
+  <g transform="translate(816,82)">
+    <rect width="354" height="296" rx="12" fill="#fff" stroke="#76b900" stroke-width="2"/>
+    <text x="18" y="30" class="panel-title">Smooth nonlinear boundary</text>
+    <rect x="14" y="41" width="326" height="220" rx="7" fill="#f3f3f3" stroke="#ddd"/>
+    <path d="M30 150C75 165 82 215 122 216C165 218 175 152 218 119C257 88 286 109 335 156" fill="none" stroke="#76b900" stroke-width="4"/>
+    <use href="#scatter-points"/>
+    <use href="#green-check" transform="translate(315,64)"/>
+    <text x="177" y="284" class="good" text-anchor="middle">Follows the broad trend with a smoother rule</text>
+  </g>
+
+  <g transform="translate(31,402)">
+    <circle cx="6" cy="0" r="6" fill="#4c93df"/><text x="19" y="4" class="small">Class A</text>
+    <circle cx="94" cy="0" r="6" fill="#ed9748"/><text x="107" y="4" class="small">Class B</text>
+    <text x="190" y="4" class="small">The same observed data appear in all three panels.</text>
+  </g>
+</svg>

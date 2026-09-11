@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="430" viewBox="0 0 1500 430" role="img" aria-labelledby="title desc">
+  <title id="title">One epoch grouped with different batch sizes</title>
+  <desc id="desc">A clean comparison of processing N examples one at a time or in mini-batches. Each row represents one training round containing an HQNN pass, loss, gradient, and optimizer update.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="135%">
+      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      .title { font: 700 34px Arial, sans-serif; fill: #1a1a1a; }
+      .subtitle { font: 17px Arial, sans-serif; fill: #555555; }
+      .panel-title { font: 700 20px Arial, sans-serif; letter-spacing: 0.5px; }
+      .badge { font: 700 15px Arial, sans-serif; }
+      .round { font: 700 14px Arial, sans-serif; fill: #555555; letter-spacing: 0.8px; }
+      .label { font: 700 15px Arial, sans-serif; fill: #1a1a1a; }
+      .label-white { font: 700 15px Arial, sans-serif; fill: #ffffff; }
+      .chevron { font: 700 25px Arial, sans-serif; fill: #8b8b8b; }
+      .chevron-green { font: 700 25px Arial, sans-serif; fill: #76b900; }
+      .caption { font: 15px Arial, sans-serif; fill: #555555; }
+      .footer { font: 700 16px Arial, sans-serif; fill: #1a1a1a; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="430" fill="#f4f6f6"/>
+  <text x="750" y="48" text-anchor="middle" class="title">One epoch, grouped in different ways</text>
+  <text x="750" y="79" text-anchor="middle" class="subtitle">Every row is one training round and one optimizer update</text>
+
+  <!-- Batch size 1 -->
+  <rect x="40" y="108" width="690" height="265" rx="18" fill="#ffffff" stroke="#d7dadd" stroke-width="2" filter="url(#shadow)"/>
+  <path d="M58 108 H712 A18 18 0 0 1 730 126 V168 H40 V126 A18 18 0 0 1 58 108 Z" fill="#242424"/>
+  <text x="72" y="147" class="panel-title" fill="#ffffff">BATCH SIZE = 1</text>
+  <rect x="585" y="125" width="113" height="30" rx="15" fill="#ffffff"/>
+  <text x="641.5" y="146" text-anchor="middle" class="badge" fill="#242424">N rounds</text>
+
+  <text x="66" y="218" class="round">ROUND 1</text>
+  <rect x="155" y="190" width="58" height="44" rx="22" fill="#eceff1"/>
+  <text x="184" y="218" text-anchor="middle" class="label">x₁</text>
+  <text x="229" y="220" text-anchor="middle" class="chevron">›</text>
+  <rect x="246" y="190" width="92" height="44" rx="9" fill="#242424"/>
+  <text x="292" y="218" text-anchor="middle" class="label-white">HQNN</text>
+  <text x="354" y="220" text-anchor="middle" class="chevron">›</text>
+  <rect x="371" y="190" width="68" height="44" rx="9" fill="#ffffff" stroke="#9ca3a8" stroke-width="2"/>
+  <text x="405" y="218" text-anchor="middle" class="label">Loss</text>
+  <text x="455" y="220" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="472" y="190" width="98" height="44" rx="9" fill="#eef7df" stroke="#76b900" stroke-width="2"/>
+  <text x="521" y="218" text-anchor="middle" class="label">Gradient</text>
+  <text x="586" y="220" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="603" y="190" width="96" height="44" rx="9" fill="#76b900"/>
+  <text x="651" y="218" text-anchor="middle" class="label">Update</text>
+
+  <text x="66" y="282" class="round">ROUND 2</text>
+  <rect x="155" y="254" width="58" height="44" rx="22" fill="#eceff1"/>
+  <text x="184" y="282" text-anchor="middle" class="label">x₂</text>
+  <text x="229" y="284" text-anchor="middle" class="chevron">›</text>
+  <rect x="246" y="254" width="92" height="44" rx="9" fill="#242424"/>
+  <text x="292" y="282" text-anchor="middle" class="label-white">HQNN</text>
+  <text x="354" y="284" text-anchor="middle" class="chevron">›</text>
+  <rect x="371" y="254" width="68" height="44" rx="9" fill="#ffffff" stroke="#9ca3a8" stroke-width="2"/>
+  <text x="405" y="282" text-anchor="middle" class="label">Loss</text>
+  <text x="455" y="284" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="472" y="254" width="98" height="44" rx="9" fill="#eef7df" stroke="#76b900" stroke-width="2"/>
+  <text x="521" y="282" text-anchor="middle" class="label">Gradient</text>
+  <text x="586" y="284" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="603" y="254" width="96" height="44" rx="9" fill="#76b900"/>
+  <text x="651" y="282" text-anchor="middle" class="label">Update</text>
+
+  <text x="66" y="340" class="caption">N examples are processed in N short rounds.</text>
+
+  <!-- Mini-batches -->
+  <rect x="770" y="108" width="690" height="265" rx="18" fill="#ffffff" stroke="#76b900" stroke-width="2.5" filter="url(#shadow)"/>
+  <path d="M788 108 H1442 A18 18 0 0 1 1460 126 V168 H770 V126 A18 18 0 0 1 788 108 Z" fill="#76b900"/>
+  <text x="802" y="147" class="panel-title" fill="#1a1a1a">MINI-BATCH SIZE = B</text>
+  <rect x="1282" y="125" width="145" height="30" rx="15" fill="#242424"/>
+  <text x="1354.5" y="146" text-anchor="middle" class="badge" fill="#ffffff">⌈N / B⌉ rounds</text>
+
+  <text x="796" y="218" class="round">ROUND 1</text>
+  <rect x="885" y="190" width="112" height="44" rx="22" fill="#eef7df" stroke="#76b900" stroke-width="2"/>
+  <text x="941" y="218" text-anchor="middle" class="label">x₁ … xᴮ</text>
+  <text x="1013" y="220" text-anchor="middle" class="chevron">›</text>
+  <rect x="1030" y="190" width="88" height="44" rx="9" fill="#242424"/>
+  <text x="1074" y="218" text-anchor="middle" class="label-white">HQNN</text>
+  <text x="1134" y="220" text-anchor="middle" class="chevron">›</text>
+  <rect x="1151" y="190" width="66" height="44" rx="9" fill="#ffffff" stroke="#9ca3a8" stroke-width="2"/>
+  <text x="1184" y="218" text-anchor="middle" class="label">Loss</text>
+  <text x="1233" y="220" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="1250" y="190" width="92" height="44" rx="9" fill="#eef7df" stroke="#76b900" stroke-width="2"/>
+  <text x="1296" y="218" text-anchor="middle" class="label">Gradient</text>
+  <text x="1358" y="220" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="1375" y="190" width="64" height="44" rx="9" fill="#76b900"/>
+  <text x="1407" y="218" text-anchor="middle" class="label">Update</text>
+
+  <text x="796" y="282" class="round">ROUND 2</text>
+  <rect x="885" y="254" width="112" height="44" rx="22" fill="#eef7df" stroke="#76b900" stroke-width="2"/>
+  <text x="941" y="282" text-anchor="middle" class="label">next B</text>
+  <text x="1013" y="284" text-anchor="middle" class="chevron">›</text>
+  <rect x="1030" y="254" width="88" height="44" rx="9" fill="#242424"/>
+  <text x="1074" y="282" text-anchor="middle" class="label-white">HQNN</text>
+  <text x="1134" y="284" text-anchor="middle" class="chevron">›</text>
+  <rect x="1151" y="254" width="66" height="44" rx="9" fill="#ffffff" stroke="#9ca3a8" stroke-width="2"/>
+  <text x="1184" y="282" text-anchor="middle" class="label">Loss</text>
+  <text x="1233" y="284" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="1250" y="254" width="92" height="44" rx="9" fill="#eef7df" stroke="#76b900" stroke-width="2"/>
+  <text x="1296" y="282" text-anchor="middle" class="label">Gradient</text>
+  <text x="1358" y="284" text-anchor="middle" class="chevron-green">›</text>
+  <rect x="1375" y="254" width="64" height="44" rx="9" fill="#76b900"/>
+  <text x="1407" y="282" text-anchor="middle" class="label">Update</text>
+
+  <text x="796" y="340" class="caption">N examples are processed in fewer, larger rounds.</text>
+
+  <rect x="365" y="391" width="770" height="30" rx="15" fill="#e7f2d5"/>
+  <text x="750" y="412" text-anchor="middle" class="footer">Same epoch • same N examples • different number of gradient and update rounds</text>
+</svg>

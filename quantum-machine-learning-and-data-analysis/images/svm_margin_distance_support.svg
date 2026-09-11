@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title desc">
+  <title id="title">SVM margin and support vectors</title>
+  <desc id="desc">A minimal two-dimensional SVM diagram. A solid vertical decision boundary sits midway between two dashed green margin lines. Sparse blue and orange training points lie on opposite sides. Exactly one point from each class touches a margin and is ringed as a support vector. A double-headed arrow shows the full margin width, two m.</desc>
+  <defs>
+    <marker id="arrow-start" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M10 0L0 5L10 10Z" fill="#76B900"/>
+    </marker>
+    <marker id="arrow-end" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#76B900"/>
+    </marker>
+    <style>
+      .label { font: 600 17px Arial, Helvetica, sans-serif; fill: #1F2937; }
+      .measure { font: 700 18px Arial, Helvetica, sans-serif; fill: #4F7D00; }
+      .point { stroke: #FFFFFF; stroke-width: 3; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="440" fill="#FAFBFC"/>
+  <rect x="34" y="28" width="1132" height="384" rx="18" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="2"/>
+
+  <!-- Margin planes and separating hyperplane -->
+  <line x1="480" y1="58" x2="480" y2="382" stroke="#76B900" stroke-width="3" stroke-dasharray="10 10"/>
+  <line x1="720" y1="58" x2="720" y2="382" stroke="#76B900" stroke-width="3" stroke-dasharray="10 10"/>
+  <line x1="600" y1="52" x2="600" y2="388" stroke="#1F2937" stroke-width="4"/>
+  <text x="617" y="80" class="label">g(x) = 0</text>
+
+  <!-- Blue class -->
+  <g fill="#3B82F6" class="point">
+    <circle cx="150" cy="126" r="12"/>
+    <circle cx="252" cy="232" r="12"/>
+    <circle cx="340" cy="112" r="12"/>
+    <circle cx="374" cy="314" r="12"/>
+    <circle cx="480" cy="184" r="12"/>
+  </g>
+
+  <!-- Orange class -->
+  <g fill="#F59E0B" class="point">
+    <circle cx="720" cy="258" r="12"/>
+    <circle cx="822" cy="126" r="12"/>
+    <circle cx="864" cy="326" r="12"/>
+    <circle cx="954" cy="218" r="12"/>
+    <circle cx="1052" cy="112" r="12"/>
+  </g>
+
+  <!-- The closest point from each class is a support vector -->
+  <circle cx="480" cy="184" r="21" fill="none" stroke="#76B900" stroke-width="4"/>
+  <circle cx="720" cy="258" r="21" fill="none" stroke="#76B900" stroke-width="4"/>
+
+  <path d="M425 137L468 171" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+  <text x="305" y="133" class="label">support vector</text>
+
+  <path d="M732 245L776 210" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+  <text x="785" y="207" class="label">support vector</text>
+
+  <!-- Full margin width -->
+  <line x1="486" y1="354" x2="714" y2="354" stroke="#76B900" stroke-width="4" stroke-linecap="round" marker-start="url(#arrow-start)" marker-end="url(#arrow-end)"/>
+  <text x="600" y="338" class="measure" text-anchor="middle">margin width 2m</text>
+</svg>

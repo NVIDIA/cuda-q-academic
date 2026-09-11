@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">Hard-margin and soft-margin support vector machines</title>
+  <desc id="desc">Two matching classification plots compare margin behavior. In the hard-margin plot, blue and orange points remain outside or touch the dashed margins. In the soft-margin plot, one blue point lies inside the margin and one orange point lies on the wrong side of the decision boundary; both violations are highlighted in green and penalized by C.</desc>
+
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="7" flood-color="#1F2937" flood-opacity="0.08"/>
+    </filter>
+    <clipPath id="leftPlot"><rect x="58" y="77" width="504" height="286" rx="10"/></clipPath>
+    <clipPath id="rightPlot"><rect x="638" y="77" width="504" height="286" rx="10"/></clipPath>
+    <style>
+      .panel-title { font: 700 20px Arial, Helvetica, sans-serif; fill: #1F2937; }
+      .note { font: 600 13px Arial, Helvetica, sans-serif; fill: #4B5563; }
+      .cue { font: 600 14px Arial, Helvetica, sans-serif; fill: #4B5563; }
+      .boundary { stroke: #1F2937; stroke-width: 4; }
+      .margin { stroke: #76B900; stroke-width: 2.5; stroke-dasharray: 8 7; }
+      .blue { fill: #3B82F6; }
+      .orange { fill: #F59E0B; }
+      .point { stroke: #FFFFFF; stroke-width: 2.5; }
+      .leader { fill: none; stroke: #76B900; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="430" fill="#F4F7F9"/>
+
+  <!-- Hard margin -->
+  <g filter="url(#shadow)">
+    <rect x="38" y="24" width="544" height="382" rx="18" fill="#FFFFFF"/>
+  </g>
+  <circle cx="62" cy="52" r="5" fill="#76B900"/>
+  <text x="76" y="59" class="panel-title">Hard margin</text>
+
+  <rect x="58" y="77" width="504" height="286" rx="10" fill="#F8FAFC" stroke="#E5E7EB"/>
+  <g clip-path="url(#leftPlot)">
+    <rect x="58" y="77" width="202" height="286" fill="#3B82F6" opacity="0.055"/>
+    <rect x="360" y="77" width="202" height="286" fill="#F59E0B" opacity="0.065"/>
+    <line x1="310" y1="77" x2="310" y2="363" class="boundary"/>
+    <line x1="260" y1="77" x2="260" y2="363" class="margin"/>
+    <line x1="360" y1="77" x2="360" y2="363" class="margin"/>
+
+    <g class="blue point">
+      <circle cx="107" cy="296" r="10"/><circle cx="139" cy="179" r="10"/>
+      <circle cx="190" cy="252" r="10"/><circle cx="218" cy="126" r="10"/>
+      <circle cx="260" cy="203" r="11"/>
+    </g>
+    <g class="orange point">
+      <circle cx="360" cy="270" r="11"/>
+      <circle cx="402" cy="153" r="10"/><circle cx="448" cy="301" r="10"/>
+      <circle cx="489" cy="216" r="10"/><circle cx="525" cy="119" r="10"/>
+    </g>
+  </g>
+
+  <!-- Soft margin: the plot geometry matches the hard-margin panel. -->
+  <g filter="url(#shadow)">
+    <rect x="618" y="24" width="544" height="382" rx="18" fill="#FFFFFF"/>
+  </g>
+  <circle cx="642" cy="52" r="5" fill="#76B900"/>
+  <text x="656" y="59" class="panel-title">Soft margin</text>
+
+  <rect x="638" y="77" width="504" height="286" rx="10" fill="#F8FAFC" stroke="#E5E7EB"/>
+  <g clip-path="url(#rightPlot)">
+    <rect x="638" y="77" width="202" height="286" fill="#3B82F6" opacity="0.055"/>
+    <rect x="940" y="77" width="202" height="286" fill="#F59E0B" opacity="0.065"/>
+    <line x1="890" y1="77" x2="890" y2="363" class="boundary"/>
+    <line x1="840" y1="77" x2="840" y2="363" class="margin"/>
+    <line x1="940" y1="77" x2="940" y2="363" class="margin"/>
+
+    <g class="blue point">
+      <circle cx="687" cy="296" r="10"/><circle cx="719" cy="179" r="10"/>
+      <circle cx="770" cy="252" r="10"/><circle cx="798" cy="126" r="10"/>
+      <circle cx="868" cy="203" r="11"/>
+    </g>
+    <g class="orange point">
+      <circle cx="868" cy="270" r="11"/>
+      <circle cx="982" cy="153" r="10"/><circle cx="1028" cy="301" r="10"/>
+      <circle cx="1069" cy="216" r="10"/><circle cx="1105" cy="119" r="10"/>
+    </g>
+
+    <circle cx="868" cy="203" r="17" fill="none" stroke="#76B900" stroke-width="3"/>
+    <circle cx="868" cy="270" r="17" fill="none" stroke="#76B900" stroke-width="3"/>
+  </g>
+
+  <path d="M 854 191 L 824 164 L 777 164" class="leader"/>
+  <text x="675" y="169" class="note">inside margin</text>
+  <path d="M 855 282 L 824 313 L 777 313" class="leader"/>
+  <text x="681" y="318" class="note">wrong side</text>
+
+  <rect x="774" y="381" width="14" height="4" rx="2" fill="#76B900"/>
+  <text x="798" y="390" class="cue">violations penalized by C</text>
+</svg>
