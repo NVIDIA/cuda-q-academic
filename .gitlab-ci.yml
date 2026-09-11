@@ -36,6 +36,11 @@ stages:
     # algorithms package without resolving cudaq again and potentially
     # replacing the image's curated runtime.
     - pip install --quiet --upgrade --no-deps cudaq-algorithms
+    # torch pulls in triton, whose bundled LLVM aborts the process (SIGABRT,
+    # "option registered more than once") once cudaq's LLVM is also loaded.
+    # torch.optim.* imports torch._dynamo -> triton unconditionally, so the
+    # HQNN notebooks died on Adam(). Nothing here uses torch.compile; drop it.
+    - pip uninstall -y -q triton || true
     - python -c 'from importlib.metadata import version; import cudaq_algorithms; print("cudaq-algorithms", version("cudaq-algorithms"))'
     # Transitional fallback for branches that have not yet migrated every
     # import. This becomes a no-op once cudaq_solvers is gone from the repo.
@@ -149,6 +154,29 @@ stages:
       print("  torch CUDA still alive after cudaq:", float(t2), flush=True)
       print("torch + cudaq GPU interop ok")
       ' || echo "WARN: torch + cudaq GPU interop crashed (see above)"
+
+        # Pipeline 67279501 post-mortem: both HQNN notebooks SIGABRT inside
+        # torch.optim.Adam.__init__ -> torch._dynamo -> `import triton`, with
+        # cudaq already loaded. Bare torch+cudaq imports pass, so the trigger
+        # is triton's LLVM being loaded next to cudaq's. Reproduce in seconds.
+        echo "--- probe (non-fatal): import cudaq, then construct torch.optim.Adam (pulls in dynamo/triton)"
+        python -X faulthandler -c '
+      import cudaq, torch
+      p = torch.zeros(1, requires_grad=True)
+      torch.optim.Adam([p])
+      print("cudaq + Adam/dynamo ok")
+      ' || echo "WARN: cudaq + torch.optim.Adam crashed (see above)"
+        echo "--- probe (non-fatal): import cudaq, then import triton directly"
+        python -X faulthandler -c '
+      import cudaq, triton
+      print("cudaq + triton import ok", triton.__version__)
+      ' || echo "WARN: cudaq + triton import crashed (see above)"
+        echo "--- probe (non-fatal): same Adam construction WITHOUT cudaq (control)"
+        python -X faulthandler -c '
+      import torch
+      torch.optim.Adam([torch.zeros(1, requires_grad=True)])
+      print("Adam without cudaq ok")
+      ' || echo "WARN: Adam crashed even without cudaq"
 
         # Same interop, but inside a real ipykernel under nbconvert. If this
         # crashes while the plain-python probe above passes, the trigger is
@@ -379,6 +407,9 @@ test:notebooks:cpu:
       dynamics101|dynamics101/Solutions|*.ipynb
       ai-for-quantum|ai-for-quantum/solutions|*.ipynb
   rules:
+    # TEMPORARY (MR !56 debugging): CPU job disabled while iterating on the
+    # 4 failing GPU notebooks. Remove this line to re-enable.
+    - when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
       changes:
         paths:
@@ -407,11 +438,18 @@ test:notebooks:gpu:
   extends: .test:notebooks
   variables:
     REQUIRE_GPU: "true"
+    # TEMPORARY (MR !56 debugging): run ONLY the 3 notebooks whose kernel died
+    # in pipeline 67279501 so the job finishes quickly. qmmm_solutions.ipynb
+    # (a 1800s timeout, not a crash) is excluded for now. Restore the full
+    # list (uncomment below) before merging.
     NOTEBOOK_MODULES: |
-      chemistry-simulations|chemistry-simulations/solutions|*.ipynb
-      qec101|qec101/Solutions|*.ipynb
-      simulation|simulation/solutions|*.ipynb
-      quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
+      simulation|simulation/solutions|01_simulation101_solutions.ipynb
+      quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|0[12]_*_solutions.ipynb
+    # NOTEBOOK_MODULES: |
+    #   chemistry-simulations|chemistry-simulations/solutions|*.ipynb
+    #   qec101|qec101/Solutions|*.ipynb
+    #   simulation|simulation/solutions|*.ipynb
+    #   quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
       changes:
