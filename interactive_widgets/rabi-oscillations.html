@@ -353,6 +353,7 @@
         position: relative;
       }
       .bloch-host {
+        position: relative;
         width: 100%;
         height: 280px;
         border: 1px solid var(--border);
@@ -360,12 +361,17 @@
         background: #000000;
         cursor: grab;
         touch-action: none;
+        overflow: hidden;
       }
       .bloch-host:active {
         cursor: grabbing;
       }
+      /* The renderer sizes the backing store in device pixels, so the canvas
+         must be pinned to the host box or it lays out at that larger size. */
       .bloch-host canvas {
         display: block;
+        width: 100% !important;
+        height: 100% !important;
       }
       .bloch-fallback {
         display: grid;
@@ -1919,10 +1925,25 @@
           thetaLabel.visible = false;
           scene.add(thetaLabel);
 
+          const BASE_FOV = 42;
+
           function resize() {
-            const width = host.clientWidth || 320;
-            const height = host.clientHeight || 280;
+            const width = host.clientWidth;
+            const height = host.clientHeight;
+            // A hidden tab reports a zero box; keep the last good size instead.
+            if (!width || !height) return;
             camera.aspect = width / height;
+            // Widen the vertical field of view on panels that are taller than
+            // wide so the axis labels stay inside the card.
+            camera.fov =
+              camera.aspect >= 1
+                ? BASE_FOV
+                : (2 *
+                    Math.atan(
+                      Math.tan((BASE_FOV * Math.PI) / 360) / camera.aspect,
+                    ) *
+                    180) /
+                  Math.PI;
             camera.updateProjectionMatrix();
             renderer.setSize(width, height, false);
           }
@@ -2023,6 +2044,12 @@
 
           resize();
           setTheta(0);
+          if (typeof ResizeObserver === "function") {
+            new ResizeObserver(() => {
+              resize();
+              if (state.reducedMotion) renderFrame();
+            }).observe(host);
+          }
           if (state.reducedMotion) {
             renderFrame();
           } else {
