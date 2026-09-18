@@ -461,8 +461,17 @@ test:notebooks:gpu:
 
 include:
   - project: agentics/bootstrapper
+    # Pinned to an immutable commit SHA so this pipeline's behavior does
+    # not change when the upstream default branch moves. Bump deliberately
+    # after reviewing the upstream diff.
+    ref: a2bc66798ff21d2f31c714d8e6fd45b8b4c2a8a8
     file: gitlab/pipeline-analysis/template.yml
 
 "🔍 AI Failure Analysis":
   extends:
     - .ai-failure-analysis
+  # The upstream template refers to a mutable image tag, so pinning the
+  # include ref above does not by itself pin the image this job runs.
+  # Override with an immutable digest (the build that tag resolved to on
+  # 2026-03-23); re-resolve and bump deliberately to pick up a new build.
+  image: gitlab-master.nvidia.com:5005/agentics/bootstrapper/pipeline-analysis-agent@sha256:705b54418537ab1cc704e42fb619b2da4a16a784a1a7af158b52fb9378f4db21
