@@ -2,10 +2,11 @@
  
 default:
   image:
-    name: ghcr.io/nvidia/cudaqx
+    name: $CUDAQX_IMAGE
     entrypoint: [""]
  
 variables:
+  CUDAQX_IMAGE: "ghcr.io/nvidia/cudaqx"
   PIP_ROOT_USER_ACTION: ignore
   PYTHONUNBUFFERED: "1"
   GIT_DEPTH: "0"
@@ -232,6 +233,18 @@ stages:
 
       mkdir -p "$CI_PROJECT_DIR/nb-logs"
 
+      # Host diagnostics (cgroup limits, kernel OOM messages, GPU state) describe
+      # the runner fleet, so collect them only for pipelines from this project.
+      if [ "${CI_PIPELINE_SOURCE:-}" != "merge_request_event" ] \
+         || [ "${CI_MERGE_REQUEST_SOURCE_PROJECT_ID:-$CI_PROJECT_ID}" = "$CI_PROJECT_ID" ]; then
+        TRUSTED_DIAGNOSTICS=true
+      else
+        TRUSTED_DIAGNOSTICS=false
+      fi
+
+      POSTMORTEM_DIR="${TMPDIR:-/tmp}/nb-postmortem"
+      mkdir -p "$POSTMORTEM_DIR"
+
       # -----------------------------------------------------------------------
       # post_mortem <notebook> <module>
       #
@@ -247,20 +260,24 @@ stages:
         local base; base=$(basename "$nb" .ipynb)
         echo "--- post-mortem: $nb"
 
-        echo "  cgroup memory events (non-zero oom_kill == the kernel was OOM-killed):"
-        for f in /sys/fs/cgroup/memory.events /sys/fs/cgroup/memory.peak \
-                 /sys/fs/cgroup/memory/memory.failcnt; do
-          [ -r "$f" ] && sed 's/^/    /' "$f"
-        done
-        if dmesg -T >/dev/null 2>&1; then
-          dmesg -T | grep -iE 'oom|killed process' | tail -20 | sed 's/^/    /'
-        else
-          echo "    (dmesg unavailable in this container)"
-        fi
+        if [ "$TRUSTED_DIAGNOSTICS" = "true" ]; then
+          echo "  cgroup memory events (non-zero oom_kill == the kernel was OOM-killed):"
+          for f in /sys/fs/cgroup/memory.events /sys/fs/cgroup/memory.peak \
+                   /sys/fs/cgroup/memory/memory.failcnt; do
+            [ -r "$f" ] && sed 's/^/    /' "$f"
+          done
+          if dmesg -T >/dev/null 2>&1; then
+            dmesg -T | grep -iE 'oom|killed process' | tail -20 | sed 's/^/    /'
+          else
+            echo "    (dmesg unavailable in this container)"
+          fi
 
-        echo "  GPU state after the crash:"
-        nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv 2>/dev/null \
-          | sed 's/^/    /' || true
+          echo "  GPU state after the crash:"
+          nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv 2>/dev/null \
+            | sed 's/^/    /' || true
+        else
+          echo "  (diagnostics suppressed: merge request from a fork)"
+        fi
 
         echo "  re-running as a plain script with faulthandler enabled:"
         local script="$CI_PROJECT_DIR/nb-logs/${base}.py"
@@ -276,17 +293,18 @@ stages:
             '        def __getattr__(self, _): return lambda *a, **k: None' \
             '    return _Shim()' \
             | cat - "$script" > "${script}.tmp" && mv "${script}.tmp" "$script"
+          local log="$POSTMORTEM_DIR/${base}.postmortem.log"
           ( cd "$(dirname "$nb")" \
             && PYTHONPATH="$CI_PROJECT_DIR/$mod:${PYTHONPATH:-}" \
                timeout 1800 python -X faulthandler -u "$script" ) \
-            > "$CI_PROJECT_DIR/nb-logs/${base}.postmortem.log" 2>&1
+            > "$log" 2>&1
           local rc=$?
           echo "  plain-script exit code: $rc"
           if [ "$rc" -gt 128 ]; then
             echo "  -> killed by signal $((rc - 128)) (137=SIGKILL/OOM, 139=SIGSEGV, 134=SIGABRT)"
           fi
           echo "  last 60 lines of plain-script output:"
-          tail -n 60 "$CI_PROJECT_DIR/nb-logs/${base}.postmortem.log" | sed 's/^/    /'
+          tail -n 60 "$log" | sed 's/^/    /'
         else
           echo "  (could not convert notebook to script)"
         fi
@@ -393,6 +411,7 @@ stages:
       fi
   artifacts:
     when: always
+    access: developer
     expire_in: 1 week
 
 test:notebooks:cpu:
@@ -419,6 +438,7 @@ test:notebooks:cpu:
           - ai-for-quantum/**/*.ipynb
   artifacts:
     when: always
+    access: developer
     paths:
       - "quick-start-to-quantum/solutions/*.ipynb"
       - "qis-examples/solutions/*.ipynb"
@@ -450,6 +470,7 @@ test:notebooks:gpu:
           - quantum-machine-learning-and-data-analysis/**/*.ipynb
   artifacts:
     when: always
+    access: developer
     paths:
       - "chemistry-simulations/solutions/*.ipynb"
       - "qec101/Solutions/*.ipynb"
@@ -461,17 +482,12 @@ test:notebooks:gpu:
 
 include:
   - project: agentics/bootstrapper
-    # Pinned to an immutable commit SHA so this pipeline's behavior does
-    # not change when the upstream default branch moves. Bump deliberately
-    # after reviewing the upstream diff.
+    # Pinned so this pipeline does not change when upstream's default branch
+    # moves. Bump after reviewing the upstream diff.
     ref: a2bc66798ff21d2f31c714d8e6fd45b8b4c2a8a8
     file: gitlab/pipeline-analysis/template.yml
 
 "🔍 AI Failure Analysis":
   extends:
     - .ai-failure-analysis
-  # The upstream template refers to a mutable image tag, so pinning the
-  # include ref above does not by itself pin the image this job runs.
-  # Override with an immutable digest (the build that tag resolved to on
-  # 2026-03-23); re-resolve and bump deliberately to pick up a new build.
-  image: gitlab-master.nvidia.com:5005/agentics/bootstrapper/pipeline-analysis-agent@sha256:705b54418537ab1cc704e42fb619b2da4a16a784a1a7af158b52fb9378f4db21
+  image: $AI_ANALYSIS_IMAGE
