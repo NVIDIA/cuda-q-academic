@@ -13,21 +13,65 @@ variables:
   # Kernels spawned by nbconvert inherit this. Without it a native crash
   # (segfault, abort) shows up only as "Kernel died" with no traceback.
   PYTHONFAULTHANDLER: "1"
+  # ---------------------------------------------------------------------------
+  # Nightly compatibility run. Both values below are placeholders: the real
+  # ones are supplied by the pipeline schedule (CI/CD -> Schedules -> Variables)
+  # so that no pre-release registry or artifact-repository coordinate is
+  # committed to a branch that is mirrored publicly.
+  #
+  #   CUDAQX_NIGHTLY_IMAGE  defaults to the public release image, so an
+  #                         unconfigured run degrades to "test the notebooks
+  #                         against what students actually get" rather than
+  #                         failing to pull.
+  #   CUDAQ_QEC_WHEELS_URL  empty means "use the regular package index".
+  # ---------------------------------------------------------------------------
+  CUDAQX_NIGHTLY_IMAGE: "$CUDAQX_IMAGE"
+  CUDAQ_QEC_WHEELS_URL: ""
  
 stages:
   - test
+  - notify
  
 .test:notebooks:
   stage: test
   timeout: 90 minutes
   before_script:
-    - apt-get update -qq && apt-get install -y -qq libgfortran5
+    # The cudaqx image runs as root; the nvcr cuda-quantum images used by the
+    # nightly job run as the `cudaq` user with passwordless sudo. Support both.
+    - SUDO=""; [ "$(id -u)" -eq 0 ] || SUDO=sudo
+    - $SUDO apt-get update -qq && $SUDO apt-get install -y -qq libgfortran5
+    # Nightly job only: a base CUDA-Q image has no CUDA-QX libraries.
+    # --no-deps so pip cannot replace the image's cudaq with a PyPI release.
+    # Import failures here mean "no wheel built against this cudaq yet", which
+    # is itself a useful compatibility signal, so they are reported, not fatal.
+    - |
+      if [ "${INSTALL_CUDAQX_LIBS:-false}" = "true" ]; then
+        python -c 'import cudaq; print("cudaq", cudaq.__version__)'
+        echo "runner python/platform tags:"
+        python -c 'import sysconfig,sys; print("  cp%d%d" % sys.version_info[:2], sysconfig.get_platform())'
+        if [ -n "${CUDAQ_QEC_WHEELS_URL:-}" ]; then
+          echo "--- installing cudaq-qec from a pipeline-supplied wheel directory"
+          # Prefer the CUDA-13 project name; fall back to the plain one. --pre
+          # is required for rc versions. pip selects the cp/manylinux wheel.
+          pip install --quiet --upgrade --no-deps --pre --no-index \
+              --find-links "$CUDAQ_QEC_WHEELS_URL" cudaq-qec-cu13 \
+          || pip install --quiet --upgrade --no-deps --pre --no-index \
+              --find-links "$CUDAQ_QEC_WHEELS_URL" cudaq-qec \
+          || echo "WARN: no wheel in the configured directory matched this runner (see tags above)"
+        else
+          pip install --quiet --upgrade --no-deps cudaq-qec-cu13 \
+          || pip install --quiet --upgrade --no-deps cudaq-qec
+        fi
+        pip list 2>/dev/null | grep -i 'cudaq' || true
+        python -c 'import cudaq_qec; print("cudaq_qec import ok", getattr(cudaq_qec, "__version__", ""))' \
+          || echo "WARN: cudaq_qec does not import against this cudaq"
+      fi
     - pip install --quiet --upgrade
         jupyter
         nbconvert
         qutip
         pyscf
-        genQC
+        genQC==0.2.5
         galois
         torch
         scikit-learn
@@ -321,7 +365,9 @@ stages:
       #     plus all modules if .gitlab-ci.yml itself changed
       # -----------------------------------------------------------------------
       echo "CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH:-<unset>} CI_DEFAULT_BRANCH=${CI_DEFAULT_BRANCH:-<unset>} CI_PIPELINE_SOURCE=${CI_PIPELINE_SOURCE:-<unset>}"
-      if [ -n "${CI_COMMIT_BRANCH:-}" ] && [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH:-main}" ]; then
+      if [ "${RUN_ALL_MODULES:-false}" = "true" ]; then
+        echo "RUN_ALL_MODULES=true — running all modules."
+      elif [ -n "${CI_COMMIT_BRANCH:-}" ] && [ "${CI_COMMIT_BRANCH}" = "${CI_DEFAULT_BRANCH:-main}" ]; then
         echo "Running all modules (trigger: ${CI_PIPELINE_SOURCE:-unknown})"
       else
         if [ -n "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-}" ]; then
@@ -403,10 +449,19 @@ stages:
       echo "Summary:"
       echo "  Passed : $TOTAL_PASSED"
       echo "  Failed : $TOTAL_FAILED"
+
+      # Machine-readable summary for notify:slack (the job log is not parsed).
+      {
+        echo "passed=$TOTAL_PASSED"
+        echo "failed=$TOTAL_FAILED"
+        echo "image=${CUDAQX_NIGHTLY_IMAGE:-default}"
+      } > "$CI_PROJECT_DIR/nb-logs/summary.env"
+      : > "$CI_PROJECT_DIR/nb-logs/failed.txt"
  
       if [ "$TOTAL_FAILED" -gt 0 ]; then
         echo "Failed notebooks:"
         printf '  %s\n' "${ALL_FAILED[@]}"
+        printf '%s\n' "${ALL_FAILED[@]}" > "$CI_PROJECT_DIR/nb-logs/failed.txt"
         exit 1
       fi
   artifacts:
@@ -426,6 +481,11 @@ test:notebooks:cpu:
       dynamics101|dynamics101/Solutions|*.ipynb
       ai-for-quantum|ai-for-quantum/solutions|*.ipynb
   rules:
+    # Nightly runs use test:notebooks:nightly instead of these jobs. Scoped to
+    # the pipeline sources that job actually runs on: RUN_NIGHTLY leaking in as
+    # a project-level variable must not silently empty every push/MR pipeline.
+    - if: '($CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web") && $RUN_NIGHTLY == "true"'
+      when: never
     # On-demand full run: set RUN_NOTEBOOKS=true when triggering the pipeline.
     - if: '$RUN_NOTEBOOKS == "true"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
@@ -463,6 +523,9 @@ test:notebooks:gpu:
       simulation|simulation/solutions|*.ipynb
       quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
   rules:
+    # See test:notebooks:cpu for why this is scoped by pipeline source.
+    - if: '($CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web") && $RUN_NIGHTLY == "true"'
+      when: never
     # On-demand full run: set RUN_NOTEBOOKS=true when triggering the pipeline.
     - if: '$RUN_NOTEBOOKS == "true"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"'
@@ -483,6 +546,84 @@ test:notebooks:gpu:
       # Crash post-mortems for notebooks whose kernel died.
       - "nb-logs/"
     expire_in: 1 week
+
+# ---------------------------------------------------------------------------
+# Nightly compatibility job — scheduled only against staging. Runs EVERY
+# module (CPU and GPU lists) against $CUDAQX_NIGHTLY_IMAGE to see how the
+# current notebooks behave on an upcoming CUDA-Q release. allow_failure so
+# an upstream regression never gates normal work. The only trigger is the
+# daily schedule plus a manual run on a protected ref by a maintainer.
+# ---------------------------------------------------------------------------
+test:notebooks:nightly:
+  extends: .test:notebooks
+  image:
+    name: $CUDAQX_NIGHTLY_IMAGE
+    entrypoint: [""]
+  allow_failure: true
+  # All 11 modules in one job; the GPU half alone is ~50 min.
+  timeout: 4 hours
+  variables:
+    REQUIRE_GPU: "true"
+    RUN_ALL_MODULES: "true"
+    INSTALL_CUDAQX_LIBS: "true"
+    NOTEBOOK_MODULES: |
+      quick-start-to-quantum|quick-start-to-quantum/solutions|*.ipynb
+      qis-examples|qis-examples/solutions|*.ipynb
+      hybrid-workflows|hybrid-workflows/solutions|*.ipynb
+      qaoa-for-max-cut|qaoa-for-max-cut|*Solution*.ipynb
+      quantum-applications-to-finance|quantum-applications-to-finance/solutions|*.ipynb
+      dynamics101|dynamics101/Solutions|*.ipynb
+      ai-for-quantum|ai-for-quantum/solutions|*.ipynb
+      chemistry-simulations|chemistry-simulations/solutions|*.ipynb
+      qec101|qec101/Solutions|*.ipynb
+      simulation|simulation/solutions|*.ipynb
+      quantum-machine-learning-and-data-analysis|quantum-machine-learning-and-data-analysis/solutions|*.ipynb
+  rules:
+    # Daily schedule: edit this schedule to point at staging and set RUN_NIGHTLY=true
+    # plus CUDAQX_NIGHTLY_IMAGE and CUDAQ_QEC_WHEELS_URL as schedule variables.
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RUN_NIGHTLY == "true"'
+    # Manual run on a protected ref (main/staging). Avoids letting any feature
+    # branch trigger a pull from the configured artifact repository.
+    - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_NIGHTLY == "true" && $CI_COMMIT_REF_PROTECTED == "true"'
+  artifacts:
+    when: always
+    access: developer
+    paths:
+      - "quick-start-to-quantum/solutions/*.ipynb"
+      - "qis-examples/solutions/*.ipynb"
+      - "hybrid-workflows/solutions/*.ipynb"
+      - "qaoa-for-max-cut/*Solution*.ipynb"
+      - "quantum-applications-to-finance/solutions/*.ipynb"
+      - "dynamics101/Solutions/*.ipynb"
+      - "ai-for-quantum/solutions/*.ipynb"
+      - "chemistry-simulations/solutions/*.ipynb"
+      - "qec101/Solutions/*.ipynb"
+      - "simulation/solutions/*.ipynb"
+      - "quantum-machine-learning-and-data-analysis/solutions/*.ipynb"
+      - "nb-logs/"
+    expire_in: 1 week
+
+# ---------------------------------------------------------------------------
+# Slack notification for the nightly notebook run.
+# ---------------------------------------------------------------------------
+notify:slack:nightly:
+  stage: notify
+  image:
+    name: $CUDAQX_NIGHTLY_IMAGE
+    entrypoint: [""]
+  needs:
+    - job: test:notebooks:nightly
+      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RUN_NIGHTLY == "true"'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_NIGHTLY == "true" && $CI_COMMIT_REF_PROTECTED == "true"'
+  allow_failure: true
+  variables:
+    # Not strictly required for notify, but avoids extra runner setup time.
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "0"
+  script:
+    - python3 ci/notify_slack.py
 
 include:
   - project: agentics/bootstrapper
