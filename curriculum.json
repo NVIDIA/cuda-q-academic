@@ -1,7 +1,7 @@
 {
   "metadata": {
     "schema_version": 1,
-    "last_updated": "2026-08-21",
+    "last_updated": "2026-10-27",
     "source_of_truth": "This file is the canonical machine-readable inventory for CUDA-Q Academic lessons, learning track membership, and live visualization-gallery widgets.",
     "lesson_policy": "Use lessons for content discovery and learning track routing. For deeper notebook detail or when updating a lesson, consult the notebook intro cell when it exists.",
     "widget_policy": "Widget metadata is sourced from visualization-gallery.html on the widgets-as-html branch because the main branch does not contain the full live gallery inventory.",
@@ -1522,6 +1522,8 @@
     "trajectory-noise-demo",
     "mwpm-decoding-challenge",
     "error-digitization-explorer",
+    "cudaq-logical-layers",
+    "cudaq-logical-rotation-synthesis",
     "qaoa-max-cut-explorer",
     "qaoa-optimization-landscape",
     "choosing-the-next-operator-adapt-qaoa",
@@ -2509,6 +2511,51 @@
         "Jupyter",
         "workshop setup",
         "NVIDIA Build"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "cudaq-logical-layers": {
+      "title": "Exploring Logical Layers with CUDA-Q",
+      "gallery_section": "domain-specific",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/cudaq-logical-layers.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/cudaq-logical-layers.html",
+      "source_repo_path": "interactive_widgets/cudaq-logical-layers.html",
+      "related_content": [],
+      "related_track_ids": [
+        "qec-101"
+      ],
+      "summary": "Place interacting qubits, choose error-correcting codes, and compare physical resources and scheduled time across the logical layers within CUDA-Q.",
+      "keywords": [
+        "logical compilation",
+        "logical qubits",
+        "placement",
+        "error correction",
+        "Steane code",
+        "surface code",
+        "connectivity",
+        "scheduling"
+      ],
+      "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
+    },
+    "cudaq-logical-rotation-synthesis": {
+      "title": "What does one rotation cost?",
+      "gallery_section": "domain-specific",
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/cudaq-logical-rotation-synthesis.html",
+      "source_url": "https://github.com/NVIDIA/cuda-q-academic/blob/widgets-as-html/interactive_widgets/cudaq-logical-rotation-synthesis.html",
+      "source_repo_path": "interactive_widgets/cudaq-logical-rotation-synthesis.html",
+      "related_content": [],
+      "related_track_ids": [
+        "qec-101"
+      ],
+      "summary": "Explore Clifford+T rotation synthesis, choose a T-state factory and surface-code distance, and compare qubit and time costs within an error budget.",
+      "keywords": [
+        "rotation synthesis",
+        "Clifford+T",
+        "T-state factory",
+        "magic state distillation",
+        "surface code",
+        "fault tolerance",
+        "resource estimation"
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     }

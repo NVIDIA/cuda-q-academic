@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>What Does One Rotation Cost? Budgeting a Fault-Tolerant Rotation with CUDA-Q</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--accent:#76b900;--accent-dark:#5e9400;--bg:#1A1A1A;--surface:#2A2A2A;--border:#444444;--fg:#E0E0E0;--muted:#AAAAAA;--purple:#952fc6;--purple-light:#c27be6;--blue:#0074df;--blue-light:#4da3ff;--yellow:#f9c500;--red:#e52020;--error-text:#ff7b72}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.5}
+button,input,select,textarea{font:inherit}
+button,select,summary{min-height:44px}
+button{min-width:44px;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.5;cursor:not-allowed}
+a{color:var(--accent);text-underline-offset:3px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#000;padding:8px 16px;z-index:100;text-decoration:none;font-weight:bold}
+.skip-link:focus{top:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+.widget-container{background-color:var(--surface);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:8px;padding:24px;width:100%;max-width:1100px;box-shadow:0 10px 40px rgba(0,0,0,0.4);margin:0 auto}
+@media (min-width:768px){.widget-container{padding:32px}}
+.widget-container h1{color:var(--accent);font-size:1.5rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;margin-top:0;font-weight:700;line-height:1.2}
+.widget-container .summary-text{color:var(--muted);margin-bottom:8px;font-size:1rem;line-height:1.5}
+.instructions-section{margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px}
+.instructions-section summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.instructions-section summary::-webkit-details-marker{display:none}
+.instructions-section summary::before{content:'▶';font-size:0.7rem;color:var(--accent);transition:transform 0.15s;flex-shrink:0}
+.instructions-section[open]>summary::before{transform:rotate(90deg)}
+.instructions-section summary:focus{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.instructions-section summary h2{display:inline}
+.instructions-section h2{color:var(--accent);font-size:1.1rem;margin:0;font-weight:700}
+.instructions-section:not([open]){padding-bottom:16px}
+.instructions-section ol{margin-top:12px}
+.instructions-section .kbd{background:var(--border);padding:2px 6px;border-radius:4px;font-family:inherit;font-size:0.9em}
+h2{font-size:1.2rem;line-height:1.35;margin:0 0 16px;color:var(--fg)}
+h3{font-size:1.05rem;margin:0 0 10px;color:var(--accent)}
+p{margin:0 0 14px}
+.small{font-size:.85rem;color:var(--muted)}
+li{margin:7px 0}
+ul,ol{padding-left:22px}
+code{overflow-wrap:anywhere;font-size:.9em;color:var(--fg)}
+.info-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px}
+/* Goal box and journey strip */
+.goal-box{margin-bottom:20px;border:1px solid var(--accent);border-top:3px solid var(--accent)}
+.goal-box h2{color:var(--fg);font-size:1.15rem;margin:0 0 14px;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.journey{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;list-style:none;margin:0 0 14px;padding:0;counter-reset:none}
+.journey li{position:relative;display:flex;flex-direction:column;gap:4px;margin:0;padding:12px 12px 12px 14px;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;min-width:0}
+.journey li:not(:last-child)::after{content:'›';position:absolute;right:-9px;top:50%;transform:translateY(-55%);color:var(--accent);font-size:1.4rem;font-weight:700;line-height:1;background:var(--surface);padding:0 1px}
+.journey .step-no{position:absolute;top:8px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#000;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.journey strong{font-size:.95rem;color:var(--fg);padding-right:26px;line-height:1.25}
+.journey small{color:var(--muted);font-size:.78rem;line-height:1.35}
+.journey .layer-tag{margin-top:auto;padding-top:4px;color:var(--accent);font-size:.72rem;font-weight:700;letter-spacing:.5px}
+.goal-why{margin:0;color:var(--fg);font-size:.95rem}
+.goal-why strong{color:var(--accent)}
+/* Collapsible compilation layers */
+.layer{background:var(--surface);border:1px solid var(--purple);border-top:3px solid var(--purple);border-radius:8px;padding:0;margin-top:20px;scroll-margin-top:16px}
+.layer-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;list-style:none;padding:16px 24px;min-height:64px;cursor:pointer;border-radius:8px}
+.layer-summary::-webkit-details-marker{display:none}
+.layer-summary h2{margin:0;font-size:1.15rem;color:var(--fg)}
+.layer-summary:hover{background:rgba(149,47,198,0.12)}
+.layer-chevron{color:var(--purple-light);font-size:1.6rem;line-height:1;flex:none}
+.layer[open]>.layer-summary{border-bottom:1px solid var(--purple);border-radius:8px 8px 0 0}
+.layer[open]>.layer-summary .layer-chevron{transform:rotate(180deg)}
+.layer-body{padding:20px 24px}
+.badge{display:inline-block;padding:4px 10px;margin-right:9px;color:#000;background:var(--accent);border-radius:5px;font-size:.85rem;font-weight:700;letter-spacing:.5px}
+.badge-secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.badge-purple{background:var(--purple);color:#fff}
+.choice-row,.radio-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+/* Buttons */
+.btn-primary{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent);padding:9px 16px;border-radius:6px;font-weight:600;transition:background .15s,color .15s}
+.btn-primary:hover:not(:disabled){background:var(--accent);color:#000000;border-color:var(--accent)}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 16px;border-radius:6px;font-weight:600;transition:background .15s,color .15s}
+.btn-secondary:hover:not(:disabled){background:rgba(255,255,255,0.05);color:#fff}
+button[aria-pressed]{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent)}
+button[aria-pressed]:hover:not(:disabled),button[aria-pressed=true]{background:var(--accent);color:#000000;border-color:var(--accent)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0}
+.two-col>*{min-width:0}
+.compact{margin:12px 0}
+.compact summary{color:var(--accent);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center}
+.compact p,.compact li{font-size:.87rem;color:var(--muted)}
+.compact strong{color:var(--fg)}
+.region,.encoding{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px}
+.capacity{font-size:.85rem;color:var(--muted);margin:0}
+label{font-size:.9rem}
+select{display:block;width:100%;margin-top:6px;padding:10px;min-height:44px;background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:6px}
+fieldset{margin:0 0 12px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;min-width:0}
+legend{font-size:.9rem;font-weight:600;color:var(--fg);padding:0 6px}
+.radio-row label{display:flex;gap:7px;align-items:center;min-height:44px;padding:4px}
+input[type=radio]{accent-color:var(--accent);width:18px;height:18px}
+.feedback{margin:10px 0;min-height:1.5em;color:var(--accent);font-size:.92rem;font-weight:600}
+.feedback.error{color:var(--error-text)}
+.result-line{font-weight:600;color:var(--accent)}
+.diagram-scroll{overflow-x:auto;padding:5px}
+/* Sliders */
+.label-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:4px}
+.label-line label{font-weight:600;color:var(--fg)}
+output{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
+.slider-wrap{padding:10px 4px;margin:4px 0 8px}
+.slider-wrap:focus-within{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+input[type=range]{-webkit-appearance:none;width:100%;background:transparent;margin:0;cursor:pointer}
+input[type=range]:focus{outline:none}
+input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--accent)}
+input[type=range]:focus::-moz-range-thumb{box-shadow:0 0 0 3px var(--accent)}
+input[type=range]::-webkit-slider-runnable-track{width:100%;height:4px;cursor:pointer;background:#444;border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;border-radius:50%;background:#76B900;cursor:pointer;margin-top:-7px;border:2px solid #1A1A1A}
+input[type=range]::-moz-range-track{width:100%;height:4px;cursor:pointer;background:#444;border-radius:5px}
+input[type=range]::-moz-range-thumb{height:14px;width:14px;border-radius:50%;background:#76B900;cursor:pointer;border:2px solid #1A1A1A}
+.slider-scale{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin:-4px 2px 8px}
+/* Canonical circuit styles */
+.circuit-svg{display:block;width:100%;height:auto}
+.circuit-wire{stroke:#E0E0E0;stroke-width:2}
+.circuit-gate-box{fill:#2A2A2A;stroke:#76b900;stroke-width:2}
+.circuit-gate-text{fill:#E0E0E0;font-family:Inter,sans-serif;font-weight:bold;font-size:16px;text-anchor:middle;dominant-baseline:middle}
+.circuit-gate-name{font-size:14px}
+.circuit-gate-param{fill:#E0E0E0;font-family:Inter,sans-serif;font-weight:bold;font-size:12px;text-anchor:middle;dominant-baseline:middle}
+.circuit-qubit-label{fill:#76b900;font-family:Inter,sans-serif;font-size:14px;font-weight:bold}
+.circuit-ket{fill:#E0E0E0;font-family:Inter,sans-serif;font-size:14px;dominant-baseline:middle}
+.circuit-meter{stroke:#E0E0E0;stroke-width:2;fill:none}
+.circuit-index{fill:var(--muted);font-family:Inter,sans-serif;font-size:11px;dominant-baseline:middle}
+.seq-svg .circuit-gate-text{font-size:14px}
+.circuit-t-gate{fill:#76b900}
+.circuit-t-text{fill:#000}
+.source-svg{max-width:320px;margin:4px auto}
+.gate-key{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:.85rem;color:var(--muted);margin:10px 0 0}
+.gate-chip{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:2px solid var(--accent);border-radius:4px;font-weight:700;font-size:.8rem;color:var(--fg);margin-right:6px;background:var(--surface)}
+.gate-chip.t{background:var(--accent);color:#000}
+/* P0 */
+.p0-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+.p0-grid .choice-row{margin:4px 0 6px}
+.p0-grid .choice-row button{flex:1 1 auto}
+.eps-btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:10px 14px;line-height:1.3}
+.eps-btn small{font-weight:400;font-size:.8rem;color:var(--muted)}
+.eps-btn .eps-warn{color:var(--error-text);font-weight:600}
+.eps-btn:hover:not(:disabled) small,.eps-btn[aria-pressed=true] small{color:#000}
+.equation{font-variant-numeric:tabular-nums;font-weight:600;color:var(--fg);margin:0 0 6px}
+.equation .op{color:var(--muted);font-weight:400;padding:0 4px}
+.equation .lbl{color:var(--muted);font-weight:400;font-size:.9em}
+.stage-box{margin-top:18px}
+.stage-box h3{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+.stage-box h3 .result-line{font-size:.95rem;color:var(--fg)}
+.pending{padding:18px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:8px;color:var(--fg)}
+/* Budget bars */
+.budget-track{display:flex;height:12px;background:#444;border-radius:6px;overflow:hidden;margin:12px 0 8px}
+.seg-synthesis{background:var(--purple)}
+.seg-magic{background:linear-gradient(90deg,#5e9400,#76b900)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.88rem;color:var(--muted);margin:0 0 6px}
+.legend strong{color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px;background:var(--accent)}
+.dot.purple{background:var(--purple)}
+.dot.empty{background:#444}
+/* P1 regions */
+.region-strip{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin:16px 0}
+.region p{margin-bottom:8px}
+.region.cartoon{display:flex;flex-direction:column}
+.cartoon-svg{display:block;width:100%;max-width:300px;height:auto;margin:6px auto 10px}
+.cartoon-caption{font-size:1rem;font-weight:600;color:var(--fg);text-align:center;margin:0 0 6px}
+.region.cartoon .capacity{text-align:center;margin-top:auto}
+.region.factory-region{border-color:var(--purple)}
+.region.factory-region h3{color:var(--purple-light)}
+.region-transfer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--accent);font-weight:600;font-size:.9rem;text-align:center;min-width:150px;padding:0 4px}
+.region-transfer svg{width:150px;height:28px;display:block}
+.region-transfer .small{margin:0}
+/* P2 surface code */
+.visual-stage{display:flex;align-items:center;justify-content:center;min-height:220px;margin:8px 0}
+.surface-svg{width:210px;height:210px;max-width:100%;display:block}
+.code-data{fill:var(--surface);stroke:var(--accent);stroke-width:.07}
+.face-X{fill:var(--blue);fill-opacity:.22;stroke:var(--blue-light);stroke-opacity:.55;stroke-width:.04}
+.face-Z{fill:var(--purple);fill-opacity:.24;stroke:var(--purple-light);stroke-opacity:.55;stroke-width:.04}
+.check-X{fill:var(--blue-light)}
+.check-Z{fill:var(--purple-light)}
+.patch-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 18px;font-size:.85rem;color:var(--muted);margin:0 0 10px}
+.patch-legend .data{color:var(--accent)}
+.patch-legend .x{color:var(--blue-light)}
+.patch-legend .z{color:var(--purple-light)}
+.patch-legend .footprint{color:var(--yellow)}
+.footprint-rect{fill:var(--yellow);fill-opacity:.05;stroke:var(--yellow);stroke-width:.06;stroke-dasharray:.3 .18}
+.footprint-label{fill:var(--yellow);font-family:Inter,sans-serif;font-weight:600}
+.figure-title{font-size:.9rem;font-weight:600;color:var(--fg);margin:0 0 4px;text-align:center}
+/* P2 factory flow */
+.factory-flow-group{display:grid;gap:14px;margin:14px 0 6px}
+.factory-flow{display:grid;grid-template-columns:minmax(56px,1fr) 24px minmax(96px,1.2fr) 24px minmax(56px,1fr);gap:8px;align-items:center}
+.state-group{text-align:center;min-width:0}
+.state-icons{height:72px;display:flex;align-items:center;justify-content:center}
+.state-icons svg{display:block;max-width:90px;max-height:70px;width:100%;height:100%}
+.state-raw{fill:var(--purple);stroke:var(--purple-light);stroke-width:1.5}
+.state-mid{fill:var(--blue);stroke:var(--blue-light);stroke-width:1.5}
+.state-out{fill:var(--accent);stroke:#a6e14c;stroke-width:1.5}
+.flow-label{font-size:.85rem;margin-top:4px;color:var(--muted)}
+.flow-count{font-size:1.5rem;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+.flow-arrow{font-size:24px;color:var(--muted);text-align:center;line-height:1}
+.distillation-box{border:1px solid var(--border);border-bottom:3px solid var(--accent);border-radius:6px;min-height:68px;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:8px 6px;background:var(--surface)}
+.distillation-box strong{font-size:1.05rem}
+.distillation-box span{font-size:.78rem;color:var(--muted);margin-top:3px}
+.factory-flow-group:has(.factory-flow:nth-child(2)) .state-icons{height:46px}
+.factory-flow-group:has(.factory-flow:nth-child(2)) .state-icons svg{max-height:44px}
+.flow-legend{justify-content:center;margin-top:4px}
+.dot.raw{background:var(--purple)}
+.dot.mid{background:var(--blue)}
+.capacity-figure{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--border)}
+.capacity-svg{display:block;width:100%;max-width:260px;height:auto;margin:6px auto 0}
+.capacity-caption{text-align:center;margin:6px 0 0}
+/* P3 */
+.noise-box{max-width:560px}
+/* Metrics and tables */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 22px}
+.metric{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);padding:16px;border-radius:8px}
+.metric strong{font-size:1.7rem;display:block;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.2}
+.metric span{font-size:.85rem}
+.metric small{display:block;color:var(--muted);font-size:.76rem;margin-top:4px}
+.metric.fail{border-top-color:var(--red)}
+.metric.fail strong{color:var(--error-text)}
+.metric .verdict{display:block;font-weight:600;font-size:.85rem;margin-top:6px;color:var(--accent)}
+.metric.fail .verdict{color:var(--error-text)}
+.table-scroll{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;margin:12px 0}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+th{color:var(--accent)}
+td.pass{color:var(--accent);font-weight:600}
+td.fail{color:var(--error-text);font-weight:600}
+tr.selected td{background:rgba(118,185,0,0.08)}
+tr.selected td:first-child{box-shadow:inset 3px 0 var(--accent)}
+.comparison-note{margin-top:0}
+/* Summary, challenge, code */
+.final-summary{margin-top:24px;padding:20px 24px;border:2px solid var(--purple);border-top:4px solid var(--purple);border-radius:8px;background:rgba(149,47,198,0.08)}
+.final-summary>h2{color:#d9b3f2;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.final-summary table{table-layout:fixed}
+.final-summary th:first-child{width:28%}
+.final-summary td{overflow-wrap:anywhere}
+.final-summary .metrics{margin-bottom:12px}
+.breakdown-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:8px 0 16px}
+.breakdown-grid>*{min-width:0}
+.breakdown-grid h3{font-size:.95rem}
+.exercise{margin-top:20px;padding:16px 20px;border:1px solid var(--border);border-left:4px solid var(--yellow);border-radius:8px;background:var(--surface)}
+.exercise h3{color:var(--yellow)}
+.exercise-status{margin:0;font-weight:600;color:var(--fg)}
+.exercise-status .improved{color:var(--accent)}
+.code-launch{margin-top:20px;border:2px solid var(--purple);border-top:4px solid var(--purple);background:rgba(149,47,198,0.08)}
+.code-launch h2{color:#d9b3f2}
+.code-launch .badge-secondary{color:#d9b3f2;border-color:var(--purple-light)}
+/* Footer */
+.widget-footer{margin-top:28px;padding-top:20px;border-top:1px solid var(--border);font-size:.9rem;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px}
+.widget-footer a{color:#76b900;display:inline-block;padding:4px 0}
+.widget-footer a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* Dialog */
+dialog{width:min(1000px,95vw);max-height:92vh;background:var(--surface);color:var(--fg);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:8px;padding:24px;font-family:inherit}
+dialog::backdrop{background:rgba(0,0,0,0.7)}
+.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.dialog-head h2{margin:0;color:var(--accent)}
+textarea{width:100%;height:48vh;resize:vertical;border:1px solid var(--border);background:var(--bg);color:var(--fg);font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;padding:14px;white-space:pre;overflow:auto;border-radius:6px}
+@media (max-width:760px){
+.p0-grid,.breakdown-grid{grid-template-columns:1fr}
+.journey{grid-template-columns:1fr}
+.journey li:not(:last-child)::after{content:'⌄';right:auto;left:50%;top:auto;bottom:-16px;transform:translateX(-50%);font-size:1.2rem}
+.region-strip{grid-template-columns:1fr;gap:10px}
+.region-transfer svg{transform:rotate(90deg);width:60px;height:28px;margin:6px 0}
+}
+@media (max-width:650px){
+body{padding:10px 8px}
+.two-col{grid-template-columns:1fr}
+.metrics{grid-template-columns:1fr}
+.metric strong{font-size:1.5rem}
+.dialog-head{align-items:start}
+dialog{padding:16px}
+.choice-row button{flex:1}
+.layer-summary{padding:14px 12px}
+.layer-summary h2{font-size:1.05rem}
+.layer-body{padding:16px 12px}
+.region,.encoding,.info-box,.final-summary{padding:12px}
+.final-summary th,.final-summary td{padding:9px 6px}
+.final-summary th:first-child{width:34%}
+.factory-flow{grid-template-columns:minmax(44px,1fr) 18px minmax(80px,1.2fr) 18px minmax(44px,1fr);gap:4px}
+.flow-arrow{font-size:20px}
+.surface-svg{width:180px;height:180px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}}
+</style></head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<main id="main-content" class="widget-container" tabindex="-1">
+<header>
+<h1>What does one rotation cost?</h1>
+<p class="summary-text">Budget a fault-tolerant rotation from Clifford+T synthesis to the T-state factory, using the logical compilation layers in CUDA-Q.</p>
+<p class="small">This widget is a deeper follow-up to <a href="cudaq-logical-layers.html">Logical Layers</a>. Start there for a simpler introduction to the compilation layers before budgeting a fault-tolerant rotation.</p>
+</header>
+<details class="instructions-section" aria-labelledby="instructions-heading" open>
+<summary><h2 id="instructions-heading">Instructions</h2></summary>
+<p>The logical compilation layers in CUDA-Q are <strong>P0</strong> (logical circuit), <strong>P1</strong> (logical placement), <strong>P2</strong> (error-correcting encoding), <strong>P3</strong> (physical connectivity and schedule), and <strong>P4</strong> (control signals). This widget follows that notation and stops at P3. New to the layers? Start with the <a href="cudaq-logical-layers.html">introductory logical-compilation widget</a>, which walks a full circuit through P0 to P4; this widget assumes that background and follows one rotation in depth.</p>
+<p>Every T gate in a fault-tolerant circuit consumes one high-quality <strong>T state</strong> (a magic state). A <strong>T-state factory</strong> distills many noisy raw T states into fewer, better ones. This widget follows a single rotation gate through that pipeline.</p>
+<ol>
+<li><strong>P0 · Circuit:</strong> choose the error target for the whole rotation, then a synthesis tolerance ε. Read the Clifford+T gate sequence and note how many T gates it contains.</li>
+<li><strong>P1 · Regions:</strong> see where operations run and where T states are built.</li>
+<li><strong>P2 · Encoding:</strong> set the surface-code distance and pick a distillation protocol.</li>
+<li><strong>P3 · Noise and schedule:</strong> vary the raw T-state error, then compare the error bound, physical qubits, and scheduled duration of all four factories in the summary.</li>
+<li>Solve the design challenge in the Summary, then take the AI challenge at the end: use “View your CUDA-Q code” as a starting point to budget a small algorithm of your own.</li>
+</ol>
+<p class="small">All 32 configurations were precompiled using the logical capabilities in CUDA-Q. Error bounds come from exact fault enumeration of independent raw-state errors. Results are model estimates, not hardware measurements.</p>
+<p><strong>Keyboard:</strong> <span class="kbd">Tab</span> / <span class="kbd">Shift+Tab</span> move between controls · <span class="kbd">Enter</span> or <span class="kbd">Space</span> activates a button or expands a section · <span class="kbd">←</span> <span class="kbd">→</span> move within a row of choice buttons · <span class="kbd">←</span> <span class="kbd">→</span> also adjust a focused slider; the focused slider shows a green ring · <span class="kbd">Esc</span> closes the code dialog. The focused control shows a green ring.</p>
+</details>
+
+<section class="info-box goal-box" aria-labelledby="goal-heading">
+<h2 id="goal-heading"><span class="badge">Goal</span> Qubits and time needed for one rotation within a set error budget</h2>
+<ol class="journey" aria-label="Five steps from rotation to cost">
+<li><span class="step-no" aria-hidden="true">1</span><strong>Rotation</strong><small>One Rᵧ gate on one logical qubit</small><span class="layer-tag">P0</span></li>
+<li><span class="step-no" aria-hidden="true">2</span><strong>T-count</strong><small>Synthesize it into H, S, and T gates</small><span class="layer-tag">P0</span></li>
+<li><span class="step-no" aria-hidden="true">3</span><strong>T states</strong><small>Each T gate consumes one</small><span class="layer-tag">P1</span></li>
+<li><span class="step-no" aria-hidden="true">4</span><strong>Factory</strong><small>Distill them from noisy raw states</small><span class="layer-tag">P2</span></li>
+<li><span class="step-no" aria-hidden="true">5</span><strong>Qubits and time</strong><small>Read the bill</small><span class="layer-tag">P3</span></li>
+</ol>
+<p class="goal-why"><strong>Trade-offs:</strong> qubits and time are two separate constraints, and the choices along the way trade one for the other. A bigger factory delivers T states faster but reserves more qubits; a leaner one saves qubits and makes the computation wait. This widget helps you find where those trade-offs lie.</p>
+</section>
+
+<details id="p0" class="layer" open>
+<summary class="layer-summary"><h2 id="p0-heading"><span class="badge">P0</span> Synthesize the logical circuit</h2><span class="layer-chevron" aria-hidden="true">⌄</span></summary>
+<div class="layer-body">
+<p>The logical circuit begins with one qubit prepared in |0⟩ and rotated by Rᵧ(0.37). Fault-tolerant hardware cannot apply an arbitrary rotation directly, so the compiler <strong>synthesizes</strong> it as a sequence of H, S, and T gates. First fix the error target: that is the whole budget for this rotation. Then pick a synthesis tolerance ε; a tighter ε needs more T gates and uses less of the budget, and every T gate will later cost a T state.</p>
+<div class="two-col p0-grid">
+<div class="info-box">
+<h3>Logical circuit</h3>
+<svg class="circuit-svg source-svg" viewBox="0 0 320 80" role="img" aria-label="One logical qubit q0, prepared in state zero, rotated by R y of 0.37 radians, and the circuit continues"><text x="10" y="40" class="circuit-qubit-label" dominant-baseline="middle">q0</text><text x="40" y="40" class="circuit-ket">|0⟩</text><line x1="72" y1="40" x2="230" y2="40" class="circuit-wire"/><rect x="118" y="16" width="56" height="48" rx="4" class="circuit-gate-box"/><text x="146" y="32" class="circuit-gate-text circuit-gate-name">Rᵧ</text><text x="146" y="50" class="circuit-gate-param">0.37</text><text x="258" y="40" class="circuit-gate-text" style="font-size:22px;letter-spacing:3px">…</text></svg>
+<p class="small">θ = 0.37 rad is fixed. Only the accuracy of its Clifford+T approximation changes.</p>
+</div>
+<div class="info-box">
+<h3>Two choices</h3>
+<fieldset><legend>Step 1 · Error target for the whole rotation</legend>
+<div class="choice-row" role="group" aria-label="Error target">
+<button class="btn-primary" data-budget="4" aria-pressed="false">≤ 10⁻⁴</button>
+<button class="btn-primary" data-budget="5" aria-pressed="false">≤ 10⁻⁵</button>
+<button class="btn-primary" data-budget="6" aria-pressed="true">≤ 10⁻⁶</button>
+</div>
+<p id="p0-target-note" class="small"></p></fieldset>
+<fieldset><legend>Step 2 · Synthesis tolerance ε</legend>
+<div class="choice-row" role="group" aria-label="Synthesis tolerance">
+<button class="btn-primary eps-btn" data-precision="0.0001" aria-pressed="false"><strong>Coarser · ε = 10⁻⁴</strong><small class="eps-detail"></small><small class="eps-warn" hidden>⚠ Exceeds the target on its own</small></button>
+<button class="btn-primary eps-btn" data-precision="0.000001" aria-pressed="false"><strong>Finer · ε = 10⁻⁶</strong><small class="eps-detail"></small><small class="eps-warn" hidden>⚠ Exceeds the target on its own</small></button>
+</div></fieldset>
+<p id="synthesis-feedback" class="feedback" role="status">Choose a synthesis tolerance to compile the rotation.</p>
+</div>
+</div>
+<div class="info-box stage-box">
+<h3><span>Synthesized Clifford+T sequence</span><span id="gate-counts" class="result-line"></span></h3>
+<div id="decomposition" class="diagram-scroll" tabindex="0" role="region" aria-label="Synthesized gate sequence"></div>
+<div class="gate-key"><span><span class="gate-chip" aria-hidden="true">H</span>Hadamard</span><span><span class="gate-chip" aria-hidden="true">S</span>Phase (Clifford)</span><span><span class="gate-chip t" aria-hidden="true">T</span>T gate · needs one T state</span><span>Read left to right, then row by row; every row continues q0.</span></div>
+</div>
+<div class="info-box stage-box">
+<h3>Error budget: target − synthesis = what is left for T states</h3>
+<p id="p0-equation" class="equation"></p>
+<div class="budget-track" aria-hidden="true"><span class="seg-synthesis" id="p0-synthesis-bar"></span></div>
+<div class="legend"><span><span class="dot empty"></span>Whole bar = target <strong id="p0-target-value">—</strong></span><span><span class="dot purple"></span>Used by synthesis <strong id="p0-synthesis-value">—</strong></span><span><span class="dot empty"></span>Left for T-state errors <strong id="p0-remaining-value">—</strong></span></div>
+<p id="p0-budget-note" class="small"></p>
+</div>
+</div>
+</details>
+
+<details id="p1" class="layer">
+<summary class="layer-summary"><h2 id="p1-heading"><span class="badge">P1</span> Place the circuit and factory in regions</h2><span class="layer-chevron" aria-hidden="true">⌄</span></summary>
+<div class="layer-body">
+<p>The logical machine has two regions. The T-state factory is its own region, so it runs in parallel with compute: it can prepare T states ahead of time, ready whenever the circuit reaches a T gate.</p>
+<div class="region-strip">
+<div class="region cartoon"><h3>Compute region</h3>
+<svg class="cartoon-svg" viewBox="0 0 260 80" role="img" aria-label="The logical qubit q0 with H, S, and T gates applied along its wire, then a measurement"><text x="8" y="40" class="circuit-qubit-label" dominant-baseline="middle">q0</text><line x1="34" y1="40" x2="252" y2="40" class="circuit-wire"/><rect x="48" y="22" width="36" height="36" rx="4" class="circuit-gate-box"/><text x="66" y="40" class="circuit-gate-text">H</text><rect x="98" y="22" width="36" height="36" rx="4" class="circuit-gate-box"/><text x="116" y="40" class="circuit-gate-text">S</text><rect x="148" y="22" width="36" height="36" rx="4" class="circuit-gate-box circuit-t-gate"/><text x="166" y="40" class="circuit-gate-text circuit-t-text">T</text><rect x="200" y="22" width="36" height="36" rx="4" class="circuit-gate-box"/><path d="M207,47 A11,11 0 0 1 229,47" class="circuit-meter"/><line x1="218" y1="47" x2="226" y2="34" class="circuit-meter"/></svg>
+<p class="cartoon-caption">This is where the operations are applied.</p>
+<p id="p1-compute" class="capacity"></p></div>
+<div class="region-transfer"><span id="p1-demand">needs T states — one per T gate</span><svg viewBox="0 0 150 28" role="img" aria-label="T states flow from the factory region to the compute region"><path d="M146 14 H12" stroke="#76b900" stroke-width="2.5"/><path d="M20 5 L8 14 L20 23" fill="none" stroke="#76b900" stroke-width="2.5"/></svg></div>
+<div class="region factory-region cartoon"><h3>Factory region</h3>
+<svg class="cartoon-svg" viewBox="0 0 260 80" role="img" aria-label="Many noisy raw T states enter the T factory and one clean T state comes out"><g class="state-raw"><circle cx="18" cy="18" r="6"/><circle cx="38" cy="12" r="6"/><circle cx="58" cy="20" r="6"/><circle cx="26" cy="40" r="6"/><circle cx="48" cy="40" r="6"/><circle cx="18" cy="62" r="6"/><circle cx="38" cy="66" r="6"/><circle cx="58" cy="60" r="6"/></g><path d="M74 40 H96" class="circuit-wire"/><path d="M96 40 L90 35 M96 40 L90 45" class="circuit-wire"/><rect x="100" y="14" width="88" height="52" rx="6" class="circuit-gate-box"/><text x="144" y="40" class="circuit-gate-text" style="font-size:15px">T factory</text><path d="M188 40 H214" class="circuit-wire"/><path d="M214 40 L208 35 M214 40 L208 45" class="circuit-wire"/><circle cx="236" cy="40" r="11" class="state-out"/><text x="236" y="40" class="circuit-gate-text circuit-t-text" style="font-size:13px">T</text></svg>
+<p class="cartoon-caption">This is where T states are built.</p>
+<p class="capacity">The distillation protocol, and so the batch size, is chosen in P2.</p></div>
+</div>
+<p class="small">T states must be transferred from the factory to compute. On real hardware that costs time and qubits; the overhead is not counted in this exercise.</p>
+</div>
+</details>
+
+<details id="p2" class="layer">
+<summary class="layer-summary"><h2 id="p2-heading"><span class="badge">P2</span> Choose the encoding and factory protocol</h2><span class="layer-chevron" aria-hidden="true">⌄</span></summary>
+<div class="layer-body">
+<p>Both regions use the <strong>rotated surface code</strong>. The code distance d sets how many physical qubits each encoded patch reserves. The factory’s <strong>distillation protocol</strong> sets how many raw T states it consumes, how clean its outputs are, and how many patches it needs. Distillation works by combining many noisy T states through a Clifford circuit and measuring checks that would reveal an error; a batch whose checks all pass is kept, and the rest are thrown away.</p>
+<div class="two-col">
+<div class="encoding">
+<h3>Surface code</h3>
+<div class="label-line"><label for="distance">Code distance</label><output for="distance" id="distance-value"></output></div>
+<div class="slider-wrap"><input id="distance" type="range" min="3" max="9" step="2" value="3" aria-label="Surface-code distance" aria-describedby="distance-help"></div>
+<div class="slider-scale" aria-hidden="true"><span>3</span><span>5</span><span>7</span><span>9</span></div>
+<div class="visual-stage" id="surface-diagram"></div>
+<div class="patch-legend"><span class="data">● Data qubit</span><span class="x">■ X check</span><span class="z">◆ Z check</span><span class="footprint">▢ Reserved footprint</span></div>
+<p id="distance-help" class="result-line"></p>
+<p id="patch-note" class="small"></p>
+</div>
+<div class="encoding">
+<h3>T-state factory</h3>
+<label for="strategy">Distillation protocol<select id="strategy"><option value="15">15 → 1</option><option value="20">20 → 4</option><option value="15-15" selected>15 → 1, then 15 → 1</option><option value="15-20">15 → 1, then 20 → 4</option></select></label>
+<p id="protocol-note" class="small"></p>
+<div id="factory-diagram"></div>
+<div class="legend flow-legend"><span><span class="dot raw"></span>Raw T states</span><span><span class="dot mid"></span>First-stage outputs</span><span><span class="dot"></span>Accepted T states</span></div>
+<div class="capacity-figure"><h4 class="figure-title">Patches declared in the device</h4><div id="capacity-diagram"></div><p id="capacity-note" class="small capacity-caption"></p></div>
+</div>
+</div>
+</div>
+</details>
+
+<details id="p3" class="layer">
+<summary class="layer-summary"><h2 id="p3-heading"><span class="badge">P3</span> Set physical noise and read the schedule</h2><span class="layer-chevron" aria-hidden="true">⌄</span></summary>
+<div class="layer-body">
+<p>Connectivity and timing stay fixed here: 1 µs per surface-code cycle, d cycles per encoded operation, and 10 µs classical reaction time. The one physical input you control is how noisy the raw T states are before distillation.</p>
+<p>The <strong>scheduled duration</strong> is the time for one accepting pass with the factory and compute running in parallel. It matters because the factory sets the pace: the compute patch can only apply a T gate when a T state is ready, so a slow factory leaves it idle, and in a real algorithm that wait repeats for every rotation. Qubits and time are the two sides of the bill, and the factory comparison in the summary shows how one can be traded for the other.</p>
+<div class="info-box noise-box">
+<div class="label-line"><label for="noise">Raw T-state error</label><output for="noise" id="noise-value"></output></div>
+<div class="slider-wrap"><input id="noise" type="range" min="0" max="8" step="1" value="4" aria-label="Raw T-state error probability" aria-describedby="noise-help"></div>
+<div class="slider-scale" aria-hidden="true"><span>10⁻⁴</span><span>10⁻³</span><span>10⁻²</span></div>
+<p id="noise-help" class="small">Probability that one raw T state carries a Z error. Encoded operations, storage, and transfer are ideal in this model, so distance changes qubits and time but not the error bound.</p>
+</div>
+<section id="final-summary" class="final-summary" aria-labelledby="summary-heading">
+<h2 id="summary-heading"><span class="badge badge-purple">Summary</span> Your configuration · P0 to P3</h2>
+<div id="results" aria-live="polite"></div>
+<div id="configuration-summary"></div>
+<div id="breakdown"></div>
+<div class="exercise" role="group" aria-labelledby="exercise-heading">
+<h3 id="exercise-heading">Challenge · Design to a specification</h3>
+<p>Your design requires surface-code distance <strong>d ≥ 7</strong>. Keep the error target at <strong>10⁻⁶</strong> and the raw T-state error at <strong>10⁻³</strong>. Which factory meets the target with at most <strong>4,000 physical qubits</strong> and a scheduled duration of at most <strong>30,000 µs</strong>? Configure it above, then check.</p>
+<p class="small">The distance is a supplied requirement; this ideal-operation error model does not infer it. Compare the four factories and explain the qubit–time trade-off.</p>
+<div class="choice-row"><button id="check-challenge" class="btn-primary">Check my configuration</button><button id="reset" class="btn-secondary">Reset all layers</button></div>
+<p id="challenge-feedback" class="feedback" role="status"></p>
+</div>
+</section>
+</div>
+</details>
+
+<section class="code-launch info-box" aria-labelledby="coding-challenge-heading">
+<h2 id="coding-challenge-heading"><span class="badge badge-secondary">Challenge</span> Budget your own algorithm with AI</h2>
+<p>Here is the CUDA-Q code for the logical capabilities used in your configuration. Use AI to modify it for a small algorithm of your own with several rotations, and compute its error budget, physical qubits, and scheduled duration.</p>
+<button id="view-code" class="btn-primary" aria-haspopup="dialog" aria-controls="code-dialog" aria-describedby="code-readiness" disabled>View your CUDA-Q code</button>
+<p id="code-readiness" class="small" role="status">To enable your code, choose a synthesis tolerance in P0.</p>
+</section>
+
+<footer class="widget-footer">
+<a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
+<a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+</footer>
+<div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+</main>
+<dialog id="code-dialog" aria-labelledby="code-title">
+<div class="dialog-head">
+<h2 id="code-title">CUDA-Q code for your configuration</h2>
+<button id="close-code" class="btn-secondary">Close</button>
+</div>
+<p id="code-selection" class="small"></p>
+<p class="small">Save as a .py file and run in a Python environment with the Python packages <code>cudaq==0.16.0.post1</code> and <code>cudaq-logical==0.1.1.post1</code> installed. The script’s printed JSON matches the widget’s numbers for this configuration.</p>
+<textarea id="code-text" readonly spellcheck="false" aria-label="Complete runnable Python script"></textarea>
+<div class="choice-row">
+<button id="copy-code" class="btn-primary">Copy code</button>
+<button id="download-code" class="btn-secondary">Download .py</button>
+</div>
+<p id="copy-feedback" role="status" class="feedback"></p>
+</dialog>
+<script>const DATA={"versions": {"cudaq": "0.16.0.post1", "cudaq-logical": "0.1.1.post1", "numpy": "2.5.3"}, "hashes": {"runtime.py": "22687fdf249d62b9d05bfb06e8c59e12103a6ff67f530fa2d0206746cb794685", "protocols.py": "f821045c46cddfe010c5a19b9afc4f850c5c9a4d17f1a3b358fa3a447a4bbcc4", "noise.py": "4083bd4161756d54408c2a705526fcf13c68ec32dd816586c4dd64594781bf14", "../runtime.py": "cb572d7d05e6bfadf5b576c4db017b6f9a30bcad98270cc1013b1e53580a11d8"}, "choices": {"15": {"label": "15 \u2192 1", "inputs": 15, "outputs": 1, "work": 5, "storage": 0, "first": 0, "checks": 4, "rotations": 11, "raw_lanes": 15}, "20": {"label": "20 \u2192 4", "inputs": 20, "outputs": 4, "work": 7, "storage": 0, "first": 0, "checks": 3, "rotations": 17, "raw_lanes": 20}, "15-15": {"label": "15 \u2192 1, then 15 \u2192 1", "inputs": 225, "outputs": 1, "work": 5, "storage": 15, "first": 15, "checks": 64, "rotations": 176, "raw_lanes": 15}, "15-20": {"label": "15 \u2192 1, then 20 \u2192 4", "inputs": 300, "outputs": 4, "work": 7, "storage": 20, "first": 20, "checks": 83, "rotations": 237, "raw_lanes": 15}}, "enumerators": {"15": [[1, 0], [0, 0], [0, 0], [0, 35], [105, 0], [0, 168], [280, 0], [0, 435], [435, 0], [0, 280], [168, 0], [0, 105], [35, 0], [0, 0], [0, 0], [0, 1]], "20": [[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 3, 0, 3, 3, 0, 0, 3, 3, 0, 3, 0, 0, 4], [0, 22, 22, 0, 22, 0, 0, 18, 22, 0, 0, 18, 0, 18, 18, 0], [80, 0, 0, 72, 0, 72, 72, 0, 0, 72, 72, 0, 72, 0, 0, 77], [0, 222, 222, 0, 222, 0, 0, 250, 222, 0, 0, 250, 0, 250, 250, 0], [588, 0, 0, 628, 0, 628, 628, 0, 0, 628, 628, 0, 628, 0, 0, 580], [0, 1262, 1262, 0, 1262, 0, 0, 1178, 1262, 0, 0, 1178, 0, 1178, 1178, 0], [2026, 0, 0, 1912, 0, 1912, 1912, 0, 0, 1912, 1912, 0, 1912, 0, 0, 2040], [0, 2550, 2550, 0, 2550, 0, 0, 2690, 2550, 0, 0, 2690, 0, 2690, 2690, 0], [2796, 0, 0, 2962, 0, 2962, 2962, 0, 0, 2962, 2962, 0, 2962, 0, 0, 2796], [0, 2690, 2690, 0, 2690, 0, 0, 2550, 2690, 0, 0, 2550, 0, 2550, 2550, 0], [2040, 0, 0, 1912, 0, 1912, 1912, 0, 0, 1912, 1912, 0, 1912, 0, 0, 2026], [0, 1178, 1178, 0, 1178, 0, 0, 1262, 1178, 0, 0, 1262, 0, 1262, 1262, 0], [580, 0, 0, 628, 0, 628, 628, 0, 0, 628, 628, 0, 628, 0, 0, 588], [0, 250, 250, 0, 250, 0, 0, 222, 250, 0, 0, 222, 0, 222, 222, 0], [77, 0, 0, 72, 0, 72, 72, 0, 0, 72, 72, 0, 72, 0, 0, 80], [0, 18, 18, 0, 18, 0, 0, 22, 18, 0, 0, 22, 0, 22, 22, 0], [4, 0, 0, 3, 0, 3, 3, 0, 0, 3, 3, 0, 3, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]}, "synthesis": [{"precision": 0.0001, "error": 9.882874523671074e-05, "t_count": 40, "gates": ["s", "s", "s", "h", "s", "s", "h", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "h", "s"]}, {"precision": 1e-06, "error": 7.984011145082899e-07, "t_count": 60, "gates": ["s", "s", "s", "h", "s", "s", "s", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "t", "h", "s", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "t", "h", "t", "h", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "t", "h", "s", "t", "h", "s", "t", "h", "s", "t", "h", "t", "h", "s", "t", "h", "t", "h", "h", "s"]}], "cases": [{"precision": 0.0001, "distance": 3, "choice": "15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 600, "patch_qubits": 32, "factory_patches": 5, "compute_qubits": 32, "factory_qubits": 175, "physical_qubits": 207, "checks": 160, "rotations": 480, "schedule_ns": 1588000.0, "time_us": 1588.0}, {"precision": 0.0001, "distance": 3, "choice": "20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 200, "patch_qubits": 32, "factory_patches": 7, "compute_qubits": 32, "factory_qubits": 244, "physical_qubits": 276, "checks": 30, "rotations": 210, "schedule_ns": 625000.0, "time_us": 625.0}, {"precision": 0.0001, "distance": 3, "choice": "15-15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 9000, "patch_qubits": 32, "factory_patches": 20, "compute_qubits": 32, "factory_qubits": 655, "physical_qubits": 687, "checks": 2560, "rotations": 7080, "schedule_ns": 24791000.0, "time_us": 24791.0}, {"precision": 0.0001, "distance": 3, "choice": "15-20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 3000, "patch_qubits": 32, "factory_patches": 27, "compute_qubits": 32, "factory_qubits": 879, "physical_qubits": 911, "checks": 830, "rotations": 2410, "schedule_ns": 8219000.0, "time_us": 8219.0}, {"precision": 0.0001, "distance": 5, "choice": "15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 600, "patch_qubits": 72, "factory_patches": 5, "compute_qubits": 72, "factory_qubits": 375, "physical_qubits": 447, "checks": 160, "rotations": 480, "schedule_ns": 2636000.0, "time_us": 2636.0}, {"precision": 0.0001, "distance": 5, "choice": "20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 200, "patch_qubits": 72, "factory_patches": 7, "compute_qubits": 72, "factory_qubits": 524, "physical_qubits": 596, "checks": 30, "rotations": 210, "schedule_ns": 1025000.0, "time_us": 1025.0}, {"precision": 0.0001, "distance": 5, "choice": "15-15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 9000, "patch_qubits": 72, "factory_patches": 20, "compute_qubits": 72, "factory_qubits": 1455, "physical_qubits": 1527, "checks": 2560, "rotations": 7080, "schedule_ns": 41281000.0, "time_us": 41281.0}, {"precision": 0.0001, "distance": 5, "choice": "15-20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 3000, "patch_qubits": 72, "factory_patches": 27, "compute_qubits": 72, "factory_qubits": 1959, "physical_qubits": 2031, "checks": 830, "rotations": 2410, "schedule_ns": 13675000.0, "time_us": 13675.0}, {"precision": 0.0001, "distance": 7, "choice": "15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 600, "patch_qubits": 128, "factory_patches": 5, "compute_qubits": 128, "factory_qubits": 655, "physical_qubits": 783, "checks": 160, "rotations": 480, "schedule_ns": 3684000.0, "time_us": 3684.0}, {"precision": 0.0001, "distance": 7, "choice": "20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 200, "patch_qubits": 128, "factory_patches": 7, "compute_qubits": 128, "factory_qubits": 916, "physical_qubits": 1044, "checks": 30, "rotations": 210, "schedule_ns": 1425000.0, "time_us": 1425.0}, {"precision": 0.0001, "distance": 7, "choice": "15-15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 9000, "patch_qubits": 128, "factory_patches": 20, "compute_qubits": 128, "factory_qubits": 2575, "physical_qubits": 2703, "checks": 2560, "rotations": 7080, "schedule_ns": 57771000.0, "time_us": 57771.0}, {"precision": 0.0001, "distance": 7, "choice": "15-20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 3000, "patch_qubits": 128, "factory_patches": 27, "compute_qubits": 128, "factory_qubits": 3471, "physical_qubits": 3599, "checks": 830, "rotations": 2410, "schedule_ns": 19131000.0, "time_us": 19131.0}, {"precision": 0.0001, "distance": 9, "choice": "15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 600, "patch_qubits": 200, "factory_patches": 5, "compute_qubits": 200, "factory_qubits": 1015, "physical_qubits": 1215, "checks": 160, "rotations": 480, "schedule_ns": 4732000.0, "time_us": 4732.0}, {"precision": 0.0001, "distance": 9, "choice": "20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 200, "patch_qubits": 200, "factory_patches": 7, "compute_qubits": 200, "factory_qubits": 1420, "physical_qubits": 1620, "checks": 30, "rotations": 210, "schedule_ns": 1825000.0, "time_us": 1825.0}, {"precision": 0.0001, "distance": 9, "choice": "15-15", "t_count": 40, "clifford_count": 66, "batches": 40, "produced": 40, "unused": 0, "raw_inputs": 9000, "patch_qubits": 200, "factory_patches": 20, "compute_qubits": 200, "factory_qubits": 4015, "physical_qubits": 4215, "checks": 2560, "rotations": 7080, "schedule_ns": 74261000.0, "time_us": 74261.0}, {"precision": 0.0001, "distance": 9, "choice": "15-20", "t_count": 40, "clifford_count": 66, "batches": 10, "produced": 40, "unused": 0, "raw_inputs": 3000, "patch_qubits": 200, "factory_patches": 27, "compute_qubits": 200, "factory_qubits": 5415, "physical_qubits": 5615, "checks": 830, "rotations": 2410, "schedule_ns": 24587000.0, "time_us": 24587.0}, {"precision": 1e-06, "distance": 3, "choice": "15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 900, "patch_qubits": 32, "factory_patches": 5, "compute_qubits": 32, "factory_qubits": 175, "physical_qubits": 207, "checks": 240, "rotations": 720, "schedule_ns": 2368000.0, "time_us": 2368.0}, {"precision": 1e-06, "distance": 3, "choice": "20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 300, "patch_qubits": 32, "factory_patches": 7, "compute_qubits": 32, "factory_qubits": 244, "physical_qubits": 276, "checks": 45, "rotations": 315, "schedule_ns": 908000.0, "time_us": 908.0}, {"precision": 1e-06, "distance": 3, "choice": "15-15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 13500, "patch_qubits": 32, "factory_patches": 20, "compute_qubits": 32, "factory_qubits": 655, "physical_qubits": 687, "checks": 3840, "rotations": 10620, "schedule_ns": 37231000.0, "time_us": 37231.0}, {"precision": 1e-06, "distance": 3, "choice": "15-20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 4500, "patch_qubits": 32, "factory_patches": 27, "compute_qubits": 32, "factory_qubits": 879, "physical_qubits": 911, "checks": 1245, "rotations": 3615, "schedule_ns": 12377000.0, "time_us": 12377.0}, {"precision": 1e-06, "distance": 5, "choice": "15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 900, "patch_qubits": 72, "factory_patches": 5, "compute_qubits": 72, "factory_qubits": 375, "physical_qubits": 447, "checks": 240, "rotations": 720, "schedule_ns": 3936000.0, "time_us": 3936.0}, {"precision": 1e-06, "distance": 5, "choice": "20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 300, "patch_qubits": 72, "factory_patches": 7, "compute_qubits": 72, "factory_qubits": 524, "physical_qubits": 596, "checks": 45, "rotations": 315, "schedule_ns": 1498000.0, "time_us": 1498.0}, {"precision": 1e-06, "distance": 5, "choice": "15-15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 13500, "patch_qubits": 72, "factory_patches": 20, "compute_qubits": 72, "factory_qubits": 1455, "physical_qubits": 1527, "checks": 3840, "rotations": 10620, "schedule_ns": 62001000.0, "time_us": 62001.0}, {"precision": 1e-06, "distance": 5, "choice": "15-20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 4500, "patch_qubits": 72, "factory_patches": 27, "compute_qubits": 72, "factory_qubits": 1959, "physical_qubits": 2031, "checks": 1245, "rotations": 3615, "schedule_ns": 20603000.0, "time_us": 20603.0}, {"precision": 1e-06, "distance": 7, "choice": "15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 900, "patch_qubits": 128, "factory_patches": 5, "compute_qubits": 128, "factory_qubits": 655, "physical_qubits": 783, "checks": 240, "rotations": 720, "schedule_ns": 5504000.0, "time_us": 5504.0}, {"precision": 1e-06, "distance": 7, "choice": "20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 300, "patch_qubits": 128, "factory_patches": 7, "compute_qubits": 128, "factory_qubits": 916, "physical_qubits": 1044, "checks": 45, "rotations": 315, "schedule_ns": 2088000.0, "time_us": 2088.0}, {"precision": 1e-06, "distance": 7, "choice": "15-15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 13500, "patch_qubits": 128, "factory_patches": 20, "compute_qubits": 128, "factory_qubits": 2575, "physical_qubits": 2703, "checks": 3840, "rotations": 10620, "schedule_ns": 86771000.0, "time_us": 86771.0}, {"precision": 1e-06, "distance": 7, "choice": "15-20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 4500, "patch_qubits": 128, "factory_patches": 27, "compute_qubits": 128, "factory_qubits": 3471, "physical_qubits": 3599, "checks": 1245, "rotations": 3615, "schedule_ns": 28829000.0, "time_us": 28829.0}, {"precision": 1e-06, "distance": 9, "choice": "15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 900, "patch_qubits": 200, "factory_patches": 5, "compute_qubits": 200, "factory_qubits": 1015, "physical_qubits": 1215, "checks": 240, "rotations": 720, "schedule_ns": 7072000.0, "time_us": 7072.0}, {"precision": 1e-06, "distance": 9, "choice": "20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 300, "patch_qubits": 200, "factory_patches": 7, "compute_qubits": 200, "factory_qubits": 1420, "physical_qubits": 1620, "checks": 45, "rotations": 315, "schedule_ns": 2678000.0, "time_us": 2678.0}, {"precision": 1e-06, "distance": 9, "choice": "15-15", "t_count": 60, "clifford_count": 96, "batches": 60, "produced": 60, "unused": 0, "raw_inputs": 13500, "patch_qubits": 200, "factory_patches": 20, "compute_qubits": 200, "factory_qubits": 4015, "physical_qubits": 4215, "checks": 3840, "rotations": 10620, "schedule_ns": 111482000.0, "time_us": 111482.0}, {"precision": 1e-06, "distance": 9, "choice": "15-20", "t_count": 60, "clifford_count": 96, "batches": 15, "produced": 60, "unused": 0, "raw_inputs": 4500, "patch_qubits": 200, "factory_patches": 27, "compute_qubits": 200, "factory_qubits": 5415, "physical_qubits": 5615, "checks": 1245, "rotations": 3615, "schedule_ns": 37055000.0, "time_us": 37055.0}]};const GEOMETRY={"source": "cudaq.logical.architecture.geometry.rotated_surface_lattice; matched to surface.definitions(d).code.hx/hz", "version": "0.1.1.post1", "source_sha256": "ab214de5f6063f732e858f1d8b9c4f0e3f757106f7cf44e636af1d5228d622ec", "distances": {"3": {"coordinates": [[1, 1], [3, 1], [5, 1], [1, 3], [3, 3], [5, 3], [1, 5], [3, 5], [5, 5]], "faces": [{"support": [0, 1], "coordinate": [2, 0], "basis": "X"}, {"support": [1, 2, 4, 5], "coordinate": [4, 2], "basis": "X"}, {"support": [3, 4, 6, 7], "coordinate": [2, 4], "basis": "X"}, {"support": [7, 8], "coordinate": [4, 6], "basis": "X"}, {"support": [0, 1, 3, 4], "coordinate": [2, 2], "basis": "Z"}, {"support": [2, 5], "coordinate": [6, 2], "basis": "Z"}, {"support": [3, 6], "coordinate": [0, 4], "basis": "Z"}, {"support": [4, 5, 7, 8], "coordinate": [4, 4], "basis": "Z"}], "data_qubits": 9, "checks": 8, "logical_qubits": 1, "patch_qubits": 32}, "5": {"coordinates": [[1, 1], [3, 1], [5, 1], [7, 1], [9, 1], [1, 3], [3, 3], [5, 3], [7, 3], [9, 3], [1, 5], [3, 5], [5, 5], [7, 5], [9, 5], [1, 7], [3, 7], [5, 7], [7, 7], [9, 7], [1, 9], [3, 9], [5, 9], [7, 9], [9, 9]], "faces": [{"support": [0, 1], "coordinate": [2, 0], "basis": "X"}, {"support": [2, 3], "coordinate": [6, 0], "basis": "X"}, {"support": [1, 2, 6, 7], "coordinate": [4, 2], "basis": "X"}, {"support": [3, 4, 8, 9], "coordinate": [8, 2], "basis": "X"}, {"support": [5, 6, 10, 11], "coordinate": [2, 4], "basis": "X"}, {"support": [7, 8, 12, 13], "coordinate": [6, 4], "basis": "X"}, {"support": [11, 12, 16, 17], "coordinate": [4, 6], "basis": "X"}, {"support": [13, 14, 18, 19], "coordinate": [8, 6], "basis": "X"}, {"support": [15, 16, 20, 21], "coordinate": [2, 8], "basis": "X"}, {"support": [17, 18, 22, 23], "coordinate": [6, 8], "basis": "X"}, {"support": [21, 22], "coordinate": [4, 10], "basis": "X"}, {"support": [23, 24], "coordinate": [8, 10], "basis": "X"}, {"support": [0, 1, 5, 6], "coordinate": [2, 2], "basis": "Z"}, {"support": [2, 3, 7, 8], "coordinate": [6, 2], "basis": "Z"}, {"support": [4, 9], "coordinate": [10, 2], "basis": "Z"}, {"support": [5, 10], "coordinate": [0, 4], "basis": "Z"}, {"support": [6, 7, 11, 12], "coordinate": [4, 4], "basis": "Z"}, {"support": [8, 9, 13, 14], "coordinate": [8, 4], "basis": "Z"}, {"support": [10, 11, 15, 16], "coordinate": [2, 6], "basis": "Z"}, {"support": [12, 13, 17, 18], "coordinate": [6, 6], "basis": "Z"}, {"support": [14, 19], "coordinate": [10, 6], "basis": "Z"}, {"support": [15, 20], "coordinate": [0, 8], "basis": "Z"}, {"support": [16, 17, 21, 22], "coordinate": [4, 8], "basis": "Z"}, {"support": [18, 19, 23, 24], "coordinate": [8, 8], "basis": "Z"}], "data_qubits": 25, "checks": 24, "logical_qubits": 1, "patch_qubits": 72}, "7": {"coordinates": [[1, 1], [3, 1], [5, 1], [7, 1], [9, 1], [11, 1], [13, 1], [1, 3], [3, 3], [5, 3], [7, 3], [9, 3], [11, 3], [13, 3], [1, 5], [3, 5], [5, 5], [7, 5], [9, 5], [11, 5], [13, 5], [1, 7], [3, 7], [5, 7], [7, 7], [9, 7], [11, 7], [13, 7], [1, 9], [3, 9], [5, 9], [7, 9], [9, 9], [11, 9], [13, 9], [1, 11], [3, 11], [5, 11], [7, 11], [9, 11], [11, 11], [13, 11], [1, 13], [3, 13], [5, 13], [7, 13], [9, 13], [11, 13], [13, 13]], "faces": [{"support": [0, 1], "coordinate": [2, 0], "basis": "X"}, {"support": [2, 3], "coordinate": [6, 0], "basis": "X"}, {"support": [4, 5], "coordinate": [10, 0], "basis": "X"}, {"support": [1, 2, 8, 9], "coordinate": [4, 2], "basis": "X"}, {"support": [3, 4, 10, 11], "coordinate": [8, 2], "basis": "X"}, {"support": [5, 6, 12, 13], "coordinate": [12, 2], "basis": "X"}, {"support": [7, 8, 14, 15], "coordinate": [2, 4], "basis": "X"}, {"support": [9, 10, 16, 17], "coordinate": [6, 4], "basis": "X"}, {"support": [11, 12, 18, 19], "coordinate": [10, 4], "basis": "X"}, {"support": [15, 16, 22, 23], "coordinate": [4, 6], "basis": "X"}, {"support": [17, 18, 24, 25], "coordinate": [8, 6], "basis": "X"}, {"support": [19, 20, 26, 27], "coordinate": [12, 6], "basis": "X"}, {"support": [21, 22, 28, 29], "coordinate": [2, 8], "basis": "X"}, {"support": [23, 24, 30, 31], "coordinate": [6, 8], "basis": "X"}, {"support": [25, 26, 32, 33], "coordinate": [10, 8], "basis": "X"}, {"support": [29, 30, 36, 37], "coordinate": [4, 10], "basis": "X"}, {"support": [31, 32, 38, 39], "coordinate": [8, 10], "basis": "X"}, {"support": [33, 34, 40, 41], "coordinate": [12, 10], "basis": "X"}, {"support": [35, 36, 42, 43], "coordinate": [2, 12], "basis": "X"}, {"support": [37, 38, 44, 45], "coordinate": [6, 12], "basis": "X"}, {"support": [39, 40, 46, 47], "coordinate": [10, 12], "basis": "X"}, {"support": [43, 44], "coordinate": [4, 14], "basis": "X"}, {"support": [45, 46], "coordinate": [8, 14], "basis": "X"}, {"support": [47, 48], "coordinate": [12, 14], "basis": "X"}, {"support": [0, 1, 7, 8], "coordinate": [2, 2], "basis": "Z"}, {"support": [2, 3, 9, 10], "coordinate": [6, 2], "basis": "Z"}, {"support": [4, 5, 11, 12], "coordinate": [10, 2], "basis": "Z"}, {"support": [6, 13], "coordinate": [14, 2], "basis": "Z"}, {"support": [7, 14], "coordinate": [0, 4], "basis": "Z"}, {"support": [8, 9, 15, 16], "coordinate": [4, 4], "basis": "Z"}, {"support": [10, 11, 17, 18], "coordinate": [8, 4], "basis": "Z"}, {"support": [12, 13, 19, 20], "coordinate": [12, 4], "basis": "Z"}, {"support": [14, 15, 21, 22], "coordinate": [2, 6], "basis": "Z"}, {"support": [16, 17, 23, 24], "coordinate": [6, 6], "basis": "Z"}, {"support": [18, 19, 25, 26], "coordinate": [10, 6], "basis": "Z"}, {"support": [20, 27], "coordinate": [14, 6], "basis": "Z"}, {"support": [21, 28], "coordinate": [0, 8], "basis": "Z"}, {"support": [22, 23, 29, 30], "coordinate": [4, 8], "basis": "Z"}, {"support": [24, 25, 31, 32], "coordinate": [8, 8], "basis": "Z"}, {"support": [26, 27, 33, 34], "coordinate": [12, 8], "basis": "Z"}, {"support": [28, 29, 35, 36], "coordinate": [2, 10], "basis": "Z"}, {"support": [30, 31, 37, 38], "coordinate": [6, 10], "basis": "Z"}, {"support": [32, 33, 39, 40], "coordinate": [10, 10], "basis": "Z"}, {"support": [34, 41], "coordinate": [14, 10], "basis": "Z"}, {"support": [35, 42], "coordinate": [0, 12], "basis": "Z"}, {"support": [36, 37, 43, 44], "coordinate": [4, 12], "basis": "Z"}, {"support": [38, 39, 45, 46], "coordinate": [8, 12], "basis": "Z"}, {"support": [40, 41, 47, 48], "coordinate": [12, 12], "basis": "Z"}], "data_qubits": 49, "checks": 48, "logical_qubits": 1, "patch_qubits": 128}, "9": {"coordinates": [[1, 1], [3, 1], [5, 1], [7, 1], [9, 1], [11, 1], [13, 1], [15, 1], [17, 1], [1, 3], [3, 3], [5, 3], [7, 3], [9, 3], [11, 3], [13, 3], [15, 3], [17, 3], [1, 5], [3, 5], [5, 5], [7, 5], [9, 5], [11, 5], [13, 5], [15, 5], [17, 5], [1, 7], [3, 7], [5, 7], [7, 7], [9, 7], [11, 7], [13, 7], [15, 7], [17, 7], [1, 9], [3, 9], [5, 9], [7, 9], [9, 9], [11, 9], [13, 9], [15, 9], [17, 9], [1, 11], [3, 11], [5, 11], [7, 11], [9, 11], [11, 11], [13, 11], [15, 11], [17, 11], [1, 13], [3, 13], [5, 13], [7, 13], [9, 13], [11, 13], [13, 13], [15, 13], [17, 13], [1, 15], [3, 15], [5, 15], [7, 15], [9, 15], [11, 15], [13, 15], [15, 15], [17, 15], [1, 17], [3, 17], [5, 17], [7, 17], [9, 17], [11, 17], [13, 17], [15, 17], [17, 17]], "faces": [{"support": [0, 1], "coordinate": [2, 0], "basis": "X"}, {"support": [2, 3], "coordinate": [6, 0], "basis": "X"}, {"support": [4, 5], "coordinate": [10, 0], "basis": "X"}, {"support": [6, 7], "coordinate": [14, 0], "basis": "X"}, {"support": [1, 2, 10, 11], "coordinate": [4, 2], "basis": "X"}, {"support": [3, 4, 12, 13], "coordinate": [8, 2], "basis": "X"}, {"support": [5, 6, 14, 15], "coordinate": [12, 2], "basis": "X"}, {"support": [7, 8, 16, 17], "coordinate": [16, 2], "basis": "X"}, {"support": [9, 10, 18, 19], "coordinate": [2, 4], "basis": "X"}, {"support": [11, 12, 20, 21], "coordinate": [6, 4], "basis": "X"}, {"support": [13, 14, 22, 23], "coordinate": [10, 4], "basis": "X"}, {"support": [15, 16, 24, 25], "coordinate": [14, 4], "basis": "X"}, {"support": [19, 20, 28, 29], "coordinate": [4, 6], "basis": "X"}, {"support": [21, 22, 30, 31], "coordinate": [8, 6], "basis": "X"}, {"support": [23, 24, 32, 33], "coordinate": [12, 6], "basis": "X"}, {"support": [25, 26, 34, 35], "coordinate": [16, 6], "basis": "X"}, {"support": [27, 28, 36, 37], "coordinate": [2, 8], "basis": "X"}, {"support": [29, 30, 38, 39], "coordinate": [6, 8], "basis": "X"}, {"support": [31, 32, 40, 41], "coordinate": [10, 8], "basis": "X"}, {"support": [33, 34, 42, 43], "coordinate": [14, 8], "basis": "X"}, {"support": [37, 38, 46, 47], "coordinate": [4, 10], "basis": "X"}, {"support": [39, 40, 48, 49], "coordinate": [8, 10], "basis": "X"}, {"support": [41, 42, 50, 51], "coordinate": [12, 10], "basis": "X"}, {"support": [43, 44, 52, 53], "coordinate": [16, 10], "basis": "X"}, {"support": [45, 46, 54, 55], "coordinate": [2, 12], "basis": "X"}, {"support": [47, 48, 56, 57], "coordinate": [6, 12], "basis": "X"}, {"support": [49, 50, 58, 59], "coordinate": [10, 12], "basis": "X"}, {"support": [51, 52, 60, 61], "coordinate": [14, 12], "basis": "X"}, {"support": [55, 56, 64, 65], "coordinate": [4, 14], "basis": "X"}, {"support": [57, 58, 66, 67], "coordinate": [8, 14], "basis": "X"}, {"support": [59, 60, 68, 69], "coordinate": [12, 14], "basis": "X"}, {"support": [61, 62, 70, 71], "coordinate": [16, 14], "basis": "X"}, {"support": [63, 64, 72, 73], "coordinate": [2, 16], "basis": "X"}, {"support": [65, 66, 74, 75], "coordinate": [6, 16], "basis": "X"}, {"support": [67, 68, 76, 77], "coordinate": [10, 16], "basis": "X"}, {"support": [69, 70, 78, 79], "coordinate": [14, 16], "basis": "X"}, {"support": [73, 74], "coordinate": [4, 18], "basis": "X"}, {"support": [75, 76], "coordinate": [8, 18], "basis": "X"}, {"support": [77, 78], "coordinate": [12, 18], "basis": "X"}, {"support": [79, 80], "coordinate": [16, 18], "basis": "X"}, {"support": [0, 1, 9, 10], "coordinate": [2, 2], "basis": "Z"}, {"support": [2, 3, 11, 12], "coordinate": [6, 2], "basis": "Z"}, {"support": [4, 5, 13, 14], "coordinate": [10, 2], "basis": "Z"}, {"support": [6, 7, 15, 16], "coordinate": [14, 2], "basis": "Z"}, {"support": [8, 17], "coordinate": [18, 2], "basis": "Z"}, {"support": [9, 18], "coordinate": [0, 4], "basis": "Z"}, {"support": [10, 11, 19, 20], "coordinate": [4, 4], "basis": "Z"}, {"support": [12, 13, 21, 22], "coordinate": [8, 4], "basis": "Z"}, {"support": [14, 15, 23, 24], "coordinate": [12, 4], "basis": "Z"}, {"support": [16, 17, 25, 26], "coordinate": [16, 4], "basis": "Z"}, {"support": [18, 19, 27, 28], "coordinate": [2, 6], "basis": "Z"}, {"support": [20, 21, 29, 30], "coordinate": [6, 6], "basis": "Z"}, {"support": [22, 23, 31, 32], "coordinate": [10, 6], "basis": "Z"}, {"support": [24, 25, 33, 34], "coordinate": [14, 6], "basis": "Z"}, {"support": [26, 35], "coordinate": [18, 6], "basis": "Z"}, {"support": [27, 36], "coordinate": [0, 8], "basis": "Z"}, {"support": [28, 29, 37, 38], "coordinate": [4, 8], "basis": "Z"}, {"support": [30, 31, 39, 40], "coordinate": [8, 8], "basis": "Z"}, {"support": [32, 33, 41, 42], "coordinate": [12, 8], "basis": "Z"}, {"support": [34, 35, 43, 44], "coordinate": [16, 8], "basis": "Z"}, {"support": [36, 37, 45, 46], "coordinate": [2, 10], "basis": "Z"}, {"support": [38, 39, 47, 48], "coordinate": [6, 10], "basis": "Z"}, {"support": [40, 41, 49, 50], "coordinate": [10, 10], "basis": "Z"}, {"support": [42, 43, 51, 52], "coordinate": [14, 10], "basis": "Z"}, {"support": [44, 53], "coordinate": [18, 10], "basis": "Z"}, {"support": [45, 54], "coordinate": [0, 12], "basis": "Z"}, {"support": [46, 47, 55, 56], "coordinate": [4, 12], "basis": "Z"}, {"support": [48, 49, 57, 58], "coordinate": [8, 12], "basis": "Z"}, {"support": [50, 51, 59, 60], "coordinate": [12, 12], "basis": "Z"}, {"support": [52, 53, 61, 62], "coordinate": [16, 12], "basis": "Z"}, {"support": [54, 55, 63, 64], "coordinate": [2, 14], "basis": "Z"}, {"support": [56, 57, 65, 66], "coordinate": [6, 14], "basis": "Z"}, {"support": [58, 59, 67, 68], "coordinate": [10, 14], "basis": "Z"}, {"support": [60, 61, 69, 70], "coordinate": [14, 14], "basis": "Z"}, {"support": [62, 71], "coordinate": [18, 14], "basis": "Z"}, {"support": [63, 72], "coordinate": [0, 16], "basis": "Z"}, {"support": [64, 65, 73, 74], "coordinate": [4, 16], "basis": "Z"}, {"support": [66, 67, 75, 76], "coordinate": [8, 16], "basis": "Z"}, {"support": [68, 69, 77, 78], "coordinate": [12, 16], "basis": "Z"}, {"support": [70, 71, 79, 80], "coordinate": [16, 16], "basis": "Z"}], "data_qubits": 81, "checks": 80, "logical_qubits": 1, "patch_qubits": 200}}};const RUNTIME="# Portions adapted from NVIDIA CUDA-Q, Copyright (c) 2026 NVIDIA Corporation\n# & Affiliates, Apache-2.0. See LICENSE and research/revision.json.\n\"\"\"Executable model for the rotation-cost widget.\n\nSection 1: shared surface-patch definitions and timing (from the upstream\n           Gidney-Ekera factory example).\nSection 2: the lesson's 20-to-4 protocol constants (Litinski Fig. 4).\nSection 3: compile one synthesized rotation against explicit factory batches\n           and estimate qubits and scheduled duration (P0 to P3).\nSection 4: exact classical fault propagation for independent raw Z errors.\n\nAll schedules describe one accepting pass with no sampled faults or retries.\nThe noise model audits the distillation circuits analytically; it is not a\nphysical surface-code simulation.\n\"\"\"\nimport functools\nimport json\nimport math\nfrom pathlib import Path\nfrom types import SimpleNamespace\n\nimport cudaq.logical as cql\n\n\n# ---------------------------------------------------------------------------\n# Section 1: shared building blocks\n# ---------------------------------------------------------------------------\n@cql.program\ndef rotation(theta: float) -> bool:\n    q = cql.allocate(1, state=cql.types.zero, name=\"data\")\n    q[0] = cql.ry(q[0], theta)\n    return cql.measure_z(q[0])\n\n\ndef product_z(values, support):\n    product = cql.types.Z(values[support[0]][0])\n    for index in support[1:]:\n        product = product @ cql.types.Z(values[index][0])\n    return product\n\n\ndef advance(values, product, successors):\n    for factor, successor in zip(product.factors, successors, strict=True):\n        owner = getattr(factor.operand, \"patch\", factor.operand)\n        index = next(i for i, value in enumerate(values) if value is owner)\n        values[index] = successor\n\n\n@functools.cache\ndef surface_definitions(distance):\n    surface = cql.architectures.surface.definitions(distance)\n    code = surface.code\n\n    @cql.protocol(implements=cql.logical.produce(cql.logical.RAW_T_STATE))\n    def raw_injection() -> cql.types.resource[cql.logical.RAW_T_STATE]:\n        # Explicit physical leaf, following the shipped factory example.\n        return cql.produce(cql.logical.RAW_T_STATE)\n\n    @cql.protocol(implements=cql.logical.produce(cql.logical.T_STATE))\n    def one_round() -> cql.types.resource[cql.logical.T_STATE]:\n        raw = cql.request_many(cql.logical.RAW_T_STATE, count=15)\n        output = surface.prepare_plus(cql.allocate_patch(code, region=\"factory\"))\n        checks = []\n        for state in raw[:4]:\n            output, check = cql.unpack_resource(state, like=output, encoding=code)\n            checks.append(check)\n        values = [*checks, output]\n        for state, support in zip(raw[4:], cql.protocols.FIFTEEN_TO_ONE_ROTATION_SUPPORTS):\n            product = product_z(values, support)\n            advance(values, product, cql.resource_rotate(state, product, angle=cql.algebra.pi / 4))\n        values[4] = surface.fold_s(values[4])\n        for check in values[:4]:\n            cql.postselect(surface.measure_x(check), expected=False)\n        return cql.pack_resource(values[4], kind=cql.logical.T_STATE)\n\n    @cql.protocol(implements=cql.logical.produce(cql.logical.T_STATE))\n    def two_rounds() -> cql.types.resource[cql.logical.T_STATE]:\n        # A batch of 15 first-round outputs feeds the same 5-row circuit.\n        # Reserve 20 factory patches: 15 stored inputs plus a 5-patch work area.\n        # This is a transparent capacity choice, not a minimum-area claim.\n        distilled = tuple(one_round() for _ in range(15))\n        output = surface.prepare_plus(cql.allocate_patch(code, region=\"factory\"))\n        checks = []\n        for state in distilled[:4]:\n            output, check = cql.unpack_resource(state, like=output, encoding=code)\n            checks.append(check)\n        values = [*checks, output]\n        for state, support in zip(distilled[4:], cql.protocols.FIFTEEN_TO_ONE_ROTATION_SUPPORTS):\n            product = product_z(values, support)\n            advance(values, product, cql.resource_rotate(state, product, angle=cql.algebra.pi / 4))\n        values[4] = surface.fold_s(values[4])\n        for check in values[:4]:\n            cql.postselect(surface.measure_x(check), expected=False)\n        return cql.pack_resource(values[4], kind=cql.logical.T_STATE)\n\n    @cql.gadget(implements=cql.logical.t)\n    def inject(q: cql.patch[code], state: cql.types.resource[cql.logical.T_STATE]) -> cql.patch[code]:\n        q, = cql.resource_rotate(state, cql.types.Z(q[0]), angle=cql.algebra.pi / 4)\n        return q\n\n    return surface, raw_injection, one_round, two_rounds, inject\n\n\ndef patch_options(surface):\n    return dict(granularity=cql.architecture.ResourceGranularity.PATCH,\n                footprint=surface.square_patch_footprint,\n                native_actions=cql.architecture.physical_actions.clifford_set(),\n                native_instruments=(cql.architecture.physical_instruments.MX,\n                                    cql.architecture.physical_instruments.MZ,\n                                    cql.architecture.physical_instruments.MPP))\n\n\ndef timing(distance):\n    # Same distance-qualified macro convention as the upstream factory example.\n    layer = distance * 1000.0\n    durations = {key: layer for key in (\n        \"prepare_ns\", \"h_ns\", \"cx_ns\", \"cz_ns\", \"mpp_ns\", \"rpp_ns\",\n        \"resource_rpp_ns\", \"measure_z_instrument_ns\", \"measure_x_instrument_ns\", \"reset_ns\")}\n    durations.update(x_ns=0., z_ns=0., pack_resource_ns=0., unpack_resource_ns=0.)\n    return cql.devices.TimingModel(\n        {\"surface_cycle_ns\": 1000., \"reaction_time_ns\": 10000.,\n         \"condition_ns\": 10000., \"postselect_ns\": 10000., \"xor_ns\": 0.},\n        by_code_distance={distance: durations},\n        source=\"Illustrative upstream surface patch macro model: 1 us code cycle, d cycles per encoded layer, 10 us reaction\")\n\n\n\n# Namespace so Section 3 can reuse these pieces under one name.\nbase = SimpleNamespace(rotation=rotation, surface_definitions=surface_definitions,\n                       patch_options=patch_options, timing=timing,\n                       product_z=product_z, advance=advance)\n\n\n# ---------------------------------------------------------------------------\n# Section 2: 20-to-4 protocol (Litinski Fig. 4)\n# ---------------------------------------------------------------------------\n# Rows 0..3 are outputs; rows 4..6 are X checks. CUDA-Q uses\n# exp(-i theta P/2); the author's supplement uses exp(+i pi P/8).\n# See research/twolevel20to4.py and https://arxiv.org/abs/1905.06903.\nSUPPORTS20 = (\n    (4,), (5,), (6,), (0, 4, 5), (4, 5, 6), (0, 5, 6),\n    (0, 4, 6), (1, 4, 5), (0, 1, 2, 3, 5), (1, 4, 6),\n    (0, 1, 2, 3, 4), (1, 5, 6), (0, 1, 2, 3, 4, 5, 6),\n    (2, 4, 5), (0, 1, 2, 3, 6), (2, 4, 6), (2, 5, 6),\n    (3, 4, 5), (3, 4, 6), (3, 5, 6),\n)\nANGLE_SIGNS20 = tuple(1 if i in (0, 1, 2, 4) else -1 for i in range(20))\nCHOICES = {\n    '15': dict(label='15 → 1', inputs=15, outputs=1, work=5, storage=0, first=0, checks=4, rotations=11, raw_lanes=15),\n    '20': dict(label='20 → 4', inputs=20, outputs=4, work=7, storage=0, first=0, checks=3, rotations=17, raw_lanes=20),\n    '15-15': dict(label='15 → 1, then 15 → 1', inputs=225, outputs=1, work=5, storage=15, first=15, checks=64, rotations=176, raw_lanes=15),\n    '15-20': dict(label='15 → 1, then 20 → 4', inputs=300, outputs=4, work=7, storage=20, first=20, checks=83, rotations=237, raw_lanes=15),\n}\n\n# ---------------------------------------------------------------------------\n# Section 3: compile the rotation against explicit factory batches\n# ---------------------------------------------------------------------------\n# Allocated surface-patch capacity, not a minimal lattice-surgery layout.\n# P2 and P3 describe an accepting pass; Section 4 accounts for independent\n# raw Z faults and ideal encoded operations, not hardware faults.\n\n\ndef walk(op):\n    yield op\n    for region in op.regions:\n        for block in region.blocks:\n            for child in block.operations:\n                yield from walk(child.operation)\n\n\ndef synthesis(precision):\n    if precision not in (1e-4, 1e-6):\n        raise ValueError('Use synthesis tolerance 1e-4 or 1e-6')\n    source = cql.compile(base.rotation, parameters={'theta': .37})\n    build = cql.compiler.synthesize(source,\n        gate_set=cql.compiler.gate_sets.clifford_t, precision=precision)\n    gates = [str(op.attributes['action']).removeprefix('#qlx.action<').removesuffix('>')\n             for op in walk(build.module.operation) if op.name == 'qlx.apply']\n    assert set(gates) <= {'h', 's', 't'}\n    return source, build, gates\n\n\n@functools.cache\ndef definitions(distance, choice, precision):\n    surface, raw_injection, one, two, inject = base.surface_definitions(distance)\n    code = surface.code\n    spec = CHOICES[choice]\n    _, _, gates = synthesis(precision)\n\n    # Return four distinct linear resources; no scalar service that would\n    # throw away three of the four outputs after every application T gate.\n    @cql.protocol\n    def twenty() -> tuple[cql.types.resource[cql.logical.T_STATE],\n                         cql.types.resource[cql.logical.T_STATE],\n                         cql.types.resource[cql.logical.T_STATE],\n                         cql.types.resource[cql.logical.T_STATE]]:\n        inputs = (tuple(one() for _ in range(20)) if choice == '15-20'\n                  else cql.request_many(cql.logical.RAW_T_STATE, count=20))\n        outputs = [surface.prepare_plus(cql.allocate_patch(code, region='factory')) for _ in range(4)]\n        checks = []\n        # The first three +pi/4 singleton rotations initialize the check\n        # rows directly from input T states, as in NVIDIA's 15-to-1 circuit.\n        for state in inputs[:3]:\n            outputs[0], check = cql.unpack_resource(state, like=outputs[0], encoding=code)\n            checks.append(check)\n        values = [*outputs, *checks]\n        for state, support, sign in zip(inputs[3:], SUPPORTS20[3:], ANGLE_SIGNS20[3:], strict=True):\n            product = base.product_z(values, support)\n            base.advance(values, product, cql.resource_rotate(state, product, angle=sign*cql.algebra.pi/4))\n        for check in values[4:]:\n            cql.postselect(surface.measure_x(check), expected=False)\n        return tuple(cql.pack_resource(q, kind=cql.logical.T_STATE) for q in values[:4])\n\n    producer = one if choice == '15' else two if choice == '15-15' else twenty\n\n    @cql.protocol\n    def application() -> bool:\n        q = surface.prepare_zero(cql.allocate_patch(code, region='compute'))\n        pending = []\n        for gate in gates:\n            if gate == 'h':\n                q = surface.h(q)\n            elif gate == 's':\n                q = surface.fold_s(q)\n            else:\n                if not pending:\n                    pending = list(producer()) if spec['outputs'] == 4 else [producer()]\n                q = inject(q, pending.pop(0))\n        for unused in pending:\n            cql.discard(unused, reason='Unused tail of final four-output batch')\n        return surface.measure_z(q)\n\n    return surface, raw_injection, producer, application\n\n\ndef device_for(distance, choice, precision):\n    surface, raw_injection, producer, application = definitions(distance, choice, precision)\n    spec = CHOICES[choice]\n    patches = spec['work'] + spec['storage']\n    b = cql.devices.DeviceBuilder(f'Compact_{choice}_d{distance}')\n    compute = b.logical.add_compute(capacity=1, name='compute')\n    # Logical factory region with encoded capacity; production is explicitly\n    # in the application body, including all four returned resources.\n    factory = b.logical.add_compute(capacity=patches, name='factory')\n    raw = b.logical.add_factory(produces=cql.logical.RAW_T_STATE,\n        via=raw_injection, capacity=spec['raw_lanes'], name='raw_injection_region')\n    cq = b.qec.bind(compute, encoding=surface.code, block_capacity=1)\n    fq = b.qec.bind(factory, encoding=surface.code, block_capacity=patches)\n    rq = b.qec.bind(raw, encoding=surface.code, block_capacity=spec['raw_lanes'])\n    cp = b.physical.add_resources('surface_code_patch', 1, name='compute_patch', **base.patch_options(surface))\n    fp = b.physical.add_resources('surface_code_patch', patches, name='factory_patches', **base.patch_options(surface))\n    rp = b.physical.add_qubits(spec['raw_lanes'], name='raw_injection_qubits')\n    b.physical.bind(cq, to=cp)\n    b.physical.bind(fq, to=fp)\n    b.physical.bind(rq, to=rp, factory_model=cql.devices.FactoryModel(\n        startup_cycles=1, output_interval_cycles=1,\n        evidence=cql.analysis.user_assertion('Raw T injection physical leaf: one qubit per lane; ideal encoded operations.')))\n    b.physical.set_operating_point(timing=base.timing(distance))\n    return b.build(), application, surface\n\n\ndef run_case(precision=1e-6, distance=3, choice='20', artifacts=None):\n    if precision not in (1e-4, 1e-6) or distance not in (3, 5, 7, 9) or choice not in CHOICES:\n        raise ValueError('Unsupported compact-widget configuration')\n    source, p0, gates = synthesis(precision)\n    spec = CHOICES[choice]\n    device, application, surface = device_for(distance, choice, precision)\n    p2 = cql.compile(application)\n    schedule = cql.compiler.schedule(p2, device=device)\n    counts = cql.estimate(p2, tier=cql.estimate.Tier.STATIC)\n    resources = cql.estimate(schedule, tier=cql.estimate.Tier.SCHEDULE,\n        p_phys=.001, failure_budget=.1, cycle_time=1e-6)\n    # Elapsed scheduled time, including permitted overlap, not summed gate work.\n    # No retry loops or explicit transfer events exist in this accepting-pass model.\n    assert math.isclose(resources.makespan_ns, schedule.makespan_ns, rel_tol=1e-12)\n    assert math.isclose(resources.expected_makespan_ns, resources.makespan_ns, rel_tol=1e-12)\n    assert math.isclose(resources.maximum_makespan_ns, resources.makespan_ns, rel_tol=1e-12)\n    t_count = gates.count('t')\n    batches = (t_count + spec['outputs'] - 1) // spec['outputs']\n    for key, expected in {\n        'resource_request': batches*spec['inputs'],\n        'selection': batches*spec['checks'],\n        'resource_rotate_product': batches*spec['rotations'] + t_count,\n    }.items():\n        assert counts.operation_counts[key] == expected, (key, counts.operation_counts[key], expected)\n    patch = surface.square_patch_footprint.units\n    total_patches = 1 + spec['work'] + spec['storage']\n    assert patch == 2*(distance+1)**2\n    assert resources.physical_qubits == total_patches*patch + spec['raw_lanes']\n    for build in (source, p0, p2, schedule.build):\n        assert build.module.operation.verify()\n    if artifacts:\n        dest = Path(artifacts)\n        dest.mkdir(parents=True, exist_ok=True)\n        for name, build in (('p0',p0), ('p2',p2), ('p3',schedule.build)):\n            (dest/f'{name}.mlir').write_text(build.to_mlir())\n    return dict(precision=precision, distance=distance, choice=choice,\n        t_count=t_count, clifford_count=len(gates)-t_count,\n        batches=batches, produced=batches*spec['outputs'],\n        unused=batches*spec['outputs']-t_count,\n        raw_inputs=batches*spec['inputs'], patch_qubits=patch,\n        factory_patches=total_patches-1, compute_qubits=patch,\n        factory_qubits=(total_patches-1)*patch+spec['raw_lanes'],\n        physical_qubits=resources.physical_qubits,\n        checks=counts.operation_counts['selection'],\n        rotations=counts.operation_counts['resource_rotate_product'],\n        schedule_ns=resources.makespan_ns, time_us=resources.makespan_ns/1000)\n";const NOISE_SOURCE="# ---------------------------------------------------------------------------\n# Section 4: exact fault propagation for independent raw Z errors\n# ---------------------------------------------------------------------------\n# An analytical circuit audit, NOT a physical surface-code noise simulation.\n# Weight enumerators are derived from the executable rotation supports; the\n# integer dynamic programming was checked against exhaustive enumeration.\n\n\ndef weight_enumerator(columns, rows, outputs):\n    \"\"\"Count raw fault subsets by Hamming weight and final propagated Z mask.\"\"\"\n    masks = 1 << rows\n    table = [[0]*masks for _ in range(len(columns)+1)]\n    table[0][0] = 1\n    for n, column in enumerate(columns):\n        for weight in range(n+1, 0, -1):\n            for mask in range(masks):\n                table[weight][mask] += table[weight-1][mask ^ column]\n    # Output bits are low; all other bits are X-check syndromes.\n    return [row[:1 << outputs] for row in table]\n\n\ndef enumerators(supports15):\n    # NVIDIA 15-to-1 uses check-first rows; move output row4 to low bit0.\n    columns15 = [1 << (i+1) for i in range(4)]\n    columns15 += [sum(1 if i == 4 else 1 << (i+1) for i in s) for s in supports15]\n    columns20 = [sum(1 << i for i in s) for s in SUPPORTS20]\n    return {'15': weight_enumerator(columns15, 5, 1),\n            '20': weight_enumerator(columns20, 7, 4)}\n\n\ndef distribution(weights, p):\n    n = len(weights)-1\n    joint = [math.fsum(row[mask]*p**w*(1-p)**(n-w)\n                       for w, row in enumerate(weights)) for mask in range(len(weights[0]))]\n    acceptance = math.fsum(joint)\n    return acceptance, [value/acceptance for value in joint]\n\n\ndef evaluate(tables, choice, p, t_count, synthesis_error, budget):\n    if choice not in CHOICES or not 0 <= p <= .04 or t_count < 1 or not 0 < budget <= 1:\n        raise ValueError('Unsupported noise-model inputs')\n    spec = CHOICES[choice]\n    first_a, first = distribution(tables['15'], p)\n    input_error = first[1] if spec['first'] else p\n    final_a, final = distribution(tables['20' if spec['outputs'] == 4 else '15'], input_error)\n    outputs = spec['outputs']\n    q = [math.fsum(final[mask] for mask in range(len(final)) if mask & ((1 << k)-1))\n         for k in range(outputs+1)]\n    full, remainder = divmod(t_count, outputs)\n    magic = -math.expm1(full*math.log1p(-q[outputs]) + math.log1p(-q[remainder]))\n    # Operational output-state trace-distance bound. Convex mixing of bad\n    # trajectories adds <= P(any bad input); unitary approximation adds <=\n    # the phase-aligned spectral norm. Any final measurement inherits it.\n    total = min(1., synthesis_error + magic)\n    acceptance = first_a**spec['first']*final_a\n    return dict(raw_error=p, final_input_error=input_error,\n        output_error=q[1], batch_error=q[outputs],\n        first_acceptance=first_a if spec['first'] else None,\n        final_acceptance=final_a, batch_acceptance=acceptance,\n        magic_error_bound=magic, synthesis_error=synthesis_error,\n        total_error_bound=total, budget=budget, meets_budget=total <= budget)\n";</script>
+<script>"use strict";
+const $=id=>document.getElementById(id);
+const DEFAULTS={choice:'15-15',precision:null,noise:4,distance:3,budget:6};
+const state={...DEFAULTS};
+const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
+const pow10=n=>`10${n<0?'⁻':''}${[...String(Math.abs(n))].map(d=>SUP[d]).join('')}`;
+const fmt=x=>x===0?'0':x.toExponential(2).replace(/^1\.00e([+-])(\d+)$/,(_,s,n)=>pow10(Number(s+n))).replace(/e([+-])(\d+)/,(_,s,n)=>` × ${pow10(Number(s+n))}`);
+const integer=x=>x.toLocaleString('en-US');
+const us=x=>x.toLocaleString('en-US',{maximumSignificantDigits:2})+' µs';
+const budgetOf=()=>10**-state.budget;
+const rawOf=()=>10**(-4+state.noise*.25);
+const synthesisOf=()=>DATA.synthesis.find(s=>s.precision===state.precision);
+function say(text){$('status-announce').textContent=text;}
+function feedback(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error);}
+
+/* Exact fault propagation for independent raw Z errors (mirrors noise.py). */
+function distribution(weights,p){
+ const n=weights.length-1;
+ const joint=weights[0].map((_,m)=>weights.reduce((s,row,w)=>s+row[m]*p**w*(1-p)**(n-w),0));
+ const acceptance=joint.reduce((s,v)=>s+v,0);
+ return {acceptance,values:joint.map(v=>v/acceptance)};
+}
+function evaluate(choice=state.choice){
+ const spec=DATA.choices[choice],p=rawOf(),budget=budgetOf(),synthesis=synthesisOf();
+ const first=distribution(DATA.enumerators['15'],p);
+ const input=spec.first?first.values[1]:p;
+ const final=distribution(DATA.enumerators[spec.outputs===4?'20':'15'],input);
+ const q=Array.from({length:spec.outputs+1},(_,k)=>final.values.reduce((s,v,m)=>s+((m&((1<<k)-1))?v:0),0));
+ const full=Math.floor(synthesis.t_count/spec.outputs),remainder=synthesis.t_count%spec.outputs;
+ const magic=-Math.expm1(full*Math.log1p(-q[spec.outputs])+Math.log1p(-q[remainder]));
+ const total=Math.min(1,synthesis.error+magic);
+ return {raw_error:p,output_error:q[1],batch_acceptance:first.acceptance**spec.first*final.acceptance,
+  magic_error_bound:magic,synthesis_error:synthesis.error,total_error_bound:total,budget,meets_budget:total<=budget};
+}
+const current=(choice=state.choice)=>DATA.cases.find(c=>c.choice===choice&&c.precision===state.precision&&c.distance===state.distance);
+const ready=()=>state.precision!==null;
+
+/* P0: synthesized gate sequence */
+let circuitKey='';
+function renderCircuit(){
+ const host=$('decomposition');
+ if(!ready()){circuitKey='';host.innerHTML='<p class="pending">Choose a synthesis tolerance ε to compile Rᵧ(0.37) into H, S, and T gates.</p>';return;}
+ const synthesis=synthesisOf(),gates=synthesis.gates;
+ const step=36,box=30,left=52;
+ const cols=Math.max(6,Math.min(gates.length,Math.floor((host.clientWidth-left-16)/step)));
+ const key=`${state.precision}|${cols}`;
+ if(key===circuitKey)return;
+ circuitKey=key;
+ const rows=Math.ceil(gates.length/cols),rowH=44,w=left+cols*step+8,h=rows*rowH+6;
+ let drawing='';
+ for(let row=0;row<rows;row++){
+  const start=row*cols,end=Math.min(start+cols,gates.length),y=rowH/2+row*rowH;
+  drawing+=`<text class="circuit-index" x="2" y="${y}">${start+1}–${end}</text><line class="circuit-wire" x1="${left-6}" y1="${y}" x2="${left+(end-start)*step}" y2="${y}"/>`;
+  for(let i=start;i<end;i++){
+   const g=gates[i],t=g==='t',x=left+(i-start)*step+(step-box)/2;
+   drawing+=`<g><title>${t?'T gate · needs one T state':g.toUpperCase()+' gate (Clifford)'}</title><rect class="circuit-gate-box ${t?'circuit-t-gate':''}" x="${x}" y="${y-box/2}" width="${box}" height="${box}" rx="4"/><text class="circuit-gate-text ${t?'circuit-t-text':''}" x="${x+box/2}" y="${y}">${g.toUpperCase()}</text></g>`;
+  }
+ }
+ host.innerHTML=`<svg class="circuit-svg seq-svg" viewBox="0 0 ${w} ${h}" role="img" aria-labelledby="seq-title seq-desc"><title id="seq-title">${gates.length}-gate Clifford+T approximation of R y 0.37, containing ${synthesis.t_count} T gates</title><desc id="seq-desc">Read left to right, then top to bottom; every row continues qubit q0. Gate order: ${gates.map(g=>g.toUpperCase()).join(', ')}.</desc>${drawing}</svg>`;
+}
+function renderBudgetAfterSynthesis(){
+ const budget=budgetOf(),synthesis=synthesisOf(),used=synthesis?synthesis.error:0;
+ const width=synthesis?Math.min(100,100*used/budget):0;
+ $('p0-synthesis-bar').style.width=`${width}%`;
+ $('p0-target-value').textContent=fmt(budget);
+ $('p0-synthesis-value').textContent=synthesis?fmt(used):'—';
+ $('p0-remaining-value').textContent=synthesis?fmt(Math.max(0,budget-used)):'—';
+ $('p0-equation').innerHTML=!synthesis?`${fmt(budget)} <span class="lbl">(target)</span><span class="op">−</span>? <span class="lbl">(synthesis)</span><span class="op">=</span>? <span class="lbl">left for T states</span>`:used>=budget?`${fmt(budget)} <span class="lbl">(target)</span><span class="op">−</span>${fmt(used)} <span class="lbl">(synthesis)</span><span class="op">&lt;</span>0`:`${fmt(budget)} <span class="lbl">(target)</span><span class="op">−</span>${fmt(used)} <span class="lbl">(synthesis)</span><span class="op">=</span>${fmt(budget-used)} <span class="lbl">left for all ${synthesis.t_count} T states together</span>`;
+ $('p0-budget-note').textContent=!synthesis?`The whole bar is your error target. Choose a tolerance in Step 2 to see how much of it synthesis uses.`:used>=budget?`Synthesis alone exceeds the target, so nothing is left for T-state errors. Choose the finer tolerance or relax the target.`:`The remaining budget must cover the errors of all ${synthesis.t_count} consumed T states together, not each one. P1 to P3 decide whether the factory can deliver that.`;
+}
+
+/* P2: surface-code patch */
+let surfaceKey=null;
+function renderSurface(){
+ if(surfaceKey===state.distance)return;
+ surfaceKey=state.distance;
+ const d=state.distance,lattice=GEOMETRY.distances[String(d)];
+ let faces='',checks='',dots='';
+ for(const face of lattice.faces){
+  const [x,y]=face.coordinate;
+  const points=face.support.map(q=>lattice.coordinates[q]);
+  if(points.length===2)points.push(face.coordinate);
+  const cx=points.reduce((s,p)=>s+p[0],0)/points.length,cy=points.reduce((s,p)=>s+p[1],0)/points.length;
+  points.sort((a,b)=>Math.atan2(a[1]-cy,a[0]-cx)-Math.atan2(b[1]-cy,b[0]-cx));
+  faces+=`<polygon class="face-${face.basis}" points="${points.map(p=>p.join(',')).join(' ')}"/>`;
+  checks+=`<g><title>${face.basis} check</title>${face.basis==='X'?`<rect class="check-X" x="${x-.18}" y="${y-.18}" width=".36" height=".36"/>`:`<path class="check-Z" d="M${x} ${y-.25} L${x+.25} ${y} L${x} ${y+.25} L${x-.25} ${y} Z"/>`}</g>`;
+ }
+ for(const [i,[x,y]] of lattice.coordinates.entries())dots+=`<circle class="code-data" cx="${x}" cy="${y}" r=".2"><title>Data qubit ${i+1}</title></circle>`;
+ const footprint=`<rect class="footprint-rect" x="-1" y="-1" width="${2*d+2}" height="${2*d+2}" rx=".3"><title>Reserved footprint: ${lattice.patch_qubits} physical qubits</title></rect>`;
+ $('surface-diagram').innerHTML=`<svg class="surface-svg" viewBox="-1.5 -1.5 ${2*d+3} ${2*d+3}" role="img" aria-label="Distance ${d} rotated surface code patch: ${lattice.data_qubits} data qubits and ${lattice.checks} X and Z checks, inside a reserved footprint of ${lattice.patch_qubits} physical qubits">${footprint}${faces}${checks}${dots}</svg>`;
+}
+
+/* P2: factory flow and reserved patches */
+function stateGroup(count,role,label){
+ let symbols='';
+ if(count<=20){
+  const cols=Math.min(5,count),rows=Math.ceil(count/cols),r=count<=4?7:4.5;
+  for(let i=0;i<count;i++)symbols+=`<circle class="state-${role}" cx="${10+(i%cols)*16}" cy="${10+Math.floor(i/cols)*16}" r="${r}"/>`;
+  symbols=`<svg viewBox="0 0 ${cols*16+4} ${rows*16+4}" aria-hidden="true">${symbols}</svg>`;
+ }else symbols=`<span class="flow-count">${count}</span>`;
+ return `<div class="state-group"><div class="state-icons">${symbols}</div><div class="flow-label">${count<=20?`${count} ${label}`:label}</div></div>`;
+}
+let factoryKey='';
+function renderFactory(){
+ if(factoryKey===state.choice)return;
+ factoryKey=state.choice;
+ const s=DATA.choices[state.choice];
+ const arrow='<span class="flow-arrow" aria-hidden="true">→</span>';
+ const box=(label,mult=1)=>`<div class="distillation-box"><strong>${label}</strong><span>${mult>1?`${mult} batches · each output kept only if its checks pass`:'output kept only if all checks pass; otherwise discard and rerun'}</span></div>`;
+ const final=s.outputs===4?'20 → 4':'15 → 1';
+ const NOTES={
+  '15':'<strong>15 → 1</strong> combines 15 noisy T states through a Clifford circuit into one T state. Four check measurements detect errors; if any check fails, the single output is discarded and the batch is rerun. The accepted state’s error drops from about p to about 35p³.',
+  '20':'<strong>20 → 4</strong> combines 20 noisy T states into 4 T states using 3 checks. It is cheaper per output than 15 → 1 but weaker: only single errors are caught, so a batch’s undetected-error chance drops from about p to about 22p².',
+  '15-15':'<strong>Two stages.</strong> Fifteen independent 15 → 1 batches run first; their 15 outputs (error about 35p³) become the inputs of one more 15 → 1 round, giving one very clean T state. It consumes 225 raw states per output and is the slowest option.',
+  '15-20':'<strong>Two stages.</strong> Twenty independent 15 → 1 batches run first; their 20 outputs feed one 20 → 4 round, giving 4 clean T states per batch. Four outputs at a time make it much faster than 15 → 1, then 15 → 1, at the price of more patches.'};
+ $('protocol-note').innerHTML=NOTES[state.choice];
+ let flow='';
+ if(s.first)flow+=`<div class="factory-flow">${stateGroup(s.inputs,'raw','raw')}${arrow}${box('15 → 1',s.first)}${arrow}${stateGroup(s.first,'mid','first-stage')}</div>`;
+ flow+=`<div class="factory-flow">${stateGroup(s.first||s.inputs,s.first?'mid':'raw',s.first?'first-stage':'raw')}${arrow}${box(final)}${arrow}${stateGroup(s.outputs,'out','accepted')}</div>`;
+ $('factory-diagram').innerHTML=`<div class="factory-flow-group" role="img" aria-label="${s.inputs} raw T states feed ${s.first?`${s.first} independent 15-to-1 batches, then one ${final} stage`:`one ${final} stage`}, producing ${s.outputs} accepted T state${s.outputs===1?'':'s'} per batch. A batch is kept only when all its checks pass.">${flow}</div>`;
+ const patches=s.work+s.storage,perRow=7,rowsN=Math.ceil(patches/perRow);
+ let tiles='<rect class="code-data" x="4" y="22" width="16" height="16" rx="2" style="stroke-width:2"/>';
+ for(let i=0;i<patches;i++){
+  const storage=i>=s.work;
+  tiles+=`<rect x="${58+(i%perRow)*20}" y="${22+Math.floor(i/perRow)*20}" width="16" height="16" rx="2" fill="${storage?'#2A2A2A':'#76b900'}" stroke="${storage?'#c27be6':'#76b900'}" stroke-width="2"/>`;
+ }
+ const h=22+rowsN*20+6;
+ $('capacity-diagram').innerHTML=`<svg class="capacity-svg" viewBox="0 0 200 ${h}" role="img" aria-label="Declared encoded patches: 1 compute patch, ${s.work} factory work patches${s.storage?` and ${s.storage} storage patches`:''}"><text x="4" y="12" fill="#AAAAAA" font-size="11" font-family="Inter,sans-serif">Compute</text><text x="58" y="12" fill="#AAAAAA" font-size="11" font-family="Inter,sans-serif">Factory${s.storage?' (■ work · □ storage)':''}</text>${tiles}</svg>`;
+}
+function renderCapacityNote(){
+ const s=DATA.choices[state.choice],lattice=GEOMETRY.distances[String(state.distance)],patches=s.work+s.storage;
+ const total=(1+patches)*lattice.patch_qubits+s.raw_lanes;
+ $('capacity-note').innerHTML=`${s.work} work patch${s.work===1?'':'es'} (one per row of the ${s.outputs===4?'20 → 4':'15 → 1'} circuit)${s.storage?` + ${s.storage} storage patches (first-stage outputs waiting for the second stage)`:''}.<br>Physical qubits = (1 + ${patches}) × ${integer(lattice.patch_qubits)} + ${s.raw_lanes} raw injection qubits = <strong>${integer(total)}</strong>.`;
+}
+
+/* P3: summary, breakdown, comparison */
+function metricCards(c,n){
+ const fail=!n.meets_budget;
+ return `<div class="metrics">
+<div class="metric ${fail?'fail':''}"><span>Output error bound</span><strong>${fmt(n.total_error_bound)}</strong><span class="verdict">${fail?'Exceeds':'Meets'} target ≤ ${fmt(n.budget)}</span><small>Synthesis ${fmt(n.synthesis_error)} + T states ${fmt(n.magic_error_bound)}</small></div>
+<div class="metric"><span>Physical qubits</span><strong>${integer(c.physical_qubits)}</strong><small>${integer(c.compute_qubits)} compute + ${integer(c.factory_qubits)} factory, including ${DATA.choices[state.choice].raw_lanes} raw injection qubits</small></div>
+<div class="metric"><span>Scheduled duration</span><strong>${us(c.time_us)}</strong><small>One accepting pass; factory and compute overlap. The factory sets the pace, and this repeats for every rotation in a real algorithm.</small></div>
+</div>`;
+}
+function configurationTable(c){
+ const s=DATA.choices[state.choice];
+ return `<div class="table-scroll" tabindex="0" role="region" aria-label="Choices across compilation layers"><table><thead><tr><th scope="col">Layer</th><th scope="col">Your choice</th></tr></thead><tbody>
+<tr><th scope="row">P0 · Circuit</th><td>Rᵧ(0.37) · target ≤ ${fmt(budgetOf())} · ε = ${fmt(state.precision)} → ${c.t_count + c.clifford_count} gates, ${c.t_count} T</td></tr>
+<tr><th scope="row">P1 · Logical regions</th><td>Compute: 1 patch · Factory: ${c.factory_patches} patches + ${s.raw_lanes} raw injection qubits</td></tr>
+<tr><th scope="row">P2 · Encoding and factory</th><td>Surface · distance ${state.distance} (${integer(c.patch_qubits)} qubits per patch) · ${s.label}</td></tr>
+<tr><th scope="row">P3 · Physical noise</th><td>Raw T-state error ${fmt(rawOf())} · fixed timing model</td></tr>
+</tbody></table></div>`;
+}
+function breakdown(c,n){
+ const s=DATA.choices[state.choice];
+ const syn=Math.min(100,100*n.synthesis_error/n.budget),mag=Math.min(100-syn,100*n.magic_error_bound/n.budget);
+ const rows=Object.keys(DATA.choices).map(choice=>{
+  const r=current(choice),v=evaluate(choice),sel=choice===state.choice;
+  return `<tr class="${sel?'selected':''}" ${sel?'aria-current="true"':''}><th scope="row">${DATA.choices[choice].label}${sel?' <span class="small">(selected)</span>':''}</th><td>${fmt(v.total_error_bound)}</td><td>${integer(r.physical_qubits)}</td><td>${us(r.time_us)}</td><td class="${v.meets_budget?'pass':'fail'}">${v.meets_budget?'Meets':'Exceeds'}</td></tr>`;
+ }).join('');
+ return `<div class="breakdown-grid">
+<div><h3>Error budget</h3><div class="budget-track" aria-hidden="true"><span class="seg-synthesis" style="width:${syn}%"></span><span class="seg-magic" style="width:${mag}%"></span></div><div class="legend"><span><span class="dot purple"></span>Rotation synthesis <strong>${fmt(n.synthesis_error)}</strong></span><span><span class="dot"></span>T states <strong>${fmt(n.magic_error_bound)}</strong></span><span><span class="dot empty"></span>Target <strong>${fmt(n.budget)}</strong></span></div></div>
+<div><h3>Factory throughput</h3><p class="small">${c.t_count} T gates · ${c.batches} batch${c.batches===1?'':'es'} of ${s.outputs} · ${integer(c.raw_inputs)} raw T states consumed${c.unused?` · ${c.unused} output${c.unused===1?'':'s'} unused`:''}.<br>Each accepted T state has error ${fmt(n.output_error)}; a whole batch is accepted ${(100*n.batch_acceptance).toFixed(2)}% of the time.</p></div>
+</div>
+<h3>Factory comparison at these settings</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Comparison of the four factory protocols"><table><thead><tr><th scope="col">Factory</th><th scope="col">Error bound</th><th scope="col">Physical qubits</th><th scope="col">Scheduled duration</th><th scope="col">Target</th></tr></thead><tbody>${rows}</tbody></table></div>
+<p class="small comparison-note">Same target, tolerance, distance, and raw error for every row. Durations are one accepting pass, rounded to two significant figures.</p>`;
+}
+function challengeResult(){
+ if(!ready())return {passed:false,text:'Choose a synthesis tolerance in P0, then check your configuration.'};
+ if(state.budget!==6||state.noise!==4)return {passed:false,text:'For this challenge, set the error target to 10⁻⁶ in P0 and the raw T-state error to 10⁻³ in P3.'};
+ const n=evaluate(),c=current(),issues=[];
+ if(state.distance<7)issues.push('distance must be at least 7');
+ if(n.total_error_bound>1e-6)issues.push('the error bound exceeds 10⁻⁶');
+ if(c.physical_qubits>4000)issues.push('more than 4,000 physical qubits');
+ if(c.time_us>30000)issues.push('the scheduled duration exceeds 30,000 µs');
+ return issues.length?{passed:false,text:`Not yet: ${issues.join('; ')}. Use the comparison table to find a factory that fits.`}:{passed:true,text:'All requirements met. Can you explain why 15 → 1 and 20 → 4 miss the error target, and why 15 → 1, then 15 → 1 blows the 30,000 µs limit even though it meets the target?'};
+}
+function renderSummary(){
+ if(!ready()){
+  $('results').innerHTML='<p class="pending">Choose a synthesis tolerance in P0 to reveal your metrics, configuration, and factory comparison.</p>';
+  $('configuration-summary').innerHTML='';$('breakdown').innerHTML='';
+  return;
+ }
+ const c=current(),n=evaluate();
+ $('results').innerHTML=`<h3>Metrics</h3>${metricCards(c,n)}`;
+ $('configuration-summary').innerHTML=configurationTable(c);
+ $('breakdown').innerHTML=breakdown(c,n);
+}
+
+function render(announce=true){
+ feedback('challenge-feedback','');
+ document.querySelectorAll('[data-budget]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.budget)===state.budget)));
+ document.querySelectorAll('[data-precision]').forEach(b=>{
+  b.setAttribute('aria-pressed',String(Number(b.dataset.precision)===state.precision));
+  const syn=DATA.synthesis.find(x=>x.precision===Number(b.dataset.precision));
+  b.querySelector('.eps-detail').textContent=`${syn.t_count} T gates · synthesis error ${fmt(syn.error)}`;
+  b.querySelector('.eps-warn').hidden=syn.error<budgetOf();
+ });
+ $('p0-target-note').textContent=`Your whole budget is ${fmt(budgetOf())}. Synthesis error and T-state errors together must stay below it.`;
+ const budget=budgetOf(),raw=rawOf(),lattice=GEOMETRY.distances[String(state.distance)],spec=DATA.choices[state.choice];
+ $('distance-value').textContent=`d = ${state.distance}`;
+ const inCode=lattice.data_qubits+lattice.checks;
+ $('distance-help').textContent=`${inCode} qubits in the code · ${integer(lattice.patch_qubits)} reserved per patch`;
+ $('patch-note').innerHTML=`The code itself uses ${lattice.data_qubits} data + ${lattice.checks} check qubits. The square-patch footprint model in CUDA-Q Logical reserves <strong>2(d + 1)² = ${integer(lattice.patch_qubits)}</strong> physical qubits per patch. The extra tiles are a margin around the code so that neighbouring patches can interact by lattice surgery. All physical-qubit totals below use the reserved number.`;
+ $('noise-value').textContent=fmt(raw);
+ $('noise').setAttribute('aria-valuetext',`${raw.toPrecision(3)} error probability per raw T state`);
+ renderBudgetAfterSynthesis();renderSurface();renderFactory();renderCapacityNote();renderCircuit();
+ $('view-code').disabled=!ready();
+ $('code-readiness').textContent=ready()?'Your code is ready and updates with your selections.':'To enable your code, choose a synthesis tolerance in P0.';
+ if(!ready()){
+  $('gate-counts').textContent='';
+  feedback('synthesis-feedback','Choose a synthesis tolerance to compile the rotation.');
+  $('p1-compute').textContent='1 logical qubit · T-state demand set by P0';
+  $('p1-demand').textContent='needs T states — one per T gate · count set in P0';
+  renderSummary();
+  if(announce)say(`Error target ${fmt(budget)}. Choose a synthesis tolerance in P0.`);
+  return;
+ }
+ const c=current(),n=evaluate(),synthesis=synthesisOf();
+ $('gate-counts').textContent=`${synthesis.gates.length} gates · ${c.t_count} T gates · checked error ${fmt(synthesis.error)}`;
+ feedback('synthesis-feedback',n.synthesis_error>=n.budget?`${c.t_count} T gates, but the synthesis error ${fmt(n.synthesis_error)} already exceeds the target ${fmt(n.budget)}. Choose the finer tolerance or relax the target.`:`${c.t_count} T gates, each needing one T state. Synthesis error ${fmt(n.synthesis_error)}; see the budget below.`,n.synthesis_error>=n.budget);
+ $('p1-compute').textContent=`1 logical qubit · needs ${c.t_count} T states`;
+ $('p1-demand').textContent=`needs ${c.t_count} T states — one per T gate`;
+ renderSummary();
+ if(announce)say(`${spec.label}: error bound ${fmt(n.total_error_bound)}, ${n.meets_budget?'meets':'exceeds'} target. ${integer(c.physical_qubits)} physical qubits, ${us(c.time_us)}.`);
+}
+
+/* Code export */
+function codeText(){
+ const p=rawOf(),budget=budgetOf();
+ return RUNTIME+'\n\n'+NOISE_SOURCE+`\n\n# Selected widget configuration. Change these inputs to explore.\nif __name__ == '__main__':\n    resources = run_case(precision=${state.precision}, distance=${state.distance}, choice=${JSON.stringify(state.choice)})\n    tables = enumerators(cql.protocols.FIFTEEN_TO_ONE_ROTATION_SUPPORTS)\n    synthesis_error = ${synthesisOf().error}\n    result = evaluate(tables, ${JSON.stringify(state.choice)}, ${p}, resources['t_count'], synthesis_error, ${budget})\n    print(json.dumps(dict(resources=resources, noise=result), indent=2))\n`;
+}
+function configLabel(){return `ε = ${fmt(state.precision)} · target ≤ ${fmt(budgetOf())} · distance ${state.distance} · ${DATA.choices[state.choice].label} · raw error ${fmt(rawOf())}`;}
+
+/* Events */
+document.addEventListener('click',e=>{
+ const el=e.target.closest('button');if(!el)return;
+ if(el.dataset.budget){state.budget=Number(el.dataset.budget);render();}
+ if(el.dataset.precision){state.precision=Number(el.dataset.precision);render();}
+});
+$('strategy').addEventListener('change',e=>{state.choice=e.target.value;render();});
+$('distance').addEventListener('input',e=>{state.distance=Number(e.target.value);render();});
+$('noise').addEventListener('input',e=>{state.noise=Number(e.target.value);render();});
+$('check-challenge').onclick=()=>{const r=challengeResult();feedback('challenge-feedback',r.text,!r.passed);say(r.text);};
+$('reset').onclick=()=>{
+ Object.assign(state,DEFAULTS);
+ $('strategy').value=state.choice;$('distance').value=state.distance;$('noise').value=state.noise;
+ render(false);say('All layers reset.');$('p0').open=true;$('p0').scrollIntoView({block:'start'});
+};
+$('view-code').onclick=()=>{if(!ready())return;$('code-text').value=codeText();$('code-selection').textContent=configLabel();$('copy-feedback').textContent='';$('code-dialog').showModal();$('close-code').focus();};
+$('close-code').onclick=()=>$('code-dialog').close();
+$('code-dialog').addEventListener('close',()=>$('view-code').focus());
+$('copy-code').onclick=async()=>{try{await navigator.clipboard.writeText($('code-text').value);$('copy-feedback').textContent='Copied the complete script.';}catch{$('code-text').focus();$('code-text').select();$('copy-feedback').textContent='Code selected. Press Ctrl+C or Command+C to copy.';}};
+$('download-code').onclick=()=>{const blob=new Blob([$('code-text').value],{type:'text/x-python'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`cudaq-t-factory-${state.choice}-d${state.distance}.py`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('copy-feedback').textContent='Python download requested.';};
+document.addEventListener('keydown',e=>{
+ if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;
+ const row=e.target.closest('.choice-row');if(!row||e.target.tagName!=='BUTTON')return;
+ const items=[...row.querySelectorAll('button:not(:disabled)')];const i=items.indexOf(e.target);if(i<0||items.length<2)return;
+ e.preventDefault();items[(i+(['ArrowRight','ArrowDown'].includes(e.key)?1:items.length-1))%items.length].focus();
+});
+window.tFactoryWidget={state,current,evaluate,render,codeText,challengeResult,fmt,DATA};
+render(false);
+new ResizeObserver(()=>renderCircuit()).observe($('decomposition'));
+</script></body></html>
