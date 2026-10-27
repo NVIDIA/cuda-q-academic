@@ -204,7 +204,8 @@
         "resonator-punch-out",
         "qubit-spectroscopy-intro",
         "amplitude-rabi",
-        "drag-pulse-calibration"
+        "drag-pulse-calibration",
+        "t1-relaxation"
       ],
       "widget_ids": [
         "ising-api-key-setup",
@@ -2339,9 +2340,9 @@
     "t1-relaxation": {
       "title": "T₁ (Energy Relaxation)",
       "gallery_section": "calibration",
-      "coming_soon": true,
-      "live_url": null,
-      "source_url": null,
+      "coming_soon": false,
+      "live_url": "https://nvidia.github.io/cuda-q-academic/interactive_widgets/t1-energy-lifetime.html",
+      "source_url": "interactive_widgets/t1-energy-lifetime.html",
       "source_repo_path": null,
       "related_content": [
         "Calibration"
@@ -2353,8 +2354,7 @@
       "keywords": [
         "calibration",
         "T1",
-        "energy relaxation",
-        "coming soon"
+        "energy relaxation"
       ],
       "metadata_source": "visualization-gallery.html (widgets-as-html branch)"
     },
