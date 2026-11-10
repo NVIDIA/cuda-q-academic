@@ -2,7 +2,7 @@ services:
   cuda-q-academic:
     image: ghcr.io/nvidia/cudaqx
     ports:
-      - '8888:8888'
+      - '127.0.0.1:8888:8888'
     command: >-
           -c "pip install qutip torch scikit-learn matplotlib-venn cudaq-algorithms tornado==6.5.10 &&
           cd /home/cudaq &&
@@ -12,4 +12,4 @@ services:
           git sparse-checkout set docs/sphinx/applications/python &&
           cp -r docs/sphinx/applications/python /home/cudaq/cuda-q-academic/application-hub &&
           cd /home/cudaq &&
-          jupyter lab --ip=0.0.0.0 --no-browser --NotebookApp.token='' --allow-root --NotebookApp.allow_origin='*' --notebook-dir='/home/cudaq/cuda-q-academic'"
+          jupyter lab --ip=0.0.0.0 --no-browser --allow-root --notebook-dir='/home/cudaq/cuda-q-academic'"
