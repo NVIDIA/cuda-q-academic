@@ -1,0 +1,48 @@
+image: mcr.microsoft.com/playwright:v1.64.1-noble
+
+stages:
+  - test
+  - verify
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "widgets-as-html"'
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "widgets-as-html"'
+
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+default:
+  interruptible: true
+  before_script:
+    - npm ci --ignore-scripts
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - playwright-report/
+      - test-results/
+    reports:
+      junit: test-results/junit.xml
+
+widgets:check:
+  stage: test
+  timeout: 15 minutes
+  script:
+    - npm test
+
+widgets:verify-live:
+  stage: verify
+  timeout: 20 minutes
+  needs:
+    - widgets:check
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "widgets-as-html"'
+  script:
+    - npm run test:live
