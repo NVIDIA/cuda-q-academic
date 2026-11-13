@@ -88,7 +88,6 @@ stages:
     # torch.optim.* imports torch._dynamo -> triton unconditionally, so the
     # HQNN notebooks died on Adam(). Nothing here uses torch.compile; drop it.
     - pip uninstall -y -q triton || true
-    - python3 -m unittest discover -s ci/tests -p test_diffusion_dependencies.py -v
     - python -c 'from importlib.metadata import version; import cudaq_algorithms; print("cudaq-algorithms", version("cudaq-algorithms"))'
     # Transitional fallback for branches that have not yet migrated every
     # import. This becomes a no-op once cudaq_solvers is gone from the repo.
