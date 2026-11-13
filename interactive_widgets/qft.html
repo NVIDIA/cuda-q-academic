@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interactive QFT Visualizer</title>
-  
+
   <!-- Dependencies: Google Fonts (Inter), MathJax (Apache 2.0). Permissive licenses only per widget creator policy. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +49,7 @@
     }
 
     h1, h2, h3 { margin: 0; font-weight: 600; }
-    
+
     /* Skip Link for Accessibility */
     .skip-link {
       position: absolute; top: -40px; left: 0;
@@ -81,7 +81,7 @@
     /* =========================================
        Rule 23.2: STANDARD HEADER TYPOGRAPHY
        ========================================= */
-    
+
     /* Ensure the header container aligns center */
     .widget-container header {
         text-align: left;
@@ -99,7 +99,7 @@
         font-weight: 700;
         line-height: 1.2;
     }
-    
+
     .widget-container .summary-text {
         color: var(--nvidia-gray);
         margin-bottom: 8px;
@@ -226,7 +226,7 @@
       padding: 10px;
       transition: box-shadow 0.2s;
     }
-    
+
     #circle-container:focus-visible {
       box-shadow: 0 0 0 3px var(--nvidia-green);
     }
@@ -243,7 +243,7 @@
 
     .point-group { cursor: pointer; }
     .point-group circle.visible-point { transition: all 0.2s; }
-    
+
     /* Hover/Focus State for Points */
     .point-group:hover circle.visible-point,
     .point-group.keyboard-focus circle.visible-point {
@@ -260,7 +260,7 @@
       stroke-width: 3px;
       animation: pulse-point 1.5s infinite;
     }
-    
+
     #vector {
       transform-origin: 190px 190px;
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
@@ -344,7 +344,7 @@
       cursor: default;
       border-radius: 4px 4px 0 0;
     }
-    
+
     th.col-header:focus-visible {
       outline: var(--focus-outline);
       outline-offset: -2px;
@@ -353,7 +353,7 @@
 
     th.col-header.selectable { cursor: pointer; border-color: #666; }
     th.col-header.selectable:hover { color: var(--nvidia-green); border-color: var(--nvidia-green); }
-    
+
     th.col-header.active {
       background-color: var(--nvidia-green);
       color: #000;
@@ -389,7 +389,7 @@
     .corner-header { width: 50px; height: 40px; position: relative; }
     .corner-header svg { position: absolute; top:0; left:0; width:100%; height:100%; }
     .corner-text { font-size: 0.75rem; font-weight: bold; }
-    
+
     /* --- STATUS & ALERTS --- */
     #status-region {
       min-height: 3rem;
@@ -405,7 +405,7 @@
       box-sizing: border-box;
       margin-top: 10px;
     }
-    
+
     .status-success { color: var(--nvidia-green) !important; font-weight: 600; }
     .status-error { color: #ff5555 !important; font-weight: 600; }
 
@@ -547,7 +547,65 @@
       outline-offset: -2px;
     }
 
-  </style>
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
+    </style>
 </head>
 <body>
 
@@ -559,8 +617,8 @@
         <p class="summary-text">Explore the Quantum Fourier Transform by interacting with phase rotations on the unit circle and observing the resulting matrix construction.</p>
     </header>
 
-    <section class="instructions-section" aria-labelledby="instructions-heading">
-        <h2 id="instructions-heading">Instructions</h2>
+    <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+        <summary><h2 id="instructions-heading">Instructions</h2></summary>
         <ol>
             <li>Click <strong>Visualize Column |0⟩</strong> to run a guided animation that fills the first column of the QFT matrix using phase rotations on the unit circle.</li>
             <li>Click <strong>Visualize Column |1⟩</strong> to fill the second column the same way. After that, the matrix switches to interactive mode.</li>
@@ -568,11 +626,11 @@
             <li>Use <strong>Auto-Fill Remaining</strong> to complete the rest of the matrix, or <strong>Reset Matrix</strong> to start over.</li>
         </ol>
         <p><strong>Keyboard shortcuts:</strong> <span class="kbd">ESC</span> — reset. <span class="kbd">Enter</span> / <span class="kbd">Space</span> — select or place. <span class="kbd">Arrow keys</span> — navigate the unit circle when focused.</p>
-    </section>
+    </details>
 
     <!-- Layout Wrapper (Flex columns) -->
     <div class="layout-wrapper">
-    
+
         <!-- LEFT COLUMN: VISUALIZER & CONTROLS -->
         <section class="card" style="flex: 0 0 380px;" aria-labelledby="vis-heading">
         <div class="card-header">
@@ -598,7 +656,7 @@
 
             <!-- Background Grid -->
             <circle cx="190" cy="190" r="158" fill="url(#grid)" opacity="0.5" />
-            
+
             <!-- Axes -->
             <line x1="190" y1="50" x2="190" y2="330" stroke="#444" stroke-dasharray="4" />
             <line x1="50" y1="190" x2="330" y2="190" stroke="#444" stroke-dasharray="4" />
@@ -611,7 +669,7 @@
             <line id="vector" x1="190" y1="190" x2="310" y2="190" 
                 stroke="#76b900" stroke-width="4" marker-end="url(#arrow)" 
                 stroke-linecap="round" />
-            
+
             <!-- Center Dot -->
             <circle cx="190" cy="190" r="4" fill="#fff"/>
             </svg>
@@ -627,7 +685,7 @@
             <button id="fill-all-btn" class="btn-nvidia-primary" tabindex="0" style="display:none; background-color: #333; border-bottom-color: #999;">Auto-Fill Remaining</button>
             <button id="reset-btn" class="btn-nvidia-secondary" tabindex="0">Reset Matrix</button>
         </div>
-        
+
         </section>
 
         <!-- RIGHT COLUMN: MATRIX -->
@@ -635,7 +693,7 @@
         <div class="card-header">
             <h2 id="matrix-heading">QFT Matrix (N=8)</h2>
         </div>
-        
+
         <div class="matrix-wrapper">
             <div class="matrix-container">
             <div class="scalar" aria-hidden="true">1<span>√8</span></div>
@@ -671,7 +729,73 @@
     </div> <!-- End Layout Wrapper -->
 
     <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
-    <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: apply the quantum Fourier transform to a basis state |j⟩ and read off column j of the QFT matrix. Every amplitude has size 1/√8, and amplitude k has the phase ω^(jk), where ω = e^(2πi/8).</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> numpy <span class="tok-keyword">as</span> np
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">qft_column</span>(bits: <span class="tok-builtin">list</span>[<span class="tok-builtin">int</span>]):
+    n = <span class="tok-builtin">len</span>(bits)
+    qubits = cudaq.qvector(n)
+    <span class="tok-comment"># prepare |j&gt;, written q0 q1 q2 (q0 = most significant bit)</span>
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n):
+        <span class="tok-keyword">if</span> bits[i] == <span class="tok-number">1</span>:
+            <span class="tok-gate">x</span>(qubits[i])
+
+    <span class="tok-comment"># QFT: Hadamards and controlled phase rotations...</span>
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n):
+        <span class="tok-gate">h</span>(qubits[i])
+        <span class="tok-keyword">for</span> k <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(i + <span class="tok-number">1</span>, n):
+            <span class="tok-gate">r1</span>.ctrl(<span class="tok-number">2</span> * np.pi / <span class="tok-number">2</span> ** (k - i + <span class="tok-number">1</span>), qubits[k], qubits[i])
+
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n // <span class="tok-number">2</span>):  <span class="tok-comment"># ...then reverse the qubit order</span>
+        <span class="tok-gate">swap</span>(qubits[i], qubits[n - <span class="tok-number">1</span> - i])
+
+
+<span class="tok-keyword">def</span> <span class="tok-func">to_bits</span>(value, n):  <span class="tok-comment"># e.g. to_bits(1, 3) -&gt; [0, 0, 1]</span>
+    <span class="tok-keyword">return</span> [<span class="tok-builtin">int</span>(b) <span class="tok-keyword">for</span> b <span class="tok-keyword">in</span> <span class="tok-builtin">format</span>(value, <span class="tok-string">f"0{n}b"</span>)]
+
+
+n, j = <span class="tok-number">3</span>, <span class="tok-number">1</span>  <span class="tok-comment"># 3 qubits, so N = 8; try any j from 0 to 7</span>
+N = <span class="tok-number">2</span>**n
+<span class="tok-builtin">print</span>(cudaq.draw(qft_column, to_bits(j, n)))
+
+state = cudaq.get_state(qft_column, to_bits(j, n))
+
+<span class="tok-keyword">for</span> k <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(N):
+    amp = state.amplitude(to_bits(k, n))
+    <span class="tok-comment"># Convert the amplitude phase angle into a power of ω, from 0 to N-1.</span>
+    power = <span class="tok-builtin">round</span>(np.angle(amp) / (<span class="tok-number">2</span> * np.pi) * N) % N
+    <span class="tok-builtin">print</span>(
+        <span class="tok-string">f"|{k}&gt;: size = {abs(amp):.3f}, phase = ω^{power}   (j*k mod {N} = {j * k % N})"</span>
+    )
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Change <code>j</code> and compare its phases with the corresponding column in the widget. How do the phases progress from one row to the next? Try <code>n = 2</code> or <code>n = 4</code>: how does the pattern scale?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>The QFT in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/quantum_fourier_transform.ipynb" target="_blank" rel="noopener noreferrer">Quantum Fourier Transform</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">builds the QFT kernel step by step, then <strong>Quantum Fourier Transform revisited</strong> adds its inverse with <code>cudaq.adjoint</code>.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb" target="_blank" rel="noopener noreferrer">QPE: Canonical, Iterative, and Bayesian</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1. Prerequisite Concepts</strong> (<strong>The Quantum Fourier Transform</strong>) embeds this widget before using the QFT in phase estimation.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/shors.ipynb" target="_blank" rel="noopener noreferrer">Shor's Algorithm</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">the <strong>Inverse quantum Fourier transform</strong> section uses it to read the period that factors an integer.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/binary_fraction.html" target="_blank" rel="noopener noreferrer">Binary Fraction Explorer</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
         <div class="widget-footer-links">
             <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
             <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -1209,5 +1333,43 @@
   init();
 })();
 </script>
+
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
+    </script>
 </body>
 </html>

@@ -21,7 +21,7 @@
             --nvidia-gray: #AAAAAA;     /* Secondary text */
             --error-red: #FF4444;
             --focus-outline: 3px solid #76b900;
-            
+
             /* Stabilizer Colors (High Contrast on Dark) */
             --stab-s1: #ef9100; /* Orange */
             --stab-s2: #3399FF; /* Blue */
@@ -165,7 +165,7 @@
             outline: var(--focus-outline);
             outline-offset: 2px;
         }
-        
+
         /* Form Elements */
         label {
             display: block;
@@ -319,7 +319,7 @@
             line-height: 1.5;
             margin: 0 0 8px 0;
         }
-        
+
         /* Color Keys for Legend */
         .color-key {
             display: inline-block;
@@ -329,6 +329,64 @@
             margin-right: 6px;
             vertical-align: middle;
         }
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body>
@@ -339,15 +397,15 @@
 
 <!-- Section 23.1: Widget Container -->
 <div class="widget-container">
-    
+
     <!-- Section 23.2: Standard Header (First Child) -->
     <header class="widget-header">
         <h1>Steane Code Noise Model Explorer</h1>
         <p class="summary-text">Simulate and correct quantum errors using Code Capacity, Circuit Level, and Phenomenological noise models.</p>
     </header>
 
-    <section class="instructions-section" aria-labelledby="instructions-heading">
-        <h2 id="instructions-heading">Instructions</h2>
+    <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+        <summary><h2 id="instructions-heading">Instructions</h2></summary>
         <p><strong>What to do:</strong> Place an error at one of the <strong>green dashed [E] boxes</strong> on the circuit (each marks a valid error slot). Then watch how the syndrome and correction change. Try different noise models to see where errors can occur.</p>
         <ol>
             <li>Choose a <strong>Noise Model</strong>: Code Capacity (data qubits only, before checks), Circuit Level (data or ancilla), or Phenomenological (extra slots between rounds).</li>
@@ -356,13 +414,13 @@
             <li>Press <span class="kbd">ESC</span> once to clear the error or exit keyboard mode; press again to reset.</li>
         </ol>
         <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> — move to circuit (after dropdown). <span class="kbd">Enter</span> — start moving between [E] slots. <span class="kbd">Arrow keys</span> — next/previous error slot. <span class="kbd">Space</span> — place or remove error. <span class="kbd">ESC</span> — exit or reset.</p>
-    </section>
+    </details>
 
     <main id="main-content" class="main-layout">
 
         <!-- Controls Row -->
         <div class="top-controls" role="region" aria-label="Controls">
-            
+
             <div class="control-panel">
                 <label for="modeSelect" class="panel-title">Noise Model</label>
                 <select id="modeSelect" tabindex="0" onchange="setMode()">
@@ -408,7 +466,7 @@
 
         <!-- Results Row -->
         <div class="top-controls" role="region" aria-label="Results">
-            
+
             <div class="control-panel">
                 <div class="panel-title">System Status</div>
                 <div class="status-row">
@@ -432,7 +490,7 @@
                     <div id="v-s1" class="venn-circle" style="top: 0; left: 40px; border-color: var(--stab-s1); color: var(--stab-s1);"></div>
                     <div id="v-s2" class="venn-circle" style="top: 60px; left: 0; border-color: var(--stab-s2); color: var(--stab-s2);"></div>
                     <div id="v-s3" class="venn-circle" style="top: 60px; left: 80px; border-color: var(--stab-s3); color: var(--stab-s3);"></div>
-                    
+
                     <div style="position:absolute; top:5px; left:85px; font-weight:700; font-size:11px; color:var(--stab-s1)">S1</div>
                     <div style="position:absolute; top:90px; left:5px; font-weight:700; font-size:11px; color:var(--stab-s2)">S2</div>
                     <div style="position:absolute; top:90px; right:5px; font-weight:700; font-size:11px; color:var(--stab-s3)">S3</div>
@@ -444,7 +502,22 @@
     </main>
 
     <!-- Section 24: Standard Footer Navigation (REQUIRED) -->
-    <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Noise models for QEC in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/09_QEC_Detector_Error_Models.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 9: Detector Error Models and Real-Time Decoding</a><span class="level-badge" aria-label="Lesson level: Advanced">Advanced</span></div><p class="lesson-description"><strong>1. Real-Time Decoding and the Limits of Code Capacity</strong> embeds this widget and compares the code capacity, phenomenological and circuit-level noise models.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 2: Stabilizers, Shor Code, Steane Code</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>2.2 The Steane Code</strong> writes the Steane code's encoding and stabilizer checks in CUDA-Q; <strong>2.3 Steane Code Capacity Analysis with CUDA-Q QEC</strong> runs the code-capacity model at scale with the same <code>single_error_lut</code> decoder.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 3: Noisy Simulation</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>3.3c QEC Experiments</strong> adds noise channels to QEC circuits.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/04_QEC_Decoders.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 4: Decoders</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">decoders beyond a lookup table.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html" target="_blank" rel="noopener noreferrer">Hamming [7,4,3] Visualizer</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/mwpm_decoding_challenge.html" target="_blank" rel="noopener noreferrer">MWPM Decoding Challenge</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/trajectory_noise_demo.html" target="_blank" rel="noopener noreferrer">Trajectory Noise Demo</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
         <div class="widget-footer-links">
             <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
             <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -603,7 +676,7 @@ canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const row = Math.floor((y - PADDING_TOP + (LINE_H/2)) / LINE_H);
     const t = Math.round((x - START_X) / GATE_W);
 
@@ -703,7 +776,7 @@ function handleInteraction(row, t) {
 function simulate() {
     let dataState = new Array(7).fill(false);
     let ancillaState = new Array(3).fill(false);
-    
+
     for (let t = 0; t <= ANCILLA_MEASURE_TIME; t++) {
         if (errorInjection && errorInjection.timeStep === t) {
             if (errorInjection.type === 'data') {
@@ -725,7 +798,7 @@ function simulate() {
 function draw() {
     const dpr = Math.max(2, window.devicePixelRatio || 1);
     const rect = canvas.getBoundingClientRect();
-    
+
     const targetWidth = Math.floor(rect.width * dpr);
     const targetHeight = Math.floor(rect.height * dpr);
 
@@ -733,10 +806,10 @@ function draw() {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
     }
-    
+
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
-    
+
     width = rect.width;
     height = rect.height;
 
@@ -745,7 +818,7 @@ function draw() {
     const totalSteps = ANCILLA_MEASURE_TIME + 2; // +2 for padding
     const availableWidth = width - 100; // Left label padding
     const optimalGateW = availableWidth / totalSteps;
-    
+
     // Scale Logic
     PADDING_TOP = 40;
     LINE_H = 40; 
@@ -788,7 +861,7 @@ function draw() {
 
         ctx.strokeStyle = COLORS.wire;
         ctx.beginPath(); ctx.moveTo(START_X, y); ctx.lineTo(wireEndX, y); ctx.stroke();
-        
+
         const mx = wireEndX;
         ctx.fillStyle = "#151515"; 
         ctx.strokeStyle = stabColor;
@@ -809,12 +882,12 @@ function draw() {
 
         ctx.strokeStyle = gateColor; 
         ctx.beginPath(); ctx.moveTo(x, yControl); ctx.lineTo(x, yTarget); ctx.stroke();
-        
+
         ctx.fillStyle = "#151515"; 
         ctx.strokeStyle = gateColor;
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(x, yControl, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        
+
         ctx.beginPath(); ctx.arc(x, yTarget, 10, 0, Math.PI*2); ctx.fill(); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(x, yTarget-10); ctx.lineTo(x, yTarget+10);
         ctx.moveTo(x-10, yTarget); ctx.lineTo(x+10, yTarget); ctx.stroke();
@@ -822,7 +895,7 @@ function draw() {
 
     // Interaction Cursor & Errors
     let cursorRow = -1, cursorT = -1;
-    
+
     if (isInteracting) {
         cursorRow = kbCursor.row;
         cursorT = kbCursor.t;
@@ -868,14 +941,14 @@ function draw() {
                     ctx.shadowBlur = 10; ctx.shadowColor = COLORS.error; 
                     ctx.fillStyle = COLORS.error;
                     ctx.fillRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
-                    
+
                     ctx.fillStyle = "#000"; 
                     ctx.font = "bold 14px Inter";
                     ctx.shadowBlur = 0; 
                     ctx.textAlign = "center";
                     ctx.fillText("E", x, y + 1);
                     ctx.textAlign = "start";
-                    
+
                     if (isHover && isInteracting) {
                         ctx.strokeStyle = "#FFF"; ctx.lineWidth = 2;
                         ctx.strokeRect(x - boxSz/2 - 4, y - boxSz/2 - 4, boxSz + 8, boxSz + 8);
@@ -888,7 +961,7 @@ function draw() {
                     ctx.strokeStyle = '#76b900';
                     ctx.lineWidth = 2;
                     ctx.strokeRect(x - boxSz/2, y - boxSz/2, boxSz, boxSz);
-                    
+
                     if (isInteracting) {
                         ctx.beginPath(); 
                         ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y);
@@ -917,7 +990,7 @@ function update() {
     const synStr = `${s3}${s2}${s1}`;
     document.getElementById('syn-val').innerText = synStr.split('').join(' ');
     const predictedQubit = DECODER[synStr];
-    
+
     let statusText = "System Stable";
     let statusClass = "clean";
     let realErrText = "None";
@@ -953,5 +1026,42 @@ window.addEventListener('resize', draw);
 setMode();
 
 </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
+    </script>
 </body>
 </html>

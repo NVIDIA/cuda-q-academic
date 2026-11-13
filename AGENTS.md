@@ -1,7 +1,7 @@
 # AGENTS.md — widgets-as-html
 
 This branch is the static GitHub Pages site for CUDA-Q Academic (https://nvidia.github.io/cuda-q-academic/).
-It contains only HTML/JS/JSON/images: interactive widgets under `interactive_widgets/` and the
+It contains HTML/JS/JSON/images and standalone Python teaching examples: interactive widgets under `interactive_widgets/` and the
 `*/interactive_widget/` and `*/images/` module folders, plus the entry pages `index.html`,
 `learningpath.html`, and `visualization-gallery.html`. There is no application build step and no
 GPU or CUDA-Q runtime dependency. Do not modify the notebook CI or anything that only exists on
@@ -37,6 +37,24 @@ GPU or CUDA-Q runtime dependency. Do not modify the notebook CI or anything that
 `.gitlab-ci.yml` runs only for merge requests targeting `widgets-as-html` and pushes to
 `widgets-as-html`. `widgets:check` runs `npm test`; `widgets:verify-live` runs only on branch
 pushes after `widgets:check`. Run `glab ci lint .gitlab-ci.yml` after every CI edit.
+
+### Python teaching examples
+
+The 22 standalone CUDA-Q examples live in `widget-examples/` on this branch.
+`widget-examples/manifest.json` maps each example's `widget_id` to its Python source
+and HTML widget. Keep that directory and manifest together so CI and agents can
+find the sources. The current `npm test` checks HTML widgets; it does not parse or
+execute these Python files. Dedicated syntax and manifest checks are a follow-up
+with the CI maintainer, rather than an existing guarantee.
+
+Keep each embedded example synchronized with its Python source. The source's
+leading `# pip install ...` comment becomes `%pip install ...` in the notebook-ready
+display/copy block; a `cudaq-qec` install omits a redundant plain `cudaq` dependency.
+The Python body otherwise matches. Hello World retains its separate live generator.
+Runtime validation requires a CUDA-Q environment: the 19 general examples and the
+three chemistry examples have separate tested dependency environments. The latter
+(`adapt_vqe_widget.py`, `krylov_subspace.py`, `active_space.py`) use CUDA-Q 0.15.1
+with cudaq-algorithms 0.1.0; do not combine their environment with the general suite.
 
 `ci/widgets/wait-for-deployment.mjs` polls the GitHub deployments API for the *latest*
 `github-pages` deployment and requires it to be exactly `CI_COMMIT_SHA` in state `success`,

@@ -193,7 +193,7 @@ body {
 }
 .slider-track-annot {
   position: relative;
-  height: 18px;
+  height: 2.75rem;
   margin-bottom: 2px;
   pointer-events: none;
 }
@@ -201,7 +201,8 @@ body {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
   color: var(--gold);
   font-weight: 700;
   white-space: nowrap;
@@ -216,7 +217,7 @@ body {
 }
 .calib-band {
   position: absolute;
-  top: 10px;
+  top: 2.125rem;
   height: 6px;
   background: rgba(118,185,0,0.35);
   border-radius: 3px;
@@ -228,6 +229,26 @@ body {
   margin-top: 4px;
   font-size: 0.8rem;
   color: var(--muted);
+}
+.cross-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  color: var(--fg);
+}
+.cross-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.cross-legend .legend-line {
+  display: inline-block;
+  width: 18px;
+  border-top: 3px solid;
 }
 .slider-note {
   margin: 12px 0 0;
@@ -516,6 +537,13 @@ input[type=range]::-moz-range-thumb {
   border-radius: 4px;
   border: 1px solid var(--border);
 }
+#drag-lab-img {
+  max-width: 540px;
+  margin-inline: auto;
+}
+.lab-card a {
+  color: var(--accent);
+}
 .lab-card p {
   margin: 8px 0 0;
   font-size: 0.85rem;
@@ -670,7 +698,66 @@ a:focus-visible,
     transition-duration: 0.01ms !important;
   }
 }
-</style>
+
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
+    </style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -682,7 +769,7 @@ a:focus-visible,
   </header>
 
   <!-- Instructions -->
-  <details class="instructions-section" aria-labelledby="instructions-heading" open>
+  <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
     <summary><h2 id="instructions-heading">Instructions</h2></summary>
     <ol>
       <li>Read the short prior-context note: Amplitude Rabi set how hard you push; DRAG sets pulse shape. Note the two-sentence I/Q primer before the waveform panel.</li>
@@ -763,9 +850,10 @@ a:focus-visible,
       <div class="viz-panel">
         <h3 id="cross-heading">How you find β in the lab — β sweep</h3>
         <p class="panel-subtitle">Repeated X gates — final |0⟩ population after nrep π-pulses (nrep = 3, 5, 7). Y-axis: P(|0⟩).</p>
+        <ul id="cross-legend" class="cross-legend" aria-label="Pulse repetitions"></ul>
         <canvas id="cross-canvas" width="960" height="260" role="img"
           aria-labelledby="cross-heading"
-          aria-describedby="cross-desc"></canvas>
+          aria-describedby="cross-legend cross-desc"></canvas>
         <p id="cross-desc" class="sr-only">Three slightly noisy curves of P of zero versus β for 3, 5, and 7 repetitions. They meet in a broad region near the calibrated β. A gold marker shows the current β.</p>
         <p class="viz-callout" id="cross-callout" aria-live="polite">In practice the crossing is a region, not a point — you pick the center.</p>
       </div>
@@ -794,26 +882,27 @@ a:focus-visible,
 
   <!-- Lab inset (gated) -->
   <section class="info-box" id="lab-panel" aria-labelledby="lab-heading" hidden>
-    <h2 id="lab-heading">Real lab data — compare</h2>
+    <h2 id="lab-heading">Reference calibration — compare</h2>
     <div class="lab-inset">
       <p class="lab-primer" id="lab-primer">
-        Real Qblox DRAG β-sweep: Signal vs Beta for nrep = 3, 5, and 7.
-        The three curves meet in a region; the fit marks the calibrated β (≈ −1.52 on this device).
-        Hardware β units and range can differ from the interactive slider above — the signature to recognize is the crossing.
+        This simulated DRAG β-sweep comes from a Qiskit Experiments tutorial.
+        Look for the shared low-signal region of the nrep = 3, 5, and 7 curves.
+        Its pulse convention and β scale differ from the interactive slider above.
       </p>
       <p class="lab-vocab" id="lab-vocab">
         Under-corrected = gates disagree (β too small); Over-corrected = gates disagree (β too large); Calibrated = gates agree (center of the crossing region).
       </p>
       <div class="lab-card">
-        <img id="drag-lab-img" src="DRAG.png" width="1024" height="720"
-          alt="Real Qblox DRAG calibration plot: Signal versus Beta for nrep equals 3, 5, and 7. Three curves with a fit at beta approximately negative 1.52 where the curves agree.">
-        <p>Real Qblox data: nrep = 3 (blue), 5 (orange), 7 (green). Fit β ≈ −1.52 at the crossing.</p>
+        <img id="drag-lab-img" src="drag-calibration-plot.png" width="1080" height="740"
+          alt="Simulated DRAG calibration: blue nrep 3, orange nrep 5, and green nrep 7 curves share a signal minimum near beta minus 1.5.">
+        <p><a href="https://qiskit-community.github.io/qiskit-experiments/stable/0.5/tutorials/calibrations.html#calibrating-the-drag-parameter" target="_blank" rel="noopener noreferrer">Source: Qiskit Experiments calibration tutorial</a> (simulated three-level transmon).
+          The source reports β ≈ −1.52 with poor fit quality; treat it as a candidate to investigate, rather than a validated calibration.</p>
       </div>
       <fieldset class="diagnose-group" id="lab-diagnose-group">
-        <legend id="lab-diagnose-legend">Looking at this β-sweep: what does the fit mark?</legend>
+        <legend id="lab-diagnose-legend">What does the shared minimum near β ≈ −1.52 suggest?</legend>
         <div class="radio-row" role="radiogroup" aria-labelledby="lab-diagnose-legend">
           <label class="radio-option"><input type="radio" name="lab-diagnose" value="under"> <span>Under-corrected</span></label>
-          <label class="radio-option"><input type="radio" name="lab-diagnose" value="calibrated"> <span>Calibrated</span></label>
+          <label class="radio-option"><input type="radio" name="lab-diagnose" value="calibrated"> <span>Candidate calibration</span></label>
           <label class="radio-option"><input type="radio" name="lab-diagnose" value="over"> <span>Over-corrected</span></label>
         </div>
         <p class="diagnose-feedback" id="diagnose-feedback" hidden></p>
@@ -826,14 +915,14 @@ a:focus-visible,
     <h2 id="next-heading">Ising Calibration playground</h2>
     <p>You’ve found where gates agree and diagnosed the lab β-sweep. Continue in the
       <a href="https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground" target="_blank" rel="noopener noreferrer">Ising Calibration playground</a>:
-      paste the prompt below (or rewrite it in your own words), optionally attach <code>DRAG.png</code>, and
+      paste the prompt below (or rewrite it in your own words), optionally attach <code>drag-calibration-plot.png</code>, and
       <strong>ask about anything you still don’t understand</strong> — or <strong>state what you think is going on and ask the agent to confirm or correct you</strong>.</p>
     <div class="prompt-box" role="region" aria-label="Suggested playground prompt">
       <div class="prompt-box-header">
         <strong>Suggested prompt</strong>
         <button type="button" class="btn-secondary" id="copy-prompt-btn">Copy prompt</button>
       </div>
-      <p id="playground-prompt">I just finished a DRAG pulse calibration intro. Before this step I already knew the π-pulse amplitude from Rabi. In the widget I saw that DRAG adds a Q-channel derivative to the I Gaussian, and I calibrate β by finding where repeated X-gate curves (nrep = 3, 5, 7) agree. I also looked at a real Qblox β-sweep (DRAG.png) with a fit near β ≈ −1.52. Please confirm or correct that understanding. Also explain briefly: how phase error / AC Stark during the pulse differs from leakage to |2⟩, and why the analytical β ≈ −1/(2α) is only a starting point.</p>
+      <p id="playground-prompt">I just finished a DRAG pulse calibration intro. Before this step I already knew the π-pulse amplitude from Rabi. In the widget I saw that DRAG adds a Q-channel derivative to the I Gaussian, and I calibrate β by finding where repeated X-gate curves (nrep = 3, 5, 7) agree. I also looked at a simulated Qiskit β-sweep (drag-calibration-plot.png) whose curves share a minimum near β ≈ −1.52, although the source flags the fit quality as poor. Please confirm or correct that understanding. Also explain briefly: how phase error / AC Stark during the pulse differs from leakage to |2⟩, and why the analytical β ≈ −1/(2α) is only a starting point.</p>
     </div>
     <p>Open the playground, paste the prompt, then add your own follow-up: a confusion (“I don’t get why…”), or a check (“Here’s what I think happens — am I right?”).</p>
     <div class="controls-row">
@@ -842,8 +931,21 @@ a:focus-visible,
   </section>
 
   <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Time-dependent control in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/dynamics101/02_Time_Dependent.ipynb" target="_blank" rel="noopener noreferrer">Time-Dependent Hamiltonians</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>Section 1 - Implementing time dependent terms</strong> uses scalar functions to build control waveforms; <strong>Section 2 - Implementing custom operators</strong> extends the model beyond a qubit.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://nvidia.github.io/cuda-quantum/latest/examples/python/dynamics/control.html#gate-calibration" target="_blank" rel="noopener noreferrer">CUDA-Q Dynamics: Gate Calibration</a></div><p class="lesson-description">a worked three-level DRAG pulse-optimization example in the CUDA-Q documentation.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/calibration/Calibration_Resources_Guide.ipynb" target="_blank" rel="noopener noreferrer">Calibration Resources Guide</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">connect DRAG tuning to amplitude and frequency calibration.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/rabi-oscillations.html" target="_blank" rel="noopener noreferrer">Amplitude Rabi</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/qubit-spectroscopy-intro.html" target="_blank" rel="noopener noreferrer">Qubit Spectroscopy</a></p>
+        </details>
 
-  <footer class="widget-footer">
+<footer class="widget-footer">
     <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
     <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
   </footer>
@@ -1122,15 +1224,19 @@ a:focus-visible,
       ctx.stroke();
     });
 
-    let lx = pad.l + 8;
-    D.NREPS.forEach(function (n) {
-      ctx.fillStyle = colors[n];
-      ctx.fillRect(lx, pad.t + 4, 12, 3);
-      ctx.fillStyle = '#E0E0E0';
-      ctx.font = '10px Inter, sans-serif';
-      ctx.fillText('n=' + n, lx + 16, pad.t + 10);
-      lx += 58;
-    });
+    const legend = document.getElementById('cross-legend');
+    if (legend && !legend.children.length) {
+      D.NREPS.forEach(function (n) {
+        const item = document.createElement('li');
+        const swatch = document.createElement('span');
+        swatch.className = 'legend-line';
+        swatch.setAttribute('aria-hidden', 'true');
+        swatch.style.borderTopColor = colors[n];
+        item.appendChild(swatch);
+        item.appendChild(document.createTextNode('n = ' + n));
+        legend.appendChild(item);
+      });
+    }
 
     const fx = pad.l + D.betaToFrac(beta) * plotW;
     ctx.strokeStyle = '#f9c500';
@@ -1284,20 +1390,20 @@ a:focus-visible,
     const selected = document.querySelector('input[name="lab-diagnose"]:checked');
     if (!selected || !D.els.diagnoseFeedback) return;
     const val = selected.value;
-    // Fit on the Qblox plot marks the calibrated crossing
+    // The shared signal minimum suggests a calibration candidate, pending validation.
     const correct = 'calibrated';
     if (val === correct) {
       D.els.diagnoseFeedback.hidden = false;
       D.els.diagnoseFeedback.className = 'diagnose-feedback correct';
-      D.els.diagnoseFeedback.textContent = 'Correct — the fit marks where the nrep curves agree (calibrated β).';
+      D.els.diagnoseFeedback.textContent = 'Correct — the shared minimum suggests a candidate β. The source flags the fit quality as poor, so further validation is needed.';
       D.state.diagnosed = true;
-      D.announce('Diagnosis correct. The fit marks the calibrated crossing.');
+      D.announce('Diagnosis correct. The shared minimum suggests a candidate calibration.');
     } else {
       D.els.diagnoseFeedback.hidden = false;
       D.els.diagnoseFeedback.className = 'diagnose-feedback incorrect';
       const hint = val === 'under'
-        ? 'Under-corrected would mean β too small. Look at where the fit sits relative to the curves.'
-        : 'Over-corrected would mean β too large. Look at where the fit sits relative to the curves.';
+        ? 'Under-corrected would mean β too small. Look at the shared low-signal region.'
+        : 'Over-corrected would mean β too large. Look at the shared low-signal region.';
       D.els.diagnoseFeedback.textContent = 'Not quite. ' + hint;
       D.announce('Diagnosis incorrect. ' + hint);
     }
@@ -1364,5 +1470,43 @@ a:focus-visible,
   }
 })();
 </script>
+
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
+    </script>
 </body>
 </html>

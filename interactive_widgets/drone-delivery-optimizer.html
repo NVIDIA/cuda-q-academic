@@ -147,8 +147,8 @@
         flex: 0 0 280px; min-width: 240px;
         display: flex; flex-direction: column; gap: 16px;
     }
-    .viz-panel {
-        flex: 1 1 400px; height: 520px;
+    .viz-panel.info-box {
+        flex: 1 1 400px; height: 520px; min-width: 0;
         position: relative; overflow: hidden;
         padding: 0;
     }
@@ -224,12 +224,12 @@
     }
 
     .gen-overlay {
-        position: absolute; top: 8px; right: 12px;
         font-size: 0.8rem; color: var(--muted);
         background: rgba(26,26,26,0.85);
-        padding: 4px 10px; border-radius: 4px;
-        pointer-events: none;
+        padding: 8px 12px; border-radius: 4px;
+        margin-bottom: 16px; overflow-wrap: anywhere;
     }
+    .gen-overlay:empty { display: none; }
 
     .evo-insight { display: none; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     .evo-insight.active { display: flex; }
@@ -446,7 +446,64 @@
             transition-duration: 0.01ms !important;
         }
     }
-    </style>
+
+        @media (max-width: 700px) { .main-area { flex-wrap: nowrap; } .controls-panel, .viz-panel { width: 100%; max-width: 100%; min-width: 0; } }
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
+</style>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -458,7 +515,7 @@
             <p class="summary-text">Your drone has 30 packages to deliver. Can you find a short route — and discover why it's so hard?</p>
         </header>
 
-        <details class="instructions-section" aria-labelledby="instructions-heading">
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
             <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
                 <li>In <strong>The Goal</strong>, see what a random route looks like, watch a greedy algorithm build a smarter one, then watch the drone fly it. This sets the stage for everything that follows.</li>
@@ -572,13 +629,14 @@
 
             <div class="viz-panel info-box" id="viz-panel" aria-label="Drone delivery map">
                 <canvas id="map-canvas" aria-label="City grid map showing delivery stops and the current drone route"></canvas>
-                <div class="gen-overlay" id="gen-overlay" aria-hidden="true"></div>
                 <div class="map-legend" id="map-legend" aria-label="Route legend">
                     <div class="legend-item" id="legend-crossing" style="display:none;"><span class="legend-swatch crossing"></span><span>Crossing</span></div>
                 </div>
             </div>
 
         </div>
+
+        <div class="gen-overlay" id="gen-overlay" aria-hidden="true"></div>
 
         <div class="comparison-cards info-box" id="parallel-cards" style="display:none;" aria-label="Parallel starts comparison">
             <div class="comparison-cards-title">Parallel Starts</div>
@@ -668,6 +726,19 @@
                 <button class="btn-secondary" id="btn-new-layout" aria-label="Generate a new random delivery layout" style="width:100%;">Try Again with a New Layout of Drone Stops</button>
             </div>
         </div>
+
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Optimization in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" target="_blank" rel="noopener noreferrer">Max Cut with QAOA</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1.5 CUDA-Q Implementation of QAOA for Max Cut</strong> builds a cost Hamiltonian, a parameterized circuit and a classical optimizer loop.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/03_qchop.ipynb" target="_blank" rel="noopener noreferrer">Portfolio Optimization Three Ways (Q-CHOP)</a><span class="level-badge" aria-label="Lesson level: Advanced">Advanced</span></div><p class="lesson-description">compare optimization approaches on a constrained problem in CUDA-Q.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/route-explorer.html" target="_blank" rel="noopener noreferrer">Route Explorer</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/qaoa-landscape.html" target="_blank" rel="noopener noreferrer">QAOA Landscape</a></p>
+        </details>
 
         <footer class="widget-footer">
             <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
@@ -855,9 +926,9 @@
     var ctx = canvas.getContext('2d');
 
     function resizeCanvas() {
-        var container = canvas.parentElement, dpr = window.devicePixelRatio || 1, rect = container.getBoundingClientRect();
-        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-        canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+        var dpr = window.devicePixelRatio || 1, rect = canvas.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        canvas.width = Math.round(rect.width * dpr); canvas.height = Math.round(rect.height * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
@@ -1457,9 +1528,13 @@
 
     function renderSplitScreen(stops, randomRoute, greedyRt, rDist, gDist) {
         var w = canvas.clientWidth, h = canvas.clientHeight; ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#1A1A1A'; ctx.fillRect(0, 0, w, h);
-        var halfW = Math.floor(w / 2);
-        drawHalfRoute(stops, randomRoute, 0, halfW, h, '#ef9100', 2);
-        drawHalfRoute(stops, greedyRt, halfW, halfW, h, '#76b900', 2);
+        var halfW = Math.floor(w / 2), heading = document.getElementById('split-label-left');
+        var topInset = (heading ? heading.offsetHeight : 20) + 12, bottomInset = 56;
+        var plotHeight = Math.max(1, h - topInset - bottomInset);
+        ctx.save(); ctx.translate(0, topInset);
+        drawHalfRoute(stops, randomRoute, 0, halfW, plotHeight, '#ef9100', 2);
+        drawHalfRoute(stops, greedyRt, halfW, halfW, plotHeight, '#76b900', 2);
+        ctx.restore();
         ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
         if (rDist != null) { ctx.fillStyle = '#ef9100'; ctx.fillText(rDist.toFixed(1), halfW / 2, h - 40); }
         if (gDist != null) { ctx.fillStyle = '#76b900'; ctx.fillText(gDist.toFixed(1), halfW + halfW / 2, h - 40); }
@@ -1547,15 +1622,18 @@
 
     function drawQuadRoute(stops, route, qx, qy, qw, qh, color, lineWidth) {
         if (!route || route.length < 2) return;
+        var heading = document.getElementById('quad-label-0');
+        var topInset = (heading ? heading.offsetHeight : 20) + 12, bottomInset = 24;
+        var plotHeight = Math.max(1, qh - topInset - bottomInset);
         ctx.save(); ctx.beginPath(); ctx.rect(qx, qy, qw, qh); ctx.clip();
         ctx.strokeStyle = color; ctx.lineWidth = lineWidth; ctx.lineJoin = 'round'; ctx.globalAlpha = 0.7;
         for (var i = 0; i < route.length; i++) {
             var from = stops[route[i]], to = stops[route[(i + 1) % route.length]];
-            ctx.beginPath(); ctx.moveTo(qx + from.x * qw, qy + from.y * qh); ctx.lineTo(qx + to.x * qw, qy + to.y * qh); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(qx + from.x * qw, qy + topInset + from.y * plotHeight); ctx.lineTo(qx + to.x * qw, qy + topInset + to.y * plotHeight); ctx.stroke();
         }
         ctx.globalAlpha = 1; var homeIdx = route[0];
         for (var i = 0; i < stops.length; i++) {
-            var s = stops[i], p = { x: qx + s.x * qw, y: qy + s.y * qh };
+            var s = stops[i], p = { x: qx + s.x * qw, y: qy + topInset + s.y * plotHeight };
             ctx.beginPath(); ctx.arc(p.x, p.y, i === homeIdx ? 6 : 4, 0, Math.PI * 2);
             ctx.fillStyle = i === homeIdx ? '#76b900' : '#E0E0E0'; ctx.fill();
             ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1; ctx.stroke();
@@ -1699,10 +1777,48 @@
         wireSliderDisplay('speed-3', 'speed-3-val', speedLabel);
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { if (state.running) stopRunning(); if (state.droneFlying) stopDroneFlight(); } });
         window.addEventListener('resize', function() { resizeCanvas(); render(); });
+        if ('ResizeObserver' in window) {
+            new ResizeObserver(function() { resizeCanvas(); render(); }).observe(canvas.parentElement);
+        }
         newLayout();
     }
 
     document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

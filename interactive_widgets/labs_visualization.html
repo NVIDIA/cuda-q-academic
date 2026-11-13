@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LABS Visualization</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <script>
         window.MathJax = {
             options: {
@@ -115,7 +115,7 @@
         @media (max-width: 768px) {
             :root { --node-size-px: 36px; --node-gap-px: 6px; }
         }
-        
+
         @media (max-width: 400px) {
             :root { --node-size-px: 30px; --node-gap-px: 4px; }
         }
@@ -209,7 +209,7 @@
 
         .text-calc-plus { color: #FFFFFF; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
         .text-calc-minus { color: #A3A3A3; /* Lightened from 9CA3AF */ }
-        
+
         #shifted-sequence-row, #product-row {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform;
@@ -280,6 +280,64 @@
         @media (min-width: 768px) {
             .label-col { width: 6rem; font-size: 11px; }
         }
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -289,15 +347,15 @@
             <h1>Low Autocorrelation Binary Sequence (LABS) Optimization</h1>
             <p class="summary-text">Toggle the sequence bits below to find the minimum Total Energy.</p>
         </header>
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
                 <li><b>Sequence <span class="font-serif italic">S</span>:</b> Tap bits to toggle 0/1 and change the binary sequence.</li>
                 <li><b>Shift <span class="font-serif italic">k</span>:</b> Use the slider to view the overlap and product for different shift amounts. Lower Total Energy indicates better autocorrelation.</li>
                 <li>Try to reach the target minimum energy (e.g. E = 3 for N = 7).</li>
             </ol>
             <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between sections. In the Sequence box, <span class="kbd">Left</span>/<span class="kbd">Right</span> move between the 7 bits; <span class="kbd">Enter</span>/<span class="kbd">Space</span> toggle the focused bit. <span class="kbd">ESC</span> to reset if applicable.</p>
-        </section>
+        </details>
         <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
         <div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
 
@@ -328,7 +386,7 @@
                         <div class="label-col">Original<br><span class="font-serif lowercase italic">s<sub>i+k</sub></span></div>
                         <div id="static-row" class="flex"></div>
                     </div>
-                    
+
                     <div class="flex mb-4 relative z-10 items-center">
                         <div class="label-col">Shifted<br><span class="font-serif lowercase italic">s<sub>i</sub></span></div>
                         <div class="flex-grow overflow-visible">
@@ -343,7 +401,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mt-8 px-4">
                     <label for="shift-slider" class="sr-only">Shift amount k</label>
                     <input type="range" id="shift-slider" min="1" max="6" value="1" aria-valuetext="Shift 1" tabindex="0">
@@ -370,7 +428,7 @@
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="text-xs font-black uppercase tracking-wider opacity-80">Total Energy</h3>
                     </div>
-                    
+
                     <div class="text-xs md:text-sm font-serif italic opacity-70 mb-1 border-b border-black/10 pb-2">
                         <span aria-hidden="true">\( E = \sum_{k=1}^{N-1} C_k^2 \)</span>
                         <span class="sr-only">Energy equals Sum of C sub k squared from k=1 to N-1</span>
@@ -386,11 +444,77 @@
                 </div>
             </div>
         </div>
-        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
-            Note: This widget is part of the CUDA-Q Academic lesson entitled "Quantum Enhanced Optimization for Radar and Communications (LABS)".
-            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;" tabindex="0">here</a>.
-        </div>
-        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: write the N = 7 LABS energy as a Hamiltonian, score the widget's sequence, then put all 128 sequences in equal superposition. One expectation value gives their mean energy, while 50 shots show a sample of the energy distribution. Uniform superposition gives random guesses; it does not favor low energies.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">from</span> cudaq <span class="tok-keyword">import</span> spin
+<span class="tok-keyword">from</span> collections <span class="tok-keyword">import</span> Counter
+
+N = <span class="tok-number">7</span>
+<span class="tok-comment"># C_k = sum_i s_i s_(i+k), with s_i = +1 for |0&gt; and -1 for |1&gt;.</span>
+C = [<span class="tok-builtin">sum</span>(spin.<span class="tok-gate">z</span>(i) * spin.<span class="tok-gate">z</span>(i + k) <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(N - k)) <span class="tok-keyword">for</span> k <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(<span class="tok-number">1</span>, N)]
+H = <span class="tok-builtin">sum</span>(c * c <span class="tok-keyword">for</span> c <span class="tok-keyword">in</span> C)  <span class="tok-comment"># E = sum over k of C_k^2</span>
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">sequence</span>(<span class="tok-gate">s</span>: <span class="tok-builtin">list</span>[<span class="tok-builtin">int</span>]):
+    q = cudaq.qvector(<span class="tok-builtin">len</span>(<span class="tok-gate">s</span>))
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(<span class="tok-builtin">len</span>(<span class="tok-gate">s</span>)):
+        <span class="tok-keyword">if</span> <span class="tok-gate">s</span>[i] == -<span class="tok-number">1</span>:
+            <span class="tok-gate">x</span>(q[i])
+
+
+<span class="tok-comment"># 1. The widget's sequence: change any +1 to -1 and re-run.</span>
+<span class="tok-gate">s</span> = [<span class="tok-number">1</span>, <span class="tok-number">1</span>, <span class="tok-number">1</span>, <span class="tok-number">1</span>, <span class="tok-number">1</span>, <span class="tok-number">1</span>, <span class="tok-number">1</span>]
+<span class="tok-builtin">print</span>(<span class="tok-string">"Energy of your sequence:"</span>, <span class="tok-builtin">round</span>(cudaq.observe(sequence, H, <span class="tok-gate">s</span>).expectation()))
+
+
+<span class="tok-comment"># 2. Put all 128 sequences in an equal superposition.</span>
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">all_sequences</span>(n: <span class="tok-builtin">int</span>):
+    q = cudaq.qvector(n)
+    <span class="tok-gate">h</span>(q)
+
+
+<span class="tok-builtin">print</span>(<span class="tok-string">"Average energy of all 128 sequences:"</span>,
+      <span class="tok-builtin">round</span>(cudaq.observe(all_sequences, H, N).expectation(), <span class="tok-number">3</span>))
+
+
+<span class="tok-comment"># 3. Each shot measures one uniformly random sequence.</span>
+<span class="tok-keyword">def</span> <span class="tok-func">energy</span>(bits):
+    signs = [<span class="tok-number">1</span> <span class="tok-keyword">if</span> bit == <span class="tok-string">"0"</span> <span class="tok-keyword">else</span> -<span class="tok-number">1</span> <span class="tok-keyword">for</span> bit <span class="tok-keyword">in</span> bits]
+    <span class="tok-keyword">return</span> <span class="tok-builtin">sum</span>(<span class="tok-builtin">sum</span>(signs[i] * signs[i + k] <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(N - k)) ** <span class="tok-number">2</span>
+               <span class="tok-keyword">for</span> k <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(<span class="tok-number">1</span>, N))
+
+
+counts = cudaq.sample(all_sequences, N, shots_count=<span class="tok-number">50</span>)
+histogram = Counter()
+<span class="tok-keyword">for</span> bits <span class="tok-keyword">in</span> counts:
+    histogram[energy(bits)] += counts.count(bits)
+<span class="tok-keyword">for</span> E <span class="tok-keyword">in</span> <span class="tok-builtin">sorted</span>(histogram):
+    <span class="tok-builtin">print</span>(<span class="tok-string">f"E = {E:2d}: {'#' * histogram[E]}"</span>)
+<span class="tok-comment"># Only 4 of the 128 sequences reach E = 3. A 50-shot run may miss them.</span>
+<span class="tok-comment"># The lesson's counterdiabatic circuit aims to favor lower-energy sequences.</span>
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Increase <code>shots_count</code> from 50 to 500. How does the histogram change, and how often do you see <code>E = 3</code>? Change the starting sequence, then reverse it and flip all its signs. Do these transformations change its energy?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>LABS in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/01_quantum_enhanced_optimization_LABS.ipynb" target="_blank" rel="noopener noreferrer">Quantum-Enhanced Optimization (LABS)</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>The LABS problem and applications</strong> embeds this widget and defines the energy; <strong>Building a Quantum Enhanced Workflow</strong> turns the same 2- and 4-body Z terms into a CUDA-Q circuit that seeds a classical memetic search. <strong>Generating Quantum Enhanced Results</strong> compares quantum and random starting populations at N = 20.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/QUBO_widget.html" target="_blank" rel="noopener noreferrer">QUBO Portfolio Optimization</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/triangle-qaoa.html" target="_blank" rel="noopener noreferrer">QAOA Max Cut Explorer</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer" tabindex="0">Back to Visualization Gallery</a>
                 <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer" tabindex="0">CUDA-Q Academic</a>
@@ -432,7 +556,7 @@
                         : (idx - 1 + btns.length) % btns.length;
                     btns[next].focus();
                 });
-                
+
                 els.slider.addEventListener('input', (e) => {
                     currentShift = parseInt(e.target.value);
                     updateUI(false); 
@@ -451,14 +575,14 @@
                     const btn = document.createElement('button');
                     btn.className = `seq-node ${val === 1 ? 'node-plus' : 'node-minus'}`;
                     btn.textContent = val === 1 ? '+1' : '-1';
-                    
+
                     // Input buttons are the start of our Tab Order
                     btn.setAttribute('tabindex', '0');
                     btn.setAttribute('type', 'button'); 
-                    
+
                     btn.setAttribute('aria-label', `Bit ${i+1}, value ${val === 1 ? '+1' : '-1'}`);
                     btn.setAttribute('aria-pressed', val === 1 ? 'true' : 'false');
-                    
+
                     btn.onclick = () => {
                         sequence[i] *= -1;
                         const newVal = sequence[i] === 1 ? '+1' : '-1';
@@ -492,7 +616,7 @@
                 }
 
                 els.kDisp.textContent = currentShift;
-                
+
                 renderVisualizationRows();
 
                 const correlations = [];
@@ -549,7 +673,7 @@
                     const valTop = sequence[i + currentShift];
                     const valBot = sequence[i];
                     const product = valTop * valBot;
-                    
+
                     const node = document.createElement('div');
                     node.className = `prod-node ${product === 1 ? 'prod-plus' : 'prod-minus'}`;
                     node.textContent = product === 1 ? '+1' : '-1';
@@ -568,12 +692,12 @@
             function renderPlot(cors) {
                 els.plot.innerHTML = '';
                 const maxValSq = (N - 1) * (N - 1);
-                
+
                 cors.forEach((val, i) => {
                     const k = i + 1;
                     const valSq = val * val;
                     const active = (k === currentShift);
-                    
+
                     const wrapper = document.createElement('div');
                     // Mouse-only click handler (valid since Slider is keyboard alternative)
                     wrapper.className = "flex flex-col items-center gap-1 cursor-pointer group flex-1 p-0";
@@ -623,7 +747,7 @@
                                 \\( C_{${currentShift}}^2 = \\left( \\sum_{i=0}^{${N - currentShift - 1}} s_{i+${currentShift}} s_i \\right)^2 \\)
                             </div>
                         </div>
-                        
+
                         <div>
                             <p class="text-[11px] font-black text-gray-300 uppercase tracking-widest mb-2">Product Summation</p>
                             <div class="bg-black/20 p-4 md:p-6 rounded-2xl border border-white/5 text-center w-full">
@@ -658,6 +782,43 @@
             } else {
                 window.addEventListener('DOMContentLoaded', init);
             }
+        })();
+    </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
         })();
     </script>
 </body>

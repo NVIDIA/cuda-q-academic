@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "examples": [
+    {
+      "widget_id": "bloch-sphere-visualizer",
+      "html": "quantum-applications-to-finance/images/bloch_sphere_visualization.html",
+      "python": "widget-examples/bloch_sphere_visualization.py"
+    },
+    {
+      "widget_id": "borns-rule-and-sampling",
+      "html": "quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html",
+      "python": "widget-examples/borns_rule_sampling.py"
+    },
+    {
+      "widget_id": "quantum-gate-visualization",
+      "html": "quantum-applications-to-finance/images/gate-widget.html",
+      "python": "widget-examples/quantum_gate_visualization.py"
+    },
+    {
+      "widget_id": "quantum-random-walk",
+      "html": "quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html",
+      "python": "widget-examples/quantum_random_walk.py"
+    },
+    {
+      "widget_id": "classic-and-split-step-random-walk",
+      "html": "quantum-applications-to-finance/images/ss-random-walk.html",
+      "python": "widget-examples/split_step_random_walk.py"
+    },
+    {
+      "widget_id": "unitary-circuit-synthesis",
+      "html": "ai-for-quantum/widgets/unitary_widget.html",
+      "python": "widget-examples/unitary_synthesis.py"
+    },
+    {
+      "widget_id": "cnot-gate-visualizer",
+      "html": "quick-start-to-quantum/interactive_widget/cnot-visualization.html",
+      "python": "widget-examples/cnot_gate_visualization.py"
+    },
+    {
+      "widget_id": "vqe-convergence",
+      "html": "chemistry-simulations/Images/VQE_Widget.html",
+      "python": "widget-examples/vqe_convergence.py"
+    },
+    {
+      "widget_id": "qubo-portfolio-optimization",
+      "html": "quantum-applications-to-finance/images/QUBO_widget.html",
+      "python": "widget-examples/qubo_portfolio_optimization.py"
+    },
+    {
+      "widget_id": "adapt-vqe-widget",
+      "html": "chemistry-simulations/Images/adapt_vqe/adapt_widget.html",
+      "python": "widget-examples/adapt_vqe_widget.py"
+    },
+    {
+      "widget_id": "krylov-subspace-widget",
+      "html": "chemistry-simulations/Images/krylov.html",
+      "python": "widget-examples/krylov_subspace.py"
+    },
+    {
+      "widget_id": "active-space-selection",
+      "html": "chemistry-simulations/Images/activespace.html",
+      "python": "widget-examples/active_space.py"
+    },
+    {
+      "widget_id": "labs-optimization-search",
+      "html": "interactive_widgets/labs_visualization.html",
+      "python": "widget-examples/labs_optimization.py"
+    },
+    {
+      "widget_id": "binary-fraction-explorer",
+      "html": "interactive_widgets/binary_fraction.html",
+      "python": "widget-examples/binary_fraction_explorer.py"
+    },
+    {
+      "widget_id": "pauli-propagation-visualizer",
+      "html": "interactive_widgets/pauli_prop_widget.html",
+      "python": "widget-examples/pauli_propagation.py"
+    },
+    {
+      "widget_id": "interactive-qft-visualizer",
+      "html": "interactive_widgets/qft.html",
+      "python": "widget-examples/interactive_qft_visualizer.py"
+    },
+    {
+      "widget_id": "amplitude-rabi",
+      "html": "interactive_widgets/rabi-oscillations.html",
+      "python": "widget-examples/amplitude_rabi.py"
+    },
+    {
+      "widget_id": "bits-vs-qubits-vertex-coloring",
+      "html": "interactive_widgets/bits-vs-qubits-coloring.html",
+      "python": "widget-examples/bits_vs_qubits_coloring.py"
+    },
+    {
+      "widget_id": "elevator-code",
+      "html": "interactive_widgets/elevator-code-widget.html",
+      "python": "widget-examples/elevator_code.py"
+    },
+    {
+      "widget_id": "error-digitization-explorer",
+      "html": "interactive_widgets/error_digitization.html",
+      "python": "widget-examples/error_digitization.py"
+    },
+    {
+      "widget_id": "qaoa-max-cut-explorer",
+      "html": "interactive_widgets/triangle-qaoa.html",
+      "python": "widget-examples/qaoa_max_cut_explorer.py"
+    },
+    {
+      "widget_id": "trajectory-noise-demo",
+      "html": "interactive_widgets/trajectory_noise_demo.html",
+      "python": "widget-examples/trajectory_noise_demo.py"
+    }
+  ]
+}
