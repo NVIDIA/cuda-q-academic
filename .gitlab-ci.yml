@@ -66,12 +66,14 @@ stages:
         python -c 'import cudaq_qec; print("cudaq_qec import ok", getattr(cudaq_qec, "__version__", ""))' \
           || echo "WARN: cudaq_qec does not import against this cudaq"
       fi
+    # genQC 0.2.5 uses Transformer.batch_first, removed in OpenCLIP 4.x.
     - pip install --quiet --upgrade
         jupyter
         nbconvert
         qutip
         pyscf
         genQC==0.2.5
+        open_clip_torch==3.3.0
         galois
         torch
         scikit-learn
