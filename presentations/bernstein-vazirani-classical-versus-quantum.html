@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bernstein–Vazirani: Classical versus Quantum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#76b900;--accent-dark:#5e9400;--bg:#1A1A1A;--surface:#2A2A2A;--border:#444444;--fg:#E0E0E0;--muted:#AAAAAA;--neg:#e52020;--anc:#ef9100}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.5;padding:24px 12px}
+a{color:#76b900}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#000;padding:8px 16px;z-index:100;text-decoration:none;font-weight:bold}
+.skip-link:focus{top:0}
+.widget-container{background-color:var(--surface);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:8px;padding:24px;width:100%;max-width:1100px;box-shadow:0 10px 40px rgba(0,0,0,0.4);margin:0 auto}
+@media (min-width:768px){.widget-container{padding:32px}}
+.widget-container h1{color:var(--accent);font-size:1.5rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;margin-top:0;font-weight:700;line-height:1.2}
+.widget-container .summary-text{color:var(--muted);margin-bottom:8px;font-size:1rem;line-height:1.5}
+.instructions-section{margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px}
+.instructions-section summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.instructions-section summary::-webkit-details-marker{display:none}
+.instructions-section summary::before{content:'▶';font-size:0.7rem;color:var(--accent);transition:transform 0.15s;flex-shrink:0}
+.instructions-section[open]>summary::before{transform:rotate(90deg)}
+.instructions-section summary:focus{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.instructions-section summary h2{display:inline}
+.instructions-section h2{color:var(--accent);font-size:1.1rem;margin:0;font-weight:700}
+.instructions-section:not([open]){padding-bottom:16px}
+.instructions-section ol{margin-top:12px;margin-bottom:8px;padding-left:22px}
+.instructions-section p{margin:8px 0 0;color:var(--muted);font-size:0.95rem}
+.instructions-section .kbd{background:var(--border);padding:2px 6px;border-radius:4px;font-family:inherit;font-size:0.9em}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+[hidden]{display:none !important}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.tab{min-height:48px;padding:10px 18px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:600;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:10px}
+.tab .num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;background:#313131;color:var(--fg);font-size:0.8rem}
+.tab:hover{color:#fff}
+.tab[aria-selected="true"]{color:#fff;border-bottom-color:var(--accent)}
+.tab[aria-selected="true"] .num{background:var(--accent);color:#000}
+.panel{display:grid;gap:16px}
+.grid-2{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:stretch}
+.steps .stage .num{width:auto;min-width:22px;padding:0 5px}
+@media (max-width:860px){.grid-2,.circ-grid,.secret-grid{grid-template-columns:1fr !important}}
+.info-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.box-title{margin:0;font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.btn-primary,.btn-secondary,.bit-btn{white-space:nowrap;min-width:44px;min-height:44px;padding:8px 14px;border-radius:4px;font:inherit;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.btn-primary{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent)}
+.btn-primary:hover{background:var(--accent);color:#000000;border-color:var(--accent)}
+.btn-primary:disabled,.btn-secondary:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary:disabled:hover{background:var(--surface);color:#fff;border-color:var(--border);border-bottom-color:var(--accent)}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);color:white}
+.bit-btn{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent)}
+.bit-btn:hover,.bit-btn.active,.bit-btn[aria-pressed="true"]{background:var(--accent);color:#000000;border-color:var(--accent)}
+.bits{display:flex;gap:8px;flex-wrap:wrap}
+.bits .bit-btn{width:48px;font-size:1.25rem;font-weight:700;padding:8px 0;font-family:'Roboto Mono',monospace}
+.bits .bit-btn small{display:block;font-size:0.65rem;font-weight:600;opacity:.75;line-height:1;font-family:'Inter',sans-serif}
+.slider-wrap{display:flex;flex-direction:column;gap:6px;padding:4px}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
+.slider-head output{font-variant-numeric:tabular-nums;color:#fff}
+.slider-wrap:focus-within{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+input[type=range]{-webkit-appearance:none;width:100%;background:transparent;min-height:28px}
+input[type=range]:focus{outline:none}
+input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--accent)}
+input[type=range]:focus::-moz-range-thumb{box-shadow:0 0 0 3px var(--accent)}
+input[type=range]::-webkit-slider-runnable-track{width:100%;height:4px;cursor:pointer;background:#444;border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;border-radius:50%;background:#76B900;cursor:pointer;margin-top:-7px;border:2px solid #1A1A1A}
+input[type=range]::-moz-range-track{width:100%;height:4px;cursor:pointer;background:#444;border-radius:5px}
+input[type=range]::-moz-range-thumb{height:14px;width:14px;border-radius:50%;background:#76B900;cursor:pointer;border:2px solid #1A1A1A}
+.qsteps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.qstep{min-height:64px;padding:10px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left}
+.qstep .num{flex:none;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:4px;background:#313131;color:var(--fg);font-size:.85rem;font-weight:700}
+.qstep .t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.qstep b{color:#fff;font-size:1rem}.qstep small{font-size:.82rem;line-height:1.3}
+.qstep:hover{color:#fff}
+.qstep[aria-pressed="true"]{border-color:var(--accent);background:rgba(118,185,0,.1);color:var(--fg)}
+.qstep[aria-pressed="true"] .num{background:var(--accent);color:#000}
+.mlines{display:flex;flex-direction:column;gap:6px}
+.mline{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:baseline;padding:10px 14px;border-radius:6px;border:1px solid transparent;color:var(--muted);font-size:1.05rem;font-variant-numeric:tabular-nums;cursor:pointer}
+.mline .n{font-weight:700;font-size:.85rem;color:var(--muted)}
+.mline.on{border-color:var(--accent);background:rgba(118,185,0,.08);color:#fff}
+.mline.on .n{color:var(--accent)}
+.mline .why{display:block;font-size:.9rem;color:var(--muted);margin-top:4px}
+.mline.on .why{color:var(--fg)}
+.stages{display:flex;flex-wrap:wrap;gap:6px}
+.stage{min-height:44px;padding:8px 14px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+.stage .num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#313131;color:var(--fg);font-size:0.75rem}
+.stage:hover{color:#fff}
+.stage[aria-pressed="true"]{color:#fff;border-color:var(--accent);background:rgba(118,185,0,0.1)}
+.stage[aria-pressed="true"] .num{background:var(--accent);color:#000}
+.circuit-wire{stroke:#E0E0E0;stroke-width:2}
+.circuit-gate-box{fill:#2A2A2A;stroke:#76b900;stroke-width:2}
+.circuit-gate-text{fill:#E0E0E0;font-family:Inter,sans-serif;font-weight:bold;font-size:16px;text-anchor:middle;dominant-baseline:middle}
+.circuit-qubit-label{fill:#76b900;font-family:Inter,sans-serif;font-size:14px;font-weight:bold}
+.circuit-ctrl-dot{fill:#76b900;stroke:none}
+.circuit-ctrl-line{stroke:#E0E0E0;stroke-width:2}
+.circuit-target-circle{fill:#2A2A2A;stroke:#76b900;stroke-width:2}
+.circuit-target-plus{stroke:#76b900;stroke-width:2}
+.meter-arc{fill:none;stroke:#E0E0E0;stroke-width:2}
+.svg-wrap{width:100%;overflow-x:auto}
+.svg-wrap svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.cands{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+.cand{position:relative;border-radius:6px;background:#1f1f1f;border:1px solid var(--border);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Roboto Mono',monospace;font-weight:700;font-size:1.05rem;color:#fff;transition:opacity .3s,border-color .3s;min-height:58px;justify-content:center}
+.cand .sub{font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;color:var(--muted)}
+.cand.out{color:#757575;border-color:#333}
+.cand.out::before,.cand.out::after{content:'';position:absolute;left:14%;right:14%;top:50%;height:2px;background:#e52020;transform:rotate(28deg);opacity:.85}
+.cand.out::after{transform:rotate(-28deg)}
+.cand.just{border-color:#e52020}
+.cand.win{border-color:var(--accent);background:rgba(118,185,0,0.12)}
+.cand.win .sub{color:#76b900}
+.amps{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}
+.amp{border-radius:6px;background:#1f1f1f;border:1px solid var(--border);padding:8px 6px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-height:80px;justify-content:center;overflow:hidden}
+.amp .ket{font-weight:700;font-size:1rem;color:#fff;font-family:'Roboto Mono',monospace}
+.amp .val{font-variant-numeric:tabular-nums;font-weight:700;font-size:0.95rem}
+.amp .bar{position:absolute;left:0;bottom:0;height:4px;background:linear-gradient(to right,#5e9400,#76b900)}
+.amp.pos .val{color:#76b900}.amp.neg .val{color:#ff6b6b}.amp.zero .val{color:#757575}.amp.zero .ket{color:#a7a7a7}
+.amp.pick{outline:2px solid var(--accent);outline-offset:-2px;cursor:pointer}
+.amp.pick:hover{background:#262626}
+.amp.pick.neg{outline-color:#ff6b6b}
+.amp.flip{outline:2px solid #ef9100;outline-offset:-2px;padding-top:22px}
+.amp .badge{position:absolute;top:4px;right:4px;font-size:0.65rem;font-weight:800;color:#000;background:#ef9100;border-radius:3px;padding:1px 4px;font-family:'Inter',sans-serif}
+.amp .was{font-size:0.75rem;color:var(--muted);text-decoration:line-through;font-variant-numeric:tabular-nums}
+.kick{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:center;font-size:1rem}
+.kick .lab{font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.kick .ex{color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+.kick .ex.now{color:#ffb13b}
+.anc{color:#ffb13b;font-weight:700}
+.steps{display:flex;flex-direction:column;gap:6px}
+.steps .stage{justify-content:flex-start}
+.steps .stage.sub{margin-left:18px;border-color:#5a4a2a}
+.steps .stage.sub[aria-pressed="true"]{border-color:#ef9100;background:rgba(239,129,57,0.12)}
+.steps .stage.sub[aria-pressed="true"] .num{background:#ef9100}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:0.85rem;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:middle;border-radius:3px}
+.note{border-left:3px solid var(--accent);padding:6px 12px;color:var(--fg);font-size:0.95rem;background:rgba(118,185,0,0.06)}
+.eq{font-size:1.1rem;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.m{font-family:'Roboto Mono',monospace;font-weight:500}
+.muted{color:var(--muted)}
+.big{font-size:1.35rem;font-weight:600;color:#fff;line-height:1.3}
+.tag{display:inline-flex;align-items:center;padding:4px 10px;border-radius:4px;font-weight:700;background:#313131;color:#fff;font-family:'Roboto Mono',monospace}
+.tag.on{background:var(--accent);color:#000}
+.tag.bad{background:#5a1a1a;color:#ffb3b3}
+.qlog{display:grid;grid-template-columns:auto auto 1fr;gap:6px 14px;align-items:center;font-variant-numeric:tabular-nums}
+.qlog .q{font-family:'Roboto Mono',monospace;font-weight:600;color:#fff}
+.qlog .r{font-family:'Roboto Mono',monospace;font-weight:700;color:#76b900}
+.qlog .s{color:var(--muted);font-size:0.9rem}
+.counter{display:flex;gap:28px;flex-wrap:wrap}
+.counter .n{font-size:2.4rem;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+.counter .l{font-size:0.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
+.tally{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:'Roboto Mono',monospace;font-weight:700;font-size:1.05rem}
+.tally .t{min-width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;background:#1f1f1f;border:2px solid}
+.tally .t.p{color:#76b900;border-color:#76b900}.tally .t.n{color:#ff6b6b;border-color:#e52020;border-style:dashed}
+.tally .res{font-size:1.2rem;color:#fff}
+.ybtn{font-family:'Roboto Mono',monospace;font-weight:700;letter-spacing:.06em}
+pre.code{margin:0;background:#1A1A1A;border:1px solid var(--border);border-radius:6px;padding:14px 16px;overflow-x:auto;font-family:'Roboto Mono',monospace;font-size:0.85rem;line-height:1.55;color:#E0E0E0}
+pre.code .k{color:#c77dff}pre.code .f{color:#4da3ff}pre.code .c{color:#757575}pre.code .hl{color:#76b900;font-weight:700}
+.widget-footer{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:24px}
+.widget-footer a{color:#76b900;text-decoration:none;font-weight:600}
+.widget-footer a:hover{text-decoration:underline}
+.widget-footer a:focus{outline:3px solid #76b900;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<main class="widget-container" id="main-content">
+<header>
+<h1>Bernstein–Vazirani</h1>
+<p class="summary-text">A black box computes f(x) = s·x mod 2 for a hidden string s. Find s classically one query at a time, then watch one quantum query do it by interference.</p>
+</header>
+<details class="instructions-section" aria-labelledby="instructions-heading" open>
+<summary><h2 id="instructions-heading">Instructions</h2></summary>
+<ol>
+<li>Set the length n and the secret string s. Both tabs use the same black box.</li>
+<li><strong>Classical:</strong> build an input x and query f(x). Every candidate string that would have answered differently is crossed out. Count how many queries it takes until one candidate remains.</li>
+<li><strong>Quantum:</strong> click the three steps (superposition, oracle, interference) and watch the amplitude distribution. The matching line of math is highlighted below.</li>
+</ol>
+<p>Keyboard: <span class="kbd">Tab</span> moves between controls; the focused slider shows a green ring. <span class="kbd">←</span> <span class="kbd">→</span> switch tabs and move within button rows. <span class="kbd">Enter</span> or <span class="kbd">Space</span> presses a button. <span class="kbd">Esc</span> resets the current tab.</p>
+</details>
+
+<div class="info-box" style="margin-bottom:16px">
+<div style="display:grid;grid-template-columns:220px 1fr;gap:16px 28px;align-items:center" class="secret-grid">
+<div class="slider-wrap"><div class="slider-head"><label for="n-slider">Length n</label><output id="n-out">3</output></div><input type="range" id="n-slider" min="2" max="4" step="1" value="3" aria-label="Number of bits in the secret string"></div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+<div class="bits" id="bits" role="group" aria-label="Secret string bits. Press a bit to toggle it." data-arrows></div>
+<div class="eq">s = <span class="m" id="s-str" style="color:#76b900"></span><span class="muted" style="font-weight:500;font-size:0.95rem;margin-left:14px">f(x) = <span id="f-expr"></span></span></div>
+<button class="btn-secondary" id="random">Random s</button>
+</div>
+</div>
+</div>
+
+<div class="tabs" role="tablist" aria-label="Approach">
+<button class="tab" role="tab" id="tab-cl" aria-controls="panel-cl" aria-selected="true"><span class="num">1</span>Classical: query by query</button>
+<button class="tab" role="tab" id="tab-qu" aria-controls="panel-qu" aria-selected="false" tabindex="-1"><span class="num">2</span>Quantum: one query</button>
+</div>
+
+<section class="panel" id="panel-cl" role="tabpanel" aria-labelledby="tab-cl">
+<div class="grid-2">
+<div class="info-box">
+<h2 class="box-title">Ask the black box</h2>
+<div class="muted">Build an input x, then query. You only get back one bit.</div>
+<div class="bits" id="xbits" role="group" aria-label="Input x bits. Press a bit to toggle it." data-arrows></div>
+<div class="row"><button class="btn-primary" id="query">Query f(x)</button><button class="btn-secondary" id="cl-reset">Start over</button></div>
+<div class="qlog" id="qlog"></div>
+<div class="counter"><div><div class="n" id="c-q">0</div><div class="l">queries</div></div><div><div class="n" id="c-left"></div><div class="l">candidates left</div></div></div>
+</div>
+<div class="info-box">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:baseline"><h2 class="box-title">Every string s could be</h2><span class="muted" id="cl-sub"></span></div>
+<div class="cands" id="cands"></div>
+<div class="note" id="cl-note">Before any query, all 2<sup>n</sup> strings are possible. A query f(x) returns one bit, so it can rule out at most half of the remaining candidates.</div>
+</div>
+</div>
+</section>
+
+<section class="panel" id="panel-qu" role="tabpanel" aria-labelledby="tab-qu" hidden>
+<div class="info-box">
+<div class="qsteps" role="group" aria-label="Step" data-arrows>
+<button class="qstep" data-stage="0" aria-pressed="true"><span class="num">0</span><span class="t"><b>Start</b><small>all query qubits in |0⟩</small></span></button>
+<button class="qstep" data-stage="1" aria-pressed="false"><span class="num">1</span><span class="t"><b>Make a superposition</b><small>H on every qubit: ask about every x at once</small></span></button>
+<button class="qstep" data-stage="2" aria-pressed="false"><span class="num">2</span><span class="t"><b>Apply the oracle</b><small>entangling CNOTs write f(x) as a sign on |x⟩</small></span></button>
+<button class="qstep" data-stage="3" aria-pressed="false"><span class="num">3</span><span class="t"><b>Interfere</b><small>H again: every wrong string cancels, s survives</small></span></button>
+</div>
+<div class="svg-wrap" id="circuit"></div>
+</div>
+
+<div class="info-box">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px"><h2 class="box-title" id="st-title"></h2><div class="muted" id="st-sub"></div></div>
+<div class="svg-wrap" id="amps"></div>
+<div class="legend"><span><i style="background:#76b900"></i>positive amplitude</span><span><i style="background:#ff6b6b"></i>negative amplitude</span><span>Bar height = amplitude, fixed scale from −1 to +1 · dotted lines at ±1/√N</span></div>
+<div class="row" id="noise-row" hidden style="align-items:center"><button class="btn-secondary" id="noise-btn" aria-pressed="false">Show noisy distribution</button><span class="muted" style="font-size:.9rem">An example only, not a specific noise model. In practice you run many shots and keep the most frequent string.</span></div>
+</div>
+
+<div class="info-box">
+<h2 class="box-title">The math, one line per step</h2>
+<div class="mlines" id="mlines"></div>
+</div>
+
+<details class="instructions-section" style="margin:0">
+<summary><h2>CUDA-Q kernel for this s</h2></summary>
+<pre class="code" id="code" tabindex="0" aria-label="CUDA-Q Python kernel generated from the secret string" style="margin-top:12px"></pre>
+<div class="muted" style="margin-top:8px">A CNOT from query qubit i to the ancilla is present exactly when s<sub>i</sub> = 1. Qubit 0 is the leftmost bit of s.</div>
+</details>
+</section>
+
+<footer class="widget-footer">
+<a href="index.html">More presentations</a>
+<a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+</footer>
+<div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+</main>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const announce = t => { $('#status-announce').textContent = t; };
+let n = 3, s = [1, 0, 1], x = [0, 0, 0], queries = [], stage = 0, pred = null, ySel = null;
+const bitsOf = (k, len) => k.toString(2).padStart(len, '0');
+const dotB = (a, b) => { let r = 0; for (let i = 0; i < a.length; i++) r ^= (+a[i] & +b[i]); return r; };
+const S = () => s.join('');
+const NS = 'http://www.w3.org/2000/svg';
+const svg = (w, h, inner, label) => `<svg xmlns="${NS}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${label}">${inner}</svg>`;
+const gateBox = (cx, cy, t) => `<rect class="circuit-gate-box" x="${cx - 22}" y="${cy - 18}" width="44" height="36" rx="4"></rect><text class="circuit-gate-text" x="${cx}" y="${cy + 1}">${t}</text>`;
+const arrowNav = g => g.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const b = [...g.querySelectorAll('button:not([disabled])')], i = b.indexOf(document.activeElement); if (i < 0) return; e.preventDefault(); b[(i + (e.key === 'ArrowRight' ? 1 : b.length - 1)) % b.length].focus(); });
+
+// Tabs
+const tabs = $$('.tab'); let current = 0; const resetters = [];
+function showTab(i, focus) { current = i; tabs.forEach((t, k) => { const on = k === i; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; $('#' + t.getAttribute('aria-controls')).hidden = !on; }); if (focus) tabs[i].focus(); }
+tabs.forEach((t, i) => { t.addEventListener('click', () => showTab(i)); t.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); showTab((i + 1) % tabs.length, 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); showTab((i + tabs.length - 1) % tabs.length, 1); } }); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { resetters[current](); announce('Reset'); } });
+
+// Secret
+function bitRow(el, arr, name, onToggle) {
+  el.innerHTML = arr.map((b, i) => `<button class="bit-btn${b ? ' active' : ''}" data-i="${i}" aria-pressed="${b ? 'true' : 'false'}" aria-label="${name} bit ${i} is ${b}. Toggle"><small>${name}${i}</small>${b}</button>`).join('');
+  el.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => { onToggle(+btn.dataset.i); el.querySelector(`[data-i="${btn.dataset.i}"]`).focus(); }));
+}
+function renderSecret() {
+  $('#n-out').textContent = n; $('#s-str').textContent = S();
+  const terms = s.map((b, i) => b ? `x<sub>${i}</sub>` : null).filter(Boolean); $('#f-expr').innerHTML = terms.length ? terms.join(' ⊕ ') : '0';
+  bitRow($('#bits'), s, 's', i => { s[i] ^= 1; onSecretChange(); announce(`s is now ${S()}`); });
+}
+function onSecretChange() { queries = []; stage = 0; noisy = false; $$('[data-stage]').forEach(b => b.setAttribute('aria-pressed', b.dataset.stage === '0')); renderSecret(); renderClassical(); renderQuantum(); }
+$('#n-slider').addEventListener('input', e => { n = +e.target.value; s = s.slice(0, n); while (s.length < n) s.push(0); x = new Array(n).fill(0); onSecretChange(); });
+$('#random').addEventListener('click', () => { s = s.map(() => Math.random() < 0.5 ? 1 : 0); onSecretChange(); announce(`s is now ${S()}`); });
+
+// 1 · Classical
+const alive = c => queries.every(q => dotB(c, q.x) === q.f);
+function renderClassical() {
+  const N = 1 << n, cands = Array.from({ length: N }, (_, k) => bitsOf(k, n)), last = queries[queries.length - 1];
+  bitRow($('#xbits'), x, 'x', i => { x[i] ^= 1; renderClassical(); });
+  $('#qlog').innerHTML = queries.map(q => `<span class="q">f(${q.x})</span><span class="r">= ${q.f}</span><span class="s">ruled out ${q.killed}</span>`).join('');
+  const left = cands.filter(alive), done = left.length === 1;
+  $('#c-q').textContent = queries.length; $('#c-left').textContent = left.length;
+  $('#cl-sub').textContent = `${left.length} of ${N} remain`;
+  $('#cands').innerHTML = cands.map(c => { const a = alive(c), just = last && !a && dotB(c, last.x) !== last.f && queries.slice(0, -1).every(q => dotB(c, q.x) === q.f);
+    const sub = last ? (a ? `f(${last.x}) = ${last.f} ✓` : `would give ${dotB(c, last.x) === last.f ? last.f : 1 - last.f}`) : '';
+    return `<div class="cand${a ? '' : ' out'}${just ? ' just' : ''}${done && a ? ' win' : ''}" aria-label="${c}${a ? '' : ', ruled out'}">${c}<span class="sub">${done && a ? 'this is s' : sub}</span></div>`; }).join('');
+  $('#query').disabled = done || queries.some(q => q.x === x.join(''));
+  $('#query').textContent = queries.some(q => q.x === x.join('')) ? `Already asked f(${x.join('')})` : `Query f(${x.join('')})`;
+  $('#cl-note').innerHTML = !queries.length ? 'Before any query, all 2<sup>n</sup> strings are possible. One query returns one bit, so it can rule out at most half of the remaining candidates.'
+    : done ? `<strong style="color:#76b900">Found s = ${S()} after ${queries.length} queries.</strong> Each useful query halves the candidates, so ${n} independent queries are needed and sufficient: ${N} → ${Array.from({ length: n }, (_, k) => N >> (k + 1)).join(' → ')}. Querying the basis vectors 100…, 010…, … reads off one bit of s each.`
+    : last.killed === 0 ? `f(${last.x}) = ${last.f} ruled out nothing: every remaining candidate already agreed on that input. That query was dependent on earlier ones (over 𝔽₂, ${last.x} is a sum of inputs already asked, or it is 0…0).`
+    : `f(${last.x}) = ${last.f}. Every remaining candidate c with c·${last.x} ≠ ${last.f} is crossed out. ${left.length} still fit every answer, so s is not yet determined.`;
+}
+$('#query').addEventListener('click', () => { const xs = x.join(''), f = dotB(s, xs), before = Array.from({ length: 1 << n }, (_, k) => bitsOf(k, n)).filter(alive).length; queries.push({ x: xs, f }); const after = Array.from({ length: 1 << n }, (_, k) => bitsOf(k, n)).filter(alive).length; queries[queries.length - 1].killed = before - after; renderClassical(); announce(`f of ${xs} is ${f}. ${after} candidates left.`); });
+$('#cl-reset').addEventListener('click', () => resetters[0]());
+resetters[0] = () => { queries = []; x = new Array(n).fill(0); renderClassical(); };
+
+// 2 · Quantum
+let noisy = false;
+function noisyAmps() {
+  const N = 1 << n, si = parseInt(S(), 2), rnd = k => { const v = Math.sin((k + 1) * 12.9898 + si * 78.233 + n * 3.7) * 43758.5453; return v - Math.floor(v); };
+  const w = Array.from({ length: N }, (_, k) => { if (k === si) return 0; let d = 0, x = k ^ si; while (x) { d += x & 1; x >>= 1; } return (d === 1 ? 3 : 1) * (0.5 + rnd(k)); });
+  const tw = w.reduce((a, b) => a + b, 0), ps = 0.72;
+  return w.map((v, k) => k === si ? Math.sqrt(ps) : (rnd(k + 31) < 0.5 ? -1 : 1) * Math.sqrt((1 - ps) * v / tw));
+}
+const ones = () => s.map((b, i) => b ? i : -1).filter(i => i >= 0);
+function amplitudes(k) {
+  const N = 1 << n, a = new Array(N).fill(0), r = 1 / Math.sqrt(N);
+  if (k === 0) { a[0] = 1; return a; }
+  if (k === 1) return a.fill(r);
+  if (k === 2) return a.map((_, m) => dotB(s, bitsOf(m, n)) ? -r : r);
+  a[parseInt(S(), 2)] = 1; return a;
+}
+function renderCircuit() {
+  const rows = n + 1, Y = i => 64 + i * 54, W = 470, H = Y(n) + 48; let c = '';
+  for (let i = 0; i < rows; i++) { const anc = i === n;
+    c += `<text class="circuit-qubit-label" x="4" y="${Y(i) + 5}">${anc ? '<tspan fill="#ef9100">a</tspan> |1⟩' : `q${i} |0⟩`}</text><line class="circuit-wire" x1="64" y1="${Y(i)}" x2="${W - 8}" y2="${Y(i)}"></line>` + gateBox(110, Y(i), 'H');
+    if (!anc) c += gateBox(410, Y(i), 'H'); }
+  c += `<text x="150" y="${Y(n) - 12}" fill="#ffb13b" font-family="Inter, sans-serif" font-size="13" font-weight="700" text-anchor="end">a = |−⟩</text>`;
+  const o = ones(), x0 = 180, span = 170, gap = o.length > 1 ? span / (o.length - 1) : 0;
+  c += `<rect x="${x0 - 22}" y="${Y(0) - 30}" width="${span + 44}" height="${Y(n) - Y(0) + 48}" rx="6" fill="none" stroke="#757575" stroke-dasharray="5 5"></rect><text x="${x0 + span / 2}" y="${Y(0) - 40}" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="12" font-weight="700" text-anchor="middle">ORACLE U_f : f(x) = s·x</text>`;
+  o.forEach((i, k) => { const px = o.length > 1 ? x0 + k * gap : x0 + span / 2; c += `<line class="circuit-ctrl-line" x1="${px}" y1="${Y(i)}" x2="${px}" y2="${Y(n) + 14}"></line><circle class="circuit-ctrl-dot" cx="${px}" cy="${Y(i)}" r="6"></circle><circle class="circuit-target-circle" cx="${px}" cy="${Y(n)}" r="14"></circle><line class="circuit-target-plus" x1="${px - 14}" y1="${Y(n)}" x2="${px + 14}" y2="${Y(n)}"></line><line class="circuit-target-plus" x1="${px}" y1="${Y(n) - 14}" x2="${px}" y2="${Y(n) + 14}"></line>`; });
+  if (!o.length) c += `<text x="${x0 + span / 2}" y="${(Y(0) + Y(n)) / 2}" fill="#AAAAAA" font-family="Inter, sans-serif" font-size="13" text-anchor="middle">s = 0…0: no CNOTs, no signs</text>`;
+  const sx = [60, 142, 380, 445][stage]; c += `<line x1="${sx}" y1="30" x2="${sx}" y2="${H - 4}" stroke="#76b900" stroke-width="2" stroke-dasharray="4 4"></line>`;
+  $('#circuit').innerHTML = svg(W, H + 6, c, `Bernstein–Vazirani circuit for s = ${S()}`);
+}
+function renderState() {
+  const N = 1 << n, nz = noisy && stage === 3, a = nz ? noisyAmps() : amplitudes(stage);
+  $('#st-title').textContent = ['Start', 'After H on every qubit: a flat superposition', 'After the oracle: the same superposition with signs', 'After H again: one string left'][stage];
+  $('#st-sub').textContent = ['Only |0…0⟩ has amplitude.', `All ${N} strings have amplitude 1/√${N}. Measuring now would be a coin toss.`, 'Probabilities unchanged. The pattern of minus signs is where f(x) = 1.', `Measuring gives ${S()} with probability 1.`][stage];
+  if (nz) { $('#st-title').textContent = 'After H again, on a noisy device (illustrative)'; $('#st-sub').textContent = `${S()} is still the most likely result (about ${Math.round(a[parseInt(S(), 2)] ** 2 * 100)}%), but errors leak probability onto other strings.`; }
+  $('#noise-row').hidden = stage !== 3; $('#noise-btn').textContent = noisy ? 'Show ideal distribution' : 'Show noisy distribution'; $('#noise-btn').setAttribute('aria-pressed', noisy);
+  { const W = 760, top = 34, hh = 120, mid = top + hh, H = mid + hh + (N > 8 ? 56 : 44), left = 56, bw = (W - left - 16) / N, r = 1 / Math.sqrt(N); let g = '';
+    g += `<line x1="${left}" y1="${top}" x2="${left}" y2="${mid + hh}" stroke="#555"></line>`;
+    [[1, '+1'], [0.5, '+0.5'], [0, '0'], [-0.5, '−0.5'], [-1, '−1']].filter(([v]) => Math.abs(Math.abs(v) - r) > 0.02).forEach(([v, l]) => { const y = mid - v * hh; g += `<line x1="${left - 5}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="${v === 0 ? '#aaa' : '#333'}" stroke-width="${v === 0 ? 2 : 1}"></line><text x="${left - 10}" y="${y + 4}" fill="#aaa" font-family="Inter, sans-serif" font-size="12" text-anchor="end">${l}</text>`; });
+    [r, -r].forEach(v => { const y = mid - v * hh; g += `<line x1="${left}" y1="${y}" x2="${W - 8}" y2="${y}" stroke="#76b900" stroke-width="1" stroke-dasharray="2 4" opacity=".6"></line>`; });
+    g += `<text x="${left - 10}" y="${mid - r * hh + 4}" fill="#76b900" font-family="Inter, sans-serif" font-size="11" text-anchor="end">${r.toFixed(2)}</text><text x="${left - 10}" y="${mid + r * hh + 4}" fill="#76b900" font-family="Inter, sans-serif" font-size="11" text-anchor="end">−${r.toFixed(2)}</text>`;
+    a.forEach((v, k) => { const x = left + k * bw + bw * 0.15, w = bw * 0.7, h = Math.abs(v) * hh, y = v >= 0 ? mid - h : mid, col = Math.abs(v) < 1e-9 ? '#555' : v < 0 ? '#e52020' : '#76b900';
+      g += Math.abs(v) < 1e-9 ? `<rect x="${x}" y="${mid - 2}" width="${w}" height="4" rx="2" fill="#555"></rect>` : `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${col}"></rect>`;
+      g += `<text x="${x + w / 2}" y="${v >= 0 ? y - 6 : y + h + 14}" fill="${Math.abs(v) < 1e-9 ? '#888' : '#fff'}" font-family="Roboto Mono, monospace" font-size="${N > 8 ? 11 : 13}" font-weight="700" text-anchor="middle">${Math.abs(v) < 1e-9 ? '0' : (v < 0 ? '−' : '+') + Math.abs(v).toFixed(2)}</text>`;
+      g += `<text x="${x + w / 2}" y="${mid + hh + (N > 8 && k % 2 ? 44 : 30)}" fill="#E0E0E0" font-family="Roboto Mono, monospace" font-size="${N > 8 ? 12 : 15}" font-weight="700" text-anchor="middle">${N > 8 ? bitsOf(k, n) : '|' + bitsOf(k, n) + '⟩'}</text>`; });
+    $('#amps').innerHTML = svg(W, H, g, `Amplitude of each basis state after step ${stage}`); }
+  const terms = s.map((b, i) => b ? `x<sub>${i}</sub>` : null).filter(Boolean).join(' ⊕ ') || '0';
+  const L = [
+    ['|ψ₀⟩ = |0…0⟩ |1⟩', 'Query register in |0…0⟩, ancilla in |1⟩.'],
+    [`|ψ₁⟩ = 1/√${N} Σ<sub>x</sub> |x⟩ ⊗ |−⟩`, 'H on every qubit. The ancilla becomes |−⟩ = (|0⟩ − |1⟩)/√2.'],
+    [`|ψ₂⟩ = 1/√${N} Σ<sub>x</sub> (−1)<sup>f(x)</sup> |x⟩ ⊗ |−⟩, &nbsp; f(x) = ${terms}`, 'Each CNOT would flip the ancilla when its control bit is 1, and X|−⟩ = −|−⟩. The flip shows up as a sign on |x⟩ (phase kickback). The ancilla is unchanged and can be ignored from here on.'],
+    [`|ψ₃⟩ = |s⟩ = |${S()}⟩`, `H<sup>⊗n</sup> maps the sign pattern (−1)<sup>s·x</sup> back to the single basis state |s⟩: for every y ≠ s exactly half of the ${N} contributions have the opposite sign and cancel; for y = s all ${N} agree.`]
+  ];
+  $('#mlines').innerHTML = L.map((l, k) => `<div class="mline${k === stage ? ' on' : ''}" data-ml="${k}" role="button" tabindex="0"><span class="n">${k}</span><span>${l[0]}<span class="why">${l[1]}</span></span></div>`).join('');
+  $$('[data-ml]').forEach(el => { const go = () => setStage(+el.dataset.ml); el.addEventListener('click', go); el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); });
+}
+function setStage(k) { stage = Math.max(0, Math.min(3, k)); $$('[data-stage]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.stage === stage)); renderCircuit(); renderState(); announce($('#st-title').textContent); }
+$$('[data-stage]').forEach(b => b.addEventListener('click', () => setStage(+b.dataset.stage)));
+function renderQuantum() {
+  renderCircuit(); renderState();
+  const o = ones(), cx = o.map(i => `    <span class="hl">x.ctrl(q[${i}], anc)</span>`).join('\n') || `    <span class="c"># s = ${'0'.repeat(n)}: no CNOTs</span>`;
+  $('#code').innerHTML = `<span class="k">import</span> cudaq
+
+secret = <span class="hl">[${s.join(', ')}]</span>   <span class="c"># s = ${S()}</span>
+
+<span class="f">@cudaq.kernel</span>
+<span class="k">def</span> <span class="f">bernstein_vazirani</span>(secret: list[int]):
+    n = len(secret)
+    q = cudaq.qvector(n)
+    anc = cudaq.qubit()
+    x(anc)
+    h(q)
+    h(anc)
+    <span class="c"># oracle U_f: CNOT from q[i] to anc where s_i = 1</span>
+${cx}
+    h(q)
+    mz(q)
+
+result = cudaq.sample(bernstein_vazirani, secret, shots_count=1000)
+print(result)   <span class="c"># { ${S()}:1000 }</span>`;
+}
+resetters[1] = () => { noisy = false; setStage(0); };
+$('#noise-btn').addEventListener('click', () => { noisy = !noisy; renderState(); announce(noisy ? 'Showing an example noisy distribution' : 'Showing the ideal distribution'); });
+
+$$('[data-arrows]').forEach(arrowNav);
+renderSecret(); renderClassical(); renderQuantum();
+</script>
+</body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantum Computing Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<style>
+:root{--accent:#76b900;--accent-dark:#5e9400;--bg:#1A1A1A;--surface:#2A2A2A;--border:#444444;--fg:#E0E0E0;--muted:#AAAAAA;--qa:#0074df;--qb:#ef9100;--qc:#952fc6;--neg:#e52020}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.5;padding:24px 12px}
+a{color:#76b900}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--accent);color:#000;padding:8px 16px;z-index:100;text-decoration:none;font-weight:bold}
+.skip-link:focus{top:0}
+.widget-container{background-color:var(--surface);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:8px;padding:24px;width:100%;max-width:1100px;box-shadow:0 10px 40px rgba(0,0,0,0.4);margin:0 auto}
+@media (min-width:768px){.widget-container{padding:32px}}
+.widget-container h1{color:var(--accent);font-size:1.5rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;margin-top:0;font-weight:700;line-height:1.2}
+.widget-container .summary-text{color:var(--muted);margin-bottom:8px;font-size:1rem;line-height:1.5}
+.instructions-section{margin-bottom:24px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px}
+.instructions-section summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.instructions-section summary::-webkit-details-marker{display:none}
+.instructions-section summary::before{content:'▶';font-size:0.7rem;color:var(--accent);transition:transform 0.15s;flex-shrink:0}
+.instructions-section[open]>summary::before{transform:rotate(90deg)}
+.instructions-section summary:focus{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.instructions-section summary h2{display:inline}
+.instructions-section h2{color:var(--accent);font-size:1.1rem;margin:0;font-weight:700}
+.instructions-section:not([open]){padding-bottom:16px}
+.instructions-section ol{margin-top:12px;margin-bottom:8px;padding-left:22px}
+.instructions-section p{margin:8px 0 0;color:var(--muted);font-size:0.95rem}
+.instructions-section .kbd{background:var(--border);padding:2px 6px;border-radius:4px;font-family:inherit;font-size:0.9em}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.tab{min-height:48px;padding:10px 18px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:600;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:10px}
+.tab .num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;background:#313131;color:var(--fg);font-size:0.8rem}
+.tab:hover{color:#fff}
+.tab[aria-selected="true"]{color:#fff;border-bottom-color:var(--accent)}
+.tab[aria-selected="true"] .num{background:var(--accent);color:#000}
+.panel{display:grid;gap:16px}
+.panel[hidden]{display:none}
+.grid-3{display:grid;grid-template-columns:270px minmax(0,1fr) 290px;gap:16px;align-items:stretch}
+.defs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:16px}
+.def{background:#1f1f1f;border:1px solid var(--border);border-radius:6px;padding:14px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.def-head{font-size:0.8rem;letter-spacing:.12em;text-transform:uppercase;color:#76b900;font-weight:700}
+.def-eq{font-size:1.2rem;font-weight:600;color:#fff;line-height:1.6}
+.def-eq .vec{vertical-align:middle;margin:0 2px}
+.def-eq.muted{font-size:1rem;color:var(--muted)}
+.def-txt{color:var(--fg);font-size:0.95rem;line-height:1.5}
+@media (max-width:760px){.defs{grid-template-columns:1fr}}
+.qubit-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.qubit-grid .bloch{min-height:360px}
+.qubit-grid .eq{font-size:1.25rem}
+.qubit-grid .kv{font-size:1.15rem;gap:8px 18px}
+@media (max-width:900px){.qubit-grid{grid-template-columns:1fr}}
+.grid-2{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:stretch}
+@media (max-width:1000px){.grid-3{grid-template-columns:1fr}}
+@media (max-width:800px){.grid-2{grid-template-columns:1fr}}
+.info-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.box-title{margin:0;font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.big-q{font-size:1.9rem;font-weight:600;color:#fff;line-height:1.25}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.btn-primary,.btn-secondary,.bit-btn{white-space:nowrap;min-width:44px;min-height:44px;padding:8px 14px;border-radius:4px;font:inherit;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.btn-primary{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent)}
+.btn-primary:hover{background:var(--accent);color:#000000;border-color:var(--accent)}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);color:white}
+.bit-btn{background:var(--surface);color:#FFFFFF;border:1px solid var(--border);border-bottom:3px solid var(--accent)}
+.bit-btn:hover,.bit-btn.active,.bit-btn[aria-pressed="true"]{background:var(--accent);color:#000000;border-color:var(--accent)}
+.gate-btn{font-size:1.15rem;min-width:52px}
+.slider-wrap{display:flex;flex-direction:column;gap:6px;padding:4px}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
+.slider-head output{font-variant-numeric:tabular-nums;color:#fff}
+.slider-wrap:focus-within{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+input[type=range]{-webkit-appearance:none;width:100%;background:transparent;min-height:28px}
+input[type=range]:focus{outline:none}
+input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--accent)}
+input[type=range]:focus::-moz-range-thumb{box-shadow:0 0 0 3px var(--accent)}
+input[type=range]::-webkit-slider-runnable-track{width:100%;height:4px;cursor:pointer;background:#444;border-radius:5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;border-radius:50%;background:#76B900;cursor:pointer;margin-top:-7px;border:2px solid #1A1A1A}
+input[type=range]::-moz-range-track{width:100%;height:4px;cursor:pointer;background:#444;border-radius:5px}
+input[type=range]::-moz-range-thumb{height:14px;width:14px;border-radius:50%;background:#76B900;cursor:pointer;border:2px solid #1A1A1A}
+.bloch{position:relative;background-color:#000000;border-radius:8px;min-height:420px;touch-action:none;overflow:hidden}
+.bloch:focus{outline:4px solid #76b900;outline-offset:2px}
+.bloch canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.bloch .hint{position:absolute;left:12px;bottom:10px;font-size:0.8rem;color:#a7a7a7;pointer-events:none}
+.bars{display:flex;align-items:flex-end;justify-content:space-around;gap:10px;height:190px;padding-top:26px;border-bottom:1px solid var(--border)}
+.bar{flex:1;max-width:84px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+.bar .fill{width:100%;background:linear-gradient(to top,#5e9400,#76b900);border-radius:3px 3px 0 0;transition:height .35s cubic-bezier(.4,0,.2,1)}
+.bar .ghost{position:absolute;bottom:0;left:0;right:0;border:2px dashed #E0E0E0;border-bottom:none;border-radius:3px 3px 0 0;transition:height .35s}
+.bar .val{position:absolute;top:-24px;font-size:0.9rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.bar-labels{display:flex;justify-content:space-around;gap:10px}
+.bar-labels span{flex:1;max-width:84px;text-align:center;font-weight:700;font-size:1.05rem}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:0.85rem;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:18px;height:12px;margin-right:6px;vertical-align:middle;border-radius:2px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-variant-numeric:tabular-nums;font-size:1.05rem}
+.kv dt{color:var(--muted);font-weight:600}
+.kv dd{margin:0;color:#fff;font-weight:600}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:1.15rem;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.eq.sym{color:var(--muted)}
+.vec{display:inline-grid;grid-template-columns:auto;gap:2px;padding:2px 10px;border-left:2px solid #E0E0E0;border-right:2px solid #E0E0E0;border-radius:6px;text-align:center;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.meas-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.meas-grid{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--accent);padding:6px 12px;color:var(--fg);font-size:0.95rem;background:rgba(118,185,0,0.06)}
+.matrix{display:inline-grid;grid-template-columns:repeat(2,auto);gap:4px 18px;padding:6px 14px;border-left:2px solid #E0E0E0;border-right:2px solid #E0E0E0;border-radius:6px;font-variant-numeric:tabular-nums;font-weight:600;color:#fff;text-align:center}
+.circuit-wire{stroke:#E0E0E0;stroke-width:2}
+.circuit-gate-box{fill:#2A2A2A;stroke:#76b900;stroke-width:2}
+.circuit-gate-text{fill:#E0E0E0;font-family:Inter,sans-serif;font-weight:bold;font-size:16px;text-anchor:middle;dominant-baseline:middle}
+.circuit-gate-param{fill:#E0E0E0;font-family:Inter,sans-serif;font-weight:bold;font-size:12px;text-anchor:middle;dominant-baseline:middle}
+.circuit-qubit-label{fill:#76b900;font-family:Inter,sans-serif;font-size:14px;font-weight:bold}
+.circuit-ctrl-dot{fill:#76b900;stroke:none}
+.circuit-ctrl-line{stroke:#E0E0E0;stroke-width:2}
+.circuit-target-circle{fill:#2A2A2A;stroke:#76b900;stroke-width:2}
+.circuit-target-plus{stroke:#76b900;stroke-width:2}
+.meter-arc{fill:none;stroke:#E0E0E0;stroke-width:2}
+.svg-wrap{width:100%;overflow-x:auto}
+.svg-wrap svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.path-node{stroke-width:2}
+.big-num{font-size:2.4rem;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+.shots{display:flex;flex-wrap:wrap;gap:6px;min-height:40px}
+.shot{padding:4px 8px;border-radius:4px;background:#313131;font-weight:700;font-size:1rem;letter-spacing:0.04em}
+.qa{color:#4da3ff}.qb{color:#ffb13b}.qc{color:#c77dff}
+.qcard{border:1px solid var(--border);border-left:6px solid;border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.m4{display:grid;grid-template-columns:auto repeat(4,52px);gap:3px;font-variant-numeric:tabular-nums;font-weight:700;text-align:center;align-items:center}
+.m4 .c{padding:8px 0;border-radius:3px;color:#fff}
+.m4 .h{font-size:0.9rem;padding:2px 6px}
+.v4{display:grid;grid-template-columns:auto 70px;gap:3px;font-variant-numeric:tabular-nums;font-weight:700;align-items:center}
+.v4 .c{padding:8px 6px;border-radius:3px;background:#1f1f1f;text-align:center;color:#fff}
+.trow5{display:grid;grid-template-columns:60px 84px 84px 84px minmax(50px,1fr);gap:10px;align-items:center;font-variant-numeric:tabular-nums;font-weight:700;padding:6px 10px;border-radius:4px;background:#1f1f1f}
+.trow5.hd{background:none;padding:0 10px;font-size:0.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.trow5.sum{background:none;border-top:1px solid var(--border);border-radius:0;padding-top:8px}
+.trow{display:grid;grid-template-columns:64px 96px 64px minmax(60px,1fr);gap:10px;align-items:center;font-variant-numeric:tabular-nums;font-weight:700;padding:6px 10px;border-radius:4px;background:#1f1f1f}
+@media (max-width:800px){.tg-grid{grid-template-columns:1fr !important}}
+.pgrid{display:grid;gap:8px}
+.pcell{border-radius:6px;background:#1f1f1f;border:1px solid var(--border);padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;overflow:hidden}
+.pcell .ket{font-weight:800;font-size:1.15rem}
+.pcell .amp{font-variant-numeric:tabular-nums;font-weight:600;color:#fff}
+.pcell .sq{position:absolute;inset:0;background:#76b900;opacity:0;transition:opacity .3s;pointer-events:none}
+.gauge{height:14px;background:#313131;border-radius:7px;overflow:hidden}
+.gauge>div{height:100%;background:linear-gradient(to right,#5e9400,#76b900);transition:width .35s}
+.tag{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:4px;font-weight:700;background:#313131;color:#fff}
+.tag.on{background:var(--accent);color:#000}
+.muted{color:var(--muted)}
+.bit-btn[aria-pressed="true"] .qa,.bit-btn[aria-pressed="true"] .qb,.bit-btn.active .qa,.bit-btn.active .qb,.bit-btn:hover .qa,.bit-btn:hover .qb{color:#000}
+.qalg{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:8px 4px}
+.qalg .blk{flex:1 1 172px;min-width:172px;background:#1f1f1f;border:1px solid var(--border);border-radius:8px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.qalg .blk.proc{background:#000;border-color:#000}
+.qalg .blk.meas{border-color:var(--accent)}
+.qalg .ttl{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#76b900;text-align:center}
+.qalg .arr{flex:none;align-self:center;color:#aaa;font-size:1.1rem}
+.qa-vec{display:flex;align-items:center;gap:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;line-height:20px;color:#fff;white-space:nowrap}
+.qa-br{display:grid;padding:0 6px;border-left:2px solid #E0E0E0;border-right:2px solid #E0E0E0;border-radius:5px;text-align:center}
+.qa-bars{display:flex;align-items:flex-end;gap:4px;height:64px;width:100%;border-bottom:1px solid #777}
+.qa-bars span{flex:1;border-radius:2px 2px 0 0}
+.qa-lab{display:flex;gap:4px;width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.6rem;color:#aaa;margin-top:-6px}
+.qa-lab span{flex:1;text-align:center}
+.qa-grid{display:grid;grid-template-columns:repeat(8,16px);gap:3px}
+.qa-grid span{width:16px;height:16px}
+.icg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+.icg .cell{background:#1f1f1f;border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.icg .cell h3{margin:0;font-size:1.3rem;color:#fff}.icg .cell h3 .mono{color:var(--accent);font-family:'Roboto Mono',monospace}
+.icg .lab{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.icg .ket{font-size:1.25rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.icg .bloch{min-height:0;height:280px}
+.icg .gbar{grid-column:1/-1;display:flex;flex:none;max-width:none;height:auto;flex-direction:row;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:6px;padding:10px 16px;font-size:1.05rem;color:#fff}
+.icg .gbar.half{grid-column:auto}.icg .gbar.z{border-left-color:#ff6b6b}.icg .gbar.off{border-left-color:#666;color:var(--muted)}
+.icg .gbar .g{font-weight:800;font-size:1.3rem;min-width:28px}
+.icg .gbar .rule{font-family:'Roboto Mono',monospace;font-size:.95rem;background:#1f1f1f;border-radius:4px;padding:2px 8px;color:#fff}
+.icg .res{font-size:1.05rem;font-weight:600;color:#fff}.icg .res .big{font-size:1.4rem;color:var(--accent);font-weight:800;margin-right:10px}
+.icg .c0{color:#4da3ff}.icg .c1{color:#ffb13b}.icg .neg{color:#ff6b6b}
+@media (max-width:760px){.icg{grid-template-columns:1fr}.icg .gbar{grid-column:auto}}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:44px}
+.seq .chip{min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;border:2px solid #76b900;border-radius:4px;font-weight:700}
+.widget-footer{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:24px}
+.widget-footer a{color:#76b900;text-decoration:none;font-weight:600}
+.widget-footer a:hover{text-decoration:underline}
+.widget-footer a:focus{outline:3px solid #76b900;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<main class="widget-container" id="main-content">
+<header>
+<h1>Qubit Foundations</h1>
+<p class="summary-text">Five linked views: one qubit, tensor products, gates, interference, and entanglement.</p>
+</header>
+<details class="instructions-section" aria-labelledby="instructions-heading" open>
+<summary><h2 id="instructions-heading">Instructions</h2></summary>
+<ol>
+<li>Pick a topic tab. Each tab builds on the one before it.</li>
+<li><strong>Qubit:</strong> set the state with presets or sliders, then measure to compare samples with probabilities.</li>
+<li><strong>Two qubits:</strong> set qubits A (blue) and B (orange) and see their tensor product.</li>
+<li><strong>Gates:</strong> apply single-qubit gates and watch the arrow move on the Bloch sphere. Then compare tensor-product gates with CNOT on two qubits, and measure the final state in the algorithm picture.</li>
+<li><strong>Interference:</strong> compare H H with H Z H. Play each Bloch sphere, then read the two components of the state after every gate and see which outcome cancels.</li><li><strong>Entanglement:</strong> rotate qubit A, toggle the CNOT, and sample shots to see correlation.</li>
+</ol>
+<p>Keyboard: <span class="kbd">Tab</span> moves between controls; the focused slider shows a green ring. <span class="kbd">←</span> <span class="kbd">→</span> switch tabs and move within button rows. <span class="kbd">Enter</span> or <span class="kbd">Space</span> presses a button. On a Bloch sphere, <span class="kbd">Tab</span> to it and use the arrow keys to rotate the view. <span class="kbd">Esc</span> resets the current tab.</p>
+</details>
+
+<div class="tabs" role="tablist" aria-label="Topics">
+<button class="tab" role="tab" id="tab-qubit" aria-controls="panel-qubit" aria-selected="true"><span class="num">1</span>Qubit</button>
+<button class="tab" role="tab" id="tab-tensor" aria-controls="panel-tensor" aria-selected="false" tabindex="-1"><span class="num">2</span>Two qubits</button>
+<button class="tab" role="tab" id="tab-gates" aria-controls="panel-gates" aria-selected="false" tabindex="-1"><span class="num">3</span>Gates</button>
+<button class="tab" role="tab" id="tab-interf" aria-controls="panel-interf" aria-selected="false" tabindex="-1"><span class="num">4</span>Interference</button>
+<button class="tab" role="tab" id="tab-ent" aria-controls="panel-ent" aria-selected="false" tabindex="-1"><span class="num">5</span>Entanglement</button>
+</div>
+
+<section class="panel" id="panel-qubit" role="tabpanel" aria-labelledby="tab-qubit">
+<div class="info-box">
+<h2 class="box-title">Bit vs. qubit</h2>
+<div class="defs">
+<div class="def">
+<div class="def-head">Classical bit</div>
+<div class="def-eq">b ∈ {0, 1}</div>
+<div class="def-eq muted">as vectors: <span class="vec"><span>1</span><span>0</span></span> or <span class="vec"><span>0</span><span>1</span></span></div>
+<div class="def-txt">Exactly one of two values. Reading it always returns that value.</div>
+</div>
+<div class="def">
+<div class="def-head">Qubit</div>
+<div class="def-eq">|ψ⟩ = <span style="color:#76b900">α</span><span class="vec"><span>1</span><span>0</span></span> + <span style="color:#c77dff">β</span><span class="vec"><span>0</span><span>1</span></span> = <span style="color:#76b900">α</span>|0⟩ + <span style="color:#c77dff">β</span>|1⟩ = <span class="vec"><span style="color:#76b900">α</span><span style="color:#c77dff">β</span></span></div>
+<div class="def-eq muted"><span style="color:#76b900">α</span>, <span style="color:#c77dff">β</span> ∈ ℂ &nbsp;with&nbsp; |<span style="color:#76b900">α</span>|² + |<span style="color:#c77dff">β</span>|² = 1</div>
+<div class="def-txt">A unit vector in ℂ². |0⟩ and |1⟩ are the two basis vectors above. Measuring returns 0 with probability |<span style="color:#76b900">α</span>|² and 1 with probability |<span style="color:#c77dff">β</span>|², and leaves the qubit in the basis state it returned.</div>
+</div>
+</div>
+<div class="note">A bit is the special case <span style="color:#76b900">α</span>, <span style="color:#c77dff">β</span> ∈ {0, 1}. Everything else below (the Bloch sphere, θ and φ) is just a way to draw a unit vector in ℂ² up to an overall phase.</div>
+</div>
+<div class="qubit-grid">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div class="bloch" id="bloch-qubit" tabindex="0" role="img" aria-label="Bloch sphere showing the qubit state"><span class="hint">Drag to rotate</span></div>
+<div class="info-box">
+<h2 class="box-title">Set the state</h2>
+<div class="row" role="group" aria-label="Preset states" data-arrows>
+<button class="bit-btn" data-preset="0">|0⟩</button><button class="bit-btn" data-preset="1">|1⟩</button><button class="bit-btn" data-preset="+">|+⟩</button><button class="bit-btn" data-preset="-">|−⟩</button><button class="bit-btn" data-preset="i">|+i⟩</button><button class="bit-btn" data-preset="-i">|−i⟩</button>
+</div>
+<div class="slider-wrap"><div class="slider-head"><label for="q-theta">θ</label><output id="q-theta-out">60°</output></div><input type="range" id="q-theta" min="0" max="180" step="1" value="60" aria-label="Polar angle theta in degrees"></div>
+<div class="slider-wrap"><div class="slider-head"><label for="q-phi">φ</label><output id="q-phi-out">0°</output></div><input type="range" id="q-phi" min="0" max="359" step="1" value="0" aria-label="Phase angle phi in degrees"></div>
+</div>
+</div>
+<div class="info-box" style="gap:22px">
+<h2 class="box-title">The state</h2>
+<div class="eq" id="q-vec" style="row-gap:10px"></div>
+<dl class="kv" id="q-amps"></dl>
+<div class="note">Any state is a weighted sum of the basis states |0⟩ and |1⟩. The amplitude <span style="color:#76b900">α</span> is the top entry of the vector and <span style="color:#c77dff">β</span> the bottom one, with |<span style="color:#76b900">α</span>|² + |<span style="color:#c77dff">β</span>|² = 1.</div>
+</div>
+</div>
+<div class="info-box"><div class="meas-grid">
+<div style="display:flex;flex-direction:column;gap:12px">
+<h2 class="box-title">Measure along an axis</h2>
+<div class="row" role="group" aria-label="Measurement axis" data-arrows><button class="bit-btn" data-basis="z" aria-pressed="true">z (0 / 1)</button><button class="bit-btn" data-basis="x" aria-pressed="false">x (+ / −)</button><button class="bit-btn" data-basis="y" aria-pressed="false">y (+i / −i)</button></div>
+<div class="row" role="group" aria-label="Number of shots" data-arrows><button class="btn-primary" data-shots="1">1 shot</button><button class="btn-primary" data-shots="100">100</button><button class="btn-primary" data-shots="1000">1000</button></div>
+<div class="muted" id="q-shot-out">Not measured yet</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div class="bars" id="q-bars"></div><div class="bar-labels" id="q-bar-labels"><span>0</span><span>1</span></div>
+<div class="legend"><span><i style="background:linear-gradient(to top,#5e9400,#76b900)"></i>Probability</span><span><i style="border:2px dashed #E0E0E0"></i>Measured</span><span><i style="background:#ef9100;height:3px"></i>Measurement axis</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="eq" id="q-prob-eq" style="flex-direction:column;align-items:flex-start;gap:6px"></div>
+<div class="note" id="q-meas-note">Measuring projects the arrow onto the chosen axis: the closer the tip is to an end, the more likely that outcome.</div>
+</div>
+</div></div>
+</section>
+
+<section class="panel" id="panel-tensor" role="tabpanel" aria-labelledby="tab-tensor" hidden>
+<div class="grid-2">
+<div class="info-box">
+<h2 class="box-title">Two qubits</h2>
+<div id="t-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+</div>
+<div class="info-box">
+<h2 class="box-title">Two vectors become one: the tensor product</h2>
+<div id="t-eq" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px"></div>
+</div>
+</div>
+</section>
+
+<section class="panel" id="panel-gates" role="tabpanel" aria-labelledby="tab-gates" hidden>
+<div class="grid-3">
+<div class="info-box">
+<h2 class="box-title">Apply a gate</h2>
+<div class="row" role="group" aria-label="Gates" data-arrows>
+<button class="bit-btn gate-btn" data-gate="X">X</button><button class="bit-btn gate-btn" data-gate="Y">Y</button><button class="bit-btn gate-btn" data-gate="Z">Z</button><button class="bit-btn gate-btn" data-gate="H">H</button><button class="bit-btn gate-btn" data-gate="S">S</button><button class="bit-btn gate-btn" data-gate="T">T</button>
+</div>
+<div id="g-desc" style="min-height:72px;display:flex;flex-direction:column;gap:4px"><div class="eq" id="g-desc-title">Every gate is a rotation</div><div class="muted" id="g-desc-body">Pick a gate to see its axis and angle.</div></div>
+<div class="legend"><span><i style="background:#f9c500;height:3px"></i>Rotation axis</span><span><i style="background:#f9c500;height:3px;opacity:.6"></i>Path of the tip</span></div>
+<div class="row"><button class="btn-secondary" id="g-undo">Undo</button><button class="btn-primary" id="g-reset">Reset to |0⟩</button></div>
+</div>
+<div class="bloch" id="bloch-gates" tabindex="0" role="img" aria-label="Bloch sphere showing the state after the applied gates"><span class="hint">Drag to rotate</span></div>
+<div class="info-box">
+<h2 class="box-title">Gate acting on the state</h2>
+<div id="g-act" style="min-height:90px;display:flex;flex-wrap:wrap;align-items:center;gap:10px"></div>
+<h2 class="box-title">Probabilities</h2>
+<div class="bars" id="g-bars" style="height:120px"></div><div class="bar-labels"><span>0</span><span>1</span></div>
+</div>
+</div>
+<div class="info-box"><h2 class="box-title">Circuit</h2><div class="svg-wrap" id="g-circuit"></div></div>
+<div class="info-box">
+<h2 class="box-title">Two-qubit gates</h2>
+<div>A gate on two qubits is a 4 × 4 matrix. Some are a tensor product of single-qubit gates. Others, like CNOT, cannot be split that way.</div>
+<div class="row" role="group" aria-label="Two-qubit gate" data-arrows style="align-items:center"><span class="muted" style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Tensor products</span><button class="bit-btn" data-tg="HI" aria-pressed="false">H on <span class="qa">A</span></button><button class="bit-btn" data-tg="IH" aria-pressed="false">H on <span class="qb">B</span></button><button class="bit-btn" data-tg="XI" aria-pressed="false">X on <span class="qa">A</span></button><span class="muted" style="margin-left:14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Two-qubit only</span><button class="bit-btn" data-tg="CX" aria-pressed="true">CNOT</button></div>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:28px"><div id="t-circ" style="flex:none"></div><div class="eq" id="t-block" style="font-size:1.3rem;flex:none;flex-wrap:nowrap;white-space:nowrap"></div><div class="note" id="t-gdesc" style="flex:1;min-width:240px"></div></div>
+<div id="t-mat" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;overflow-x:auto"></div>
+</div>
+<div id="t-after" class="muted"></div>
+<div class="muted" style="font-size:.9rem">The gate is applied to the state A ⊗ B set in the Two qubits tab.</div>
+</div>
+<div class="info-box">
+<h2 class="box-title">From gates to an algorithm</h2>
+<div>A quantum algorithm is a sequence of gates. Multiplied together they are one matrix acting on the whole state vector. The goal is to reshape the distribution so the answer you want is the likely outcome when you measure.</div>
+<div class="qalg" id="qalg"></div>
+</div>
+</section>
+
+<section class="panel" id="panel-interf" role="tabpanel" aria-labelledby="tab-interf" hidden>
+<div class="muted" style="font-size:1.05rem">Two circuits that differ by one gate. Follow the arrow on the sphere and the two components of the state. The second H adds the components for outcome 0 and subtracts them for outcome 1; a sign flip in between decides which one cancels.</div>
+<div class="icg" id="icg"></div>
+<div class="legend"><span><i style="background:#4da3ff"></i>|0⟩ component</span><span><i style="background:#ffb13b"></i>|1⟩ component</span><span><i style="background:#ff6b6b"></i>|1⟩ component after Z flipped its sign</span><span><i style="background:#fff"></i>total</span></div>
+</section>
+
+<section class="panel" id="panel-ent" role="tabpanel" aria-labelledby="tab-ent" hidden>
+<div class="grid-2">
+<div class="info-box">
+<h2 class="box-title">Controls</h2>
+<div class="slider-wrap"><div class="slider-head"><label for="e-theta">R<sub>y</sub>(θ) on <span class="qa">A</span></label><output id="e-theta-out">0°</output></div><input type="range" id="e-theta" min="0" max="180" step="1" value="0" aria-label="Rotation angle on qubit A in degrees"></div>
+<button class="bit-btn" id="e-cnot" aria-pressed="false">CNOT: off</button>
+<div class="row"><button class="btn-primary" id="e-sample">Sample 24 shots</button><button class="btn-secondary" id="e-reset">Reset</button></div>
+</div>
+<div class="info-box">
+<h2 class="box-title">Circuit and outcomes</h2>
+<div class="svg-wrap" id="e-circuit"></div>
+<div class="bars" id="e-bars" style="height:150px"></div><div class="bar-labels" id="e-bar-labels"></div>
+</div>
+</div>
+<div class="info-box">
+<h2 class="box-title" id="e-tensor-title">Does it factor as A ⊗ B?</h2>
+<div id="e-tensor" style="display:flex;flex-wrap:wrap;align-items:center;gap:14px"></div>
+<div class="note" id="e-tensor-note"></div>
+</div>
+<div class="info-box"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px"><h2 class="box-title">Can it be split into A ⊗ B?</h2><div id="e-split" class="big-q" style="font-size:1.4rem"></div><div class="eq" id="e-state" style="font-size:1.25rem;display:block"></div><div class="eq" id="e-fact" style="font-size:1.25rem;display:block"></div><div class="muted" id="e-why"></div><div class="gauge" role="meter" aria-label="Entanglement" aria-valuemin="0" aria-valuemax="1" id="e-gauge"><div></div></div><div class="muted" id="e-conc"></div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><h2 class="box-title">Shots (<span class="qa">A</span><span class="qb">B</span>)</h2><div class="shots" id="e-shots"><span class="muted">Press “Sample” to measure.</span></div><div class="muted" id="e-agree"></div></div>
+</div></div>
+</section>
+
+<footer class="widget-footer">
+<a href="index.html">More presentations</a>
+<a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
+</footer>
+<div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const b2t = v => new THREE.Vector3(v[1], v[2], v[0]);
+const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function label(text, size, color, italic) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3), fs = 64 * dpr;
+  const c = document.createElement('canvas'), g = c.getContext('2d');
+  g.font = `${italic ? 'italic ' : ''}600 ${fs}px Inter, sans-serif`;
+  const w = Math.ceil(g.measureText(text).width) + 16 * dpr;
+  c.width = w; c.height = fs * 1.4;
+  g.font = `${italic ? 'italic ' : ''}600 ${fs}px Inter, sans-serif`; g.fillStyle = color || '#E0E0E0'; g.textBaseline = 'middle'; g.fillText(text, 8 * dpr, c.height / 2);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false })); s.renderOrder = 10;
+  const h = size || 0.2; s.scale.set(h * c.width / c.height, h, 1); return s;
+}
+class Bloch {
+  constructor(el) {
+    this.el = el; this.v = [0, 0, 1]; this.anim = null;
+    const scene = this.scene = new THREE.Scene();
+    const cam = this.cam = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    cam.position.set(1.5, 1.2, 4.0); cam.lookAt(0, 0, 0);
+    const r = this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    r.setClearColor(0x000000, 1); r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    el.appendChild(r.domElement);
+    const ctl = this.controls = new OrbitControls(cam, r.domElement);
+    ctl.enablePan = false; ctl.enableZoom = false; ctl.enableDamping = true; ctl.rotateSpeed = 0.7;
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const dl = new THREE.DirectionalLight(0xffffff, 1.4); dl.position.set(3, 4, 5); scene.add(dl);
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(1, 32, 24), new THREE.MeshBasicMaterial({ color: 0x888888, wireframe: true, transparent: true, opacity: 0.15 })));
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.995, 48, 32), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.04, depthWrite: false })));
+    const ring = (rot) => { const pts = []; for (let i = 0; i <= 96; i++) { const a = i / 96 * Math.PI * 2; pts.push(new THREE.Vector3(Math.cos(a), 0, Math.sin(a))); } const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x777777, transparent: true, opacity: 0.6 })); if (rot) l.rotation.set(...rot); scene.add(l); };
+    ring(); ring([Math.PI / 2, 0, 0]); ring([0, 0, Math.PI / 2]);
+    const axis = (a, b) => scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([b2t(a), b2t(b)]), new THREE.LineBasicMaterial({ color: 0xcccccc })));
+    axis([-1.2, 0, 0], [1.2, 0, 0]); axis([0, -1.2, 0], [0, 1.2, 0]); axis([0, 0, -1.2], [0, 0, 1.2]);
+    [['|0⟩', [0, 0, 1.45]], ['|1⟩', [0, 0, -1.45]], ['|+⟩', [1.5, 0, 0]], ['|−⟩', [-1.5, 0, 0]], ['|+i⟩', [0, 1.55, 0]], ['|−i⟩', [0, -1.55, 0]]].forEach(([t, p]) => { const s = label(t, 0.2); s.position.copy(b2t(p)); scene.add(s); });
+    [['x', [1.12, 0, 0.14]], ['y', [0, 1.12, 0.14]], ['z', [0.14, 0.14, 1.1]]].forEach(([t, p]) => { const s = label(t, 0.17, '#f9c500', true); s.position.copy(b2t(p)); scene.add(s); });
+    this.hl = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 2.44, 12), new THREE.MeshBasicMaterial({ color: 0xf9c500 })); this.hl.visible = false; scene.add(this.hl);
+    this.projN = null; this.projLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color: 0xef9100, dashSize: 0.05, gapSize: 0.035 })); this.projLine.visible = false; scene.add(this.projLine);
+    this.foot = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 12), new THREE.MeshBasicMaterial({ color: 0xef9100 })); this.foot.visible = false; scene.add(this.foot);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x76b900, roughness: 0.45, metalness: 0.1, emissive: 0x2a4400 });
+    const arrow = this.arrow = new THREE.Group();
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.86, 20), mat); shaft.rotation.x = Math.PI / 2; shaft.position.z = 0.43;
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.16, 24), mat); head.rotation.x = Math.PI / 2; head.position.z = 0.92;
+    arrow.add(shaft, head); scene.add(arrow);
+    const tip = this.tip = new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 8), new THREE.MeshBasicMaterial({ color: 0x76b900 })); scene.add(tip);
+    this.trailPts = []; this.trail = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xf9c500, transparent: true, opacity: 0.85 })); scene.add(this.trail);
+    this.set([0, 0, 1]);
+    el.addEventListener('keydown', e => {
+      const k = e.key; if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(k)) return;
+      e.preventDefault(); e.stopPropagation();
+      const sp = new THREE.Spherical().setFromVector3(cam.position); const d = 0.12;
+      if (k === 'ArrowLeft') sp.theta -= d; if (k === 'ArrowRight') sp.theta += d;
+      if (k === 'ArrowUp') sp.phi = Math.max(0.15, sp.phi - d); if (k === 'ArrowDown') sp.phi = Math.min(Math.PI - 0.15, sp.phi + d);
+      cam.position.setFromSpherical(sp); cam.lookAt(0, 0, 0);
+    });
+    new ResizeObserver(() => requestAnimationFrame(() => this.resize())).observe(el); this.resize();
+    const loop = () => { requestAnimationFrame(loop); if (!this.el.offsetParent) return; this.step(); ctl.update(); r.render(scene, cam); };
+    loop();
+  }
+  resize() { const w = this.el.clientWidth, h = this.el.clientHeight; if (!w || !h) return; this.renderer.setSize(w, h, false); this.cam.aspect = w / h; this.cam.fov = w / h < 1 ? Math.min(70, 2 * Math.atan(Math.tan(17.5 * Math.PI / 180) / (w / h)) * 180 / Math.PI) : 35; this.cam.updateProjectionMatrix(); }
+  place(v) { const t = b2t(v), n = t.length(); this.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n > 1e-6 ? t.clone().normalize() : new THREE.Vector3(0, 1, 0)); this.arrow.scale.setScalar(Math.max(n, 0.001)); this.tip.position.copy(t); this.cur = t.clone();
+    if (this.projN) { const f = this.projN.clone().multiplyScalar(t.dot(this.projN)); this.projLine.geometry.setFromPoints([t, f]); this.projLine.computeLineDistances(); this.foot.position.copy(f); } }
+  highlight(n, color) { if (!n) { this.hl.visible = false; return; } this.hl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b2t(n).normalize()); this.hl.material.color.set(color || 0xf9c500); this.hl.visible = true; }
+  project(n) { this.projN = n ? b2t(n).normalize() : null; this.projLine.visible = this.foot.visible = !!n; if (this.cur) this.place([this.cur.z, this.cur.x, this.cur.y]); }
+  set(v) { this.anim = null; this.v = v.slice(); this.place(v); }
+  clearTrail() { this.trailPts = []; this.trail.geometry.setFromPoints([]); }
+  rotate(axis, angle, done) {
+    if (this.anim) { const d = this.anim.done; this.set(this.anim.end); d && d(); }
+    const a = b2t(axis).normalize(), start = b2t(this.v);
+    const q = new THREE.Quaternion().setFromAxisAngle(a, angle), endT = start.clone().applyQuaternion(q);
+    const end = [endT.z, endT.x, endT.y];
+    if (reduce()) { this.set(end); done && done(); return; }
+    this.anim = { a, angle, start, end, t0: performance.now(), dur: 450 + 350 * Math.abs(angle) / Math.PI, done };
+    this.trailPts = [start.clone()];
+  }
+  step() {
+    const A = this.anim; if (!A) return;
+    let u = Math.min(1, (performance.now() - A.t0) / A.dur); const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    const p = A.start.clone().applyQuaternion(new THREE.Quaternion().setFromAxisAngle(A.a, A.angle * e));
+    this.place([p.z, p.x, p.y]); this.trailPts.push(p); this.trail.geometry.setFromPoints(this.trailPts);
+    if (u >= 1) { this.anim = null; this.v = A.end; this.place(A.end); A.done && A.done(); }
+  }
+}
+window.Bloch = Bloch;
+window.dispatchEvent(new Event('bloch-ready'));
+
+</script>
+<script type="module">
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const announce = t => { $('#status-announce').textContent = t; };
+const R2 = Math.SQRT1_2, D = Math.PI / 180;
+const C = (re, im = 0) => [re, im];
+const cm = (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]];
+const ca = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const ab2 = a => a[0] * a[0] + a[1] * a[1];
+const n2 = (x, d = 2) => { const v = Math.abs(x) < 0.5 * Math.pow(10, -d) ? 0 : x; return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d); };
+const fc = (z, d = 2) => { const e = 0.5 * Math.pow(10, -d), r = Math.abs(z[0]) < e ? 0 : z[0], i = Math.abs(z[1]) < e ? 0 : z[1]; if (!i) return n2(r, d); if (!r) return n2(i, d) + 'i'; return n2(r, d) + (i < 0 ? ' − ' : ' + ') + Math.abs(i).toFixed(d) + 'i'; };
+const blochOf = (a, b) => { const p = cm([a[0], -a[1]], b); return [2 * p[0], 2 * p[1], ab2(a) - ab2(b)]; };
+const NS = 'http://www.w3.org/2000/svg';
+const svg = (w, h, inner, label) => `<svg xmlns="${NS}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${label}">${inner}</svg>`;
+const QCOL = ['#4da3ff', '#ffb13b', '#c77dff'], QEDGE = ['#0074df', '#ef9100', '#952fc6'], QN = ['A', 'B', 'C'];
+const kets = (bits, cls) => `|${bits.split('').map((d, i) => `<span style="color:${QCOL[i]}">${d}</span>`).join('')}⟩`;
+const tsp = bits => bits.split('').map((d, i) => `<tspan fill="${QCOL[i]}">${d}</tspan>`).join('');
+function setBars(el, probs, ghosts, d = 2) {
+  if (!el.children.length) el.innerHTML = probs.map(() => '<div class="bar"><div class="ghost" style="height:0"></div><div class="fill" style="height:0"></div><span class="val"></span></div>').join('');
+  [...el.children].forEach((b, i) => { b.querySelector('.fill').style.height = (probs[i] * 100) + '%'; b.querySelector('.val').textContent = probs[i].toFixed(d); const g = b.querySelector('.ghost'); g.style.height = ghosts ? (ghosts[i] * 100) + '%' : '0'; g.style.display = ghosts ? 'block' : 'none'; });
+}
+const sample = (probs, n) => { const c = probs.map(() => 0), out = []; for (let k = 0; k < n; k++) { let r = Math.random(), i = 0; while (i < probs.length - 1 && r >= probs[i]) { r -= probs[i]; i++; } c[i]++; out.push(i); } return { c, out }; };
+const gateBox = (x, y, t) => `<rect class="circuit-gate-box" x="${x - 22}" y="${y - 18}" width="44" height="36" rx="4"></rect><text class="circuit-gate-text" x="${x}" y="${y + 1}">${t}</text>`;
+const meter = (x, y) => `<rect class="circuit-gate-box" x="${x - 22}" y="${y - 18}" width="44" height="36" rx="4"></rect><path class="meter-arc" d="M${x - 13} ${y + 8} A14 14 0 0 1 ${x + 13} ${y + 8}"></path><line class="circuit-wire" x1="${x}" y1="${y + 8}" x2="${x + 9}" y2="${y - 9}"></line>`;
+
+// Tabs
+const tabs = $$('.tab'); let current = 0; const resetters = [];
+function showTab(i, focus) {
+  current = i; tabs.forEach((t, k) => { const on = k === i; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; $('#' + t.getAttribute('aria-controls')).hidden = !on; });
+  if (focus) tabs[i].focus(); announce(tabs[i].textContent.replace(/^\d/, '') + ' tab');
+}
+tabs.forEach((t, i) => { t.addEventListener('click', () => showTab(i)); t.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); showTab((i + 1) % tabs.length, 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); showTab((i + tabs.length - 1) % tabs.length, 1); } }); });
+$$('[data-arrows]').forEach(g => g.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const b = [...g.querySelectorAll('button')], i = b.indexOf(document.activeElement); if (i < 0) return; e.preventDefault(); b[(i + (e.key === 'ArrowRight' ? 1 : b.length - 1)) % b.length].focus(); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { resetters[current] && resetters[current](); announce('Reset'); } });
+
+// 1 · Qubit
+const b1 = new window.Bloch($('#bloch-qubit'));
+const qT = $('#q-theta'), qP = $('#q-phi'); let basis = 'z';
+const PRE = { '0': [0, 0], '1': [180, 0], '+': [90, 0], '-': [90, 180], 'i': [90, 90], '-i': [90, 270] };
+const BASIS = { z: { n: [0, 0, 1], lab: ['0', '1'], kets: ['|0⟩', '|1⟩'], eq: ['|α|²', '|β|²'], other: 'x and y' }, x: { n: [1, 0, 0], lab: ['+', '−'], kets: ['|+⟩', '|−⟩'], eq: ['|α + β|² / 2', '|α − β|² / 2'], other: 'z and y' }, y: { n: [0, 1, 0], lab: ['+i', '−i'], kets: ['|+i⟩', '|−i⟩'], eq: ['|α − iβ|² / 2', '|α + iβ|² / 2'], other: 'z and x' } };
+const NOTE = 'Measuring projects the arrow onto the chosen axis (orange). The closer the tip is to one end, the more likely that outcome. The other two axes are not read, and that information is destroyed.';
+const vecH = arr => `<span class="vec">${arr.map(x => `<span>${x}</span>`).join('')}</span>`;
+function qState() { const t = +qT.value * D, p = +qP.value * D; return [C(Math.cos(t / 2)), C(Math.cos(p) * Math.sin(t / 2), Math.sin(p) * Math.sin(t / 2))]; }
+function qBloch() { const t = +qT.value * D, p = +qP.value * D; return [Math.sin(t) * Math.cos(p), Math.sin(t) * Math.sin(p), Math.cos(t)]; }
+function qProbs() { const v = qBloch(), n = BASIS[basis].n, d = v[0] * n[0] + v[1] * n[1] + v[2] * n[2]; return [(1 + d) / 2, (1 - d) / 2]; }
+function qRender(ghost) {
+  const t = +qT.value, p = +qP.value, [a, b] = qState(), B = BASIS[basis];
+  $('#q-theta-out').textContent = t + '°'; $('#q-phi-out').textContent = p + '°';
+  b1.set(qBloch()); b1.highlight(B.n, 0xef9100); b1.project(B.n);
+  const ma = Math.hypot(a[0], a[1]), mb = Math.hypot(b[0], b[1]), dd = (Math.max(ma, mb) > 0.98 && Math.min(ma, mb) >= 0.005) ? 3 : 2, fcd = z => fc(z, dd);
+  const bt = b[0] && Math.abs(b[1]) > 0.005 ? '(' + fcd(b) + ')' : fcd(b);
+  const CA = '#76b900', CB = '#c77dff', QA = c => `<span style="color:${CA}">${c}</span>`, QB = c => `<span style="color:${CB}">${c}</span>`, K = d => `|${d}⟩`;
+  $('#q-vec').innerHTML = `<span style="white-space:nowrap">|ψ⟩ = ${QA('α')}${K('0')} + ${QB('β')}${K('1')}</span><span style="white-space:nowrap">= ${QA(fcd(a))}${K('0')} + ${QB(bt)}${K('1')}</span><span style="white-space:nowrap;display:inline-flex;align-items:center;gap:8px">= <span class="vec">${`<span style="color:${CA}">${fcd(a)}</span><span style="color:${CB}">${fcd(b)}</span>`}</span></span>`;
+  $('#q-amps').innerHTML = `<dt><span style="color:${CA}">α</span> = cos(θ/2)</dt><dd style="color:${CA}">${fcd(a)}</dd><dt><span style="color:${CB}">β</span> = e<sup>iφ</sup> sin(θ/2)</dt><dd style="color:${CB}">${fcd(b)}</dd><dt>|<span style="color:${CA}">α</span>|² + |<span style="color:${CB}">β</span>|²</dt><dd>${(ab2(a) + ab2(b)).toFixed(dd)}</dd>`;
+  const pr = qProbs(); setBars($('#q-bars'), pr, ghost, dd);
+  $('#q-bar-labels').innerHTML = B.lab.map(l => `<span>${l}</span>`).join('');
+  $('#q-prob-eq').innerHTML = [0, 1].map(k => `<div>P(${B.lab[k]}) = ${B.eq[k]} = <span style="color:#76b900">${pr[k].toFixed(dd)}</span></div>`).join('');
+  $$('[data-preset]').forEach(x => { const [pt, pp] = PRE[x.dataset.preset]; x.classList.toggle('active', pt === t && (pt === 0 || pt === 180 || pp === p)); });
+  if (!ghost) { $('#q-shot-out').textContent = 'Not measured yet'; $('#q-meas-note').textContent = NOTE; }
+}
+[qT, qP].forEach(s => s.addEventListener('input', () => qRender()));
+$$('[data-preset]').forEach(x => x.addEventListener('click', () => { const [t, p] = PRE[x.dataset.preset]; qT.value = t; qP.value = p; qRender(); announce('State ' + x.textContent); }));
+$$('[data-basis]').forEach(x => x.addEventListener('click', () => { basis = x.dataset.basis; $$('[data-basis]').forEach(y => y.setAttribute('aria-pressed', y === x)); qRender(); announce('Measuring along ' + basis); }));
+$$('[data-shots]').forEach(x => x.addEventListener('click', () => {
+  const n = +x.dataset.shots, B = BASIS[basis], { c, out } = sample(qProbs(), n);
+  qRender([c[0] / n, c[1] / n]);
+  let msg;
+  if (n === 1) { const k = out[0]; b1.set(B.n.map(v => k ? -v : v)); setBars($('#q-bars'), k ? [0, 1] : [1, 0], [c[0], c[1]]); $$('[data-preset]').forEach(y => y.classList.remove('active'));
+    msg = `Measured ${B.lab[k]}. The qubit is now ${B.kets[k]}.`; $('#q-meas-note').textContent = `The arrow now sits on the ${basis}-axis. Its ${B.other} components are gone: measuring along either of those next gives 50 / 50. Move a slider to prepare a new state.`; }
+  else msg = `${B.lab[0]}: ${c[0]}, ${B.lab[1]}: ${c[1]} out of ${n}`;
+  $('#q-shot-out').textContent = msg; announce(msg);
+}));
+resetters[0] = () => { qT.value = 60; qP.value = 0; basis = 'z'; $$('[data-basis]').forEach(y => y.setAttribute('aria-pressed', y.dataset.basis === 'z')); qRender(); };
+qRender();
+
+// 2 · Gates
+const b2 = new window.Bloch($('#bloch-gates'));
+const i_ = C(0, 1), eT = C(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4));
+const G = {
+  X: { m: [[C(0), C(1)], [C(1), C(0)]], ax: [1, 0, 0], ang: Math.PI, cells: ['0', '1', '1', '0'], t: '180° rotation about the x-axis', d: 'Swaps |0⟩ and |1⟩. The quantum NOT.' },
+  Y: { m: [[C(0), C(0, -1)], [i_, C(0)]], ax: [0, 1, 0], ang: Math.PI, cells: ['0', '−i', 'i', '0'], t: '180° rotation about the y-axis', d: 'Swaps |0⟩ and |1⟩ and adds a phase of ±i.' },
+  Z: { m: [[C(1), C(0)], [C(0), C(-1)]], ax: [0, 0, 1], ang: Math.PI, cells: ['1', '0', '0', '−1'], t: '180° rotation about the z-axis', d: 'Keeps |0⟩, flips the sign of |1⟩. Probabilities do not change.' },
+  H: { m: [[C(R2), C(R2)], [C(R2), C(-R2)]], ax: [R2, 0, R2], ang: Math.PI, cells: ['1', '1', '1', '−1'], pre: '1/√2', t: '180° rotation about the x–z diagonal', d: 'Swaps the z- and x-axes: |0⟩ → |+⟩ and |1⟩ → |−⟩.' },
+  S: { m: [[C(1), C(0)], [C(0), i_]], ax: [0, 0, 1], ang: Math.PI / 2, cells: ['1', '0', '0', 'i'], t: '90° rotation about the z-axis', d: 'Multiplies the |1⟩ part by i.' },
+  T: { m: [[C(1), C(0)], [C(0), eT]], ax: [0, 0, 1], ang: Math.PI / 4, cells: ['1', '0', '0', 'e<sup>iπ/4</sup>'], t: '45° rotation about the z-axis', d: 'Multiplies the |1⟩ part by e<sup>iπ/4</sup>.' }
+};
+let gHist = [], gS = [C(1), C(0)];
+const applyM = (m, s) => [ca(cm(m[0][0], s[0]), cm(m[0][1], s[1])), ca(cm(m[1][0], s[0]), cm(m[1][1], s[1]))];
+function gRender() {
+  const last = gHist[gHist.length - 1];
+  let prev = [C(1), C(0)]; gHist.slice(0, -1).forEach(g => prev = applyM(G[g].m, prev));
+  $('#g-act').innerHTML = last ? `<span class="eq">${last}</span>${G[last].pre ? `<span class="eq">${G[last].pre}</span>` : ''}<span class="matrix">${G[last].cells.map(c => `<span>${c}</span>`).join('')}</span>${vecH(prev.map(z => fc(z)))}<span class="eq">=</span>${vecH(gS.map(z => fc(z)))}` : `<span class="eq">State</span>${vecH(gS.map(z => fc(z)))}<span class="muted">Apply a gate</span>`;
+  $('#g-desc-title').textContent = last ? last + ': ' + G[last].t : 'Every gate is a rotation';
+  $('#g-desc-body').innerHTML = last ? G[last].d : 'Pick a gate to see its axis and angle.';
+  b2.highlight(last ? G[last].ax : null);
+  setBars($('#g-bars'), [ab2(gS[0]), ab2(gS[1])]);
+  const show = gHist.slice(-14), W = Math.max(360, 110 + show.length * 60 + 40);
+  let s = `<text class="circuit-qubit-label" x="8" y="45">|0⟩</text><line class="circuit-wire" x1="44" y1="40" x2="${W - 10}" y2="40"></line>`;
+  show.forEach((g, k) => s += gateBox(90 + k * 60, 40, g));
+  if (!show.length) s += `<text x="${W / 2}" y="74" fill="#AAAAAA" font-size="13" text-anchor="middle" font-family="Inter, sans-serif">Gates you apply appear here</text>`;
+  $('#g-circuit').innerHTML = svg(W, 84, s, 'Circuit: ' + (gHist.join(' then ') || 'no gates'));
+}
+$$('[data-gate]').forEach(x => x.addEventListener('click', () => { const g = G[x.dataset.gate]; gHist.push(x.dataset.gate); gS = applyM(g.m, gS); b2.rotate(g.ax, g.ang); gRender(); announce(`Applied ${x.dataset.gate}. Probability of 1 is ${ab2(gS[1]).toFixed(2)}`); }));
+function gRebuild() { gS = [C(1), C(0)]; gHist.forEach(g => gS = applyM(G[g].m, gS)); b2.set(blochOf(gS[0], gS[1])); b2.clearTrail(); gRender(); }
+$('#g-undo').addEventListener('click', () => { gHist.pop(); gRebuild(); });
+$('#g-reset').addEventListener('click', () => { gHist = []; gRebuild(); });
+resetters[2] = () => { gHist = []; gRebuild(); tg = 'CX'; tRender(); qaReset(); };
+gRender();
+
+// 3 · Interference
+{
+  const P0 = '#4da3ff', P1 = '#ffb13b', NEG = '#ff6b6b', F = 'Inter, sans-serif', M = "'Roboto Mono', monospace", R = Math.SQRT1_2;
+  const f2 = v => (Math.abs(v) < 5e-3 ? 0 : v).toFixed(2);
+  const SC = 62, LX0 = 95, LX1 = 265, W = 360;
+  const arrow = (x1, y, x2, col, wdt = 5) => { if (Math.abs(x2 - x1) < 1) return `<circle cx="${x1}" cy="${y}" r="4.5" fill="${col}"></circle>`; const d = Math.sign(x2 - x1), hx = x2 - d * 10; return `<line x1="${x1}" y1="${y}" x2="${hx}" y2="${y}" stroke="${col}" stroke-width="${wdt}" stroke-linecap="round"></line><polygon points="${x2},${y} ${hx},${y - 7} ${hx},${y + 7}" fill="${col}"></polygon>`; };
+  const nline = (cx, y) => `<line x1="${cx - SC}" y1="${y}" x2="${cx + SC}" y2="${y}" stroke="#555"></line><line x1="${cx}" y1="${y - 7}" x2="${cx}" y2="${y + 7}" stroke="#888"></line>`;
+  const head = `<text x="${LX0}" y="14" fill="#aaa" font-family="${F}" font-size="13" font-weight="700" text-anchor="middle">|0⟩ component</text><text x="${LX1}" y="14" fill="#aaa" font-family="${F}" font-size="13" font-weight="700" text-anchor="middle">|1⟩ component</text>`;
+  const val = (cx, y, v, col) => `<text x="${cx}" y="${y - 14}" fill="${col}" font-family="${M}" font-size="15" font-weight="700" text-anchor="middle">${f2(v)}</text>`;
+  const stateSvg = (a0, a1, flipped) => { const y = 52; return svg(W, 66, head + nline(LX0, y) + nline(LX1, y) + arrow(LX0, y, LX0 + a0 * SC, P0) + arrow(LX1, y, LX1 + a1 * SC, flipped ? NEG : P1) + val(LX0, y, a0, '#fff') + val(LX1, y, a1, flipped ? NEG : '#fff'), `State ${f2(a0)} ket 0 plus ${f2(a1)} ket 1`); };
+  const finalSvg = (a1, withZ) => {
+    const p0 = [R * R, R * a1], p1 = [R * R, -R * a1], y = 60, colB = withZ ? NEG : P1;
+    const tip = (cx, parts, label) => { let x = cx, s = nline(cx, y); parts.forEach((v, k) => { const nx = x + v * SC, col = k ? colB : P0; s += arrow(x, y + (k ? 9 : -9), nx, col, 5) + `<text x="${(x + nx) / 2}" y="${y + (k ? 30 : -18)}" fill="${col}" font-family="${M}" font-size="13" font-weight="700" text-anchor="middle">${v >= 0 ? '+' : '−'}${f2(Math.abs(v))}</text>`; x = nx; }); const tot = parts[0] + parts[1]; s += nline(cx, y + 72) + arrow(cx, y + 72, cx + tot * SC, '#fff', 6) + val(cx, y + 72, tot, '#fff') + `<text x="${cx}" y="${y + 102}" fill="#ccc" font-family="${F}" font-size="12" font-weight="600" text-anchor="middle">${label}</text>`; return s; };
+    return svg(W, 172, head + tip(LX0, p0, 'sum') + tip(LX1, p1, 'difference'), 'Final components built from two pieces each');
+  };
+  const circuitSvg = withZ => { const Wc = 300, y = 36, box = (cx, t, col = '#76b900', dash = '') => `<rect x="${cx - 20}" y="${y - 18}" width="40" height="36" rx="4" fill="#2A2A2A" stroke="${col}" stroke-width="2" ${dash}></rect><text x="${cx}" y="${y + 1}" fill="${col === '#666' ? '#888' : '#E0E0E0'}" font-family="${F}" font-weight="700" font-size="15" text-anchor="middle" dominant-baseline="middle">${t}</text>`; return svg(Wc, 70, `<text x="4" y="${y + 5}" fill="#76b900" font-family="${F}" font-size="14" font-weight="700">|0⟩</text><line x1="36" y1="${y}" x2="${Wc - 4}" y2="${y}" stroke="#E0E0E0" stroke-width="2"></line>${box(88, 'H')}${withZ ? box(163, 'Z', NEG) : box(163, '', '#666', 'stroke-dasharray="4 3"')}${box(238, 'H')}`, `Circuit ${withZ ? 'H Z H' : 'H H'}`); };
+  const cell = (lab, ket, s, extra = '') => `<div class="cell"><div class="lab">${lab}</div><div class="ket">${ket}</div><div class="svg-wrap">${s}</div>${extra}</div>`;
+  const bar = (sym, cls, text) => `<div class="gbar ${cls}"><span class="g">${sym}</span><span>${text}</span></div>`;
+  const ketMid = z => `<span class="c0">0.71|0⟩</span> ${z ? '<span class="neg">−</span>' : '+'} <span class="c1">0.71|1⟩</span>`;
+  $('#icg').innerHTML =
+    `<div class="cell"><h3>Circuit <span class="mono">H H</span></h3><div class="svg-wrap">${circuitSvg(false)}</div><div class="bloch" id="bl-hh" tabindex="0" role="img" aria-label="Bloch sphere for H H"><span class="hint">Drag to rotate</span></div><div style="display:flex;gap:12px;align-items:center"><button class="btn-primary" data-play="hh">▶ Play</button><span class="muted" id="bl-hh-lab">|0⟩</span></div></div>` +
+    `<div class="cell"><h3>Circuit <span class="mono">H Z H</span></h3><div class="svg-wrap">${circuitSvg(true)}</div><div class="bloch" id="bl-hzh" tabindex="0" role="img" aria-label="Bloch sphere for H Z H"><span class="hint">Drag to rotate</span></div><div style="display:flex;gap:12px;align-items:center"><button class="btn-primary" data-play="hzh">▶ Play</button><span class="muted" id="bl-hzh-lab">|0⟩</span></div></div>` +
+    cell('Start · arrow at the north pole', '|0⟩', stateSvg(1, 0)) + cell('Start · arrow at the north pole', '|0⟩', stateSvg(1, 0)) +
+    bar('H', '', 'splits &nbsp; <span class="rule">|0⟩ → 0.71|0⟩ + 0.71|1⟩</span> sum &nbsp; <span class="rule">|1⟩ → 0.71|0⟩ − 0.71|1⟩</span> difference &nbsp; <span class="muted">on the sphere: half turn about the x–z diagonal</span>') +
+    cell('After H · arrow on the equator, +x', ketMid(false), stateSvg(R, R)) + cell('After H · arrow on the equator, +x', ketMid(false), stateSvg(R, R)) +
+    bar('—', 'half off', 'no gate') + bar('Z', 'half z', 'flips the sign of |1⟩ &nbsp; <span class="rule">|1⟩ → −|1⟩</span> &nbsp; <span class="muted">half turn about z</span>') +
+    cell('Unchanged · still +x', ketMid(false), stateSvg(R, R)) + cell('After Z · same height, now −x', ketMid(true), stateSvg(R, -R, true)) +
+    bar('H', '', 'splits again &nbsp; outcome 0 gets the <b>sum</b> of the two components, outcome 1 the <b>difference</b> &nbsp; each piece is 0.71 × 0.71 = 0.5') +
+    cell('After H · north pole', '1.00|0⟩ + 0.00|1⟩ = |0⟩', finalSvg(R, false), '<div class="res"><span class="big">Always 0</span><span class="muted">H H = I</span></div>') +
+    cell('After H · south pole', '0.00|0⟩ + 1.00|1⟩ = |1⟩', finalSvg(-R, true), '<div class="res"><span class="big">Always 1</span><span class="muted">H Z H = X</span></div>');
+  const Hax = [R, 0, R], Zax = [0, 0, 1];
+  const spheres = { hh: new window.Bloch($('#bl-hh')), hzh: new window.Bloch($('#bl-hzh')) };
+  const SEQ = { hh: [[Hax, '|+⟩'], [Hax, '|0⟩']], hzh: [[Hax, '|+⟩'], [Zax, '|−⟩'], [Hax, '|1⟩']] };
+  $$('[data-play]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.play, s = spheres[k], lab = $('#bl-' + k + '-lab'); s.set([0, 0, 1]); s.clearTrail(); lab.textContent = '|0⟩'; b.disabled = true;
+    let i = 0; const next = () => { if (i >= SEQ[k].length) { b.disabled = false; return; } const [ax, l] = SEQ[k][i++]; setTimeout(() => s.rotate(ax, Math.PI, () => { lab.textContent = l; announce(l); next(); }), 500); };
+    next();
+  }));
+  resetters[3] = () => { Object.entries(spheres).forEach(([k, s]) => { s.set([0, 0, 1]); s.clearTrail(); $('#bl-' + k + '-lab').textContent = '|0⟩'; }); };
+}
+
+// 4 · Two qubits
+const tTh = [90, 0]; let tg = 'CX';
+const amp1 = t => [Math.cos(t * D / 2), Math.sin(t * D / 2)];
+const TP = [['|0⟩', 0], ['|1⟩', 180], ['|+⟩', 90], ['|−⟩', 270]];
+const r2 = 'e';
+const TG = {
+  HI: { m: [[1, 0, 1, 0], [0, 1, 0, 1], [1, 0, -1, 0], [0, 1, 0, -1]], s: R2, circ: 'HA', block: 'H ⊗ I = 1/√2 <span class="vec"><span>I&nbsp;&nbsp;I</span><span>I&nbsp;−I</span></span>', d: 'H acts on A and nothing (I) acts on B. Each 2 × 2 block is an entry of H times I.' },
+  IH: { m: [[1, 1, 0, 0], [1, -1, 0, 0], [0, 0, 1, 1], [0, 0, 1, -1]], s: R2, circ: 'HB', block: 'I ⊗ H = <span class="vec"><span>H&nbsp;&nbsp;0</span><span>0&nbsp;&nbsp;H</span></span>', d: 'Nothing acts on A, H acts on B. H repeats down the diagonal.' },
+  XI: { m: [[0, 0, 1, 0], [0, 0, 0, 1], [1, 0, 0, 0], [0, 1, 0, 0]], s: 1, circ: 'XA', block: 'X ⊗ I = <span class="vec"><span>0&nbsp;&nbsp;I</span><span>I&nbsp;&nbsp;0</span></span>', d: 'Flips A. The |0·⟩ and |1·⟩ halves of the vector swap.' },
+  CX: { m: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]], s: 1, circ: 'CX', block: 'CNOT = <span class="vec"><span>I&nbsp;&nbsp;0</span><span>0&nbsp;&nbsp;X</span></span>', d: 'If A is 0, do nothing to B. If A is 1, flip B. Only the |10⟩ and |11⟩ amplitudes swap.' }
+};
+const BITS = ['00', '01', '10', '11'];
+function tCards() {
+  $('#t-cards').innerHTML = [0, 1].map(q => `<div class="qcard" style="border-left-color:${QEDGE[q]}"><div class="slider-wrap"><div class="slider-head"><label for="t-s${q}" style="color:${QCOL[q]}">Qubit ${QN[q]}</label><output id="t-o${q}"></output></div><input type="range" id="t-s${q}" min="0" max="360" step="1" value="${tTh[q]}" aria-label="Qubit ${QN[q]} angle in degrees"></div><div role="group" aria-label="Qubit ${QN[q]} presets" data-arrows style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">${TP.map(([l, t]) => `<button class="bit-btn" style="min-width:0;padding:8px 0" data-tq="${q}" data-tt="${t}">${l}</button>`).join('')}</div></div>`).join('');
+  for (let q = 0; q < 2; q++) $('#t-s' + q).addEventListener('input', e => { tTh[q] = +e.target.value; tRender(); });
+  $$('[data-tq]').forEach(x => x.addEventListener('click', () => { const q = +x.dataset.tq; tTh[q] = +x.dataset.tt; $('#t-s' + q).value = tTh[q]; tRender(); }));
+  $$('#t-cards [data-arrows]').forEach(g => g.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const bb = [...g.querySelectorAll('button')], i = bb.indexOf(document.activeElement); if (i < 0) return; e.preventDefault(); bb[(i + (e.key === 'ArrowRight' ? 1 : bb.length - 1)) % bb.length].focus(); }));
+}
+const colVec = (vals, q) => `<span class="vec" style="font-size:1.2rem">${vals.map(v => `<span style="color:${QCOL[q]}">${n2(v)}</span>`).join('')}</span>`;
+const v4 = (vals, title) => `<div style="display:flex;flex-direction:column;gap:6px;align-items:center"><div class="muted" style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em">${title}</div><div class="v4">${vals.map((v, k) => `<span class="h" style="font-size:0.9rem">${kets(BITS[k])}</span><span class="c" style="${Math.abs(v) > 0.005 ? '' : 'color:#757575'}">${n2(v)}</span>`).join('')}</div></div>`;
+function tRender() {
+  const A = amp1(tTh[0]), B = amp1(tTh[1]);
+  for (let q = 0; q < 2; q++) { $('#t-o' + q).textContent = tTh[q] + '°'; $$(`[data-tq="${q}"]`).forEach(x => x.classList.toggle('active', +x.dataset.tt === tTh[q])); }
+  const prod = BITS.map(bb => A[+bb[0]] * B[+bb[1]]);
+  const rows = BITS.map((bb, k) => `<div class="trow5"><span style="font-size:1.1rem">${kets(bb)}</span><span><span style="color:${QCOL[0]}">a<sub>${bb[0]}</sub></span> · <span style="color:${QCOL[1]}">b<sub>${bb[1]}</sub></span></span><span style="color:#fff">${n2(prod[k])}</span><span style="color:#76b900">${(prod[k] * prod[k]).toFixed(2)}</span><span style="height:12px;border-radius:2px;background:linear-gradient(to right,#5e9400,#76b900);width:${(prod[k] * prod[k] * 100).toFixed(1)}%"></span></div>`).join('') + `<div class="trow5 sum"><span></span><span></span><span class="muted" style="font-weight:600">sum</span><span style="color:#76b900">${prod.reduce((s, x) => s + x * x, 0).toFixed(2)}</span><span class="muted" style="font-weight:500;font-size:.85rem">4 = 2² entries, normalized</span></div>`;
+  $('#t-eq').innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="qa" style="font-weight:700">A</span>${colVec(A, 0)}<span class="muted" style="font-size:0.85rem;white-space:nowrap"><span class="qa">a₀</span>, <span class="qa">a₁</span></span></div><span class="eq" style="font-size:1.8rem">⊗</span><div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="qb" style="font-weight:700">B</span>${colVec(B, 1)}<span class="muted" style="font-size:0.85rem;white-space:nowrap"><span class="qb">b₀</span>, <span class="qb">b₁</span></span></div><span class="eq" style="font-size:1.8rem">=</span><div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:300px"><div class="trow5 hd"><span>basis</span><span>product</span><span>amplitude</span><span>probability</span><span></span></div>${rows}</div>`;
+  $$('[data-tg]').forEach(x => x.setAttribute('aria-pressed', x.dataset.tg === tg));
+  if (!tg) { $('#t-circ').innerHTML = ''; $('#t-block').innerHTML = '<span class="muted">Pick a gate</span>'; $('#t-gdesc').textContent = 'A gate on one qubit still acts on the whole 4-entry vector.'; $('#t-mat').innerHTML = v4(prod, 'state'); $('#t-after').textContent = ''; return; }
+  const G4 = TG[tg], out = G4.m.map(r => r.reduce((s, m, j) => s + m * G4.s * prod[j], 0));
+  const blk = (i, j) => tg === 'CX' ? (i > 1 && j > 1 ? 'rgba(118,185,0,0.16)' : i < 2 && j < 2 ? 'rgba(255,255,255,0.06)' : '#1f1f1f') : ((i < 2) === (j < 2) ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.02)');
+  let m = '<span></span>' + BITS.map(bb => `<span class="h">${kets(bb)}</span>`).join('');
+  G4.m.forEach((r, i) => { m += `<span class="h">${kets(BITS[i])}</span>` + r.map((v, j) => `<span class="c" style="background:${blk(i, j)};${v ? (v < 0 ? 'color:#ff6b6b' : '') : 'color:#757575'}">${v < 0 ? '−1' : v}</span>`).join(''); });
+  $('#t-mat').innerHTML = `${G4.s !== 1 ? '<span class="eq">1/√2</span>' : ''}<div class="m4">${m}</div><span class="eq">×</span>${v4(prod, 'before')}<span class="eq">=</span>${v4(out, 'after')}`;
+  $('#t-block').innerHTML = G4.block; $('#t-gdesc').textContent = G4.d;
+  const yA = 34, yB = 94; let c = `<text class="circuit-qubit-label" x="4" y="${yA + 5}"><tspan fill="${QCOL[0]}">A</tspan></text><text class="circuit-qubit-label" x="4" y="${yB + 5}"><tspan fill="${QCOL[1]}">B</tspan></text><line class="circuit-wire" x1="30" y1="${yA}" x2="260" y2="${yA}"></line><line class="circuit-wire" x1="30" y1="${yB}" x2="260" y2="${yB}"></line>`;
+  if (tg === 'CX') c += `<line class="circuit-ctrl-line" x1="145" y1="${yA}" x2="145" y2="${yB + 14}"></line><circle class="circuit-ctrl-dot" cx="145" cy="${yA}" r="6"></circle><circle class="circuit-target-circle" cx="145" cy="${yB}" r="14"></circle><line class="circuit-target-plus" x1="131" y1="${yB}" x2="159" y2="${yB}"></line><line class="circuit-target-plus" x1="145" y1="${yB - 14}" x2="145" y2="${yB + 14}"></line>`;
+  else c += gateBox(145, G4.circ[1] === 'A' ? yA : yB, G4.circ[0]);
+  $('#t-circ').innerHTML = svg(270, 124, c, 'Circuit for ' + tg);
+  const ent = 2 * Math.abs(out[0] * out[3] - out[1] * out[2]) > 0.01;
+  $('#t-after').innerHTML = ent ? '<span style="color:#76b900;font-weight:700">The result can no longer be written as A ⊗ B.</span> It is entangled: see the Entanglement tab.' : 'The result is still a product of one state for A and one for B.';
+}
+$$('[data-tg]').forEach(x => x.addEventListener('click', () => { tg = x.dataset.tg; tRender(); announce('Applied ' + tg); }));
+resetters[1] = () => { tTh.splice(0, 2, 90, 0); tCards(); tRender(); };
+tCards(); tRender();
+
+// Algorithm picture (Gates tab)
+const QA_K = ['000', '001', '010', '011', '100', '101', '110', '111'], QA_A1 = [0.26, 0.05, 0.08, 0.73, 0.12, 0.59, 0.10, 0.17];
+const QA_N = QA_A1.reduce((s, v) => s + v * v, 0), QA_P = QA_A1.map(v => v * v / QA_N);
+let qaShots = 0, qaHits = 0;
+function qaReset() { qaShots = 0; qaHits = 0; $('#qa-shot').textContent = '?'; $('#qa-tally').textContent = ''; }
+(function () {
+  const G = 'color:#76b900;font-weight:700', MONO = 'font-family:ui-monospace,Menlo,Consolas,monospace';
+  const vecBlk = (vals, probs, hiVal, bar) => '<div class="qa-vec"><span><span style="text-decoration:overline">b</span> =</span><span class="qa-br">' + vals.map((v, k) => '<span style="' + (k === hiVal ? G : '') + '">' + v + '</span>').join('') + '</span><span style="display:grid;color:#aaa">' + QA_K.map((b, k) => '<span style="' + (k === 3 ? G : '') + '">|' + b + '⟩' + (k === 3 ? ' = b<sub>011</sub>' : '') + '</span>').join('') + '</span></div><div class="qa-bars">' + probs.map((p, k) => '<span style="height:' + Math.max(p * 100, 3).toFixed(1) + '%;background:' + (k === bar ? '#76b900' : '#8a8a8a') + '"></span>').join('') + '</div><div class="qa-lab">' + QA_K.map(b => '<span>' + b + '</span>').join('') + '</div>';
+  const sphere = '<svg viewBox="0 0 52 52" width="48" height="48" aria-hidden="true"><circle cx="26" cy="26" r="22" fill="none" stroke="#E0E0E0" stroke-width="1.5"></circle><ellipse cx="26" cy="26" rx="22" ry="7" fill="none" stroke="#777" stroke-width="1"></ellipse><line x1="26" y1="26" x2="26" y2="6" stroke="#76b900" stroke-width="3" stroke-linecap="round"></line><circle cx="26" cy="5" r="3" fill="#76b900"></circle></svg>';
+  let cells = ''; for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) cells += '<span style="background:' + ((i * 7 + j * 3 + (i * j) % 5) % 3 ? '#d9d9d9' : '#4a4a4a') + '"></span>';
+  const arr = '<span class="arr" aria-hidden="true">→</span>';
+  $('#qalg').innerHTML =
+    '<div class="blk" style="flex:0 0 96px;min-width:0"><div class="ttl">N = 3 qubits</div>' + sphere + sphere + sphere + '<div style="font-size:.85rem;text-align:center">Each starts in |0⟩</div></div>' + arr +
+    '<div class="blk"><div class="ttl">State vector of |000⟩</div>' + vecBlk(['1', '0', '0', '0', '0', '0', '0', '0'], [1, 0, 0, 0, 0, 0, 0, 0], 0, 0) + '</div>' + arr +
+    '<div class="blk proc"><div class="ttl">Quantum processor</div><div class="qa-grid" role="img" aria-label="An 8 by 8 matrix">' + cells + '</div><div style="' + MONO + ';color:#fff;font-weight:700">U · 2<sup>N</sup> × 2<sup>N</sup></div><div style="font-size:.85rem;text-align:center">All the circuit’s gates compose into one matrix</div></div>' + arr +
+    '<div class="blk"><div class="ttl">Final state</div>' + vecBlk(QA_A1.map(v => v.toFixed(2)), QA_P, 3, 3) + '</div>' + arr +
+    '<div class="blk meas" style="flex:0 0 132px;min-width:0"><div class="ttl">Measure one shot</div><div id="qa-shot" style="' + MONO + ';font-size:2.2rem;font-weight:700;color:#fff;letter-spacing:.08em;line-height:1.1">?</div><div style="font-size:.85rem;text-align:center">One bitstring, drawn with probability |b<sub>x</sub>|²</div><button class="btn-primary" id="qa-measure">Measure</button><div class="muted" id="qa-tally" style="font-size:.8rem;text-align:center;min-height:2.6em"></div></div>';
+  $('#qa-measure').addEventListener('click', () => { let r = Math.random(), k = 0; for (; k < 7; k++) { r -= QA_P[k]; if (r <= 0) break; } qaShots++; if (k === 3) qaHits++; $('#qa-shot').textContent = QA_K[k]; $('#qa-tally').textContent = qaShots + (qaShots === 1 ? ' shot' : ' shots') + ' · 011 came up ' + qaHits + (qaHits === 1 ? ' time' : ' times'); announce('Measured ' + QA_K[k]); });
+})();
+
+// 5 · Entanglement
+const eT_ = $('#e-theta'); let cnot = false;
+function eState() { const t = +eT_.value * D, c = Math.cos(t / 2), s = Math.sin(t / 2); return cnot ? [c, 0, 0, s] : [c, 0, s, 0]; }
+function eRender(keepShots) {
+  $('#e-theta-out').textContent = eT_.value + '°';
+  $('#e-cnot').setAttribute('aria-pressed', cnot); $('#e-cnot').textContent = 'CNOT: ' + (cnot ? 'on' : 'off');
+  const yA = 40, yB = 110, op = cnot ? 1 : 0.25;
+  let s = `<text class="circuit-qubit-label" x="4" y="${yA + 5}"><tspan fill="${QCOL[0]}">A</tspan> |0⟩</text><text class="circuit-qubit-label" x="4" y="${yB + 5}"><tspan fill="${QCOL[1]}">B</tspan> |0⟩</text><line class="circuit-wire" x1="60" y1="${yA}" x2="420" y2="${yA}"></line><line class="circuit-wire" x1="60" y1="${yB}" x2="420" y2="${yB}"></line>`;
+  s += `<rect class="circuit-gate-box" x="112" y="${yA - 24}" width="56" height="48" rx="4"></rect><text class="circuit-gate-text" x="140" y="${yA - 7}" style="font-size:14px">Ry</text><text class="circuit-gate-param" x="140" y="${yA + 11}">${eT_.value}°</text>`;
+  s += `<g opacity="${op}" ${cnot ? '' : 'stroke-dasharray="4 4"'}><line class="circuit-ctrl-line" x1="250" y1="${yA}" x2="250" y2="${yB + 14}"></line><circle class="circuit-ctrl-dot" cx="250" cy="${yA}" r="6"></circle><circle class="circuit-target-circle" cx="250" cy="${yB}" r="14"></circle><line class="circuit-target-plus" x1="236" y1="${yB}" x2="264" y2="${yB}"></line><line class="circuit-target-plus" x1="250" y1="${yB - 14}" x2="250" y2="${yB + 14}"></line></g>`;
+  s += meter(370, yA) + meter(370, yB);
+  $('#e-circuit').innerHTML = svg(440, 150, s, `Circuit: Ry of ${eT_.value} degrees on A${cnot ? ', then CNOT from A to B' : ''}`);
+  const v = eState(), p = v.map(x => x * x); setBars($('#e-bars'), p);
+  $('#e-bar-labels').innerHTML = ['00', '01', '10', '11'].map(b => `<span>${kets(b)}</span>`).join('');
+  const conc = 2 * Math.abs(v[0] * v[3] - v[1] * v[2]);
+  $('#e-split').innerHTML = conc < 0.01 ? 'Yes. A and B each have their own state.' : `<span style="color:#76b900">No.</span> A and B are entangled.`;
+  const term = (c, bits) => Math.abs(c) < 0.005 ? '' : `${c < 0 ? '−' : '+'} ${Math.abs(c).toFixed(2)}${kets(bits)}`;
+  const full = v.map((c, k) => term(c, ['00', '01', '10', '11'][k])).filter(Boolean).join(' ').replace(/^\+ /, '');
+  $('#e-state').innerHTML = `|ψ⟩ = ${full}`;
+  { const t_ = +eT_.value * D, c = Math.cos(t_ / 2), sn = Math.sin(t_ / 2), BITS4 = ['00', '01', '10', '11'], sym = (i, j) => `<span style="color:${QCOL[0]}">a<sub>${i}</sub></span> · <span style="color:${QCOL[1]}">b<sub>${j}</sub></span>`;
+    const rows = BITS4.map((bb, k) => `<div class="trow"><span style="font-size:1.1rem">${kets(bb)}</span><span>${sym(bb[0], bb[1])}</span><span style="color:#fff">= ${n2(v[k])}</span><span style="height:12px;border-radius:2px;background:linear-gradient(to right,#5e9400,#76b900);width:${(v[k] * v[k] * 100).toFixed(1)}%"></span></div>`).join('');
+    const table = `<div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:300px"><div class="muted" style="display:grid;grid-template-columns:64px 96px 64px 1fr;gap:10px;padding:0 10px;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em"><span>basis</span><span>product</span><span>value</span><span>probability</span></div>${rows}</div>`;
+    const colV = (vals, q) => `<span class="vec" style="font-size:1.2rem">${vals.map(x => `<span style="color:${QCOL[q]}">${x}</span>`).join('')}</span>`;
+    const ok = conc < 0.01; let FA = [c, sn], FB = [1, 0];
+    if (ok) { const r = [[v[0], v[1]], [v[2], v[3]]], nr = r.map(x => Math.hypot(...x)), kk = nr[0] >= nr[1] ? 0 : 1; FB = r[kk].map(x => x / nr[kk]); FA = r.map(x => x[0] * FB[0] + x[1] * FB[1]); }
+    const left = ok ? `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="qa" style="font-weight:700">A</span>${colV(FA.map(x => n2(x)), 0)}</div><span class="eq" style="font-size:1.8rem">⊗</span><div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="qb" style="font-weight:700">B</span>${colV(FB.map(x => n2(x)), 1)}</div><span class="eq" style="font-size:1.8rem">=</span>`
+      : `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="qa" style="font-weight:700">A</span>${colV(['a₀', 'a₁'], 0)}</div><span class="eq" style="font-size:1.8rem">⊗</span><div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="qb" style="font-weight:700">B</span>${colV(['b₀', 'b₁'], 1)}</div><span class="eq" style="font-size:1.8rem;color:#ff6b6b">≠</span>`;
+    $('#e-tensor').innerHTML = left + table;
+    $('#e-tensor-title').textContent = ok ? 'It factors as A ⊗ B' : 'It does not factor as A ⊗ B';
+    $('#e-tensor-note').innerHTML = ok ? `Same construction as the Two qubits tab: every entry is a product a<sub>i</sub>·b<sub>j</sub>.${Math.abs(FB[1]) < 0.005 ? ' Here B is still |0⟩, so the |01⟩ and |11⟩ entries are 0.' : ''}`
+      : `Try to solve for a₀, a₁, b₀, b₁. The |01⟩ row needs <span class="qa">a₀</span>·<span class="qb">b₁</span> = 0 and the |10⟩ row needs <span class="qa">a₁</span>·<span class="qb">b₀</span> = 0. But |00⟩ needs <span class="qa">a₀</span>·<span class="qb">b₀</span> = ${n2(c)} ≠ 0, so a₀ ≠ 0 and b₀ ≠ 0; then b₁ = 0 and a₁ = 0, which makes the |11⟩ entry 0 instead of ${n2(sn)}. No choice of A and B works: the CNOT has tied the two qubits together.`;
+  }
+  const one = (x, q) => { const t = [0, 1].map(i => Math.abs(x[i]) < 0.005 ? '' : `${x[i] < 0 ? '−' : '+'} ${Math.abs(x[i]) > 0.995 ? '' : Math.abs(x[i]).toFixed(2)}|<span style="color:${QCOL[q]}">${i}</span>⟩`).filter(Boolean); const s = t.join(' ').replace(/^\+ /, ''); return t.length > 1 ? `(${s})` : s; };
+  if (conc < 0.01) { const r = [[v[0], v[1]], [v[2], v[3]]], nr = r.map(x => Math.hypot(...x)), k = nr[0] >= nr[1] ? 0 : 1, B = r[k].map(x => x / nr[k]), A = r.map(x => x[0] * B[0] + x[1] * B[1]);
+    $('#e-fact').innerHTML = `= <span style="color:${QCOL[0]}">A</span>&nbsp;${one(A, 0)} ⊗ <span style="color:${QCOL[1]}">B</span>&nbsp;${one(B, 1)}`; $('#e-why').textContent = 'Each qubit has its own state, so the pair factors.'; }
+  else { $('#e-fact').innerHTML = `≠ (<span class="qa">a₀</span>|0⟩ + <span class="qa">a₁</span>|1⟩) ⊗ (<span class="qb">b₀</span>|0⟩ + <span class="qb">b₁</span>|1⟩)`; $('#e-why').innerHTML = 'A product would give <span class="qa">a₀</span><span class="qb">b₀</span> · <span class="qa">a₁</span><span class="qb">b₁</span> = <span class="qa">a₀</span><span class="qb">b₁</span> · <span class="qa">a₁</span><span class="qb">b₀</span>. Here the left side is ' + (v[0] * v[3]).toFixed(2) + ' and the right side is ' + (v[1] * v[2]).toFixed(2) + ', so no factorization exists.'; }
+  $('#e-gauge').firstElementChild.style.width = (conc * 100) + '%'; $('#e-gauge').setAttribute('aria-valuenow', conc.toFixed(2));
+  $('#e-conc').textContent = `Entanglement ${conc.toFixed(2)}  (0 = separate, 1 = maximal)`;
+  if (!keepShots) { $('#e-shots').innerHTML = '<span class="muted">Press “Sample” to measure.</span>'; $('#e-agree').textContent = ''; }
+}
+eT_.addEventListener('input', () => eRender());
+$('#e-cnot').addEventListener('click', () => { cnot = !cnot; eRender(); announce('CNOT ' + (cnot ? 'on' : 'off')); });
+$('#e-sample').addEventListener('click', () => {
+  const { out } = sample(eState().map(x => x * x), 24), bits = out.map(i => i.toString(2).padStart(2, '0'));
+  $('#e-shots').innerHTML = bits.map(b => `<span class="shot">${b.split('').map((d, q) => `<span style="color:${QCOL[q]}">${d}</span>`).join('')}</span>`).join('');
+  const ag = bits.filter(b => b[0] === b[1]).length; $('#e-agree').textContent = `A and B agree in ${ag} of 24 shots.`; announce(`A and B agree in ${ag} of 24 shots`);
+});
+$('#e-reset').addEventListener('click', () => resetters[4]());
+resetters[4] = () => { eT_.value = 0; cnot = false; eRender(); };
+eRender();
+
+</script>
+</body>
+</html>
