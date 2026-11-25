@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --nvidia-green: #76b900;
@@ -115,11 +115,22 @@
             border-color: var(--nvidia-green);
         }
         .angle-input::placeholder { color: var(--nvidia-gray); opacity: 0.6; }
+        .unit-toggle { display: inline-flex; border: 1px solid var(--nvidia-accent); border-radius: 6px; overflow: hidden; }
+        .unit-toggle button { background: var(--nvidia-dark); color: var(--nvidia-light); padding: 8px 16px; min-height: 40px; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; }
+        .unit-toggle button + button { border-left: 1px solid var(--nvidia-accent); }
+        .unit-toggle button[aria-pressed="true"] { background: var(--nvidia-green); color: #000; }
+        .unit-toggle button:focus-visible { outline: 3px solid var(--nvidia-green); outline-offset: -3px; }
         .input-hint {
             color: var(--nvidia-gray);
             font-size: 0.8rem;
             margin-top: 4px;
         }
+        .rotation-playback { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .rotation-playback button { min-width: 44px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--nvidia-accent); border-radius: 6px; background: var(--nvidia-dark); color: var(--nvidia-light); font: inherit; cursor: pointer; }
+        .rotation-playback #rotation-play { background: var(--nvidia-green); color: #000; font-weight: 600; }
+        .rotation-playback button:focus-visible { outline: 3px solid var(--nvidia-green); outline-offset: 2px; }
+        #rotation-status { margin: 12px 0 0; line-height: 1.5; color: var(--nvidia-light); }
+        .circuit-gate-box.circuit-gate-active { stroke: #FFFFFF; stroke-width: 3; }
         .widget-footer { margin-top: 32px; border-top: 1px solid var(--nvidia-accent); padding-top: 16px; text-align: center; }
         .widget-footer-links { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
         .widget-footer-links a { color: #76b900; text-decoration: none; min-height: 44px; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; }
@@ -142,6 +153,67 @@
         .circuit-ctrl-line { stroke: #E0E0E0; stroke-width: 2; }
         .circuit-target-circle { fill: #2A2A2A; stroke: #76b900; stroke-width: 2; }
         .circuit-target-plus { stroke: #76b900; stroke-width: 2; }
+
+        .bloch-panel-title { font-family: inherit; font-size: 1.1rem; font-weight: 600; line-height: 1.4; text-align: left; margin: 0 0 12px; }
+
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body class="antialiased">
@@ -152,39 +224,47 @@
             <p class="summary-text">Visualize the circuit's output on the Bloch Sphere by entering rotation angles for each gate.</p>
         </header>
 
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
-                <li>Type rotation angles (in radians, 0 &ndash; 6.28) for R<sub>x</sub>, R<sub>y</sub>, and R<sub>z</sub> into the input fields. Use <strong>Tab</strong> to move between fields.</li>
+                <li>Choose <strong>Radians</strong> or <strong>Degrees</strong>, then type rotation angles for R<sub>x</sub>, R<sub>y</sub>, and R<sub>z</sub> into the input fields (0 &ndash; 2&pi; radians, or 0 &ndash; 360&deg;). Use <strong>Tab</strong> to move between fields.</li>
                 <li>Watch the circuit diagram and the Bloch sphere update in real time as you type.</li>
+                <li>Choose <strong>Play</strong> to start at |0⟩ and watch R<sub>x</sub>, R<sub>y</sub>, then R<sub>z</sub> in order. Choose <strong>Pause</strong> to stop at an intermediate point, or <strong>Step</strong> to apply one complete rotation at a time. The current gate has a white outline.</li>
+                <li><strong>Reset to |0⟩</strong> clears all three angles. Changing an angle shows the complete circuit's output again. Rotation order matters: try swapping the <code>ry</code> and <code>rz</code> lines in the CUDA-Q example below.</li>
                 <li><strong>Bloch sphere:</strong> Click or <strong>Tab</strong> to focus the sphere window; then drag to rotate the view, or use <strong>Arrow keys</strong> to rotate. A green outline shows when the sphere has keyboard focus.</li>
             </ol>
             <p><strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between inputs and the Bloch sphere. <span class="kbd">Arrow</span> keys rotate the sphere when it is focused; <span class="kbd">Enter</span>/<span class="kbd">Space</span> activate buttons.</p>
-        </section>
+        </details>
         <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            
+
             <div class="lg:col-span-2">
                 <div class="info-box space-y-6">
-                    <h2 class="text-2xl font-semibold text-center">Rotation Angles (Radians)</h2>
-                    
+                    <h2 class="text-2xl font-semibold text-center">Rotation Angles (<span id="unit-label">Radians</span>)</h2>
+                    <div class="flex justify-center">
+                        <div class="unit-toggle" role="group" aria-label="Angle units">
+                            <button type="button" id="unit-rad" aria-pressed="true">Radians</button>
+                            <button type="button" id="unit-deg" aria-pressed="false">Degrees</button>
+                        </div>
+                    </div>
+
                     <div>
                         <label for="theta-x-input" class="font-bold text-xl block mb-2">R<sub>x</sub>(&theta;<sub>x</sub>)</label>
                         <input id="theta-x-input" type="number" class="angle-input" min="0" max="6.283" step="0.01" value="0" placeholder="0.00" tabindex="0" aria-label="R x rotation angle in radians">
-                        <p class="input-hint">Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
+                        <p class="input-hint" data-range-hint>Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
                     </div>
 
                     <div>
                         <label for="theta-y-input" class="font-bold text-xl block mb-2">R<sub>y</sub>(&theta;<sub>y</sub>)</label>
                         <input id="theta-y-input" type="number" class="angle-input" min="0" max="6.283" step="0.01" value="0" placeholder="0.00" tabindex="0" aria-label="R y rotation angle in radians">
-                        <p class="input-hint">Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
+                        <p class="input-hint" data-range-hint>Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
                     </div>
 
                     <div>
                         <label for="theta-z-input" class="font-bold text-xl block mb-2">R<sub>z</sub>(&theta;<sub>z</sub>)</label>
                         <input id="theta-z-input" type="number" class="angle-input" min="0" max="6.283" step="0.01" value="0" placeholder="0.00" tabindex="0" aria-label="R z rotation angle in radians">
-                        <p class="input-hint">Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
+                        <p class="input-hint" data-range-hint>Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)</p>
                     </div>
                 </div>
 
@@ -193,19 +273,73 @@
                      <div id="circuit-container" class="bg-gray-900 p-4 rounded-md">
                         <svg id="circuit-svg" width="100%" height="70" viewBox="0 0 400 70"></svg>
                      </div>
+                     <div class="rotation-playback" role="group" aria-label="Rotation playback">
+                        <button type="button" id="rotation-play">Play</button>
+                        <button type="button" id="rotation-step">Step</button>
+                        <button type="button" id="rotation-reset">Reset to |0⟩</button>
+                     </div>
+                     <p id="rotation-status" role="status" aria-live="polite" aria-atomic="true">Start in |0⟩. Set angles, then play or step through the circuit.</p>
                 </div>
             </div>
 
             <div class="lg:col-span-3">
                  <div class="flex flex-col items-center space-y-2">
-                    <h2 class="text-2xl font-semibold">Bloch Sphere</h2>
+                    <h2 class="bloch-panel-title">Bloch sphere</h2>
                     <div id="bloch-sphere-container" class="w-full h-[32rem] rounded-lg overflow-hidden p-0" tabindex="0" role="img" aria-label="Bloch sphere: 3D view of the qubit state. Use arrow keys to rotate when focused."></div>
                 </div>
             </div>
 
         </div>
 
-        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: start in |0⟩, rotate with <code>rx</code>, <code>ry</code>, and <code>rz</code>, then plot the result. Change the angles to move the state anywhere on the sphere.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq qutip matplotlib
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> numpy <span class="tok-keyword">as</span> np
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">rotations</span>(theta_x: <span class="tok-builtin">float</span>, theta_y: <span class="tok-builtin">float</span>, theta_z: <span class="tok-builtin">float</span>):
+    qubit = cudaq.qubit()  <span class="tok-comment"># starts in |0&gt;</span>
+    <span class="tok-gate">rx</span>(theta_x, qubit)
+    <span class="tok-gate">ry</span>(theta_y, qubit)
+    <span class="tok-gate">rz</span>(theta_z, qubit)
+
+
+<span class="tok-comment"># Rotation angles in radians (π/2 = 90°); try any values</span>
+theta_x, theta_y, theta_z = np.pi / <span class="tok-number">2</span>, np.pi / <span class="tok-number">4</span>, np.pi / <span class="tok-number">3</span>
+
+<span class="tok-builtin">print</span>(cudaq.draw(rotations, theta_x, theta_y, theta_z))
+state = cudaq.get_state(rotations, theta_x, theta_y, theta_z)
+cudaq.show(cudaq.add_to_bloch_sphere(state))
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Start with all angles zero, then set <code>theta_y = np.pi / 2</code> and vary <code>theta_z</code>. How does the arrow move? Swap the <code>ry</code> and <code>rz</code> lines in the kernel: does applying the same rotations in a different order change the final state?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Hands-on with the Bloch sphere in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/01_quick_start_to_quantum.ipynb" target="_blank" rel="noopener noreferrer">Quick Start 1: Start Small with One Qubit</a><span class="level-badge" aria-label="Lesson level: Introductory">Introductory</span></div><p class="lesson-description">embeds this widget and introduces <code>add_to_bloch_sphere</code> and <code>show</code>.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/02_quick_start_to_quantum.ipynb" target="_blank" rel="noopener noreferrer">Quick Start 2: Multiple Qubits and Entanglement</a><span class="level-badge" aria-label="Lesson level: Introductory">Introductory</span></div><p class="lesson-description">the <code>rx</code>/<code>ry</code>/<code>rz</code> section plots a sweep of rotation angles on one Bloch sphere.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb" target="_blank" rel="noopener noreferrer">Quick Start 3: Write Your First Parameterized Kernel</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">generalizes to arbitrary rotations with the <code>u3</code> gate (a quantum coin flip) and plots the result.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/05_QEC_MSD.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 5: Magic State Distillation</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">compares ideal and noisy T states on the Bloch sphere.</p></li>
+            </ul>
+            <h3>Bloch sphere as a concept:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 1: Introduction to QEC</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">continuous quantum errors as drift on the sphere.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 3: Noisy Simulation</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">noise channels as deformations of the sphere.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/ai-for-quantum/01_compiling_unitaries_diffusion.ipynb" target="_blank" rel="noopener noreferrer">Compiling Unitaries with Diffusion Models</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">a game that uses two Bloch spheres to show a unitary's action.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/quantum-applications-to-finance/images/gate-widget.html" target="_blank" rel="noopener noreferrer">Quantum Gate Visualization</a> · <a href="https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html" target="_blank" rel="noopener noreferrer">Born's Rule and Sampling</a> · <a href="https://nvidia.github.io/cuda-q-academic/ai-for-quantum/widgets/unitary_widget.html" target="_blank" rel="noopener noreferrer">Unitary Circuit Synthesis</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
                 <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -250,17 +384,17 @@
             const beta_out = cmul(complex(Math.cos(theta/2), Math.sin(theta/2)), b);
             return { alpha: alpha_out, beta: beta_out };
         }
-        
+
         function stateToBloch(state) {
             const alpha_mag_sq = cabs_sq(state.alpha);
             // Clamp to handle potential floating point inaccuracies
             const clamped_alpha_mag = Math.max(0, Math.min(1, Math.sqrt(alpha_mag_sq)));
             const theta = 2 * Math.acos(clamped_alpha_mag);
-            
+
             const phi_beta = Math.atan2(state.beta.im, state.beta.re);
             const phi_alpha = Math.atan2(state.alpha.im, state.alpha.re);
             const phi = phi_beta - phi_alpha;
-            
+
             return { theta, phi };
         }
 
@@ -268,9 +402,9 @@
         function createBlochSphere(container) {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-            
+
             // ### Camera position for the default view ###
-            camera.position.set(3.5, 1.5, 0); 
+            camera.position.set(3.0, 2.2, 3.0);
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setPixelRatio(Math.max(2, window.devicePixelRatio));
@@ -285,7 +419,7 @@
 
             const group = new THREE.Group();
             scene.add(group);
-            
+
             // This rotation makes the Bloch Z-axis (|0⟩) point up in the scene's Y-axis.
             group.rotation.x = -Math.PI / 2;
 
@@ -319,44 +453,81 @@
             group.add(createAxis(new THREE.Vector3(0,0,1), 0xCCCCCC)); // Z: |0⟩
 
             // Labels
-            const createLabel = (text, position, color = "rgba(224, 224, 224, 0.95)", fontSize = 20) => {
-                const scale = Math.max(2, window.devicePixelRatio);
+            const createLabel = (text, position) => {
+                const scale = Math.max(2, window.devicePixelRatio || 1);
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                context.font = `Bold ${fontSize}px Inter`;
-                const textWidth = context.measureText(text).width;
-                const cssW = textWidth + 20;
-                const cssH = fontSize * 1.5;
-                canvas.width = cssW * scale;
-                canvas.height = cssH * scale;
-                context.scale(scale, scale);
-                context.font = `Bold ${fontSize}px Inter`;
-                context.fillStyle = color;
-                context.textAlign = 'center';
-                context.textBaseline = 'middle';
-                context.fillText(text, cssW / 2, cssH / 2);
-
-                const texture = new THREE.CanvasTexture(canvas);
-                texture.minFilter = THREE.LinearFilter;
-                const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
-                const sprite = new THREE.Sprite(spriteMat);
-                sprite.scale.set(cssW / 100, cssH / 100, 1.0);
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false, sizeAttenuation: false }));
+                const inner = text.slice(1, -1).replace(/^\+i$/, 'i').replace(/^-/, '−');
+                const fontSize = 19;
+                const font = `600 ${fontSize}px Inter, sans-serif`;
+                const drawLabel = () => {
+                    context.font = font;
+                    const textWidth = context.measureText(inner).width;
+                    const lineWidth = fontSize * 0.11, gap = fontSize * 0.16;
+                    const chevronWidth = fontSize * 0.3, padding = 6;
+                    const width = padding * 2 + 2 * lineWidth + 2 * gap + textWidth + chevronWidth;
+                    const height = fontSize * 1.6;
+                    canvas.width = Math.ceil(width * scale);
+                    canvas.height = Math.ceil(height * scale);
+                    context.scale(scale, scale);
+                    const middle = height / 2, half = fontSize * 0.55;
+                    const left = padding + lineWidth / 2;
+                    context.strokeStyle = '#E0E0E0';
+                    context.lineWidth = lineWidth;
+                    context.lineCap = 'round';
+                    context.lineJoin = 'round';
+                    context.beginPath();
+                    context.moveTo(left, middle - half);
+                    context.lineTo(left, middle + half);
+                    context.stroke();
+                    context.font = font;
+                    context.fillStyle = '#E0E0E0';
+                    context.textAlign = 'left';
+                    context.textBaseline = 'middle';
+                    context.fillText(inner, left + lineWidth / 2 + gap, middle + fontSize * 0.03);
+                    const right = left + lineWidth / 2 + gap + textWidth + gap;
+                    context.beginPath();
+                    context.moveTo(right, middle - half);
+                    context.lineTo(right + chevronWidth, middle);
+                    context.lineTo(right, middle + half);
+                    context.stroke();
+                    const texture = new THREE.CanvasTexture(canvas);
+                    texture.minFilter = THREE.LinearFilter;
+                    if (sprite.material.map) sprite.material.map.dispose();
+                    sprite.material.map = texture;
+                    sprite.material.needsUpdate = true;
+                    sprite.userData.updateLabelSize = () => {
+                        const focal = 1 / Math.tan(camera.fov * Math.PI / 360);
+                        const perPixel = 2 / (Math.max(container.clientHeight, 1) * focal);
+                        sprite.scale.set(width * perPixel, height * perPixel, 1.0);
+                    };
+                    sprite.userData.updateLabelSize();
+                };
+                drawLabel();
+                document.fonts.load('600 19px Inter').then(drawLabel).catch(() => {});
                 sprite.position.copy(position);
                 return sprite;
             };
 
             group.add(createLabel('|0⟩', new THREE.Vector3(0, 0, 1.35)));
             group.add(createLabel('|1⟩', new THREE.Vector3(0, 0, -1.35)));
-            group.add(createLabel('|+⟩', new THREE.Vector3(1.3, 0, 0)));
-            group.add(createLabel('|-⟩', new THREE.Vector3(-1.3, 0, 0)));
-            group.add(createLabel('|i⟩', new THREE.Vector3(0, 1.3, 0)));
-            group.add(createLabel('|-i⟩', new THREE.Vector3(0, -1.3, 0)));
+            group.add(createLabel('|+⟩', new THREE.Vector3(1.35, 0, 0)));
+            group.add(createLabel('|−⟩', new THREE.Vector3(-1.35, 0, 0)));
+            group.add(createLabel('|i⟩', new THREE.Vector3(0, 1.35, 0)));
+            group.add(createLabel('|−i⟩', new THREE.Vector3(0, -1.35, 0)));
 
             const onWindowResize = () => {
                 camera.aspect = container.clientWidth / container.clientHeight;
                 camera.updateProjectionMatrix();
+                const fitDistance = 1.6 / (Math.tan(camera.fov * Math.PI / 360) * Math.min(1, camera.aspect));
+                if (camera.position.length() < fitDistance) camera.position.setLength(fitDistance);
+                controls.maxDistance = Math.max(8, fitDistance * 1.8);
+                scene.traverse(object => { if (object.userData.updateLabelSize) object.userData.updateLabelSize(); });
                 renderer.setSize(container.clientWidth, container.clientHeight);
+                controls.update();
             };
+            onWindowResize();
             window.addEventListener('resize', onWindowResize);
 
             return { scene, camera, renderer, controls, vectorGeom, onWindowResize };
@@ -371,9 +542,9 @@
             const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
             vector.quaternion.copy(q);
         }
-        
+
         // --- Circuit Diagram SVG (canonical construction: same classes as Pauli prop & CNOT vis) ---
-        function updateCircuitDiagram(thetaX, thetaY, thetaZ) {
+        function updateCircuitDiagram(thetaX, thetaY, thetaZ, activeGate = -1) {
             const svg = document.getElementById('circuit-svg');
             const svgNS = "http://www.w3.org/2000/svg";
             const w = 56, h = 48;
@@ -385,45 +556,187 @@
             ];
             let html = `<line x1="40" y1="${wireY}" x2="380" y2="${wireY}" class="circuit-wire" />`;
             html += `<text x="4" y="${wireY + 5}" class="circuit-qubit-label">|0⟩</text>`;
-            gates.forEach(g => {
+            gates.forEach((g, index) => {
                 const cx = g.x + w / 2;
-                html += `<rect x="${g.x}" y="8" width="${w}" height="${h}" class="circuit-gate-box" rx="4" />`;
+                html += `<rect x="${g.x}" y="8" width="${w}" height="${h}" class="circuit-gate-box${index === activeGate ? ' circuit-gate-active' : ''}" rx="4" />`;
                 html += `<text x="${cx}" y="26" class="circuit-gate-text" style="font-size:14px">${g.name}</text>`;
-                html += `<text x="${cx}" y="42" class="circuit-gate-param">(${g.val.toFixed(2)})</text>`;
+                html += `<text x="${cx}" y="42" class="circuit-gate-param">(${formatAngle(g.val)})</text>`;
             });
             svg.innerHTML = html;
         }
 
         // --- Main Setup & Update Functions ---
         const blochSphereViz = createBlochSphere(document.getElementById('bloch-sphere-container'));
-        
+
         const inputX = document.getElementById('theta-x-input');
         const inputY = document.getElementById('theta-y-input');
         const inputZ = document.getElementById('theta-z-input');
+        const playButton = document.getElementById('rotation-play');
+        const rotationStatus = document.getElementById('rotation-status');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let playing = false;
+        let progress = 3;
+        let lastFrame = null;
+        let announcedGate = -1;
+        let stageElapsed = 0;
+        const gateNames = ['Rx', 'Ry', 'Rz'];
+
+        // --- Angle units (radians / degrees) ---
+        const UNITS = {
+            rad: { label: 'Radians', max: 6.283, step: 0.01, decimals: 2,
+                   hint: 'Range: 0 &ndash; 6.28 radians (0 &ndash; 2&pi;)', aria: 'radians' },
+            deg: { label: 'Degrees', max: 360, step: 1, decimals: 1,
+                   hint: 'Range: 0 &ndash; 360&deg;', aria: 'degrees' },
+        };
+        let unit = 'rad';
 
         function clampAngle(val) {
             const num = parseFloat(val);
             if (isNaN(num)) return 0;
-            return Math.max(0, Math.min(6.283, num));
+            return Math.max(0, Math.min(UNITS[unit].max, num));
+        }
+
+        // Value typed by the user (current unit) -> radians for the gates
+        const toRadians = (v) => unit === 'deg' ? v * Math.PI / 180 : v;
+
+        function formatAngle(v) {
+            return unit === 'deg' ? `${+v.toFixed(1)}\u00B0` : v.toFixed(2);
+        }
+
+        function setUnit(next) {
+            if (next === unit) return;
+            [inputX, inputY, inputZ].forEach(el => {
+                if (el.value === '') return;
+                const v = parseFloat(el.value);
+                if (isNaN(v)) return;
+                const converted = next === 'deg' ? v * 180 / Math.PI : v * Math.PI / 180;
+                el.value = +converted.toFixed(UNITS[next].decimals);
+            });
+            unit = next;
+            const u = UNITS[unit];
+            [inputX, inputY, inputZ].forEach((el, i) => {
+                el.max = u.max;
+                el.step = u.step;
+                el.setAttribute('aria-label', `R ${'xyz'[i]} rotation angle in ${u.aria}`);
+            });
+            document.querySelectorAll('[data-range-hint]').forEach(p => { p.innerHTML = u.hint; });
+            document.getElementById('unit-label').textContent = u.label;
+            document.getElementById('unit-rad').setAttribute('aria-pressed', String(unit === 'rad'));
+            document.getElementById('unit-deg').setAttribute('aria-pressed', String(unit === 'deg'));
+            const status = document.getElementById('status-announce');
+            if (status) status.textContent = `Angles now in ${u.aria}`;
+            // Changing units must not change the partially applied circuit.
+            renderProgress(progress);
         }
 
         function updateAll() {
-            const theta_x = clampAngle(inputX.value);
-            const theta_y = clampAngle(inputY.value);
-            const theta_z = clampAngle(inputZ.value);
+            playing = false;
+            playButton.textContent = 'Play';
+            lastFrame = null;
+            progress = 3;
+            stageElapsed = 0;
+            renderProgress(progress);
+            rotationStatus.textContent = 'Complete circuit: Rx → Ry → Rz. Play or Step starts again from |0⟩.';
+        }
+
+        function renderProgress(value) {
+            const shown_x = clampAngle(inputX.value);
+            const shown_y = clampAngle(inputY.value);
+            const shown_z = clampAngle(inputZ.value);
+            const theta_x = toRadians(shown_x);
+            const theta_y = toRadians(shown_y);
+            const theta_z = toRadians(shown_z);
 
             const initialState = { alpha: complex(1, 0), beta: complex(0, 0) };
-            const stateAfterRx = applyRx(theta_x, initialState);
-            const stateAfterRy = applyRy(theta_y, stateAfterRx);
-            const finalState = applyRz(theta_z, stateAfterRy);
+            const fraction = index => Math.max(0, Math.min(1, value - index));
+            const stateAfterRx = applyRx(theta_x * fraction(0), initialState);
+            const stateAfterRy = applyRy(theta_y * fraction(1), stateAfterRx);
+            const finalState = applyRz(theta_z * fraction(2), stateAfterRy);
 
             const blochCoords = stateToBloch(finalState);
             updateVectorPosition(blochSphereViz.vectorGeom, blochCoords);
-            updateCircuitDiagram(theta_x, theta_y, theta_z);
+            const activeGate = value >= 3 ? (playing ? 2 : -1) : Math.floor(value);
+            updateCircuitDiagram(shown_x, shown_y, shown_z, activeGate);
         }
 
-        function animate() {
+        function announceProgress() {
+            const gate = Math.min(2, Math.floor(progress));
+            if (gate !== announcedGate) {
+                rotationStatus.textContent = `Applying ${gateNames[gate]} (${gate + 1} of 3), starting from the previous gate's output.`;
+                announcedGate = gate;
+            }
+        }
+
+        function playRotations() {
+            if (playing) {
+                playing = false;
+                playButton.textContent = 'Resume';
+                rotationStatus.textContent = 'Paused. Resume playback or choose Step to finish the current rotation.';
+                return;
+            }
+            if (progress >= 3) {
+                progress = 0;
+                stageElapsed = 0;
+                announcedGate = -1;
+            }
+            playing = true;
+            lastFrame = null;
+            announcedGate = -1;
+            playButton.textContent = 'Pause';
+            renderProgress(progress);
+            announceProgress();
+        }
+
+        function stepRotation() {
+            playing = false;
+            playButton.textContent = 'Play';
+            lastFrame = null;
+            stageElapsed = 0;
+            progress = progress >= 3 ? 1 : Math.min(3, Math.floor(progress) + 1);
+            playButton.textContent = progress < 3 ? 'Resume' : 'Play';
+            renderProgress(progress);
+            rotationStatus.textContent = `After ${gateNames[progress - 1]} (${progress} of 3). ${progress === 3 ? 'Circuit complete.' : 'Choose Step for the next rotation.'}`;
+            // Keep the gate that just completed visibly marked while stepping.
+            const angles = [inputX, inputY, inputZ].map(el => clampAngle(el.value));
+            updateCircuitDiagram(...angles, progress - 1);
+        }
+
+        function resetRotations() {
+            playing = false;
+            playButton.textContent = 'Play';
+            lastFrame = null;
+            stageElapsed = 0;
+            progress = 0;
+            [inputX, inputY, inputZ].forEach(el => { el.value = '0'; });
+            renderProgress(0);
+            updateCircuitDiagram(0, 0, 0);
+            rotationStatus.textContent = 'Reset to |0⟩. All rotation angles are zero.';
+        }
+
+        function animate(timestamp) {
             requestAnimationFrame(animate);
+            if (playing && !document.hidden) {
+                const elapsed = lastFrame === null ? 0 : Math.min(timestamp - lastFrame, 100);
+                if (reducedMotion.matches) {
+                    // Show discrete gate outputs, without sweeping the sphere.
+                    stageElapsed += elapsed;
+                    if (stageElapsed >= 900) {
+                        progress = Math.min(3, Math.floor(progress) + 1);
+                        stageElapsed = 0;
+                    }
+                } else {
+                    progress = Math.min(3, progress + elapsed / 1200);
+                }
+                renderProgress(progress);
+                announceProgress();
+                if (progress >= 3) {
+                    playing = false;
+                    playButton.textContent = 'Play';
+                    rotationStatus.textContent = 'Circuit complete: Rx → Ry → Rz. Play or Step starts again from |0⟩.';
+                    renderProgress(3);
+                }
+            }
+            lastFrame = document.hidden ? null : timestamp;
             blochSphereViz.controls.update();
             blochSphereViz.renderer.render(blochSphereViz.scene, blochSphereViz.camera);
         }
@@ -432,6 +745,11 @@
         [inputX, inputY, inputZ].forEach(el => {
             el.addEventListener('input', updateAll);
         });
+        document.getElementById('unit-rad').addEventListener('click', () => setUnit('rad'));
+        document.getElementById('unit-deg').addEventListener('click', () => setUnit('deg'));
+        playButton.addEventListener('click', playRotations);
+        document.getElementById('rotation-step').addEventListener('click', stepRotation);
+        document.getElementById('rotation-reset').addEventListener('click', resetRotations);
 
         // Bloch sphere: arrow-key rotation when container is focused
         const blochContainer = document.getElementById('bloch-sphere-container');
@@ -459,16 +777,54 @@
             cam.position.z = target.z + radius * Math.sin(newPhi) * Math.cos(newTheta);
             cam.lookAt(target);
         });
-        
+
         // --- Initial Call ---
         updateAll();
         animate();
-        
+
         // Defer resize to ensure DOM is fully ready
         setTimeout(() => {
             blochSphereViz.onWindowResize();
         }, 100);
 
+    </script>
+
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

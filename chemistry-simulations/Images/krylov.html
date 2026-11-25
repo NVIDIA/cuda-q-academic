@@ -91,7 +91,7 @@
             grid-template-areas: "controls matrix" "results results";
             gap: 20px;
         }
-        
+
         h2 {
             color: var(--nvidia-green);
             margin: 0 0 10px 0;
@@ -112,13 +112,13 @@
             margin-bottom: 8px;
             font-weight: bold;
         }
-        
+
         .control-item input[type="range"],
         .control-item select {
             width: 100%;
             cursor: pointer;
         }
-        
+
         .control-item select {
              background-color: var(--border-color);
              color: var(--text-color);
@@ -218,6 +218,63 @@
             }
         }
 
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body>
@@ -227,14 +284,14 @@
             <h1>Eigenvalue Subspace Analysis</h1>
             <p class="summary-text">Explore Krylov-style subspace diagonalization by selecting a sub-matrix block and comparing its eigenvalues to the full matrix.</p>
         </header>
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
                 <li>Set <b>Subspace Size (m×m)</b> with the slider and choose the <b>Subspace Corner</b> (top-left of the block).</li>
                 <li>The matrix view highlights the selected block. Eigenvalues and trace are shown below.</li>
             </ol>
             <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate controls.</p>
-        </section>
+        </details>
         <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
         <div class="widget-grid">
         <div class="controls-container">
@@ -265,11 +322,80 @@
             <div id="final-difference" class="final-diff"></div>
         </div>
         </div>
-        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
-            Note: This widget is part of the CUDA-Q Academic lesson entitled "Krylov Subspace Diagonalization (Chemistry Simulations)".
-            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;">here</a>.
-        </div>
-        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: instead of diagonalizing H₂'s full Hamiltonian (8 qubits, 256 × 256), project it onto a few time-evolved states e^(−iHk·dt)|HF⟩ made with CUDA-Q Algorithms' Trotter evolution, and diagonalize that. The lowest eigenvalue approaches the exact energy as the subspace grows, like the widget's subspace-size slider.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq==<span class="tok-number">0.15</span><span class="tok-number">.1</span> cudaq-algorithms==<span class="tok-number">0.1</span><span class="tok-number">.0</span> pyscf
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> cudaq_algorithms <span class="tok-keyword">as</span> algorithms
+<span class="tok-keyword">import</span> numpy <span class="tok-keyword">as</span> np
+<span class="tok-keyword">from</span> cudaq_algorithms <span class="tok-keyword">import</span> trotter
+<span class="tok-keyword">from</span> pyscf <span class="tok-keyword">import</span> gto, scf
+
+<span class="tok-comment"># H2 in the 6-31G basis: 8 qubits, as in the lesson</span>
+mean_field = scf.RHF(gto.M(atom=<span class="tok-string">"H 0 0 0; H 0 0 0.7474"</span>, basis=<span class="tok-string">"631g"</span>, verbose=<span class="tok-number">0</span>)).run()
+one_body, two_body, nuclear_energy = algorithms.chemistry.from_pyscf(mean_field)
+H = algorithms.chemistry.qubit_hamiltonian(
+    one_body, two_body, scalar_offset=nuclear_energy
+)
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">hartree_fock</span>(qubits: cudaq.qview):  <span class="tok-comment"># 2 electrons in the lowest spin orbitals</span>
+    <span class="tok-gate">x</span>(qubits[<span class="tok-number">0</span>])
+    <span class="tok-gate">x</span>(qubits[<span class="tok-number">1</span>])
+
+
+evolution = trotter.Trotter(H)
+<span class="tok-comment"># time step between Krylov states: change it and re-run</span>
+dt = <span class="tok-number">0.5</span>
+
+<span class="tok-comment"># Form six Krylov vectors by evolving the reference state.</span>
+states = [
+    np.array(
+        cudaq.get_state(
+            evolution.kernel(time=k * dt, steps=k + <span class="tok-number">1</span>, state_prep=hartree_fock)
+        )
+    )
+    <span class="tok-keyword">for</span> k <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(<span class="tok-number">6</span>)
+]
+
+<span class="tok-comment"># Project H into growing, orthonormal Krylov subspaces.</span>
+H_matrix = np.array(H.to_matrix())
+<span class="tok-keyword">for</span> m <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(<span class="tok-number">1</span>, <span class="tok-number">7</span>):  <span class="tok-comment"># subspace size, the widget's slider</span>
+    <span class="tok-gate">s</span>, U = np.linalg.eigh(
+        np.conj(np.column_stack(states[:m])).T <span class="tok-decorator">@</span> <span class="tok-decorator">np</span><span class="tok-decorator">.</span><span class="tok-decorator">column_stack</span>(<span class="tok-decorator">states</span>[:<span class="tok-decorator">m</span>])
+    )
+    <span class="tok-comment"># orthonormal subspace basis</span>
+    basis = np.column_stack(states[:m]) <span class="tok-decorator">@</span> <span class="tok-decorator">U</span>[:, <span class="tok-decorator">s</span> &gt; <span class="tok-number">1e-8</span>] / <span class="tok-decorator">np</span><span class="tok-decorator">.</span><span class="tok-decorator">sqrt</span>(<span class="tok-decorator">s</span>[<span class="tok-decorator">s</span> &gt; <span class="tok-number">1e-8</span>])
+    <span class="tok-builtin">print</span>(
+        <span class="tok-string">f"subspace size {m}: E = {np.linalg.eigvalsh(basis.conj().T @ H_matrix @ basis).min():.6f}"</span>
+    )
+
+<span class="tok-builtin">print</span>(<span class="tok-string">"exact:"</span>, np.linalg.eigvalsh(H_matrix).<span class="tok-builtin">min</span>())
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Try <code>dt = 0.1</code>, <code>0.5</code> and <code>2.0</code> with the same six Krylov states. How does the energy approach the exact reference as the subspace grows? Does choosing a smaller time step always help?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Subspace diagonalization in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb" target="_blank" rel="noopener noreferrer">Krylov Subspace Diagonalization</a><span class="level-badge" aria-label="Lesson level: Advanced">Advanced</span></div><p class="lesson-description"><strong>1. Quantum Subspace Diagonalization</strong> embeds this widget; <strong>2. The Quantum Krylov Method</strong> introduces the time-evolved basis; <strong>3. Implementing a Quantum Krylov Method</strong> builds the same Trotterized evolution with <code>exp_pauli</code> and computes the matrix elements with Hadamard tests, for H₂ and H₄. <strong>4. Selecting an Improved Krylov Basis</strong> and <strong>5. Parallel Krylov Method</strong> scale the method up to molecules.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb" target="_blank" rel="noopener noreferrer">QPE: Canonical, Iterative, and Bayesian</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">another route to ground-state energies.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html" target="_blank" rel="noopener noreferrer">VQE Convergence</a> · <a href="https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/adapt_vqe/adapt_widget.html" target="_blank" rel="noopener noreferrer">ADAPT-VQE</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
                 <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -301,7 +427,7 @@
         const finalDifferenceDiv = document.getElementById('final-difference');
 
         // --- 3. CORE LOGIC & CALCULATION ---
-        
+
         /**
          * Extracts a sub-matrix from the main matrix A.
          * @param {number} m - The dimension of the sub-matrix.
@@ -347,7 +473,7 @@
                 return [];
             }
         }
-        
+
         // Calculate eigenvalues for the full matrix once, as they don't change.
         const eigenvaluesA_sorted = getSortedEigenvalues(A);
 
@@ -362,7 +488,7 @@
             // --- Calculations ---
             const subMatrix = extractSubMatrix(m, corner);
             const eigenvaluesSub_sorted = getSortedEigenvalues(subMatrix);
-            
+
             // Ensure we have eigenvalues before calculating the difference
             if (eigenvaluesA_sorted.length > 0 && eigenvaluesSub_sorted.length > 0) {
                 const diffSmallest = eigenvaluesA_sorted[0] - eigenvaluesSub_sorted[0];
@@ -377,7 +503,7 @@
         }
 
         // --- 4. RENDERING FUNCTIONS ---
-        
+
         /**
          * Renders the 8x8 matrix grid and highlights the selected sub-matrix.
          */
@@ -390,7 +516,7 @@
                     else if (corner === 'Top-Right') isHighlighted = (r < m) && (c >= 8 - m);
                     else if (corner === 'Bottom-Left') isHighlighted = (r >= 8 - m) && (c < m);
                     else if (corner === 'Bottom-Right') isHighlighted = (r >= 8 - m) && (c >= 8 - m);
-                    
+
                     const className = isHighlighted ? "matrix-cell highlight" : "matrix-cell";
                     html += `<div class="${className}">${A[r][c]}</div>`;
                 }
@@ -424,6 +550,43 @@
         // --- 6. INITIAL RENDER ---
         // Use DOMContentLoaded to ensure the page is fully loaded before running the script
         document.addEventListener('DOMContentLoaded', updateDisplay);
+    </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

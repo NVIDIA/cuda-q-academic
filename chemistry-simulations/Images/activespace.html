@@ -373,6 +373,64 @@
             outline: 3px solid var(--nvidia-green);
             outline-offset: 2px;
         }
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body>
@@ -384,8 +442,8 @@
             <p class="summary-text">Interactive orbital diagram for Ammonia (NH₃) using the 6-31G Basis Set.</p>
         </header>
 
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
                 <li><strong>Standard MO diagram:</strong> Each horizontal line is an orbital; ↑ = spin up, ↓ = spin down. Colored boxes show Core, Active, and Virtual regions from your selection.</li>
                 <li>Set <strong>Active Space Electrons</strong> (0–10, even number) and <strong>Active Space Orbitals</strong> (0–15) using the inputs above.</li>
@@ -393,7 +451,7 @@
                 <li>Ensure electrons ≤ 2×orbitals in the active space and that the total configuration fits within 10 electrons and 15 orbitals.</li>
             </ol>
             <p><strong>Keyboard shortcuts:</strong> Press <span class="kbd">ESC</span> to reset to default (4 electrons, 4 orbitals). Use <span class="kbd">Tab</span> to move between inputs; press <span class="kbd">Enter</span> after typing to confirm.</p>
-        </section>
+        </details>
 
         <main class="main-content">
             <section class="controls-section info-box" aria-labelledby="controls-heading">
@@ -448,12 +506,83 @@
             </div>
         </main>
 
-        <div class="lesson-footer">
-            Note: This widget is part of the CUDA-Q Academic lesson entitled "QM/MM Hybrid Workflows - Combining VQE with a Polarizable Embedding Framework".
-            You can learn more about its context by visiting the link <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb" target="_blank" rel="noopener noreferrer">here</a>.
-        </div>
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: list NH₃'s orbitals in the 6-31G basis, pick an active space of electrons and orbitals, and build its qubit Hamiltonian in CUDA-Q. Each active orbital costs two qubits, so the active space decides how big the quantum problem is.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq==<span class="tok-number">0.15</span><span class="tok-number">.1</span> cudaq-algorithms==<span class="tok-number">0.1</span><span class="tok-number">.0</span> pyscf
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> cudaq_algorithms <span class="tok-keyword">as</span> algorithms
+<span class="tok-keyword">from</span> pyscf <span class="tok-keyword">import</span> gto, scf, mcscf, ao2mo
 
-        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+<span class="tok-comment"># NH3 in the 6-31G basis, as in the widget (geometry from the QM/MM lesson)</span>
+geometry = (
+    <span class="tok-string">"N 0.000 0.000 0.000; H -0.114 -0.009 0.990; "</span>
+    <span class="tok-string">"H -0.437 -0.825 -0.358; H 0.942 -0.010 -0.222"</span>
+)
+<span class="tok-comment"># Compute reference orbitals with restricted Hartree-Fock.</span>
+mf = scf.RHF(gto.M(atom=geometry, basis=<span class="tok-string">"631g"</span>, verbose=<span class="tok-number">0</span>)).run()
+
+<span class="tok-keyword">for</span> i, (energy, electrons) <span class="tok-keyword">in</span> <span class="tok-builtin">enumerate</span>(<span class="tok-builtin">zip</span>(mf.mo_energy, mf.mo_occ)):
+    <span class="tok-builtin">print</span>(<span class="tok-string">f"orbital {i:2d}: {energy:8.3f} Ha, {int(electrons)} electrons"</span>)
+
+<span class="tok-comment"># The widget's default active space: 4 electrons in 4 orbitals around the HOMO-LUMO gap.</span>
+<span class="tok-comment"># Change it and re-run.</span>
+n_electrons, n_orbitals = <span class="tok-number">4</span>, <span class="tok-number">4</span>
+
+cas = mcscf.CASCI(mf, n_orbitals, n_electrons)
+<span class="tok-comment"># core orbitals are frozen into e_core and h1</span>
+h1, e_core = cas.get_h1eff()
+h2 = ao2mo.restore(<span class="tok-number">1</span>, cas.get_h2eff(), n_orbitals)  <span class="tok-comment"># active-space (pq|rs) integrals</span>
+<span class="tok-comment"># Jordan-Wigner qubit Hamiltonian</span>
+H = algorithms.chemistry.qubit_hamiltonian(h1, h2, scalar_offset=e_core)
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">hartree_fock</span>(n_qubits: <span class="tok-builtin">int</span>, n_electrons: <span class="tok-builtin">int</span>):
+    q = cudaq.qvector(n_qubits)
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n_electrons):
+        <span class="tok-comment"># fill the lowest spin orbitals (spin up/down interleaved)</span>
+        <span class="tok-gate">x</span>(q[i])
+
+
+<span class="tok-comment"># Each spatial orbital needs two spin-orbital qubits.</span>
+n_qubits = <span class="tok-number">2</span> * n_orbitals
+<span class="tok-builtin">print</span>(<span class="tok-string">"Qubits:"</span>, n_qubits, <span class="tok-string">" Hamiltonian terms:"</span>, H.term_count)
+<span class="tok-builtin">print</span>(
+    <span class="tok-string">"Hartree-Fock energy, CUDA-Q:"</span>,
+    cudaq.observe(hartree_fock, H, n_qubits, n_electrons).expectation(),
+)
+<span class="tok-builtin">print</span>(<span class="tok-string">"Hartree-Fock energy, PySCF: "</span>, mf.e_tot)
+
+<span class="tok-comment"># A bigger active space recovers more correlation energy, but needs more qubits</span>
+<span class="tok-keyword">for</span> n_e, n_o <span class="tok-keyword">in</span> [(<span class="tok-number">2</span>, <span class="tok-number">2</span>), (<span class="tok-number">4</span>, <span class="tok-number">4</span>), (<span class="tok-number">6</span>, <span class="tok-number">6</span>), (<span class="tok-number">8</span>, <span class="tok-number">8</span>)]:
+    energy = mcscf.CASCI(mf, n_o, n_e).run().e_tot
+    <span class="tok-builtin">print</span>(
+        <span class="tok-string">f"({n_e}e, {n_o}o): {2 * n_o:2d} qubits, correlation energy {energy - mf.e_tot:.4f} Ha"</span>
+    )
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Compare the active-space sizes in step 3. How much correlation energy does each larger space recover, and how many extra qubits does it need? Where do the gains start getting smaller?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Active spaces in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qmmm.ipynb" target="_blank" rel="noopener noreferrer">QM/MM Hybrid Simulation</a><span class="level-badge" aria-label="Lesson level: Advanced">Advanced</span></div><p class="lesson-description"><strong>Section 4: Flexibility and Scalability</strong> uses this widget to explore active-space selection for NH₃. Compare the energy and qubit requirements of different active spaces.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb" target="_blank" rel="noopener noreferrer">ADAPT-VQE</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">Find the ground-state energy by building a circuit one operator at a time.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/krylov_subspace_diagonalization.ipynb" target="_blank" rel="noopener noreferrer">Krylov Subspace Diagonalization</a><span class="level-badge" aria-label="Lesson level: Advanced">Advanced</span></div><p class="lesson-description">Estimate the ground-state energy using a small subspace of quantum states.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/qmmm_widget.html" target="_blank" rel="noopener noreferrer">Hybrid System (QM/MM)</a> · <a href="https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html" target="_blank" rel="noopener noreferrer">VQE Convergence</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
                 <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -591,6 +720,43 @@
         numElectronsInput.addEventListener('input', drawDiagram);
         numOrbitalsInput.addEventListener('input', drawDiagram);
         drawDiagram();
+    </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

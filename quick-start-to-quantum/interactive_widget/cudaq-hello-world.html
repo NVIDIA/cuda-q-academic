@@ -16,6 +16,17 @@ See the License for the specific language governing permissions and limitations 
     <title>CUDA-Q Kernel Visualizer & Designer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" integrity="sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.8.1/math.js" integrity="sha512-AJmFmOXFAAzxbzp498VFGf+/Ke7n/O/Pz7L7R2in/4lEDkqhFvuIemyJo/MzXORunJkrJngeIyaWqLAj2rTY2Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Chart.js axis and grid colours follow the theme (light, dark or high contrast)
+        function applyChartTheme() {
+            if (!window.Chart) return;
+            const hc = document.body.classList.contains('high-contrast');
+            const darkTheme = document.body.classList.contains('theme-dark');
+            Chart.defaults.color = hc ? '#ffffff' : (darkTheme ? '#E0E0E0' : '#666666');
+            Chart.defaults.borderColor = hc ? 'rgba(255,255,255,0.35)' : (darkTheme ? '#444444' : 'rgba(0,0,0,0.1)');
+        }
+    </script>
     <style>
         :root { 
             /* BRANDING: Original NVIDIA Green */
@@ -59,6 +70,12 @@ See the License for the specific language governing permissions and limitations 
         
         select, button, input { padding: 8px 12px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
         button { cursor: pointer; }
+        .btn-copy:disabled { opacity: 0.55; cursor: not-allowed; }
+        #copy-validation-message { flex-basis: 100%; margin: 0; font-size: 0.9rem; line-height: 1.5; }
+        .widget-footer { padding: 16px 20px; border-top: 1px solid var(--border-color); text-align: center; }
+        .widget-footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; }
+        .widget-footer a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px; box-sizing: border-box; color: #76b900; }
+        .widget-footer a:focus-visible { outline: 3px solid #76b900; outline-offset: 2px; }
         
         /* EXECUTE BUTTON STYLING */
         .btn-action {
@@ -288,6 +305,34 @@ See the License for the specific language governing permissions and limitations 
         .resource-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #333; font-size: 13px; font-weight: bold; padding: 8px 15px; background: white; border: 1px solid #ddd; border-radius: 4px; transition: all 0.2s ease; }
         .resource-link:hover { border-color: var(--main-color); color: var(--main-color); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
+        /* --- Added: example label, angle-unit toggle, one-line header, equal example cards --- */
+        .circuit-name { font-size: 13px; font-weight: bold; color: #555; margin: 0 0 10px 0; }
+        .unit-toggle { display: inline-flex; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; vertical-align: middle; }
+        .unit-toggle button { border: none; border-radius: 0; padding: 6px 10px; font-size: 13px; background: #f8f8f8; color: #333; }
+        .unit-toggle button + button { border-left: 1px solid #ccc; }
+        .unit-toggle button[aria-pressed="true"] { background: #444; color: #fff; font-weight: bold; }
+        body.high-contrast .unit-toggle button[aria-pressed="true"] { background: #000; }
+        /* Keep complete controls on one line when they fit, and wrap when needed. */
+        .controls .control-group { gap: 12px; flex-wrap: wrap; }
+        .controls .control-group > strong { white-space: nowrap; font-size: 15px; }
+        .controls .control-group > label,
+        .controls .control-group > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px !important; }
+        #qubit-select, #example-select, #top-mode-select, #top-action-select { width: 130px !important; min-width: 0 !important; font-size: 13px; padding: 7px 8px; }
+        .unit-toggle button { padding: 7px 9px; }
+        @media (max-width: 1180px) { .controls .control-group { flex-wrap: wrap; } }
+        /* Gate tooltips: same font as the widget, crisp drawn brackets */
+        #matrix-tooltip { font-family: inherit !important; font-size: 13px; padding: 10px 12px; }
+        #matrix-tooltip .tt-title { text-align: center; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; color: #aaa; margin-bottom: 6px; }
+        #matrix-tooltip .tt-body { display: flex; align-items: center; justify-content: center; gap: 6px; font-variant-numeric: tabular-nums; }
+        #matrix-tooltip .tt-matrix { position: relative; display: inline-grid; grid-template-columns: auto auto; column-gap: 16px; row-gap: 4px; padding: 3px 10px; text-align: center; }
+        #matrix-tooltip .tt-matrix::before, #matrix-tooltip .tt-matrix::after { content: ""; position: absolute; top: 0; bottom: 0; width: 5px; border: 1.5px solid currentColor; }
+        #matrix-tooltip .tt-matrix::before { left: 0; border-right: none; }
+        #matrix-tooltip .tt-matrix::after { right: 0; border-left: none; }
+        #matrix-tooltip sup { font-size: 0.75em; }
+        /* Example cards: four equal columns, equal heights */
+        .info-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+        @media (max-width: 900px) { .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 520px) { .info-grid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; } }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
         @media (max-width: 768px) {
@@ -307,9 +352,178 @@ See the License for the specific language governing permissions and limitations 
             #action-popup { padding: 8px; transform: translate(-50%, -140%); }
             #action-popup button { font-size: 14px; padding: 8px 12px; }
         }
+
+        /* ===== Dark NVIDIA theme (option): matches the other CUDA-Q Academic widgets ===== */
+        body.theme-dark:not(.high-contrast) {
+            --main-color: #76b900; --hover-color: #5e9400;
+            --nvidia-dark: #E0E0E0; --bg-color: #1A1A1A; --border-color: #444444;
+            --code-bg: #111111; --code-text: #E0E0E0;
+            --panel: #2A2A2A; --inset: #1A1A1A; --muted: #AAAAAA;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body.theme-dark:not(.high-contrast) .widget-container { background: var(--panel); border-color: var(--border-color); border-top: 4px solid var(--main-color); box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+        body.theme-dark:not(.high-contrast) .controls,
+        body.theme-dark:not(.high-contrast) .actions-container,
+        body.theme-dark:not(.high-contrast) .exec-panel { background: var(--panel); border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .controls strong { color: var(--main-color); text-transform: uppercase; letter-spacing: 0.5px; }
+        body.theme-dark:not(.high-contrast) .actions-container,
+        body.theme-dark:not(.high-contrast) .gate-toolbar { border-top-color: var(--border-color); border-bottom-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .sidebar,
+        body.theme-dark:not(.high-contrast) .footer-info { background: #242424; border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .exec-panel { border-top-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .svg-container { background: #111111; border-color: var(--border-color); }
+
+        /* Form controls */
+        body.theme-dark:not(.high-contrast) select,
+        body.theme-dark:not(.high-contrast) input,
+        body.theme-dark:not(.high-contrast) textarea,
+        body.theme-dark:not(.high-contrast) button { background: var(--inset); color: var(--nvidia-dark); border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) select option,
+        body.theme-dark:not(.high-contrast) select optgroup { background: var(--inset); color: var(--nvidia-dark); }
+        body.theme-dark:not(.high-contrast) #top-action-select { border-color: var(--border-color) !important; }
+        body.theme-dark:not(.high-contrast) button:hover { border-color: var(--main-color); }
+        body.theme-dark:not(.high-contrast) .btn-copy { background: var(--inset) !important; color: var(--nvidia-dark); border-color: var(--border-color) !important; }
+        body.theme-dark:not(.high-contrast) .btn-copy:hover { border-color: var(--main-color) !important; color: var(--main-color); }
+        body.theme-dark:not(.high-contrast) .actions-container .btn-clear { color: #ff8a8a; }
+        body.theme-dark:not(.high-contrast) .actions-container [style*="border-left"] { border-color: var(--border-color) !important; }
+
+        /* Green action buttons: black text on green for contrast */
+        body.theme-dark:not(.high-contrast) .btn-action,
+        body.theme-dark:not(.high-contrast) .modal-btn-primary { background-color: var(--main-color); color: #000; }
+        body.theme-dark:not(.high-contrast) .btn-action:hover,
+        body.theme-dark:not(.high-contrast) .modal-btn-primary:hover { background-color: var(--hover-color); }
+        body.theme-dark:not(.high-contrast) .modal-btn-secondary { background: var(--inset); color: var(--nvidia-dark); border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .modal-btn-secondary:hover { background: #333333; }
+
+        /* Gate toolbar */
+        body.theme-dark:not(.high-contrast) .gate-btn { background: var(--inset); border-color: var(--main-color); color: var(--main-color); }
+        body.theme-dark:not(.high-contrast) .gate-btn:hover { background: var(--main-color); color: #000; }
+        body.theme-dark:not(.high-contrast) .gate-btn.param-gate { background: rgba(118, 185, 0, 0.15); }
+        body.theme-dark:not(.high-contrast) .gate-btn.param-gate:hover { background: var(--main-color); color: #000; }
+        body.theme-dark:not(.high-contrast) .gate-btn[style*="border-color:#333"] { border-color: var(--muted) !important; color: var(--nvidia-dark) !important; }
+        body.theme-dark:not(.high-contrast) .gate-btn[style*="border-color:#333"]:hover { background: var(--nvidia-dark); color: #000 !important; }
+        body.theme-dark:not(.high-contrast) .gate-btn.paste-btn { background: rgba(77, 163, 255, 0.12); border-color: #4da3ff; color: #4da3ff; }
+
+        /* Code panels */
+        body.theme-dark:not(.high-contrast) .code-header { background: var(--inset); color: var(--muted); border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .code-box { background: var(--code-bg); color: var(--code-text); }
+
+        /* Execution mode, measurements and results */
+        body.theme-dark:not(.high-contrast) .mode-selector { border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .mode-btn { background: var(--inset); color: var(--nvidia-dark); border-right-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .mode-btn:hover { background: #333333; }
+        body.theme-dark:not(.high-contrast) .mode-btn.active { background: var(--main-color); color: #000; border-color: var(--main-color); }
+        body.theme-dark:not(.high-contrast) .run-config { background: rgba(118, 185, 0, 0.08); border-color: #3d5c00; }
+        body.theme-dark:not(.high-contrast) .meas-row span { color: var(--nvidia-dark); }
+        body.theme-dark:not(.high-contrast) .meas-row select { background: var(--inset); border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .result-table th,
+        body.theme-dark:not(.high-contrast) .result-table td { border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .result-table th { background: var(--inset); }
+        body.theme-dark:not(.high-contrast) .raw-output { background: var(--code-bg); color: var(--code-text); }
+
+        /* Circuit (same style as the other widgets' circuit diagrams) */
+        body.theme-dark:not(.high-contrast) line.wire { stroke: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) line.control-line { stroke: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) circle.control-dot { fill: var(--main-color); }
+        body.theme-dark:not(.high-contrast) rect.gate-box { fill: var(--panel); stroke: var(--main-color); }
+        body.theme-dark:not(.high-contrast) text.gate-text { fill: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) rect.gate-box.param { fill: var(--main-color); stroke: var(--main-color); }
+        body.theme-dark:not(.high-contrast) text.gate-text.param { fill: #000; }
+        body.theme-dark:not(.high-contrast) #circuit-svg circle[fill="white"] { fill: var(--panel); stroke: var(--main-color); }
+        body.theme-dark:not(.high-contrast) #circuit-svg line[stroke="#333"] { stroke: var(--main-color); }
+        body.theme-dark:not(.high-contrast) #circuit-svg text[style*="fill:#333"] { fill: var(--main-color) !important; }
+        body.theme-dark:not(.high-contrast) text.swap-text { fill: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) line.swap-line { stroke: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) #ghost-gate rect { stroke: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) g.gate-group:focus rect.gate-box,
+        body.theme-dark:not(.high-contrast) g.gate-group.selected rect.gate-box { fill: #3d5c00; stroke: #E0E0E0; }
+        body.theme-dark:not(.high-contrast) g.gate-group:focus text.gate-text,
+        body.theme-dark:not(.high-contrast) g.gate-group.selected text.gate-text { fill: #fff !important; }
+        body.theme-dark:not(.high-contrast) g.gate-group:focus circle.swap-focus-ring,
+        body.theme-dark:not(.high-contrast) g.gate-group.selected circle.swap-focus-ring { fill: #3d5c00; }
+        body.theme-dark:not(.high-contrast) g.gate-group:focus circle[fill="white"],
+        body.theme-dark:not(.high-contrast) g.gate-group.selected circle[fill="white"] { fill: #3d5c00 !important; }
+
+        /* Footer: instructions, examples, links */
+        body.theme-dark:not(.high-contrast) .footer-info h3 { color: var(--main-color) !important; }
+        body.theme-dark:not(.high-contrast) .footer-info [style*="color:#555"],
+        body.theme-dark:not(.high-contrast) .footer-info p { color: var(--muted) !important; }
+        body.theme-dark:not(.high-contrast) .footer-info strong,
+        body.theme-dark:not(.high-contrast) .info-item h4 { color: var(--nvidia-dark) !important; }
+        body.theme-dark:not(.high-contrast) .footer-info [style*="border-bottom"] { border-color: var(--border-color) !important; }
+        body.theme-dark:not(.high-contrast) .info-item { background: var(--inset); border-color: var(--border-color); border-left-color: var(--main-color); }
+        body.theme-dark:not(.high-contrast) .resource-links { border-top-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .resource-link { background: var(--inset); color: var(--nvidia-dark); border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .resource-link:hover { border-color: var(--main-color); color: var(--main-color); }
+        body.theme-dark:not(.high-contrast) code { background: var(--inset); color: #c5e88a; padding: 0 4px; border-radius: 3px; }
+
+        /* Gate tooltips */
+        body.theme-dark:not(.high-contrast) #matrix-tooltip { background: var(--inset); color: var(--nvidia-dark); border: 1px solid var(--border-color); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+        body.theme-dark:not(.high-contrast) #matrix-tooltip .tt-title { color: var(--main-color); }
+        body.high-contrast #matrix-tooltip { background: #000 !important; color: #fff !important; border: 2px solid #fff; }
+        body.high-contrast #matrix-tooltip .tt-title { color: #fff; }
+
+        /* Added features (example label, angle toggle) */
+        body.theme-dark:not(.high-contrast) .circuit-name { color: var(--muted); }
+        body.theme-dark:not(.high-contrast) .unit-toggle { border-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .unit-toggle button { background: var(--inset); color: var(--nvidia-dark); }
+        body.theme-dark:not(.high-contrast) .unit-toggle button + button { border-left-color: var(--border-color); }
+        body.theme-dark:not(.high-contrast) .unit-toggle button[aria-pressed="true"] { background: var(--main-color); color: #000; }
+
+
+        /* ===== High Contrast mode, dark version: white on black ===== */
+        body.high-contrast {
+            --main-color: #ffffff; --hover-color: #dddddd; --nvidia-dark: #ffffff;
+            --bg-color: #000000; --border-color: #ffffff; --code-bg: #000000; --code-text: #ffffff;
+            background: #000 !important; color: #fff !important;
+        }
+        body.high-contrast .widget-container,
+        body.high-contrast .controls, body.high-contrast .actions-container, body.high-contrast .exec-panel,
+        body.high-contrast .sidebar, body.high-contrast .footer-info, body.high-contrast .svg-container,
+        body.high-contrast .info-item, body.high-contrast .resource-link, body.high-contrast .modal,
+        body.high-contrast .code-header, body.high-contrast .run-config, body.high-contrast .raw-output,
+        body.high-contrast .result-table th { background: #000 !important; color: #fff !important; border-color: #fff !important; box-shadow: none !important; }
+        body.high-contrast .widget-container { border: 2px solid #fff !important; }
+        body.high-contrast .footer-info *, body.high-contrast .modal *, body.high-contrast .controls strong,
+        body.high-contrast .meas-row span, body.high-contrast .form-group label, body.high-contrast .circuit-name { color: #fff !important; }
+        body.high-contrast .footer-info [style*="border"], body.high-contrast .modal [style*="border"],
+        body.high-contrast .result-table td, body.high-contrast .resource-links { border-color: #fff !important; }
+        body.high-contrast .modal [style*="background"] { background: #000 !important; }
+        body.high-contrast code { background: #000; color: #fff; border: 1px solid #fff; padding: 0 3px; }
+        body.high-contrast select, body.high-contrast input, body.high-contrast textarea,
+        body.high-contrast button, body.high-contrast select option, body.high-contrast select optgroup,
+        body.high-contrast .btn-copy { background: #000 !important; color: #fff !important; border: 2px solid #fff !important; }
+        body.high-contrast .btn-action, body.high-contrast .modal-btn-primary,
+        body.high-contrast .mode-btn.active, body.high-contrast .unit-toggle button[aria-pressed="true"],
+        body.high-contrast button:hover, body.high-contrast .btn-copy:hover { background: #fff !important; color: #000 !important; }
+        body.high-contrast .gate-btn, body.high-contrast .gate-btn.param-gate,
+        body.high-contrast .gate-btn[style] { background: #000 !important; color: #fff !important; border: 2px solid #fff !important; }
+        body.high-contrast .gate-btn:hover { background: #fff !important; color: #000 !important; }
+        body.high-contrast button:focus, body.high-contrast select:focus, body.high-contrast input:focus,
+        body.high-contrast [tabindex]:focus, body.high-contrast .gate-btn:focus { outline: 4px solid #fff !important; outline-offset: 2px; }
+        body.high-contrast line.wire, body.high-contrast line.control-line, body.high-contrast line.swap-line,
+        body.high-contrast #circuit-svg line[stroke="#333"] { stroke: #fff !important; }
+        body.high-contrast circle.control-dot { fill: #fff !important; }
+        body.high-contrast rect.gate-box { fill: #000; stroke: #fff; }
+        body.high-contrast text.gate-text, body.high-contrast text.swap-text,
+        body.high-contrast #circuit-svg text[style*="fill:#333"] { fill: #fff !important; }
+        body.high-contrast rect.gate-box.param { fill: #fff; stroke: #fff; }
+        body.high-contrast text.gate-text.param { fill: #000 !important; }
+        body.high-contrast #circuit-svg circle[fill="white"] { fill: #000; stroke: #fff; }
+        body.high-contrast g.gate-group:focus rect.gate-box,
+        body.high-contrast g.gate-group.selected rect.gate-box { fill: #fff !important; stroke: #fff !important; stroke-width: 4px; }
+        body.high-contrast g.gate-group:focus text.gate-text,
+        body.high-contrast g.gate-group.selected text.gate-text { fill: #000 !important; }
+
+        /* Modals */
+        body.theme-dark:not(.high-contrast) .modal { background: var(--panel); color: var(--nvidia-dark); border: 1px solid var(--border-color); border-top: 4px solid var(--main-color); }
+        body.theme-dark:not(.high-contrast) .modal p { color: var(--muted) !important; }
+        body.theme-dark:not(.high-contrast) .modal [style*="background:#f9f9f9"] { background: var(--inset) !important; color: var(--nvidia-dark) !important; border-color: var(--border-color) !important; }
+        body.theme-dark:not(.high-contrast) .modal [style*="border-top: 1px solid #eee"] { border-top-color: var(--border-color) !important; }
+        body.theme-dark:not(.high-contrast) .form-group label { color: var(--muted); }
     </style>
 </head>
-<body>
+<body class="theme-dark">
     <div id="touch-helper"></div>
     <div id="matrix-tooltip"></div>
     <div id="sr-announcer" class="sr-only" aria-live="assertive"></div>
@@ -359,7 +573,7 @@ See the License for the specific language governing permissions and limitations 
                         <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
                     </select>
                 </label>
-                <label style="font-size:14px;">Load Example:
+                <label style="font-size:14px;">Example:
                     <select id="example-select" onchange="loadExample(this.value)" style="width:160px;">
                         <option value="">-- Select Circuit --</option>
                         <option value="bell">Bell State (|Φ⁺⟩)</option>
@@ -368,6 +582,11 @@ See the License for the specific language governing permissions and limitations 
                         <option value="teleport">Teleportation</option>
                     </select>
                 </label>
+                <span style="font-size:14px;">Angles:
+                    <span class="unit-toggle" role="group" aria-label="Rotation angle units">
+                        <button type="button" id="unit-rad" aria-pressed="true" onclick="setAngleUnit('rad')">Radians</button><button type="button" id="unit-deg" aria-pressed="false" onclick="setAngleUnit('deg')">Degrees</button>
+                    </span>
+                </span>
                 <label style="font-size:14px;">Mode:
                     <select id="top-mode-select" onchange="setMode(this.value, true)" style="width:auto;">
                         <option value="state">Get State</option>
@@ -397,6 +616,7 @@ See the License for the specific language governing permissions and limitations 
                         </optgroup>
 
                         <optgroup label="Settings">
+                            <option value="toggle-dark">Toggle Dark / Light Theme</option>
                             <option value="toggle-theme">Toggle High Contrast</option>
                         </optgroup>
                     </select>
@@ -424,6 +644,8 @@ See the License for the specific language governing permissions and limitations 
                     <div id="btn-paste" class="gate-btn paste-btn" draggable="true" tabindex="0" role="button" aria-label="Paste Copied Gate" onkeydown="handleGateToolbarKey(event, 'paste')" ondragstart="dragStartPaste(event)" data-type="paste">📋 Paste</div>
                 </div>
                 
+                <div id="circuit-name" class="circuit-name" aria-live="polite">Custom circuit</div>
+
                 <div id="circuit-accessibility-container" class="sr-only" aria-live="polite">
                     <h3>Circuit Description</h3>
                     <p>Circuit Diagram. Select "Edit Circuit Diagram" in the Actions menu to enter. Inside, use Tab or Arrow Keys to navigate. Press Enter to Edit/Delete.</p>
@@ -487,6 +709,7 @@ See the License for the specific language governing permissions and limitations 
             </div>
 
             <div class="actions-container">
+                <p id="copy-validation-message" role="status" aria-live="polite" hidden></p>
                 <button id="btn-copy-kernel" class="btn-copy" onclick="copyKernelOnly()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">📋 Copy CUDA-Q Code</button>
                 <button id="btn-copy-full" class="btn-copy" onclick="copyFullViz()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">📊 Copy CUDA-Q + Viz Code</button>
                 <button id="btn-share" class="btn-copy" onclick="generateShareLink()" style="background: white; border: 1px solid #ccc; padding: 6px 12px;">🔗 Share Circuit</button>
@@ -551,9 +774,16 @@ See the License for the specific language governing permissions and limitations 
                 </a>
             </div>
         </div>
+        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+            <div class="widget-footer-links">
+                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+            </div>
+        </footer>
     </div> 
 
 <script>
+    const RUN_MEASUREMENT_MESSAGE = "Select at least one measurement to use Run mode. cudaq.run needs the kernel to return measurement results, so it can't run a kernel with an empty return.";
     let numQubits = 3;
     let circuit = []; 
     let execMode = 'sample'; 
@@ -595,6 +825,7 @@ See the License for the specific language governing permissions and limitations 
         if (!val) return;
 
         switch (val) {
+            case 'toggle-dark': toggleDarkTheme(); break;
             case 'toggle-theme': toggleHighContrast(); break;
             case 'edit-circuit': enterCircuitNav(); break;
             case 'edit-meas': enterMeasNav(); break;
@@ -611,6 +842,14 @@ See the License for the specific language governing permissions and limitations 
         el.blur();
     }
     
+    function toggleDarkTheme() {
+        document.body.classList.toggle('theme-dark');
+        const isDark = document.body.classList.contains('theme-dark');
+        announceToScreenReader(isDark ? "Dark theme enabled." : "Light theme enabled.");
+        renderCircuit();
+        if(window.myChart) displayResults(lastStateData.state, lastStateData.dim);
+    }
+
     function toggleHighContrast() {
         document.body.classList.toggle('high-contrast');
         const isHigh = document.body.classList.contains('high-contrast');
@@ -722,6 +961,52 @@ See the License for the specific language governing permissions and limitations 
         }
     }
 
+
+    // ===== Added: example label =====
+    let loadedExample = null;   // { key, snapshot, n } of the last example loaded
+    function syncExampleLabel() {
+        const sel = document.getElementById('example-select');
+        const badge = document.getElementById('circuit-name');
+        if (!sel || !badge) return;
+        if (!loadedExample || circuit.length === 0) {
+            loadedExample = null; sel.value = ''; badge.textContent = 'Custom circuit'; return;
+        }
+        const opt = sel.querySelector(`option[value="${loadedExample.key}"]`);
+        const name = opt ? opt.textContent : loadedExample.key;
+        const unchanged = JSON.stringify(circuit) === loadedExample.snapshot && numQubits === loadedExample.n;
+        sel.value = loadedExample.key;
+        badge.textContent = unchanged ? `Example: ${name}` : `Example: ${name} (edited)`;
+    }
+
+    // ===== Added: tidy maths in the gate tooltips (e^(x) as a superscript) =====
+    function prettyMath(text) {
+        let out = '', i = 0;
+        while (i < text.length) {
+            if (text.startsWith('e^(', i)) {
+                let depth = 0, j = i + 2;
+                for (; j < text.length; j++) { if (text[j] === '(') depth++; else if (text[j] === ')') { depth--; if (depth === 0) break; } }
+                out += `e<sup>${text.slice(i + 3, j)}</sup>`; i = j + 1;
+            } else { out += text[i]; i++; }
+        }
+        return out.replace(/-/g, '−');   // true minus signs
+    }
+
+    // ===== Added: radians / degrees for rotation-gate angles =====
+    let angleUnit = 'rad';
+    const toDisplayAngle = (r) => angleUnit === 'deg' ? +(r * 180 / Math.PI).toFixed(4) : +(+r).toFixed(6);
+    const fromDisplayAngle = (v) => angleUnit === 'deg' ? v * Math.PI / 180 : v;
+    function angleLabel(r) { return angleUnit === 'deg' ? `${+(r * 180 / Math.PI).toFixed(1)}°` : (+r).toFixed(2); }
+    function angleCode(r) { return angleUnit === 'deg' ? `np.radians(${toDisplayAngle(r)})` : `${+(+r).toFixed(6)}`; }
+    function setAngleUnit(next) {
+        if (next === angleUnit) return;
+        angleUnit = next;
+        document.getElementById('unit-rad').setAttribute('aria-pressed', String(next === 'rad'));
+        document.getElementById('unit-deg').setAttribute('aria-pressed', String(next === 'deg'));
+        announceToScreenReader(`Rotation angles now in ${next === 'deg' ? 'degrees' : 'radians'}.`);
+        renderCircuit(); renderAccessibilityTable(); updateCode();
+    }
+
+
     function loadExample(key) {
         if (!key || !EXAMPLES[key]) return;
         saveState();
@@ -735,9 +1020,9 @@ See the License for the specific language governing permissions and limitations 
             setMode('run'); 
             measurements[2] = 'my'; measurements[0] = 'none'; measurements[1] = 'none';
         } else setMode('sample');
+        loadedExample = { key, snapshot: JSON.stringify(circuit), n: numQubits };
         finishUpdate(true);
         announceToScreenReader(`Loaded example circuit: ${key}`);
-        document.getElementById('example-select').value = "";
     }
     const GATE_META = {
         'h': { type: 'simple', label: 'H' }, 'x': { type: 'simple', label: 'X' }, 'y': { type: 'simple', label: 'Y' }, 'z': { type: 'simple', label: 'Z' },
@@ -982,14 +1267,13 @@ See the License for the specific language governing permissions and limitations 
             let content = raw.substring(raw.indexOf('[['));
             content = content.replace(/\[\[/g,'').replace(/\]\]/g,'').replace(/\], \[\s*/g, '|');
             let rows = content.split('|'); let r1 = rows[0].split(', '); let r2 = rows[1].split(', ');
-            html = `<div style="text-align:center; font-weight:bold; margin-bottom:5px; color:#aaa;">${type.toUpperCase()} Gate</div>`;
-            html += `<div style="display:flex; align-items:center; justify-content:center;">`;
-            if(prefix) html += `<span style="margin-right:5px;">${prefix}</span>`;
-            html += `<span class="bracket">[</span><table class="matrix-table">`;
-            html += `<tr><td>${r1[0]}</td><td>${r1[1]}</td></tr>`;
-            html += `<tr><td>${r2[0]}</td><td>${r2[1]}</td></tr>`;
-            html += `</table><span class="bracket">]</span></div>`;
-        } else html = `<strong>${type.toUpperCase()}</strong><br>${raw}`;
+            html = `<div class="tt-title">${type.toUpperCase()} gate</div>`;
+            html += `<div class="tt-body">`;
+            if(prefix) html += `<span class="tt-prefix">${prettyMath(prefix)}</span>`;
+            html += `<span class="tt-matrix">`;
+            [r1[0], r1[1], r2[0], r2[1]].forEach(v => { html += `<span>${prettyMath(v)}</span>`; });
+            html += `</span></div>`;
+        } else html = `<div class="tt-title">${type.toUpperCase()} gate</div><div class="tt-body">${raw}</div>`;
         tooltip.innerHTML = html; tooltip.style.display = 'block';
         const rect = e.target.getBoundingClientRect();
         tooltip.style.left = (rect.left + window.scrollX - 20) + 'px';
@@ -1008,6 +1292,41 @@ See the License for the specific language governing permissions and limitations 
         s = s.replace(/(?<![a-zA-Z0-9_])i(?![a-zA-Z0-9_])/g, '1j');
         s = s.replace(/(?<![a-zA-Z0-9_])j(?![a-zA-Z0-9_])/g, '1j');
         return s;
+    }
+
+    function canCopyCode() {
+        return execMode !== 'run' || Array.from({length: numQubits}, (_, i) => measurements[i])
+            .some(measurement => ['mx', 'my', 'mz'].includes(measurement));
+    }
+
+    function updateCopyAvailability() {
+        const blocked = !canCopyCode();
+        const message = document.getElementById('copy-validation-message');
+        message.textContent = blocked ? RUN_MEASUREMENT_MESSAGE : '';
+        message.hidden = !blocked;
+        const results = document.getElementById('table-container');
+        if (!blocked && results.textContent === RUN_MEASUREMENT_MESSAGE) results.replaceChildren();
+        for (const id of ['btn-copy-kernel', 'btn-copy-full']) {
+            const button = document.getElementById(id);
+            button.disabled = blocked;
+            button.setAttribute('aria-disabled', String(blocked));
+            if (blocked) {
+                button.title = RUN_MEASUREMENT_MESSAGE;
+                button.setAttribute('aria-describedby', message.id);
+            } else {
+                button.removeAttribute('title');
+                button.removeAttribute('aria-describedby');
+            }
+        }
+        document.querySelectorAll('#top-action-select option[value="copy-k"], #top-action-select option[value="copy-v"]')
+            .forEach(option => { option.disabled = blocked; });
+    }
+
+    function guardCodeCopy() {
+        updateCopyAvailability();
+        if (canCopyCode()) return true;
+        announceToScreenReader(RUN_MEASUREMENT_MESSAGE);
+        return false;
     }
 
     function updateCode() {
@@ -1030,7 +1349,7 @@ See the License for the specific language governing permissions and limitations 
                 if(op.gate === 'cx') line = `    x.ctrl(q[${op.control}], q[${op.target}])`;
                 else if(op.gate === 'cz') line = `    z.ctrl(q[${op.control}], q[${op.target}])`;
             } else if (GATE_META[op.gate].type === 'swap') line = `    swap(q[${op.target}], q[${op.target2}])`;
-            else if (GATE_META[op.gate].type === 'param') line = `    ${op.gate}(${op.params.join(', ')}, q[${op.target}])`;
+            else if (GATE_META[op.gate].type === 'param') line = `    ${op.gate}(${op.params.map(angleCode).join(', ')}, q[${op.target}])`;
             else line = `    ${op.gate}(q[${op.target}])`;
             k += line + '\n';
         });
@@ -1048,9 +1367,11 @@ See the License for the specific language governing permissions and limitations 
         else if (execMode === 'sample') e += `counts = cudaq.sample(my_kernel, n, shots_count=1000)\nprint(counts)`;
         else e += `results = cudaq.run(my_kernel, n, shots_count=20)\nprint(results)`;
         document.getElementById('code-exec').innerText = e;
+        updateCopyAvailability();
     }
 
     function copyKernelOnly() {
+        if (!guardCodeCopy()) return;
         const txt = document.getElementById('code-kernel').innerText + "\n\n" + document.getElementById('code-exec').innerText;
         navigator.clipboard.writeText(txt).then(() => {
              const btn = document.getElementById('btn-copy-kernel');
@@ -1061,6 +1382,7 @@ See the License for the specific language governing permissions and limitations 
     }
 
     function copyFullViz() {
+        if (!guardCodeCopy()) return;
         let py = "";
         py += document.getElementById('code-kernel').innerText + "\n\n";
         if (execMode !== 'run') py += "import matplotlib.pyplot as plt\n"; 
@@ -1316,7 +1638,7 @@ for result, count in counts.items():
         } else if (meta.type === 'swap') {
             const selT2 = addField('Target Qubit 2', 'inp-target2'); for(let i=0; i<numQubits; i++) selT2.add(new Option(`q[${i}]`, i));
         } else if (meta.type === 'param') {
-            meta.params.forEach((p, i) => { const inp = addField(`${p} (radians)`, `inp-param-${i}`, 'input'); inp.type='number'; inp.step='0.1'; inp.value='0'; });
+            meta.params.forEach((p, i) => { const inp = addField(`${p} (${angleUnit === 'deg' ? 'degrees' : 'radians'})`, `inp-param-${i}`, 'input'); inp.type='number'; inp.step=(angleUnit === 'deg' ? '1' : '0.1'); inp.value='0'; });
         } else if (meta.type === 'custom') {
             const inpN = addField('Gate Name (use a valid Python variable name)', 'inp-name', 'input'); inpN.value="my_gate";
             const inpM = addField('Unitary Matrix (List of Lists)', 'inp-matrix', 'textarea'); 
@@ -1327,7 +1649,7 @@ for result, count in counts.items():
             const op = circuit[idx]; selT.value = op.target;
             if (meta.type === 'control') document.getElementById('inp-control').value = op.control;
             if (meta.type === 'swap') document.getElementById('inp-target2').value = op.target2;
-            if (meta.type === 'param') meta.params.forEach((_, i) => document.getElementById(`inp-param-${i}`).value = op.params[i]);
+            if (meta.type === 'param') meta.params.forEach((_, i) => document.getElementById(`inp-param-${i}`).value = toDisplayAngle(op.params[i]));
             if (meta.type === 'custom') {
                 document.getElementById('inp-name').value = op.customName;
                 document.getElementById('inp-matrix').value = customOps[op.customName].definition;
@@ -1338,7 +1660,7 @@ for result, count in counts.items():
 
              if (meta.type === 'control') document.getElementById('inp-control').value = (clipboardOp.control!==null ? clipboardOp.control : (defaultTarget===0?1:0));
              if (meta.type === 'swap') document.getElementById('inp-target2').value = (clipboardOp.target2!==null ? clipboardOp.target2 : (defaultTarget===0?1:0));
-             if (meta.type === 'param') meta.params.forEach((_, i) => document.getElementById(`inp-param-${i}`).value = clipboardOp.params[i]);
+             if (meta.type === 'param') meta.params.forEach((_, i) => document.getElementById(`inp-param-${i}`).value = toDisplayAngle(clipboardOp.params[i]));
              document.getElementById('modal-title').innerText = `Paste ${gateType.toUpperCase()}`;
         } else {
             selT.value = defaultTarget;
@@ -1392,7 +1714,7 @@ for result, count in counts.items():
             target2 = parseInt(document.getElementById('inp-target2').value);
             if(target2 === target) return showError("Target qubits must be different.");
         } else if (meta.type === 'param') {
-            for(let i=0; i<meta.params.length; i++) params.push(parseFloat(document.getElementById(`inp-param-${i}`).value));
+            for(let i=0; i<meta.params.length; i++) params.push(fromDisplayAngle(parseFloat(document.getElementById(`inp-param-${i}`).value)));
         } else if (meta.type === 'custom') {
             customName = document.getElementById('inp-name').value.trim();
             if(!customName) return showError("Please provide a name.");
@@ -1460,7 +1782,7 @@ for result, count in counts.items():
             if (op.gate === 'swap') qubitDesc = `Swapping q[${op.target}] and q[${op.target2}]`;
             cellQubits.innerText = qubitDesc; row.appendChild(cellQubits);
             const cellDetails = document.createElement('td');
-            if (op.params && op.params.length > 0) cellDetails.innerText = `Params: ${op.params.join(', ')}`;
+            if (op.params && op.params.length > 0) cellDetails.innerText = `Params: ${op.params.map(angleLabel).join(', ')}${angleUnit === 'deg' ? '' : ' radians'}`;
             else cellDetails.innerText = 'None';
             row.appendChild(cellDetails);
             tbody.appendChild(row);
@@ -1481,6 +1803,7 @@ for result, count in counts.items():
         document.getElementById('chart-wrapper').style.display = 'none';
         document.getElementById('raw-container').style.display = 'none';
         if(window.myChart) { window.myChart.destroy(); window.myChart = null; }
+        syncExampleLabel();
     }
     
     function clearAll() { 
@@ -1565,7 +1888,7 @@ for result, count in counts.items():
             if(op.gate === 'custom') { label = op.customName.substring(0,7); boxW = 60; } 
             // UPDATED: Added param display back to diagram labels
             else if (['rx','ry','rz'].includes(op.gate)) { 
-                label = op.gate.toUpperCase() + '(' + op.params[0].toFixed(2) + ')'; 
+                label = op.gate.toUpperCase() + '(' + angleLabel(op.params[0]) + ')';
                 boxW = 75; 
                 isParam = true; 
             }
@@ -1677,7 +2000,7 @@ for result, count in counts.items():
         
         // High contrast check
         const isHighContrast = document.body.classList.contains('high-contrast');
-        const barColor = isHighContrast ? '#000000' : '#76b900';
+        const barColor = isHighContrast ? '#ffffff' : '#76b900';
 
         if (execMode === 'state') {
             let html = `<table class="result-table"><thead><tr><th>State</th><th>Amplitude</th><th>Probability</th></tr></thead><tbody>`;
@@ -1691,17 +2014,17 @@ for result, count in counts.items():
                 }
             }
             html += "</tbody></table>"; tc.innerHTML = html; cw.style.display = 'block';
-            window.myChart = new Chart(cc, { type: 'bar', data: { labels, datasets: [{ label: 'Probability', data, backgroundColor: barColor }] } });
+            applyChartTheme(); window.myChart = new Chart(cc, { type: 'bar', data: { labels, datasets: [{ label: 'Probability', data, backgroundColor: barColor }] } });
         } else if (execMode === 'sample') {
             let counts = {}; let probs = [], sum = 0; for(let i=0; i<dim; i++) { sum += state[i].magSq(); probs.push(sum); }
             for(let k=0; k<1000; k++) { let r = Math.random(), outcome = 0; for(let i=0; i<dim; i++) { if(r <= probs[i]) { outcome = i; break; } } const bin = outcome.toString(2).padStart(numQubits,'0').split('').reverse().join(''); counts[bin] = (counts[bin] || 0) + 1; }
             let html = `<table class="result-table"><thead><tr><th>State</th><th>Count (1000 shots)</th></tr></thead><tbody>`;
             const sortedKeys = Object.keys(counts).sort(); sortedKeys.forEach(k => { html += `<tr><td>|${k}⟩</td><td>${counts[k]}</td></tr>`; });
             html += "</tbody></table>"; tc.innerHTML = html; cw.style.display = 'block';
-            window.myChart = new Chart(cc, { type: 'bar', data: { labels: sortedKeys, datasets: [{ label: 'Counts', data: sortedKeys.map(k=>counts[k]), backgroundColor: barColor }] } });
+            applyChartTheme(); window.myChart = new Chart(cc, { type: 'bar', data: { labels: sortedKeys, datasets: [{ label: 'Counts', data: sortedKeys.map(k=>counts[k]), backgroundColor: barColor }] } });
         } else if (execMode === 'run') {
             let activeIndices = []; for(let i=0; i<numQubits; i++) if(measurements[i] !== 'none') activeIndices.push(i);
-            if (activeIndices.length === 0) { tc.innerHTML = "<em>No measurements selected.</em>"; return; }
+            if (activeIndices.length === 0) { tc.textContent = RUN_MEASUREMENT_MESSAGE; return; }
             let probs = [], sum = 0; for(let i=0; i<dim; i++) { sum += state[i].magSq(); probs.push(sum); }
             let results = [];
             for(let s=0; s<20; s++) {

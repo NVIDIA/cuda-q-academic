@@ -89,7 +89,7 @@
   .control-group { margin-bottom: 20px; }
   .control-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--fg); margin-bottom: 8px; }
   .control-val { color: var(--accent); }
-  
+
   .slider-wrap { width: 100%; padding: 4px 0; }
   .slider-wrap:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
   input[type=range] { appearance: none; -webkit-appearance: none; width: 100%; background: transparent; margin: 0; }
@@ -130,7 +130,7 @@
   }
   .metric-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
   .metric-value { font-size: 2rem; font-weight: 700; color: var(--fg); }
-  
+
   .prob-track {
     width: 100%;
     height: 24px;
@@ -159,7 +159,65 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
-</style>
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
+    </style>
 </head>
 <body>
 
@@ -171,8 +229,8 @@
     <p class="summary-text">Explore the 3D cost landscape of a 1-layer QAOA circuit, see how tuning parameters helps the optimizer find the optimal Max Cut, and discover why optimization gets harder at scale—the barren plateau problem.</p>
   </header>
 
-  <section class="instructions-section" aria-labelledby="instructions-heading">
-    <h2 id="instructions-heading">Instructions</h2>
+  <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
     <ol>
       <li><strong>Rotate</strong> the 3D landscape using your mouse to view the peaks and valleys.</li>
       <li>Use the <strong>Cost</strong> and <strong>Mixer</strong> sliders to move your current state across the landscape.</li>
@@ -183,7 +241,7 @@
     <p style="color: var(--muted); font-size: 0.85rem; margin-top: 8px;">
       <strong>Keyboard:</strong> <span class="kbd">Tab</span> to move between controls, <span class="kbd">←</span> <span class="kbd">→</span> arrow keys to adjust sliders. Tab to the 3D view and use arrow keys to rotate.
     </p>
-  </section>
+  </details>
 
   <div class="main-panels">
     <div class="info-box">
@@ -222,9 +280,9 @@
           <strong style="color: var(--accent);">What is a barren plateau?</strong> In bigger or deeper circuits the cost landscape can become almost flat, so the optimizer has no clear direction to improve. The slider above simulates that effect.
         </p>
       </div>
-      
+
       <p style="font-size: 0.8rem; color: var(--muted); margin-top: 24px;">
-        In code, the <code>cudaq_solvers.qaoa</code> function uses an optimizer like COBYLA to automatically adjust these sliders for you, searching for the lowest point on the graph to the right.
+        In code, a CUDA-Q optimizer such as <code>cudaq.optimizers.COBYLA</code> adjusts these sliders for you, searching for the lowest point on the graph to the right.
       </p>
     </div>
 
@@ -249,8 +307,17 @@
   </div>
 
   <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>The QAOA landscape in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb" target="_blank" rel="noopener noreferrer">QAOA for Max Cut and GPT-QAOA Workshop</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1.7.1 The QAOA optimization landscape</strong> embeds this widget (Exercise 4); <strong>1.6.2 Running the QAOA optimization</strong> runs the optimizer on a larger graph. <strong>1.8 Addressing circuit depth: Adapt-QAOA</strong> and <strong>1.9 Addressing circuit depth with AI: QAOA-GPT</strong> are two ways around flat landscapes.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qaoa-for-max-cut/01_Max-Cut-with-QAOA.ipynb" target="_blank" rel="noopener noreferrer">Max Cut with QAOA</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1.5.4 Optimizer Loop</strong> tunes the QAOA angles with a CUDA-Q optimizer.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/triangle-qaoa.html" target="_blank" rel="noopener noreferrer">QAOA Max Cut Explorer</a> · <a href="https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html" target="_blank" rel="noopener noreferrer">VQE Convergence</a></p>
+        </details>
 
-  <footer class="widget-footer">
+<footer class="widget-footer">
     <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
     <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
   </footer>
@@ -307,13 +374,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const size = Math.PI * 2;
     const segments = 60;
     const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
-    
+
     // Deform the plane based on our QAOA landscape math; store base Z for barren-plateau flattening
     const positions = geometry.attributes.position.array;
     const baseLandscapeZ = [];
     const colors = [];
     const color = new THREE.Color();
-    
+
     let minZ = Infinity;
     let maxZ = -Infinity;
 
@@ -359,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 0; i < positions.length; i += 3) {
         const z = positions[i + 2];
         const normalizedZ = (z - minZ) / (maxZ - minZ);
-        
+
         // Interpolate between NVIDIA green (#76b900) and light gray (#E0E0E0)
         color.setHex(0x76b900).lerp(new THREE.Color(0xE0E0E0), normalizedZ);
         colors.push(color.r, color.g, color.b);
@@ -408,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const a = parseFloat(alphaSlider.value);
         const b = parseFloat(betaSlider.value);
         const k = parseFloat(barrenSlider.value);
-        
+
         // Update DOM text
         alphaVal.textContent = a.toFixed(2);
         betaVal.textContent = b.toFixed(2);
@@ -422,7 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Current point z (same flattening as surface)
         const zBase = calculateLandscape(a, b);
         const z = zBase * (1 - k) + meanZ * k;
-        
+
         // Update 3D Marker (Note: Three.js coordinates vs Math coordinates)
         marker.position.set(a, z, -b); // -b because plane is rotated
 
@@ -437,7 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
     alphaSlider.addEventListener('input', updateState);
     betaSlider.addEventListener('input', updateState);
     barrenSlider.addEventListener('input', updateState);
-    
+
     // Announce to screen readers periodically to avoid spam
     alphaSlider.addEventListener('change', () => {
         announcer.textContent = `Expectation value updated to ${expVal.textContent}`;
@@ -477,5 +544,42 @@ document.addEventListener("DOMContentLoaded", () => {
     animate();
 });
 </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
+    </script>
 </body>
 </html>

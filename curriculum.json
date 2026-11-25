@@ -2040,7 +2040,7 @@
       "related_track_ids": [
         "qec-101"
       ],
-      "summary": "Visualize trajectory-based error models showing how noise affects qubit state evolution over time.",
+      "summary": "Build the probability tree of bit-flip errors on three qubits and see how each error path's probability, pᵏ(1−p)³⁻ᵏ, sets how often trajectory simulation samples it.",
       "keywords": [
         "trajectory simulation",
         "noise",
@@ -2084,7 +2084,7 @@
       "related_track_ids": [
         "qec-101"
       ],
-      "summary": "See how small coherent rotation errors accumulate over many gate applications. Ideal vs noisy angle per gate with adjustable n.",
+      "summary": "Apply a small Rx(θ) error to the 3-qubit repetition code and see stabilizer measurement turn it into either no error or a full bit flip, which correction always fixes.",
       "keywords": [
         "coherent errors",
         "digitization",

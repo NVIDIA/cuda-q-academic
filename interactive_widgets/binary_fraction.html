@@ -9,12 +9,12 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- NVIDIA/CUDA-Q Style Guide CSS Overrides -->
     <style>
         /* 2.1 Primary Font Stack */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
-        
+
         :root {
             /* 1.3 Standard Color Palette */
             --nvidia-green: #76b900;
@@ -37,7 +37,7 @@
             line-height: 1.5;
             letter-spacing: 0.01em;
             word-spacing: 0.16em;
-            
+
             /* Center alignment for the main container */
             display: flex;
             flex-direction: column;
@@ -109,7 +109,7 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             margin: 0 auto;
         }
-        
+
         @media (min-width: 768px) {
             .widget-container { padding: 32px; }
         }
@@ -118,7 +118,7 @@
            Rule 23.2: STANDARD HEADER TYPOGRAPHY
            Using higher specificity to override Tailwind
            ========================================= */
-        
+
         /* Ensure the header container aligns center by default */
         .widget-container header {
             text-align: center;
@@ -137,7 +137,7 @@
             font-weight: 700; /* Enforce bold against Tailwind reset */
             line-height: 1.2;
         }
-        
+
         /* .summary-text { color: var(--nvidia-gray); margin-bottom: 8px; font-size: 1rem; } */
         .widget-container .summary-text {
             color: var(--nvidia-gray);
@@ -151,7 +151,7 @@
         .border-nvidia-accent { border-color: var(--nvidia-accent); }
         .text-nvidia-green { color: var(--nvidia-green); }
         .bg-nvidia-green { background-color: var(--nvidia-green); }
-        
+
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .info-box { background: var(--nvidia-mid); border: 1px solid var(--nvidia-accent); border-radius: 8px; padding: 16px 24px; }
         .btn-nvidia-secondary { background: transparent; color: var(--nvidia-gray); border: 1px solid transparent; min-height: 44px; min-width: 44px; }
@@ -164,7 +164,7 @@
         .bit-switch:active {
             transform: scale(0.95);
         }
-        
+
         .bit-btn {
             background-color: var(--nvidia-mid);
             color: #FFFFFF;
@@ -185,7 +185,7 @@
             width: 100%;
             margin: 4px 0;
         }
-        
+
         .active-fraction .fraction-line {
             background-color: var(--nvidia-green);
         }
@@ -261,6 +261,64 @@
             font-family: inherit;
             font-size: 0.9em;
         }
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body>
@@ -319,7 +377,7 @@
             const bestPossible = closestRepresentable(target);
             const isClosestPossible = Math.abs(current - bestPossible) < 0.00001;
             const isMatch = isClosestPossible;
-            
+
             return (
                 <section aria-label="Result Visualization" className="w-full mt-4 sm:mt-8 p-4 sm:p-6 info-box rounded-2xl">
                     <div className="grid grid-cols-2 gap-4 mb-4">
@@ -327,7 +385,7 @@
                              <div className="text-[10px] text-[#AAAAAA] uppercase tracking-widest mb-1" id="target-label">Target Value</div>
                              <div className="text-lg sm:text-2xl font-mono text-white font-bold" aria-labelledby="target-label">{target.toFixed(5)}</div>
                         </div>
-                        
+
                         <div className="flex flex-col items-end">
                             <div className="text-[10px] text-[#AAAAAA] uppercase tracking-widest mb-1" id="current-label">Current Sum</div>
                              <div aria-labelledby="current-label" className="text-lg sm:text-2xl font-mono font-bold" style={{ color: 'var(--nvidia-green)' }}>
@@ -342,7 +400,7 @@
                             className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-white z-30 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
                             style={{ left: `${tPercent}%` }}
                         ></div>
-                        
+
                         {/* Current Bar */}
                         <div 
                             className="absolute top-0 bottom-0 left-0 bg-nvidia-green z-20 transition-all duration-300 opacity-90"
@@ -392,7 +450,7 @@
             const [bits, setBits] = useState([0, 0, 0, 0, 0]);
             const [targetPhase, setTargetPhase] = useState(0.3);
             const bitRefs = useRef([]);
-            
+
             const decimalValue = bits.reduce((acc, bit, idx) => acc + (bit * Math.pow(2, -(idx + 1))), 0);
 
             const toggleBit = (idx) => {
@@ -443,24 +501,24 @@
 
             return (
                 <main id="main-content" className="widget-container">
-                
+
                     <header>
                         <h1>Binary Fraction Explorer</h1>
                         <p className="summary-text">Toggle bits to accumulate fractions and match the target value.</p>
                     </header>
 
-                    <section className="instructions-section" aria-labelledby="instructions-heading">
-                        <h2 id="instructions-heading">Instructions</h2>
+                    <details className="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+                        <summary><h2 id="instructions-heading">Instructions</h2></summary>
                         <ol>
-                            <li>Toggle the bit buttons (0 or 1) to build a binary fraction. Each bit is 2⁻¹, 2⁻², … so the sum appears as a decimal.</li>
+                            <li>Toggle the bit buttons (0 or 1) to build a binary fraction. Each bit is 2⁻¹, 2⁻², … so the sum appears as a decimal. In quantum phase estimation (QPE), measured bits are read as this kind of binary fraction.</li>
                             <li>Try to match the <strong>Target Value</strong> shown in the result area. The progress bar and current sum update as you change bits.</li>
                             <li>Click <strong>Reset Target</strong> to get a new random target, or press <span className="kbd">ESC</span>.</li>
                         </ol>
                         <p><strong>Keyboard shortcuts:</strong> <span className="kbd">ESC</span> — new target. <span className="kbd">Enter</span> or <span className="kbd">Space</span> — toggle focused bit. <span className="kbd">Arrow Left</span> / <span className="kbd">Arrow Right</span> — move between bits.</p>
-                    </section>
+                    </details>
                     <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" className="sr-only"></div>
                     <div className="w-full flex flex-col items-center gap-6 sm:gap-12">
-                        
+
                         {/* Controls Panel */}
                         <div className="flex flex-col items-center gap-4 w-full">
                             {/* 1. Interactive Bits Row (Controls) */}
@@ -477,7 +535,7 @@
                                     />
                                 ))}
                             </section>
-                            
+
                             {/* Target selection: presets + random */}
                             <div className="mt-4 flex flex-col sm:flex-row items-center gap-3 flex-wrap justify-center">
                                 <label htmlFor="target-select" className="text-[#AAAAAA] font-mono text-sm">Target:</label>
@@ -517,7 +575,7 @@
                                     />
                                 ))}
                             </div>
-                            
+
                             <div className="flex items-center justify-center mt-6 pt-6 border-t border-nvidia-accent w-full">
                                 <span className="text-[#AAAAAA] text-xl sm:text-3xl mr-4 font-mono">=</span>
                                 <span className="font-mono text-3xl sm:text-5xl font-bold tracking-tight" style={{ color: 'var(--nvidia-green)' }}>
@@ -528,13 +586,6 @@
 
                         {/* 3. Visual Comparison Bar */}
                         <ProgressBar current={decimalValue} target={targetPhase} />
-
-                        <footer className="widget-footer" aria-label="Widget and CUDA-Q navigation">
-                            <div className="widget-footer-links">
-                                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
-                                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
-                            </div>
-                        </footer>
                     </div>
                 </main>
             );
@@ -542,6 +593,124 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+    </script>
+    <div class="snippet-host">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: quantum phase estimation (QPE) reads a phase out of a quantum gate as a binary fraction, 0.b₁b₂b₃ = b₁/2 + b₂/4 + b₃/8. Here we hide a phase in a gate and let QPE find its bits.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> numpy <span class="tok-keyword">as</span> np
+
+phase = <span class="tok-number">0.625</span>  <span class="tok-comment"># the phase to find: 0.101 in binary (1/2 + 0/4 + 1/8)</span>
+n_bits = <span class="tok-number">3</span>  <span class="tok-comment"># counting qubits = bits of precision</span>
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">qft</span>(qubits: cudaq.qview):
+    n = <span class="tok-builtin">len</span>(qubits)
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n):
+        <span class="tok-gate">h</span>(qubits[i])
+        <span class="tok-keyword">for</span> j <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(i + <span class="tok-number">1</span>, n):
+            <span class="tok-gate">r1</span>.ctrl(<span class="tok-number">2</span> * np.pi / <span class="tok-number">2</span> ** (j - i + <span class="tok-number">1</span>), qubits[j], qubits[i])
+
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n // <span class="tok-number">2</span>):
+        <span class="tok-gate">swap</span>(qubits[i], qubits[n - <span class="tok-number">1</span> - i])
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">phase_estimation</span>(theta: <span class="tok-builtin">float</span>, n: <span class="tok-builtin">int</span>):
+    counting = cudaq.qvector(n)
+    target = cudaq.qubit()
+    <span class="tok-comment"># |1&gt; is an eigenstate of r1, with eigenvalue e^(2*pi*i*theta)</span>
+    <span class="tok-gate">x</span>(target)
+    <span class="tok-gate">h</span>(counting)  <span class="tok-comment"># Hadamard on every counting qubit</span>
+    <span class="tok-comment"># counting qubit i applies the gate 2^(n-1-i) times</span>
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(n):
+        <span class="tok-gate">r1</span>.ctrl(<span class="tok-number">2</span> * np.pi * theta * <span class="tok-number">2</span> ** (n - <span class="tok-number">1</span> - i), counting[i], target)
+
+    cudaq.adjoint(qft, counting)  <span class="tok-comment"># the inverse QFT turns the phases into bits</span>
+    <span class="tok-gate">mz</span>(counting)
+
+results = cudaq.sample(phase_estimation, phase, n_bits, shots_count=<span class="tok-number">1000</span>)
+bits = results.most_probable()  <span class="tok-comment"># e.g. '101', written b1 b2 b3</span>
+
+estimate = <span class="tok-builtin">sum</span>(<span class="tok-builtin">int</span>(b) / <span class="tok-number">2</span> ** (k + <span class="tok-number">1</span>) <span class="tok-keyword">for</span> k, b <span class="tok-keyword">in</span> <span class="tok-builtin">enumerate</span>(bits))
+terms = <span class="tok-string">" + "</span>.join(<span class="tok-string">f"{b}/{2**(k + 1)}"</span> <span class="tok-keyword">for</span> k, b <span class="tok-keyword">in</span> <span class="tok-builtin">enumerate</span>(bits))
+<span class="tok-builtin">print</span>(<span class="tok-string">f"Measured bits: 0.{bits} in binary"</span>)
+<span class="tok-builtin">print</span>(<span class="tok-string">f"             = {terms} = {estimate}"</span>)
+<span class="tok-builtin">print</span>(<span class="tok-string">f"Hidden phase:  {phase}"</span>)
+
+<span class="tok-comment"># Match the widget: five bits estimating the target 0.3.</span>
+phase, n_bits = <span class="tok-number">0.3</span>, <span class="tok-number">5</span>
+results = cudaq.sample(phase_estimation, phase, n_bits, shots_count=<span class="tok-number">1000</span>)
+bits = results.most_probable()
+estimate = <span class="tok-builtin">sum</span>(<span class="tok-builtin">int</span>(b) / <span class="tok-number">2</span> ** (k + <span class="tok-number">1</span>) <span class="tok-keyword">for</span> k, b <span class="tok-keyword">in</span> <span class="tok-builtin">enumerate</span>(bits))
+<span class="tok-builtin">print</span>(<span class="tok-string">f"Widget target {phase}: 0.{bits} = {estimate}"</span>)
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: In the second run, keep <code>phase = 0.3</code> and compare 3, 4 and 5 counting qubits by changing <code>n_bits</code>. How does the estimated phase change, and why might another bit sometimes make little difference?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Phase estimation in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/qpe.ipynb" target="_blank" rel="noopener noreferrer">QPE: Canonical, Iterative, and Bayesian</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>3. Canonical QPE</strong> (the <strong>Measuring the Phase</strong> part embeds this widget) reads a molecule's energy out of the phase bits; <strong>1. Prerequisite Concepts</strong> builds the QFT used here. <strong>4. Iterative QPE</strong> finds the same bits one at a time with a single counting qubit.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/quantum_fourier_transform.ipynb" target="_blank" rel="noopener noreferrer">Quantum Fourier Transform</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">the QFT kernel and its inverse with <code>cudaq.adjoint</code>.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qis-examples/shors.ipynb" target="_blank" rel="noopener noreferrer">Shor's Algorithm</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">phase estimation, read as a binary fraction, finds the order needed to factor an integer.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/qft.html" target="_blank" rel="noopener noreferrer">Interactive QFT Visualizer</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+                            <div class="widget-footer-links">
+                                <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
+                                <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
+                            </div>
+                        </footer>
+    </div>
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

@@ -233,12 +233,23 @@
             transition: top 0.8s cubic-bezier(0.5, 0, 1, 1), left 0.8s ease-out, opacity 0.8s 0.5s;
         }
 
-    </style>
+
+.widget-footer a:focus-visible { outline:3px solid #76b900; outline-offset:2px; }
+@media (max-width: 600px) {
+    body { padding: 12px; }
+    .container { padding: 16px; }
+    .control-panel { padding: 12px; }
+    .settings-group { flex-direction: column; gap: 16px; }
+    .settings-group .slider-container { width: 100% !important; }
+    .slider-wrapper input { min-width: 0; }
+    .position { min-width: 0; flex: 1; }
+}
+</style>
 </head>
 <body>
     <div class="container">
         <h1>Interactive Random Walk</h1>
-        
+
         <div class="control-panel">
             <div class="settings-group" style="display: flex; justify-content: space-around; align-items: center;">
                  <div>
@@ -262,14 +273,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div style="text-align: center;">
                 <button class="primary-btn" id="singleWalkBtn" onclick="runSingleWalk()">Run Single Walk</button>
                 <button class="secondary-btn" id="multiWalkBtn" onclick="run100Walks()">+ Run 100 Walks</button>
                 <button class="secondary-btn" onclick="resetAll()">Reset All</button>
             </div>
         </div>
-        
+
         <div class="visualization">
             <h3>Single Walk Visualization</h3>
             <div class="step-indicator" id="stepIndicator">Click "Run Single Walk" to start</div>
@@ -277,7 +288,7 @@
                 <div class="walker" id="walker"></div>
             </div>
         </div>
-        
+
         <div class="distribution">
             <h3>Frequency Distribution</h3>
             <p style="text-align: center;">Total Walks: <span id="totalWalksCount">0</span></p>
@@ -301,7 +312,7 @@
         let isAnimating = false;
         let distributionResults = Array(NUM_POSITIONS).fill(0);
         let totalWalks = 0;
-        
+
         // --- INITIALIZATION ---
         function initialize() {
             numberLine.innerHTML = '<div class="walker" id="walker"></div>'; 
@@ -312,7 +323,7 @@
                 posElement.textContent = i;
                 numberLine.appendChild(posElement);
             }
-            
+
             barChart.innerHTML = '';
             for (let i = 0; i < NUM_POSITIONS; i++) {
                 const barContainer = document.createElement('div');
@@ -344,36 +355,36 @@
             toggleControls(false);
 
             prepareForNewWalk();
-            
+
             const probability = probSlider.value / 100;
             const numSteps = parseInt(numStepsSelect.value);
             let position = START_POS;
-            
+
             document.getElementById('stepIndicator').textContent = 'Starting walk...';
             await sleep(1000);
 
             for (let i = 0; i < numSteps; i++) {
                 const goRight = Math.random() < probability;
                 const oldPosition = position;
-                
+
                 if (goRight && position < NUM_POSITIONS - 1) {
                     position++;
                 } else if (!goRight && position > 0) {
                     position--;
                 }
-                
+
                 document.getElementById('stepIndicator').textContent = `Step ${i + 1}: Moved ${position > oldPosition ? 'Right' : 'Left'}`;
                 updateWalkerPosition(position);
                 await sleep(1200);
             }
-            
+
             document.getElementById('stepIndicator').textContent = 'Walk complete!';
             await animateDropToDistribution(position);
 
             totalWalks++;
             distributionResults[position]++;
             updateDistributionDisplay();
-            
+
             isAnimating = false;
             toggleControls(true);
         }
@@ -382,7 +393,7 @@
             if (isAnimating) return;
             const probability = probSlider.value / 100;
             const numSteps = parseInt(numStepsSelect.value);
-            
+
             for (let walk = 0; walk < 100; walk++) {
                 let position = START_POS;
                 for (let step = 0; step < numSteps; step++) {
@@ -395,7 +406,7 @@
             totalWalks += 100;
             updateDistributionDisplay();
         }
-        
+
         function resetAll() {
             if (isAnimating) return;
             distributionResults = Array(NUM_POSITIONS).fill(0);
@@ -415,10 +426,10 @@
         function updateWalkerPosition(position) {
             const positions = document.querySelectorAll('.position');
             const walkerEl = document.getElementById('walker');
-            
+
             positions.forEach(p => p.classList.remove('current'));
             positions[position].classList.add('current', 'visited');
-            
+
             const percentage = (position / (NUM_POSITIONS - 1)) * 100;
             walkerEl.style.left = `calc(${percentage}% - 15px)`;
         }
@@ -426,7 +437,7 @@
         function updateDistributionDisplay() {
             const maxCount = Math.max(...distributionResults, 1);
             const bars = document.querySelectorAll('.bar');
-            
+
             distributionResults.forEach((count, index) => {
                 const height = (count / maxCount) * 180;
                 bars[index].style.height = `${height}px`;
@@ -434,18 +445,18 @@
             });
             document.getElementById('totalWalksCount').textContent = totalWalks;
         }
-        
+
         async function animateDropToDistribution(finalPosition) {
             const walkerEl = document.getElementById('walker');
             const targetBarContainer = barChart.children[finalPosition];
 
             const walkerRect = walkerEl.getBoundingClientRect();
             const barRect = targetBarContainer.getBoundingClientRect();
-            
+
             const clone = walkerEl.cloneNode(true);
             clone.className = 'walker-clone';
             document.body.appendChild(clone);
-            
+
             clone.style.left = `${walkerRect.left}px`;
             clone.style.top = `${walkerRect.top}px`;
 
@@ -457,7 +468,7 @@
             await sleep(1000);
             clone.remove();
         }
-        
+
         function toggleControls(enable) {
             singleWalkBtn.disabled = !enable;
             multiWalkBtn.disabled = !enable;
@@ -472,5 +483,9 @@
         // --- Run on page load ---
         initialize();
     </script>
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation" style="margin:32px auto 0;padding:16px 12px;border-top:1px solid #444;text-align:center;max-width:1100px;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;">
+  <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer" style="color:#76b900;min-height:44px;display:inline-flex;align-items:center;padding:8px 12px;">Back to Visualization Gallery</a>
+  <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer" style="color:#76b900;min-height:44px;display:inline-flex;align-items:center;padding:8px 12px;">CUDA-Q Academic</a>
+</footer>
 </body>
 </html>

@@ -303,6 +303,64 @@
             outline: 3px solid var(--nvidia-green);
             outline-offset: 2px;
         }
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -313,8 +371,8 @@
             <p class="summary-text">An interactive comparison of quantum optimization algorithms.</p>
         </header>
 
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
                 <li><strong>Adapt-VQE:</strong> Click the operator with the largest gradient (green) to add it to the circuit, then click "Minimize" to run the step. Repeat until the energy converges.</li>
                 <li><strong>VQE:</strong> Click "Run VQE" to run the fixed-ansatz optimization. Compare the energy curve with Adapt-VQE on the chart below.</li>
@@ -322,7 +380,7 @@
             </ol>
             <p>Each A<sub>n</sub> in the operator pool is an <strong>ansatz operator</strong> — a parameterized quantum gate sequence (e<sup>−iAθ</sup>). The gradient magnitude next to each indicates how much it would lower the energy if added to the circuit next. Adapt-VQE's key advantage is that it selects only the most impactful operators, building the circuit one gate at a time.</p>
             <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span> or <span class="kbd">Space</span> to activate buttons. In Controls, <span class="kbd">↑</span><span class="kbd">↓</span> move between Minimize and operator list.</p>
-        </section>
+        </details>
         <div id="status-announce" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -362,12 +420,104 @@
             </div>
             <div class="h-64 md:h-80"><canvas id="energyChart"></canvas></div>
         </div>
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: one ADAPT-VQE step for the H₂ molecule from the lesson. Measure the energy gradient of every operator in the pool at the Hartree-Fock state, add the one with the largest gradient to the circuit, and optimize its angle; then run a standard VQE with the full UCCSD circuit, as the widget compares.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq==<span class="tok-number">0.15</span><span class="tok-number">.1</span> cudaq-algorithms==<span class="tok-number">0.1</span><span class="tok-number">.0</span> pyscf
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> cudaq_algorithms <span class="tok-keyword">as</span> algorithms
+<span class="tok-keyword">import</span> numpy <span class="tok-keyword">as</span> np
+<span class="tok-keyword">from</span> pyscf <span class="tok-keyword">import</span> gto, scf
 
-        <div class="lesson-footer">
-            Note: This widget is part of the CUDA-Q Academic lesson entitled "ADAPT-VQE (Chemistry Simulations)".
-            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb" target="_blank" rel="noopener noreferrer">here</a>.
-        </div>
-        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+<span class="tok-comment"># H2 in the STO-3G basis (4 qubits), its qubit Hamiltonian, and the operator pool</span>
+mean_field = scf.RHF(
+    gto.M(atom=<span class="tok-string">"H 0 0 0; H 0 0 0.7474"</span>, basis=<span class="tok-string">"sto-3g"</span>, verbose=<span class="tok-number">0</span>)
+).run()
+one_body, two_body, nuclear_energy = algorithms.chemistry.from_pyscf(mean_field)
+H = algorithms.chemistry.qubit_hamiltonian(
+    one_body, two_body, scalar_offset=nuclear_energy
+)
+pool = algorithms.stateprep.make_uccgsd_operator_pool(<span class="tok-number">4</span>)
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">ansatz</span>(theta: <span class="tok-builtin">float</span>, words: <span class="tok-builtin">list</span>[cudaq.pauli_word], coefficients: <span class="tok-builtin">list</span>[<span class="tok-builtin">float</span>]):
+    q = cudaq.qvector(<span class="tok-number">4</span>)
+    <span class="tok-gate">x</span>(q[<span class="tok-number">0</span>])  <span class="tok-comment"># Hartree-Fock state |1100&gt;: 2 electrons</span>
+    <span class="tok-gate">x</span>(q[<span class="tok-number">1</span>])
+    <span class="tok-comment"># exp(i theta A) for the chosen operator A</span>
+    <span class="tok-keyword">for</span> k <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(<span class="tok-builtin">len</span>(words)):
+        exp_pauli(theta * coefficients[k], q, words[k])
+
+
+<span class="tok-comment"># Gradient of each pool operator A at the Hartree-Fock state: the expectation of i[H, A]</span>
+gradients = [
+    cudaq.observe(ansatz, <span class="tok-number">1j</span> * (H * A - A * H), <span class="tok-number">0.0</span>, [], []).expectation() <span class="tok-keyword">for</span> A <span class="tok-keyword">in</span> pool
+]
+
+<span class="tok-comment"># Choose the operator with the largest gradient magnitude.</span>
+best = pool[<span class="tok-builtin">int</span>(np.argmax(np.<span class="tok-builtin">abs</span>(gradients)))]
+
+<span class="tok-comment"># Express the selected operator as Pauli words and their weights.</span>
+words = [cudaq.pauli_word(term.get_pauli_word(<span class="tok-number">4</span>)) <span class="tok-keyword">for</span> term <span class="tok-keyword">in</span> best]
+coefficients = [term.evaluate_coefficient().real <span class="tok-keyword">for</span> term <span class="tok-keyword">in</span> best]
+
+<span class="tok-comment"># the numbers beside the widget's A_n</span>
+<span class="tok-builtin">print</span>(<span class="tok-string">"Gradient of each pool operator:"</span>, np.<span class="tok-builtin">round</span>(np.<span class="tok-builtin">abs</span>(gradients), <span class="tok-number">3</span>))
+
+<span class="tok-comment"># Optimize the selected excitation angle.</span>
+energy, theta = cudaq.optimizers.COBYLA().optimize(
+    <span class="tok-number">1</span>, <span class="tok-keyword">lambda</span> <span class="tok-gate">t</span>: cudaq.observe(ansatz, H, <span class="tok-gate">t</span>[<span class="tok-number">0</span>], words, coefficients).expectation()
+)
+<span class="tok-builtin">print</span>(
+    <span class="tok-string">"Energy: Hartree-Fock"</span>,
+    cudaq.observe(ansatz, H, <span class="tok-number">0.0</span>, [], []).expectation(),
+    <span class="tok-string">"-&gt; after one ADAPT step"</span>,
+    energy,
+)
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-comment"># standard VQE: every excitation in the circuit from the start</span>
+<span class="tok-keyword">def</span> <span class="tok-func">uccsd</span>(thetas: <span class="tok-builtin">list</span>[<span class="tok-builtin">float</span>]):
+    q = cudaq.qvector(<span class="tok-number">4</span>)
+    <span class="tok-gate">x</span>(q[<span class="tok-number">0</span>])
+    <span class="tok-gate">x</span>(q[<span class="tok-number">1</span>])
+    algorithms.stateprep.uccsd(q, thetas, <span class="tok-number">2</span>, <span class="tok-number">0</span>)
+
+
+n = algorithms.stateprep.get_num_uccsd_parameters(<span class="tok-number">4</span>, <span class="tok-number">2</span>)
+
+vqe_energy, _ = cudaq.optimizers.COBYLA().optimize(
+    n, <span class="tok-keyword">lambda</span> <span class="tok-gate">t</span>: cudaq.observe(uccsd, H, <span class="tok-builtin">list</span>(<span class="tok-gate">t</span>)).expectation()
+)
+<span class="tok-builtin">print</span>(
+    <span class="tok-string">f"Standard VQE: {n} parameters -&gt; {vqe_energy:.6f}   ADAPT-VQE: 1 parameter -&gt; {energy:.6f}"</span>
+)
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Compare the energies and parameter counts for one ADAPT step and full UCCSD. Change the H–H distance from <code>0.7474</code> to <code>1.0</code> in <code>gto.M</code> and rerun. Does one ADAPT step still reach the same energy as the full circuit?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>ADAPT-VQE in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/chemistry-simulations/adapt_vqe.ipynb" target="_blank" rel="noopener noreferrer">ADAPT-VQE</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1. ADAPT-VQE Algorithm</strong> embeds this widget; <strong>2. Building the Operator Pool and Computing the Gradient</strong> and <strong>4. Putting it all Together</strong> run the full loop for the same H₂ molecule, with the same CUDA-Q Algorithms Hamiltonian and UCCGSD pool. <strong>5. Parallelizing ADAPT-VQE</strong> spreads the gradient measurements across GPUs.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/04_quick_start_to_quantum.ipynb" target="_blank" rel="noopener noreferrer">Quick Start 4: Build Your First Variational Algorithm</a><span class="level-badge" aria-label="Lesson level: Introductory">Introductory</span></div><p class="lesson-description">the <code>observe</code> and optimizer basics this loop is built on.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/hybrid-workflows/02_qaoa_for_max_cut_and_gpt_qaoa.ipynb" target="_blank" rel="noopener noreferrer">QAOA for Max Cut and GPT-QAOA Workshop</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1.8 Addressing circuit depth: Adapt-QAOA</strong> applies the same grow-the-circuit idea to QAOA.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/chemistry-simulations/Images/VQE_Widget.html" target="_blank" rel="noopener noreferrer">VQE Convergence</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/operator-gradient.html" target="_blank" rel="noopener noreferrer">Choosing the Next Operator (Adapt-QAOA)</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/adapt-qaoa.html" target="_blank" rel="noopener noreferrer">ADAPT-QAOA vs. Standard QAOA</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
                 <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -702,6 +852,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initialize();
 });
+    </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

@@ -310,6 +310,77 @@
             padding-left: 20px;
             margin-top: -5px;
         }
+
+
+
+
+        /* Keep controls and code readable on narrow screens. */
+        @media (max-width: 600px) {
+            .position {
+                flex: 1 1 0;
+                width: auto;
+                max-width: 40px;
+                min-width: 0;
+                height: auto;
+                aspect-ratio: 1;
+                box-sizing: border-box;
+            }
+        }
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
     </style>
 </head>
 <body>
@@ -319,14 +390,14 @@
             <h1>Random Walks</h1>
             <p class="summary-text">Classical or split-step walks: set steps and probabilities, then run single or many walks and view the distribution.</p>
         </header>
-        <section class="instructions-section" aria-labelledby="instructions-heading">
-            <h2 id="instructions-heading">Instructions</h2>
+        <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+            <summary><h2 id="instructions-heading">Instructions</h2></summary>
             <ol>
                 <li>Set <b>Number of Steps</b> and <b>Step Type</b> (Classical or Split Step). Use the slider(s) to set move probabilities.</li>
                 <li>Click <b>Run Single Walk</b> or <b>Run 100 Walks</b> to simulate. <b>Reset All</b> clears the distribution.</li>
             </ol>
             <p><strong>Keyboard:</strong> <span class="kbd">ESC</span> to reset. <span class="kbd">Enter</span>/<span class="kbd">Space</span> to activate buttons. <span class="kbd">←</span>/<span class="kbd">→</span> to move between buttons in a row.</p>
-        </section>
+        </details>
         <div class="control-panel">
             <div class="settings-group" style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px;" data-arrow-nav="horizontal" role="group" aria-label="Settings">
                  <div>
@@ -387,14 +458,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div style="text-align: center; margin-top: 10px;" data-arrow-nav="horizontal" role="group" aria-label="Walk actions">
                 <button class="primary-btn" id="singleWalkBtn" onclick="runSingleWalk()">Run Single Walk</button>
                 <button class="secondary-btn" id="multiWalkBtn" onclick="run100Walks()">+ Run 100 Walks</button>
                 <button class="secondary-btn" onclick="resetAll()">Reset All</button>
             </div>
         </div>
-        
+
         <div class="visualization">
             <h3>Simulating the Walk</h3>
             <div class="step-indicator" id="stepIndicator">Click "Run Single Walk" to start</div>
@@ -402,7 +473,7 @@
                 <div class="walker" id="walker"></div>
             </div>
         </div>
-        
+
         <div class="distribution">
             <h3>Frequency Distribution</h3>
             <p style="text-align: center;">Total Walks: <span id="totalWalksCount">0</span></p>
@@ -420,11 +491,83 @@
             </ul>
             <p>The final movement for the step is the combination of these two outcomes, meaning the walker can end up moving left, right, or staying in the same position.</p>
         </div>
-        <div class="lesson-footer" style="margin-top: 32px; font-size: 0.85rem; color: var(--nvidia-gray); text-align: center; border-top: 1px solid var(--nvidia-accent); padding-top: 16px;">
-            Note: This widget is part of the CUDA-Q Academic lesson entitled "Quantum Walks for Finance Part 1".
-            You can learn more by visiting <a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" target="_blank" rel="noopener noreferrer" style="color: #76b900;">here</a>.
-        </div>
-        <footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: a split-step walk where each step has two coin flips, one that moves the walker left or leaves it, and one that moves it right or leaves it. A fresh coin qubit is used for every flip, so the walk behaves classically, and sampling the walker gives the widget's distribution after many walks. Position labels run from 0 to 8, with the walker starting at 4.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> math
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">INC</span>(qubits: cudaq.qview):  <span class="tok-comment"># position x -&gt; x + 1</span>
+    <span class="tok-gate">x</span>.ctrl([qubits[<span class="tok-number">3</span>], qubits[<span class="tok-number">2</span>], qubits[<span class="tok-number">1</span>]], qubits[<span class="tok-number">0</span>])
+    <span class="tok-gate">x</span>.ctrl([qubits[<span class="tok-number">3</span>], qubits[<span class="tok-number">2</span>]], qubits[<span class="tok-number">1</span>])
+    <span class="tok-gate">x</span>.ctrl(qubits[<span class="tok-number">3</span>], qubits[<span class="tok-number">2</span>])
+    <span class="tok-gate">x</span>(qubits[<span class="tok-number">3</span>])
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">DEC</span>(qubits: cudaq.qview):  <span class="tok-comment"># position x -&gt; x - 1 (INC in reverse)</span>
+    <span class="tok-gate">x</span>(qubits[<span class="tok-number">3</span>])
+    <span class="tok-gate">x</span>.ctrl(qubits[<span class="tok-number">3</span>], qubits[<span class="tok-number">2</span>])
+    <span class="tok-gate">x</span>.ctrl([qubits[<span class="tok-number">3</span>], qubits[<span class="tok-number">2</span>]], qubits[<span class="tok-number">1</span>])
+    <span class="tok-gate">x</span>.ctrl([qubits[<span class="tok-number">3</span>], qubits[<span class="tok-number">2</span>], qubits[<span class="tok-number">1</span>]], qubits[<span class="tok-number">0</span>])
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">split_step_walk</span>(steps: <span class="tok-builtin">int</span>, theta_left: <span class="tok-builtin">float</span>, theta_right: <span class="tok-builtin">float</span>):
+    walker = cudaq.qvector(<span class="tok-number">4</span>)  <span class="tok-comment"># positions 0 to 15</span>
+    coins = cudaq.qvector(<span class="tok-number">2</span> * steps)  <span class="tok-comment"># a fresh coin for every flip</span>
+    <span class="tok-gate">x</span>(walker[<span class="tok-number">0</span>])  <span class="tok-comment"># register value 8 = the widget's center position 4</span>
+    <span class="tok-keyword">for</span> i <span class="tok-keyword">in</span> <span class="tok-builtin">range</span>(steps):
+        <span class="tok-gate">ry</span>(theta_left, coins[<span class="tok-number">2</span> * i])  <span class="tok-comment"># part 1: |1&gt; with probability p_left</span>
+        <span class="tok-comment"># ... move left, otherwise stay</span>
+        cudaq.control(DEC, coins[<span class="tok-number">2</span> * i], walker)
+
+        <span class="tok-gate">ry</span>(theta_right, coins[<span class="tok-number">2</span> * i + <span class="tok-number">1</span>])  <span class="tok-comment"># part 2: |1&gt; with probability p_right</span>
+        <span class="tok-comment"># ... move right, otherwise stay</span>
+        cudaq.control(INC, coins[<span class="tok-number">2</span> * i + <span class="tok-number">1</span>], walker)
+
+    <span class="tok-gate">mz</span>(walker)
+
+
+<span class="tok-comment"># Steps (1 to 4) and the widget's two probability sliders (0 to 1).</span>
+steps = <span class="tok-number">4</span>
+p_left, p_right = <span class="tok-number">0.5</span>, <span class="tok-number">0.5</span>
+<span class="tok-keyword">assert</span> <span class="tok-number">1</span> &lt;= steps &lt;= <span class="tok-number">4</span>, <span class="tok-string">"Use 1–4 steps; the position register is finite."</span>
+<span class="tok-keyword">assert</span> <span class="tok-number">0</span> &lt;= p_left &lt;= <span class="tok-number">1</span> <span class="tok-keyword">and</span> <span class="tok-number">0</span> &lt;= p_right &lt;= <span class="tok-number">1</span>, <span class="tok-string">"Probabilities must be between 0 and 1."</span>
+
+<span class="tok-comment"># ry(theta) gives |1&gt; with probability sin^2(theta/2)</span>
+theta_left = <span class="tok-number">2</span> * math.asin(math.sqrt(p_left))
+theta_right = <span class="tok-number">2</span> * math.asin(math.sqrt(p_right))
+
+counts = cudaq.sample(split_step_walk, steps, theta_left, theta_right)
+<span class="tok-keyword">for</span> bits <span class="tok-keyword">in</span> <span class="tok-builtin">sorted</span>(counts, key=<span class="tok-keyword">lambda</span> b: <span class="tok-builtin">int</span>(b, <span class="tok-number">2</span>)):
+    <span class="tok-builtin">print</span>(<span class="tok-string">f"position {int(bits, 2) - 4}: {counts.probability(bits):.3f}"</span>)
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Compare <code>p_left, p_right = 0.5, 0.5</code> with <code>0.2, 0.7</code>. How does the final distribution shift? Then swap the two probabilities and compare again. Keep <code>steps</code> between 1 and 4.</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Random walks in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/01_quantum_walks.ipynb" target="_blank" rel="noopener noreferrer">Quantum Walks for Finance, Part 1</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>Discrete Time Quantum Walks</strong> embeds this widget to compare classical and split-step walks before building the quantum walk in CUDA-Q.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quantum-applications-to-finance/02_quantum_walks.ipynb" target="_blank" rel="noopener noreferrer">Quantum Walks for Finance, Part 2</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>Split Step Quantum Walk</strong> and <strong>Multi-Split Step Quantum Walk</strong> build the quantum version with parameterized coins.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/quick-start-to-quantum/03_quick_start_to_quantum.ipynb" target="_blank" rel="noopener noreferrer">Quick Start 3: Write Your First Parameterized Kernel</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>Section 1</strong> compares classical random walks with quantum walks, and <strong>Section 2</strong> writes the <code>INC</code> kernel used here.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/quantum-walk-coin-flip.html" target="_blank" rel="noopener noreferrer">Quantum Random Walk</a> · <a href="https://nvidia.github.io/cuda-q-academic/quick-start-to-quantum/interactive_widget/borns-rule-widget-sampling.html" target="_blank" rel="noopener noreferrer">Born's Rule and Sampling</a></p>
+        </details>
+
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation">
             <div class="widget-footer-links">
                 <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer">Back to Visualization Gallery</a>
                 <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer">CUDA-Q Academic</a>
@@ -460,7 +603,7 @@
         let isAnimating = false;
         let distributionResults = Array(NUM_POSITIONS).fill(0);
         let totalWalks = 0;
-        
+
         // --- INITIALIZATION ---
         function initialize() {
             numberLine.innerHTML = '<div class="walker" id="walker"></div>'; 
@@ -471,7 +614,7 @@
                 posElement.textContent = i;
                 numberLine.appendChild(posElement);
             }
-            
+
             barChart.innerHTML = '';
             for (let i = 0; i < NUM_POSITIONS; i++) {
                 const barContainer = document.createElement('div');
@@ -503,7 +646,7 @@
             document.getElementById('probValueLeft').textContent = 100 - this.value;
             resetAll(); 
         });
-        
+
         probRightSlider.addEventListener('input', function() {
             document.getElementById('probRightMoveValue').textContent = this.value;
             document.getElementById('probRightStayValue').textContent = 100 - this.value;
@@ -524,23 +667,23 @@
             isAnimating = true;
             toggleControls(false);
             prepareForNewWalk();
-            
+
             const numSteps = parseInt(numStepsSelect.value);
             const stepType = stepTypeSelect.value;
             let position = START_POS;
-            
+
             stepIndicator.textContent = 'Starting walk...';
             await sleep(1000);
 
             for (let i = 0; i < numSteps; i++) {
-                
+
                 if (stepType === 'classical') {
                     const probability = probSlider.value / 100;
                     const oldPosition = position;
                     const goRight = Math.random() < probability;
                     if (goRight && position < NUM_POSITIONS - 1) position++;
                     else if (!goRight && position > 0) position--;
-                    
+
                     stepIndicator.innerHTML = `Step ${i + 1}: <span>Moved ${position > oldPosition ? 'Right' : 'Left'}</span>`;
                     updateWalkerPosition(position);
                     await sleep(1200);
@@ -549,14 +692,14 @@
                     const walkerEl = document.getElementById('walker');
                     const probRight = probRightSlider.value / 100;
                     const probLeft = probLeftSlider.value / 100;
-                    
+
                     walkerEl.style.setProperty('background-color', 'var(--nvidia-yellow)');
 
                     // --- Part 1: Leftward Decision ---
                     const leftDelta = (Math.random() < probLeft) ? -1 : 0;
                     const intermediatePosition = Math.max(0, Math.min(NUM_POSITIONS - 1, position + leftDelta));
                     const firstMoveText = (leftDelta === -1) ? 'Move Left' : 'Stay';
-                    
+
                     stepIndicator.innerHTML = `Step ${i + 1} (<span style="color:var(--nvidia-yellow)">Part 1/2</span>): ${firstMoveText}`;
                     updateWalkerPosition(intermediatePosition, 'decision');
                     await sleep(1000);
@@ -569,7 +712,7 @@
                     stepIndicator.innerHTML = `Step ${i + 1} (<span style="color:var(--nvidia-yellow)">Part 2/2</span>): ${secondMoveText}`;
                     updateWalkerPosition(finalPosition, 'decision');
                     await sleep(1000);
-                    
+
                     // --- Finalize Step ---
                     walkerEl.style.setProperty('background-color', 'var(--nvidia-green)');
                     position = finalPosition;
@@ -580,7 +723,7 @@
                     await sleep(500);
                 }
             }
-            
+
             stepIndicator.innerHTML = `<span>Walk Complete!</span>`;
             await animateDropToDistribution(position);
 
@@ -620,7 +763,7 @@
             totalWalks += 100;
             updateDistributionDisplay();
         }
-        
+
         function resetAll() {
             if (isAnimating) return;
             distributionResults = Array(NUM_POSITIONS).fill(0);
@@ -642,17 +785,17 @@
         function updateWalkerPosition(position, phase = null) {
             const positions = document.querySelectorAll('.position');
             const walkerEl = document.getElementById('walker');
-            
+
             positions.forEach(p => {
                 p.classList.remove('current', 'decision-phase');
             });
-            
+
             const currentEl = positions[position];
             currentEl.classList.add('current', 'visited');
             if (phase === 'decision') {
                 currentEl.classList.add('decision-phase');
             }
-            
+
             const percentage = (position / (NUM_POSITIONS - 1));
             walkerEl.style.left = `calc( (100% - 40px) * ${percentage} + 5px )`;
         }
@@ -660,7 +803,7 @@
         function updateDistributionDisplay() {
             const maxCount = Math.max(...distributionResults, 1);
             const bars = document.querySelectorAll('.bar');
-            
+
             distributionResults.forEach((count, index) => {
                 const height = (count / maxCount) * 180;
                 bars[index].style.height = `${height}px`;
@@ -668,18 +811,18 @@
             });
             document.getElementById('totalWalksCount').textContent = totalWalks;
         }
-        
+
         async function animateDropToDistribution(finalPosition) {
             const walkerEl = document.getElementById('walker');
             const targetBarContainer = barChart.children[finalPosition];
 
             const walkerRect = walkerEl.getBoundingClientRect();
             const barRect = targetBarContainer.getBoundingClientRect();
-            
+
             const clone = walkerEl.cloneNode(true);
             clone.className = 'walker-clone';
             document.body.appendChild(clone);
-            
+
             clone.style.left = `${walkerRect.left}px`;
             clone.style.top = `${walkerRect.top}px`;
 
@@ -691,7 +834,7 @@
             await sleep(1000);
             clone.remove();
         }
-        
+
         function toggleControls(enable) {
             singleWalkBtn.disabled = !enable;
             multiWalkBtn.disabled = !enable;
@@ -725,6 +868,43 @@
         // --- Run on page load ---
         initialize();
         stepTypeSelect.dispatchEvent(new Event('change'));
+    </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
     </script>
 </body>
 </html>

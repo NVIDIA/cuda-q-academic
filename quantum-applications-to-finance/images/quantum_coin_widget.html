@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -69,7 +69,9 @@
             cursor: pointer;
             border: 2px solid #1A1A1A;
         }
-    </style>
+
+.widget-footer a:focus-visible { outline:3px solid #76b900; outline-offset:2px; }
+</style>
 </head>
 <body class="antialiased">
 
@@ -84,11 +86,11 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            
+
             <div class="lg:col-span-2 space-y-8">
                 <div class="info-box">
                     <h2 class="text-2xl font-semibold text-center mb-6">State Parameters</h2>
-                    
+
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label for="theta-slider" class="font-bold text-xl">Theta (\(\theta\))</label>
@@ -160,7 +162,7 @@
 
             const group = new THREE.Group();
             scene.add(group);
-            
+
             group.rotation.x = -Math.PI / 2; // Align Bloch Z-axis with scene Y-axis
 
             // Sphere
@@ -171,7 +173,7 @@
             // State Vector
             const vectorGeom = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.05, 0x76B900, 0.15, 0.08);
             group.add(vectorGeom);
-            
+
             // Axes
             const createAxis = (dir, color) => new THREE.ArrowHelper(dir, new THREE.Vector3(0,0,0), 1.2, color, 0.05, 0.03);
             group.add(createAxis(new THREE.Vector3(1,0,0), 0xCCCCCC)); // X
@@ -191,7 +193,7 @@
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
                 context.fillText(text, canvas.width / 2, canvas.height / 2);
-                
+
                 const texture = new THREE.CanvasTexture(canvas);
                 const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
                 const sprite = new THREE.Sprite(spriteMat);
@@ -223,16 +225,16 @@
             const z = Math.cos(theta);
             vector.setDirection(new THREE.Vector3(x, y, z).normalize());
         }
-        
+
         // --- Main Application Logic ---
         const blochSphereViz = createBlochSphere(document.getElementById('bloch-sphere-container'));
-        
+
         const sliderTheta = document.getElementById('theta-slider');
         const sliderPhi = document.getElementById('phi-slider');
-        
+
         const valueTheta = document.getElementById('theta-value');
         const valuePhi = document.getElementById('phi-value');
-        
+
         const valueAlpha = document.getElementById('alpha-value');
         const valueBeta = document.getElementById('beta-value');
         const valueProb0 = document.getElementById('prob0-value');
@@ -242,7 +244,7 @@
             const sign = c.im < 0 ? "-" : "+";
             return `${c.re.toFixed(3)} ${sign} ${Math.abs(c.im).toFixed(3)}i`;
         }
-        
+
         function updateAll() {
             const theta = parseFloat(sliderTheta.value);
             const phi = parseFloat(sliderPhi.value);
@@ -250,7 +252,7 @@
             // Update value displays for sliders
             valueTheta.textContent = theta.toFixed(2);
             valuePhi.textContent = phi.toFixed(2);
-            
+
             // --- Calculate quantum state from theta and phi ---
             const alpha = {
                 re: Math.cos(theta / 2),
@@ -270,7 +272,7 @@
             valueBeta.textContent = formatComplex(beta);
             valueProb0.textContent = `${prob0.toFixed(3)} (${(prob0 * 100).toFixed(1)}%)`;
             valueProb1.textContent = `${prob1.toFixed(3)} (${(prob1 * 100).toFixed(1)}%)`;
-            
+
             // Update Bloch sphere visualization
             updateVectorPosition(blochSphereViz.vectorGeom, theta, phi);
         }
@@ -285,16 +287,20 @@
         [sliderTheta, sliderPhi].forEach(slider => {
             slider.addEventListener('input', updateAll);
         });
-        
+
         // --- Initial Call ---
         updateAll();
         animate();
-        
+
         // Defer resize to ensure DOM is fully ready
         setTimeout(() => {
             blochSphereViz.onWindowResize();
         }, 100);
 
     </script>
+<footer class="widget-footer" aria-label="Widget and CUDA-Q navigation" style="margin:32px auto 0;padding:16px 12px;border-top:1px solid #444;text-align:center;max-width:1100px;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;">
+  <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html" target="_blank" rel="noopener noreferrer" style="color:#76b900;min-height:44px;display:inline-flex;align-items:center;padding:8px 12px;">Back to Visualization Gallery</a>
+  <a href="https://github.com/NVIDIA/cuda-q-academic" target="_blank" rel="noopener noreferrer" style="color:#76b900;min-height:44px;display:inline-flex;align-items:center;padding:8px 12px;">CUDA-Q Academic</a>
+</footer>
 </body>
 </html>

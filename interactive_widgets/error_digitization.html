@@ -419,7 +419,65 @@
   .widget-footer a:hover { text-decoration: underline; }
   .widget-footer a:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-</style>
+
+
+
+
+        /* Try it in CUDA-Q (code snippet) */
+        .widget-container { box-sizing: border-box; min-width: 0; }
+        .code-section, .lesson-footer { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .lesson-footer { font-size: 0.95rem !important; line-height: 1.5; color: var(--nvidia-light, #E0E0E0) !important; text-align: left !important; }
+        .code-section { box-sizing: border-box; margin-top: 32px; margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; padding: 16px; }
+        .snippet-host { width: 100%; max-width: 1100px; margin: 0 auto 32px; box-sizing: border-box; }   /* width: 100% so it still fills the page when <body> is a centred flex column */
+        /* Reset everything a widget's own global h2/h3 rules might set (e.g. CNOT: uppercase, light weight, underline) */
+        .code-section h2, .code-section h3 { text-transform: none; letter-spacing: normal; word-spacing: normal; border: 0; padding: 0; background: none; text-align: left; font-family: inherit; line-height: 1.3; }
+        .code-section h2 { color: var(--nvidia-green, #76b900); font-size: 1.1rem; font-weight: 700; margin: 0; display: inline; }   /* team standard (widget-standard.md section 2) */
+        .code-section > summary { cursor: pointer; list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: 8px; row-gap: 2px; min-height: 44px; }
+        .code-section > summary::-webkit-details-marker { display: none; }
+        .code-section > summary::marker { content: ''; }
+        .code-section > summary::after, .code-section > summary > h2::before, .code-section > summary > h2::after { content: none !important; display: none !important; }
+        .code-section > summary::before { content: '▶'; font-size: 0.7rem; color: var(--nvidia-green, #76b900); border: 0; width: auto; height: auto; transition: transform 0.15s; flex-shrink: 0; }   /* the standard green triangle */
+        .code-section[open] > summary::before { transform: rotate(90deg); }
+        .code-section > summary:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; border-radius: 4px; }
+        .code-section .level-badge { display: inline-block; padding: 1px 8px; border: 1px solid var(--nvidia-accent, #444444); border-radius: 999px; font-size: 0.75rem; font-weight: 400; line-height: 1.5; color: var(--nvidia-gray, #AAAAAA); white-space: nowrap; }
+        .code-section .lesson-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; font-weight: 600; }
+        .code-section .lesson-title a { min-width: 0; overflow-wrap: anywhere; }
+        .code-section .lesson-description { margin: 4px 0 0; }
+        .code-section .lesson-description code { overflow-wrap: anywhere; }
+        .code-section li.lesson-item { margin-bottom: 16px; }
+        .code-section.widget-instructions { margin-top: 0; margin-bottom: 24px; }
+        .code-section .summary-hint { color: var(--nvidia-gray, #AAAAAA); font-size: 0.85rem; }
+        .code-section[open] .summary-hint { display: none; }
+        .code-section[open] > summary { margin-bottom: 8px; }
+        .code-section h3 { color: var(--nvidia-light, #E0E0E0); font-size: 1rem; font-weight: 700; margin: 16px 0 8px 0; }
+        .code-section + .code-section { margin-top: 16px; }
+        .code-section p, .code-section li { color: var(--nvidia-light, #E0E0E0); font-size: 0.95rem; line-height: 1.5; }
+        .code-section a { color: var(--nvidia-green, #76b900); text-decoration: underline; }
+        .code-section a:hover { color: var(--nvidia-light, #E0E0E0); }
+        .code-section ul { list-style: disc; padding-left: 1.25rem; margin: 0; }
+        .code-section li { margin-bottom: 6px; }
+        .code-section :not(pre) > code { background: var(--nvidia-dark, #1A1A1A); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+        .code-section h3 + .code-block { margin-top: 4px; }
+        .code-block { background: #111111; border: 1px solid var(--nvidia-accent, #444444); border-radius: 8px; overflow: hidden; margin-top: 12px; }
+        .code-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--nvidia-accent, #444444); color: var(--nvidia-gray, #AAAAAA); font-size: 0.8rem; }
+        .code-section .copy-btn { background: transparent; color: var(--nvidia-gray, #AAAAAA); border: 1px solid var(--nvidia-accent, #444444); border-radius: 4px; padding: 6px 12px; min-height: 44px; min-width: 44px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+        .code-section .copy-btn:hover { background: rgba(255,255,255,0.05); color: #FFFFFF; }
+        .code-section .copy-btn:focus-visible { outline: 3px solid var(--nvidia-green, #76b900); outline-offset: 2px; }
+        .code-section .snippet-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .code-block pre { margin: 0; padding: 16px; overflow-x: auto; }
+        .code-block pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; line-height: 1.55; color: var(--nvidia-light, #E0E0E0); white-space: pre; }
+        .code-block .tok-keyword { color: #76b900; font-weight: 600; }
+        .code-block .tok-builtin { color: #7fd1ff; }
+        .code-block .tok-gate { color: #4ec9b0; }
+        .code-block .tok-func { color: #ffd866; }
+        .code-block .tok-decorator { color: #d7a8ff; }
+        .code-block .tok-string { color: #f5a97f; }
+        .code-block .tok-number { color: #f78c6c; }
+        .code-block .tok-comment { color: #8f8f8f; font-style: italic; }
+        .code-tip { margin-top: 12px; }
+        .code-hint { color: var(--nvidia-gray, #AAAAAA) !important; font-size: 0.85rem !important; margin-top: 8px; }
+        /* End CUDA-Q snippet styles */
+    </style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -430,8 +488,8 @@
   </header>
 
   <!-- Instructions -->
-  <section class="section instructions-section" aria-labelledby="instr-heading">
-    <h2 id="instr-heading">Instructions</h2>
+  <details class="instructions-section code-section widget-instructions" aria-labelledby="instructions-heading" open>
+    <summary><h2 id="instructions-heading">Instructions</h2></summary>
     <ol>
       <li>Enter a rotation angle θ and select which qubit receives the error, then click <strong>Apply Error</strong></li>
       <li>Observe how fidelity degrades continuously with θ — the error is analog</li>
@@ -439,7 +497,7 @@
       <li>Apply correction — both branches recover the original state, regardless of θ</li>
     </ol>
     <p class="kb-note">Keyboard: Tab navigates between controls and buttons; Enter activates buttons.</p>
-  </section>
+  </details>
 
   <!-- Controls -->
   <section class="section" aria-labelledby="ctrl-heading">
@@ -680,7 +738,101 @@
     <button class="btn-secondary" id="btn-reset">Reset</button>
   </div>
 
-  <footer class="widget-footer">
+        <details class="code-section instructions-section">
+            <summary><h2 id="code-heading">Try it in CUDA-Q</h2><span class="summary-hint">Show the code</span></summary>
+            <p>Try the same idea in CUDA-Q: an Rx(θ) error on one qubit of the 3-qubit repetition code. The error is continuous, but measuring the stabilizers Z₁Z₂ and Z₂Z₃ turns it into either no error or a full bit flip, and the lookup-table correction recovers |000⟩ every time.</p>
+            <div class="code-block">
+                <div class="code-toolbar"><span>Python</span><button type="button" class="btn-secondary copy-btn">Copy code</button></div>
+                <pre><code class="snippet-code">%pip install cudaq
+<span class="tok-keyword">import</span> cudaq
+<span class="tok-keyword">import</span> numpy <span class="tok-keyword">as</span> np
+<span class="tok-keyword">from</span> collections <span class="tok-keyword">import</span> Counter
+
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">rx_error</span>(theta: <span class="tok-builtin">float</span>, error_qubit: <span class="tok-builtin">int</span>):
+    data = cudaq.qvector(<span class="tok-number">3</span>)  <span class="tok-comment"># error-free state |000&gt;</span>
+    <span class="tok-gate">rx</span>(theta, data[error_qubit])  <span class="tok-comment"># continuous Rx(theta) error</span>
+
+
+<span class="tok-comment"># Error angle theta and the qubit it hits: change them and re-run.</span>
+<span class="tok-comment"># Qubits are numbered 0, 1, 2 here (the widget's qubits 1, 2, 3).</span>
+theta = np.radians(<span class="tok-number">30</span>)
+error_qubit = <span class="tok-number">0</span>
+
+state = cudaq.get_state(rx_error, theta, error_qubit)
+<span class="tok-builtin">print</span>(state)
+<span class="tok-comment"># cos^2(theta/2): changes smoothly with theta</span>
+<span class="tok-builtin">print</span>(<span class="tok-string">"Fidelity with |000&gt; ="</span>, <span class="tok-builtin">abs</span>(state[<span class="tok-number">0</span>]) ** <span class="tok-number">2</span>)
+
+<span class="tok-decorator">@</span><span class="tok-decorator">cudaq</span><span class="tok-decorator">.</span><span class="tok-decorator">kernel</span>
+<span class="tok-keyword">def</span> <span class="tok-func">repetition_code</span>(theta: <span class="tok-builtin">float</span>, error_qubit: <span class="tok-builtin">int</span>) -&gt; <span class="tok-builtin">list</span>[<span class="tok-builtin">int</span>]:
+    data = cudaq.qvector(<span class="tok-number">3</span>)
+    ancilla = cudaq.qvector(<span class="tok-number">2</span>)
+    <span class="tok-gate">rx</span>(theta, data[error_qubit])
+
+    <span class="tok-comment"># Stabilizer checks: ancilla 0 measures Z1Z2, ancilla 1 measures Z2Z3 (1 means -1)</span>
+    <span class="tok-gate">h</span>(ancilla)
+    <span class="tok-gate">z</span>.ctrl(data[<span class="tok-number">0</span>], ancilla[<span class="tok-number">0</span>])
+    <span class="tok-gate">z</span>.ctrl(data[<span class="tok-number">1</span>], ancilla[<span class="tok-number">0</span>])
+    <span class="tok-gate">z</span>.ctrl(data[<span class="tok-number">1</span>], ancilla[<span class="tok-number">1</span>])
+    <span class="tok-gate">z</span>.ctrl(data[<span class="tok-number">2</span>], ancilla[<span class="tok-number">1</span>])
+    <span class="tok-gate">h</span>(ancilla)
+    s0 = <span class="tok-gate">mz</span>(ancilla[<span class="tok-number">0</span>])
+    s1 = <span class="tok-gate">mz</span>(ancilla[<span class="tok-number">1</span>])
+
+    <span class="tok-comment"># Correction from the syndrome lookup table</span>
+    <span class="tok-keyword">if</span> s0 <span class="tok-keyword">and</span> s1:
+        <span class="tok-gate">x</span>(data[<span class="tok-number">1</span>])
+    <span class="tok-keyword">elif</span> s0:
+        <span class="tok-gate">x</span>(data[<span class="tok-number">0</span>])
+    <span class="tok-keyword">elif</span> s1:
+        <span class="tok-gate">x</span>(data[<span class="tok-number">2</span>])
+
+    d0 = <span class="tok-gate">mz</span>(data[<span class="tok-number">0</span>])
+    d1 = <span class="tok-gate">mz</span>(data[<span class="tok-number">1</span>])
+    d2 = <span class="tok-gate">mz</span>(data[<span class="tok-number">2</span>])
+    <span class="tok-keyword">return</span> [s0, s1, d0, d1, d2]
+
+
+results = cudaq.run(repetition_code, theta, error_qubit, shots_count=<span class="tok-number">1000</span>)
+syndromes = Counter((r[<span class="tok-number">0</span>], r[<span class="tok-number">1</span>]) <span class="tok-keyword">for</span> r <span class="tok-keyword">in</span> results)
+<span class="tok-comment"># only (0, 0) or the error qubit's syndrome</span>
+<span class="tok-builtin">print</span>(<span class="tok-string">"Syndromes:"</span>, syndromes)
+<span class="tok-builtin">print</span>(
+    <span class="tok-string">"P(error detected) ="</span>,
+    <span class="tok-number">1</span> - syndromes[(<span class="tok-number">0</span>, <span class="tok-number">0</span>)] / <span class="tok-number">1000</span>,
+    <span class="tok-string">"  sin^2(theta/2) ="</span>,
+    np.sin(theta / <span class="tok-number">2</span>) ** <span class="tok-number">2</span>,
+)
+<span class="tok-comment"># always (0, 0, 0)</span>
+<span class="tok-builtin">print</span>(<span class="tok-string">"Data after correction:"</span>, Counter((r[<span class="tok-number">2</span>], r[<span class="tok-number">3</span>], r[<span class="tok-number">4</span>]) <span class="tok-keyword">for</span> r <span class="tok-keyword">in</span> results))
+
+<span class="tok-comment"># Each shot follows one branch: no error, or a full flip that gets corrected.</span>
+<span class="tok-keyword">for</span> result <span class="tok-keyword">in</span> results[:<span class="tok-number">5</span>]:
+    <span class="tok-builtin">print</span>(<span class="tok-string">"syndrome"</span>, (result[<span class="tok-number">0</span>], result[<span class="tok-number">1</span>]), <span class="tok-string">"-&gt; data after correction"</span>,
+          (result[<span class="tok-number">2</span>], result[<span class="tok-number">3</span>], result[<span class="tok-number">4</span>]))
+</code></pre>
+            </div>
+            <span class="snippet-status" role="status" aria-live="polite"></span>
+            <p class="code-hint">Copy into a Jupyter or Colab code cell and run it. The first line installs the required packages.</p>
+            <p class="code-tip">Things to try: Try <code>theta = np.radians(0)</code>, <code>np.radians(90)</code> and <code>np.radians(180)</code>. How often is a nonzero syndrome measured? Then move the error to another data qubit: does the correction still recover 000?</p>
+        </details>
+        <details class="code-section instructions-section">
+            <summary><h2 id="notebooks-heading">Related lessons</h2><span class="summary-hint">Where this shows up in CUDA-Q Academic</span></summary>
+            <h3>Error digitization in a lesson:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/01_QEC_Intro.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 1: Introduction to QEC</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description"><strong>1.5 There is Still Hope for QEC!</strong> embeds this widget under <strong>Digitization of errors</strong>; <strong>1.6 The Quantum Repetition Code</strong> explains the syndrome table; <strong>1.7 Coding the Quantum Repetition Code</strong> writes this kernel with random bit-flip noise.</p></li>
+            </ul>
+            <h3>Going further:</h3>
+            <ul>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/02_QEC_Stabilizers.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 2: Stabilizers, Shor Code, Steane Code</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">generalizes the stabilizer checks used here to other codes.</p></li>
+                <li class="lesson-item"><div class="lesson-title"><a href="https://github.com/NVIDIA/cuda-q-academic/blob/main/qec101/03_QEC_Noisy_Simulation.ipynb" target="_blank" rel="noopener noreferrer">QEC 101 Lab 3: Noisy Simulation</a><span class="level-badge" aria-label="Lesson level: Intermediate">Intermediate</span></div><p class="lesson-description">simulates the code under noise channels instead of a single chosen error.</p></li>
+            </ul>
+            <p><strong>Related widgets:</strong> <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/trajectory_noise_demo.html" target="_blank" rel="noopener noreferrer">Trajectory Noise Demo</a> · <a href="https://nvidia.github.io/cuda-q-academic/interactive_widgets/hamming.html" target="_blank" rel="noopener noreferrer">Hamming [7,4,3] Visualizer</a></p>
+        </details>
+
+<footer class="widget-footer">
     <a href="https://nvidia.github.io/cuda-q-academic/visualization-gallery.html">Back to Visualization Gallery</a>
     <a href="https://github.com/NVIDIA/cuda-q-academic">CUDA-Q Academic</a>
   </footer>
@@ -919,5 +1071,42 @@
   });
 })();
 </script>
+
+
+
+    <script data-cudaq-snippet>
+        // Copy a CUDA-Q code block to the clipboard (one button per block)
+        document.querySelectorAll('.code-section .code-block').forEach(block => {
+            const btn = block.querySelector('.copy-btn');
+            const code = block.querySelector('.snippet-code');
+            const status = block.closest('.code-section').querySelector('.snippet-status') || document.getElementById('status-announce');
+            if (!btn || !code) return;
+            btn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code.textContent);
+                    btn.textContent = 'Copied';
+                    if (status) status.textContent = 'Code copied to clipboard';
+                } catch (e) {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    btn.textContent = 'Press Ctrl+C / Cmd+C';
+                }
+                setTimeout(() => { btn.textContent = 'Copy code'; }, 2000);
+            });
+        });
+
+        // Some widgets strip links from the Tab order (tabindex=-1); keep the
+        // links in these sections reachable by keyboard.
+        (function () {
+            const keep = () => document.querySelectorAll('.code-section a[tabindex="-1"]')
+                .forEach(a => a.removeAttribute('tabindex'));
+            keep();
+            document.querySelectorAll('.code-section').forEach(sec =>
+                new MutationObserver(keep).observe(sec, { subtree: true, attributes: true, attributeFilter: ['tabindex'] }));
+        })();
+    </script>
 </body>
 </html>
